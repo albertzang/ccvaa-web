@@ -4,7 +4,7 @@ export const siteConfig = {
   tagline: "Connecting communities through visual arts across Canada",
   description:
     "A British Columbia–based non-profit fostering visual arts education, exhibitions, and community engagement from coast to coast.",
-  url: "https://ccvaa.org", // Update after domain purchase
+  url: "https://ccvaa.ca",
   locale: "en-CA",
 } as const;
 
@@ -14,12 +14,22 @@ export const organization = {
   registrationNote:
     "Registered non-profit organization in British Columbia, Canada.",
   founded: "2024", // Placeholder — update with actual year
-  email: "info@ccvaa.org", // Placeholder — update with real contact
-  location: "British Columbia, Canada",
+  email: "info@ccvaa.ca",
+  location: "Richmond, British Columbia, Canada",
+  address: {
+    line1: "4 – 8800 Hazelbridge Way",
+    city: "Richmond",
+    province: "BC",
+    postalCode: "V6X 0S3",
+    country: "Canada",
+  },
+  formattedAddress:
+    "4 – 8800 Hazelbridge Way, Richmond, BC V6X 0S3, Canada",
 } as const;
 
 export const navigation = [
   { label: "About", href: "#about" },
+  { label: "Purposes", href: "#purposes" },
   { label: "Mission", href: "#mission" },
   { label: "Contact", href: "#contact" },
 ] as const;
@@ -83,9 +93,68 @@ export const missionContent = {
   ],
 } as const;
 
+export const purposesContent = {
+  title: "Society's purposes",
+  introduction:
+    "As a registered non-profit society in British Columbia, Coast to Coast Visual Arts Association is established for the following purposes:",
+  purposes: [
+    {
+      title: "Advancement of Visual Arts",
+      description:
+        "To promote, support, and advance the creation, appreciation, study, and public understanding of visual arts, including but not limited to photography, painting, drawing, printmaking, sculpture, digital art, mixed media, installation art, and emerging artistic practices.",
+    },
+    {
+      title: "Artistic Development",
+      description:
+        "To encourage artistic excellence, innovation, experimentation, and professional development among artists, photographers, educators, curators, students, and art enthusiasts.",
+    },
+    {
+      title: "Exhibitions and Public Programs",
+      description:
+        "To organize, sponsor, and present exhibitions, festivals, lectures, workshops, artist talks, screenings, publications, and other cultural activities that foster public engagement with the arts.",
+    },
+    {
+      title: "Education",
+      description:
+        "To provide educational opportunities that increase knowledge, skills, and appreciation of visual arts through instruction, mentorship, outreach programs, and lifelong learning initiatives.",
+    },
+    {
+      title: "Cultural Exchange",
+      description:
+        "To facilitate local, national, and international artistic and cultural exchange, collaboration, and dialogue among artists, cultural organizations, educational institutions, and communities.",
+    },
+    {
+      title: "Community Engagement",
+      description:
+        "To strengthen community participation in the arts and contribute to cultural vitality through inclusive, accessible, and diverse artistic programming.",
+    },
+    {
+      title: "Preservation and Documentation",
+      description:
+        "To support the preservation, documentation, publication, and dissemination of artistic works, cultural heritage, and contemporary artistic practices.",
+    },
+    {
+      title: "Public Benefit",
+      description:
+        "To provide opportunities, resources, recognition, networking, and professional support for artists and photographers at all stages of their careers.",
+    },
+    {
+      title: "Non-Profit Purpose",
+      description:
+        "To carry on activities that benefit the public by promoting creativity, cultural understanding, artistic expression, and participation in the arts.",
+    },
+    {
+      title: "Non-Profit Operation",
+      description:
+        "The Society shall operate exclusively on a non-profit basis and shall not distribute any income or assets to its members except as permitted by the Societies Act of British Columbia.",
+    },
+  ],
+} as const;
+
 export const contactContent = {
   title: "Contact us",
   description:
     "Interested in partnering, volunteering, or learning more about our programs? We would love to hear from you.",
   emailLabel: "Email",
+  addressLabel: "Mailing address",
 } as const;

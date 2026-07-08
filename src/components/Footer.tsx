@@ -2,6 +2,7 @@ import { organization, siteConfig } from "@/lib/site";
 
 export function Footer() {
   const year = new Date().getFullYear();
+  const { address } = organization;
 
   return (
     <footer className="border-t border-ocean-100 bg-ocean-950 text-ocean-100">
@@ -20,8 +21,14 @@ export function Footer() {
           </div>
 
           <div className="text-sm">
-            <p className="font-medium text-white">Location</p>
-            <p className="mt-1 text-ocean-200">{organization.location}</p>
+            <p className="font-medium text-white">Mailing address</p>
+            <address className="mt-1 not-italic leading-relaxed text-ocean-200">
+              {address.line1}
+              <br />
+              {address.city}, {address.province} {address.postalCode}
+              <br />
+              {address.country}
+            </address>
             <p className="mt-4 font-medium text-white">Contact</p>
             <a
               href={`mailto:${organization.email}`}

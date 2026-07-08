@@ -1,6 +1,8 @@
 import { contactContent, organization } from "@/lib/site";
 
 export function ContactSection() {
+  const { address } = organization;
+
   return (
     <section id="contact" className="scroll-mt-20 bg-ocean-50 py-20 sm:py-28">
       <div className="mx-auto max-w-6xl px-6">
@@ -24,9 +26,20 @@ export function ContactSection() {
             </a>
           </div>
 
-          <p className="mt-8 text-sm text-ocean-500">
-            {organization.location}
-          </p>
+          <div className="mt-8">
+            <p className="text-sm font-medium uppercase tracking-wider text-ocean-500">
+              {contactContent.addressLabel}
+            </p>
+            <address className="mt-2 text-sm not-italic leading-relaxed text-ocean-700">
+              {organization.legalName}
+              <br />
+              {address.line1}
+              <br />
+              {address.city}, {address.province} {address.postalCode}
+              <br />
+              {address.country}
+            </address>
+          </div>
         </div>
       </div>
     </section>
