@@ -1,6 +1,8 @@
 export const siteConfig = {
   name: "Coast to Coast Visual Arts Association",
   shortName: "CCVAA",
+  navTitle: "Coast to Coast",
+  navSubtitle: "Visual Arts Association",
   tagline: "Connecting communities through visual arts across Canada",
   description:
     "A British Columbia–based non-profit fostering visual arts education, exhibitions, and community engagement from coast to coast.",

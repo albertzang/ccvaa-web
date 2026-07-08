@@ -7,10 +7,10 @@ export function Header() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link href="/" className="group flex flex-col">
           <span className="font-display text-lg font-semibold tracking-tight text-ocean-900 transition-colors group-hover:text-ocean-700">
-            {siteConfig.shortName}
+            {siteConfig.navTitle}
           </span>
-          <span className="hidden text-xs text-ocean-600 sm:block">
-            Visual Arts Association
+          <span className="text-xs text-ocean-600">
+            {siteConfig.navSubtitle}
           </span>
         </Link>
 
