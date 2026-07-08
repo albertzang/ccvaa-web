@@ -29,8 +29,6 @@ export const organization = {
 
 export const navigation = [
   { label: "About", href: "#about" },
-  { label: "Purposes", href: "#purposes" },
-  { label: "Mission", href: "#mission" },
   { label: "Contact", href: "#contact" },
 ] as const;
 
@@ -46,57 +44,11 @@ export const heroContent = {
 export const aboutContent = {
   title: "About CCVAA",
   paragraphs: [
-    "Coast to Coast Visual Arts Association (CCVAA) is a non-profit organization based in British Columbia, dedicated to advancing visual arts across Canada.",
-    "We support emerging and established artists through exhibitions, workshops, and community programs that make art accessible to everyone.",
+    "Coast to Coast Visual Arts Association (CCVAA) is a registered non-profit society in British Columbia, dedicated to advancing visual arts across Canada.",
+    "We bring artists, educators, and communities together through exhibitions, education, and cultural programming — from local workshops to coast-to-coast collaboration.",
     "Whether you are an artist, educator, volunteer, or art enthusiast, we invite you to join our growing community.",
   ],
-  highlights: [
-    {
-      title: "Community programs",
-      description:
-        "Workshops, exhibitions, and outreach that connect artists with local communities.",
-    },
-    {
-      title: "Artist support",
-      description:
-        "Resources and opportunities for visual artists at every stage of their journey.",
-    },
-    {
-      title: "Coast to coast",
-      description:
-        "Building bridges between artistic communities across Canada.",
-    },
-  ],
-} as const;
-
-export const missionContent = {
-  title: "Our mission",
-  statement:
-    "To enrich lives and strengthen communities by promoting visual arts education, fostering artistic excellence, and making art accessible to all.",
-  values: [
-    {
-      title: "Accessibility",
-      description: "Art belongs to everyone, regardless of background or experience.",
-    },
-    {
-      title: "Community",
-      description: "We grow stronger when we create and learn together.",
-    },
-    {
-      title: "Excellence",
-      description: "We celebrate quality, creativity, and diverse artistic voices.",
-    },
-    {
-      title: "Inclusion",
-      description: "We welcome all perspectives and traditions in visual arts.",
-    },
-  ],
-} as const;
-
-export const purposesContent = {
-  title: "Society's purposes",
-  introduction:
-    "As a registered non-profit society in British Columbia, Coast to Coast Visual Arts Association is established for the following purposes:",
+  purposesHeading: "Our purposes",
   purposes: [
     {
       title: "Advancement of Visual Arts",
@@ -134,17 +86,17 @@ export const purposesContent = {
         "To support the preservation, documentation, publication, and dissemination of artistic works, cultural heritage, and contemporary artistic practices.",
     },
     {
-      title: "Public Benefit",
+      title: "Support for Artists",
       description:
         "To provide opportunities, resources, recognition, networking, and professional support for artists and photographers at all stages of their careers.",
     },
     {
-      title: "Non-Profit Purpose",
+      title: "Public Benefit",
       description:
         "To carry on activities that benefit the public by promoting creativity, cultural understanding, artistic expression, and participation in the arts.",
     },
     {
-      title: "Non-Profit Operation",
+      title: "Non-Profit Purpose",
       description:
         "The Society shall operate exclusively on a non-profit basis and shall not distribute any income or assets to its members except as permitted by the Societies Act of British Columbia.",
     },
