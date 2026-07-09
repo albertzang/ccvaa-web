@@ -26,7 +26,7 @@ export function Hero() {
         aria-hidden="true"
       />
 
-      <div className="relative mx-auto flex min-h-[max(32rem,calc(100vw*762/1400))] max-w-6xl flex-col justify-center px-6 pb-16 pt-24 sm:pb-20 sm:pt-28">
+      <div className="relative mx-auto flex min-h-[max(32rem,calc(100vw*762/1400))] max-w-6xl select-none flex-col justify-center px-6 pb-16 pt-24 sm:pb-20 sm:pt-28">
         <p className="text-sm font-medium uppercase tracking-widest text-ocean-200/90">
           {heroContent.eyebrow}
         </p>
