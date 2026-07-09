@@ -20,7 +20,7 @@ export function ContactSection() {
             </p>
             <a
               href={`mailto:${organization.email}`}
-              className="mt-2 inline-block font-display text-xl font-semibold text-ocean-800 transition-colors hover:text-coral"
+              className="mt-2 inline-block font-display text-xl font-semibold text-ocean-800 transition-colors hover:text-ocean-600"
             >
               {organization.email}
             </a>

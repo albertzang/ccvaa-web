@@ -27,10 +27,10 @@ export function AboutSection() {
                 className="flex overflow-hidden rounded-2xl border border-ocean-100 bg-white shadow-sm"
               >
                 <div
-                  className="flex w-14 shrink-0 items-center justify-center border-r border-ocean-100 bg-ocean-50 sm:w-16"
+                  className="flex w-14 shrink-0 items-center justify-center border-r border-ocean-100 bg-ocean-100 sm:w-16"
                   aria-hidden="true"
                 >
-                  <span className="font-display text-xl font-semibold text-ocean-900 sm:text-2xl">
+                  <span className="font-display text-xl font-semibold text-ocean-700 sm:text-2xl">
                     {index + 1}
                   </span>
                 </div>

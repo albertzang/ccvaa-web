@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #faf8f5;
-  --foreground: #0c2d48;
+  --background: #f7f6f4;
+  --foreground: #1c1b1a;
 }
 
 @theme inline {
@@ -11,20 +11,22 @@
   --font-sans: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-playfair), ui-serif, Georgia, serif;
 
-  --color-cream: #faf8f5;
-  --color-ocean-50: #f0f6fa;
-  --color-ocean-100: #d9e8f0;
-  --color-ocean-200: #b3d1e1;
-  --color-ocean-400: #5a9ab8;
-  --color-ocean-500: #3d7a9a;
-  --color-ocean-600: #2d6280;
-  --color-ocean-700: #1e4d66;
-  --color-ocean-800: #143a4f;
-  --color-ocean-900: #0c2d48;
-  --color-ocean-950: #061a28;
+  /* Warm neutrals — snow, mist, and shadow tones from the hero image */
+  --color-cream: #f7f6f4;
+  --color-ocean-50: #f0eeeb;
+  --color-ocean-100: #e3e0dc;
+  --color-ocean-200: #cac6c1;
+  --color-ocean-400: #94908a;
+  --color-ocean-500: #76726d;
+  --color-ocean-600: #5a5753;
+  --color-ocean-700: #43413e;
+  --color-ocean-800: #2c2b29;
+  --color-ocean-900: #1c1b1a;
+  --color-ocean-950: #0a0a0a;
 
-  --color-coral: #e8927c;
-  --color-coral-dark: #d4785f;
+  /* Light-beam accent — warm silver highlight */
+  --color-coral: #ebe6e0;
+  --color-coral-dark: #d9d3cb;
 }
 
 body {

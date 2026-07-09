@@ -39,8 +39,6 @@ export const heroContent = {
   headline: "Celebrating visual arts from coast to coast",
   subheadline:
     "We bring artists, educators, and communities together to create, learn, and share the power of visual expression.",
-  primaryCta: { label: "Learn about us", href: "#about" },
-  secondaryCta: { label: "Get in touch", href: "#contact" },
 } as const;
 
 export const aboutContent = {
