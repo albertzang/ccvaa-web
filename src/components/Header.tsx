@@ -1,15 +1,49 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { navigation, siteConfig } from "@/lib/site";
 
 export function Header() {
+  const [overHero, setOverHero] = useState(true);
+
+  useEffect(() => {
+    const hero = document.getElementById("hero");
+    if (!hero) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setOverHero(entry.isIntersecting),
+      { threshold: 0, rootMargin: "-72px 0px 0px 0px" },
+    );
+
+    observer.observe(hero);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <header className="sticky top-0 z-50 border-b border-ocean-100/80 bg-cream/90 backdrop-blur-md">
+    <header
+      className={`fixed top-0 inset-x-0 z-50 transition-colors duration-300 ${
+        overHero
+          ? "border-b border-white/10 bg-black/15 backdrop-blur-sm"
+          : "border-b border-ocean-100/80 bg-cream/90 backdrop-blur-md"
+      }`}
+    >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link href="/" className="group flex flex-col">
-          <span className="font-display text-lg font-semibold tracking-tight text-ocean-900 transition-colors group-hover:text-ocean-700">
+          <span
+            className={`font-display text-lg font-semibold tracking-tight transition-colors ${
+              overHero
+                ? "text-white group-hover:text-ocean-100"
+                : "text-ocean-900 group-hover:text-ocean-700"
+            }`}
+          >
             {siteConfig.navTitle}
           </span>
-          <span className="text-xs text-ocean-600">
+          <span
+            className={`text-xs transition-colors ${
+              overHero ? "text-ocean-200" : "text-ocean-600"
+            }`}
+          >
             {siteConfig.navSubtitle}
           </span>
         </Link>
@@ -20,7 +54,11 @@ export function Header() {
               <li key={item.href}>
                 <a
                   href={item.href}
-                  className="rounded-full px-3 py-2 text-sm font-medium text-ocean-800 transition-colors hover:bg-ocean-50 hover:text-ocean-900 sm:px-4"
+                  className={`rounded-full px-3 py-2 text-sm font-medium transition-colors sm:px-4 ${
+                    overHero
+                      ? "text-white/90 hover:bg-white/10 hover:text-white"
+                      : "text-ocean-800 hover:bg-ocean-50 hover:text-ocean-900"
+                  }`}
                 >
                   {item.label}
                 </a>

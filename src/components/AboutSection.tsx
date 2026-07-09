@@ -2,7 +2,7 @@ import { aboutContent } from "@/lib/site";
 
 export function AboutSection() {
   return (
-    <section id="about" className="scroll-mt-20 bg-cream py-20 sm:py-28">
+    <section id="about" className="scroll-mt-24 bg-cream py-20 sm:py-28">
       <div className="mx-auto max-w-6xl px-6">
         <div className="max-w-3xl">
           <h2 className="font-display text-3xl font-semibold tracking-tight text-ocean-900 sm:text-4xl">

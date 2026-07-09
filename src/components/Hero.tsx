@@ -3,13 +3,17 @@ import { heroContent } from "@/lib/site";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-ocean-950 text-white">
+    <section
+      id="hero"
+      className="relative overflow-hidden bg-ocean-950 text-white min-h-[max(32rem,calc(100vw*762/1400))]"
+    >
       <Image
         src="/images/hero-background.webp"
         alt=""
         fill
         priority
-        className="object-cover object-center"
+        unoptimized
+        className="object-cover object-[35%_50%]"
         sizes="100vw"
       />
 
@@ -22,7 +26,7 @@ export function Hero() {
         aria-hidden="true"
       />
 
-      <div className="relative mx-auto max-w-6xl px-6 py-24 sm:py-32">
+      <div className="relative mx-auto flex min-h-[max(32rem,calc(100vw*762/1400))] max-w-6xl flex-col justify-center px-6 pb-16 pt-24 sm:pb-20 sm:pt-28">
         <p className="text-sm font-medium uppercase tracking-widest text-ocean-200">
           {heroContent.eyebrow}
         </p>

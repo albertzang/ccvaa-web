@@ -4,7 +4,7 @@ export function ContactSection() {
   const { address } = organization;
 
   return (
-    <section id="contact" className="scroll-mt-20 bg-ocean-50 py-20 sm:py-28">
+    <section id="contact" className="scroll-mt-24 bg-ocean-50 py-20 sm:py-28">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-2xl rounded-3xl border border-ocean-100 bg-white p-8 text-center shadow-sm sm:p-12">
           <h2 className="font-display text-3xl font-semibold tracking-tight text-ocean-900">
