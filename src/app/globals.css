@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f6f4;
-  --foreground: #1c1b1a;
+  --background: #f2f4f2;
+  --foreground: #1f2a24;
 }
 
 @theme inline {
@@ -11,22 +11,22 @@
   --font-sans: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-playfair), ui-serif, Georgia, serif;
 
-  /* Warm neutrals — snow, mist, and shadow tones from the hero image */
-  --color-cream: #f7f6f4;
-  --color-ocean-50: #f0eeeb;
-  --color-ocean-100: #e3e0dc;
-  --color-ocean-200: #cac6c1;
-  --color-ocean-400: #94908a;
-  --color-ocean-500: #76726d;
-  --color-ocean-600: #5a5753;
-  --color-ocean-700: #43413e;
-  --color-ocean-800: #2c2b29;
-  --color-ocean-900: #1c1b1a;
-  --color-ocean-950: #0a0a0a;
+  /* Coast palette — fog, slate rock, and forest tones from the hero image */
+  --color-cream: #f2f4f2;
+  --color-ocean-50: #e8ece9;
+  --color-ocean-100: #d5dcd7;
+  --color-ocean-200: #b3bfb6;
+  --color-ocean-400: #7f8f84;
+  --color-ocean-500: #5f6f64;
+  --color-ocean-600: #4a574e;
+  --color-ocean-700: #38443c;
+  --color-ocean-800: #28332d;
+  --color-ocean-900: #1f2a24;
+  --color-ocean-950: #141c18;
 
-  /* Light-beam accent — warm silver highlight */
-  --color-coral: #ebe6e0;
-  --color-coral-dark: #d9d3cb;
+  /* Driftwood cedar accent */
+  --color-coral: #c49a6c;
+  --color-coral-dark: #a87d52;
 }
 
 body {

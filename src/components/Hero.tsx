@@ -5,7 +5,7 @@ export function Hero() {
   return (
     <section
       id="hero"
-      className="relative overflow-hidden bg-ocean-950 text-white min-h-[max(32rem,calc(100vw*762/1400))]"
+      className="relative overflow-hidden bg-ocean-950 text-white min-h-[max(32rem,calc(100vw*1313/2000))]"
     >
       <Image
         src="/images/hero-background.webp"
@@ -13,21 +13,21 @@ export function Hero() {
         fill
         priority
         unoptimized
-        className="object-cover object-[35%_50%]"
+        className="object-cover object-left"
         sizes="100vw"
       />
 
       <div
-        className="pointer-events-none absolute inset-0 bg-black/10"
+        className="pointer-events-none absolute inset-0 bg-ocean-950/15"
         aria-hidden="true"
       />
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/35 via-black/10 to-transparent"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ocean-950/55 via-ocean-950/20 to-white/5"
         aria-hidden="true"
       />
 
-      <div className="relative mx-auto flex min-h-[max(32rem,calc(100vw*762/1400))] max-w-6xl select-none flex-col justify-center px-6 pb-16 pt-24 sm:pb-20 sm:pt-28">
-        <p className="text-sm font-medium uppercase tracking-widest text-ocean-200/90">
+      <div className="relative mx-auto flex min-h-[max(32rem,calc(100vw*1313/2000))] max-w-6xl select-none flex-col justify-center px-6 pb-16 pt-24 sm:pb-20 sm:pt-28">
+        <p className="text-sm font-medium uppercase tracking-widest text-ocean-100/90">
           {heroContent.eyebrow}
         </p>
 
@@ -35,7 +35,7 @@ export function Hero() {
           {heroContent.headline}
         </h1>
 
-        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ocean-100 sm:text-xl">
+        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ocean-50/95 sm:text-xl">
           {heroContent.subheadline}
         </p>
       </div>
