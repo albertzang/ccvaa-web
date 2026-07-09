@@ -20,19 +20,21 @@ export function AboutSection() {
             {aboutContent.purposesHeading}
           </h3>
 
-          <ol className="mt-8 space-y-6">
+          <ol className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
             {aboutContent.purposes.map((purpose, index) => (
               <li
                 key={purpose.title}
-                className="flex gap-5 rounded-2xl border border-ocean-100 bg-white p-6 shadow-sm"
+                className="flex overflow-hidden rounded-2xl border border-ocean-100 bg-white shadow-sm"
               >
-                <span
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ocean-900 font-display text-sm font-semibold text-white"
+                <div
+                  className="flex w-14 shrink-0 items-center justify-center border-r border-ocean-100 bg-ocean-50 sm:w-16"
                   aria-hidden="true"
                 >
-                  {index + 1}
-                </span>
-                <div>
+                  <span className="font-display text-xl font-semibold text-ocean-900 sm:text-2xl">
+                    {index + 1}
+                  </span>
+                </div>
+                <div className="flex flex-1 flex-col justify-center px-5 py-5 sm:px-6 sm:py-6">
                   <h4 className="font-display text-lg font-semibold text-ocean-900">
                     {purpose.title}
                   </h4>
