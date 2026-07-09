@@ -1,17 +1,25 @@
+import Image from "next/image";
 import { heroContent } from "@/lib/site";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-ocean-900 via-ocean-800 to-ocean-700 text-white">
+    <section className="relative overflow-hidden bg-ocean-950 text-white">
+      <Image
+        src="/images/hero-background.webp"
+        alt=""
+        fill
+        priority
+        className="object-cover object-center"
+        sizes="100vw"
+      />
+
       <div
-        className="pointer-events-none absolute inset-0 opacity-30"
+        className="pointer-events-none absolute inset-0 bg-ocean-950/10"
         aria-hidden="true"
-        style={{
-          backgroundImage: `
-            radial-gradient(circle at 20% 80%, rgba(232, 146, 124, 0.4) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 40%)
-          `,
-        }}
+      />
+      <div
+        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ocean-950/30 via-ocean-950/10 to-transparent"
+        aria-hidden="true"
       />
 
       <div className="relative mx-auto max-w-6xl px-6 py-24 sm:py-32">
