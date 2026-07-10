@@ -24,24 +24,14 @@ export function AboutSection() {
             {aboutContent.purposes.map((purpose, index) => (
               <li
                 key={purpose.title}
-                className="flex overflow-hidden rounded-2xl border border-ocean-100 bg-white shadow-sm"
+                className="overflow-hidden rounded-2xl border border-ocean-100 bg-white shadow-sm"
               >
-                <div
-                  className="flex w-14 shrink-0 items-center justify-center border-r border-ocean-100 bg-ocean-100 sm:w-16"
-                  aria-hidden="true"
-                >
-                  <span className="font-display text-xl font-semibold text-ocean-700 select-none sm:text-2xl">
-                    {index + 1}
-                  </span>
-                </div>
-                <div className="flex flex-1 flex-col justify-center px-5 py-5 sm:px-6 sm:py-6">
-                  <h4 className="font-display text-lg font-semibold text-ocean-900">
-                    {purpose.title}
-                  </h4>
-                  <p className="mt-2 text-sm leading-relaxed text-ocean-600">
-                    {purpose.description}
-                  </p>
-                </div>
+                <h4 className="bg-ocean-100 px-4 py-2 font-display text-base font-semibold lining-nums tabular-nums text-ocean-700 select-none sm:px-4 sm:py-2.5">
+                  {index + 1}. {purpose.title}
+                </h4>
+                <p className="px-4 py-4 text-sm leading-relaxed text-ocean-600 sm:px-4 sm:py-4">
+                  {purpose.description}
+                </p>
               </li>
             ))}
           </ol>
