@@ -80,7 +80,7 @@ export function BoardSection() {
             {expanded && (
               <div className="border-t border-ocean-100">
                 <div
-                  className="flex aspect-[4/5] items-center justify-center bg-gradient-to-br from-ocean-50 via-white to-ocean-100/60"
+                  className="flex aspect-square items-center justify-center bg-gradient-to-br from-ocean-50 via-white to-ocean-100/60"
                   role="img"
                   aria-label={member.portraitAlt}
                 >
