@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CoastToCoastLogo } from "@/components/CoastToCoastLogo";
 import { boardContent } from "@/lib/site";
 
 function ExpandIcon({ expanded }: { expanded: boolean }) {
@@ -51,11 +52,12 @@ export function BoardSection() {
 
       <figure className="mt-8 flex justify-center">
         <div
-          className="flex aspect-[5/3] w-full max-h-72 max-w-[min(100%,calc(18rem*5/3))] items-center justify-center overflow-hidden rounded-2xl border border-ocean-100 bg-gradient-to-br from-ocean-50 via-white to-ocean-100/60 shadow-sm sm:max-h-80 sm:max-w-[min(100%,calc(20rem*5/3))]"
+          className="relative flex aspect-[5/3] w-full max-h-72 max-w-[min(100%,calc(18rem*5/3))] flex-col items-center justify-center gap-4 overflow-hidden rounded-2xl border border-ocean-800/40 bg-ocean-950 px-6 shadow-sm sm:max-h-80 sm:max-w-[min(100%,calc(20rem*5/3))]"
           role="img"
           aria-label={boardContent.photoAlt}
         >
-          <p className="max-w-xs px-6 text-center text-sm leading-relaxed text-ocean-500">
+          <CoastToCoastLogo className="h-auto w-full max-w-[14rem] sm:max-w-[16rem]" />
+          <p className="max-w-xs text-center text-sm leading-relaxed text-ocean-200/90">
             {boardContent.photoPlaceholderNote}
           </p>
         </div>
@@ -80,11 +82,15 @@ export function BoardSection() {
             {expanded && (
               <div className="border-t border-ocean-100">
                 <div
-                  className="flex aspect-square items-center justify-center bg-gradient-to-br from-ocean-50 via-white to-ocean-100/60"
+                  className="flex aspect-square flex-col items-center justify-center gap-3 bg-gradient-to-br from-ocean-50 via-white to-ocean-100/60 px-4"
                   role="img"
                   aria-label={member.portraitAlt}
                 >
-                  <p className="px-4 text-center text-xs leading-relaxed text-ocean-500">
+                  <CoastToCoastLogo
+                    onLight
+                    className="h-auto w-full max-w-[8.5rem]"
+                  />
+                  <p className="text-center text-xs leading-relaxed text-ocean-500">
                     {boardContent.portraitPlaceholderNote}
                   </p>
                 </div>

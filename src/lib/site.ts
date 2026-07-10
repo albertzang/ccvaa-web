@@ -8,6 +8,13 @@ export const siteConfig = {
     "A British Columbia–based non-profit fostering visual arts education, exhibitions, and community engagement from coast to coast.",
   url: "https://ccvaa.ca",
   locale: "en-CA",
+  logo: {
+    src: "/images/logo-ondark.png",
+    srcOnLight: "/images/logo-onlight.png",
+    alt: "Coast to Coast",
+    width: 762,
+    height: 206,
+  },
 } as const;
 
 export const organization = {

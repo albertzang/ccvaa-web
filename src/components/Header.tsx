@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { CoastToCoastLogo } from "@/components/CoastToCoastLogo";
 import { navigation, siteConfig } from "@/lib/site";
 
 export function Header() {
@@ -29,16 +30,12 @@ export function Header() {
       }`}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link href="/" className="group flex flex-col">
-          <span
-            className={`font-display text-lg font-semibold tracking-tight transition-colors ${
-              overHero
-                ? "text-white group-hover:text-ocean-100"
-                : "text-ocean-900 group-hover:text-ocean-700"
-            }`}
-          >
-            {siteConfig.navTitle}
-          </span>
+        <Link href="/" className="group flex flex-col gap-1">
+          <CoastToCoastLogo
+            priority
+            onLight={!overHero}
+            className="h-7 w-auto sm:h-8"
+          />
           <span
             className={`text-xs transition-colors ${
               overHero ? "text-ocean-200" : "text-ocean-600"
