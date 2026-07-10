@@ -103,6 +103,32 @@ export const aboutContent = {
   ],
 } as const;
 
+export const boardContent = {
+  title: "Our Board",
+  photoAlt:
+    "CCVAA board members Zhong Liu, Yaqi Jing, and Albert Zang",
+  photoPlaceholderNote: "Board photo coming soon.",
+  portraitPlaceholderNote: "Portrait coming soon.",
+  bioPlaceholder: "Bio coming soon.",
+  members: [
+    {
+      name: "Zhong Liu",
+      role: "President",
+      portraitAlt: "Portrait of Zhong Liu, President",
+    },
+    {
+      name: "Yaqi Jing",
+      role: "Vice President",
+      portraitAlt: "Portrait of Yaqi Jing, Vice President",
+    },
+    {
+      name: "Albert Zang",
+      role: "Secretary",
+      portraitAlt: "Portrait of Albert Zang, Secretary",
+    },
+  ],
+} as const;
+
 export const contactContent = {
   title: "Contact us",
   description:

@@ -1,4 +1,5 @@
 import { aboutContent } from "@/lib/site";
+import { BoardSection } from "@/components/BoardSection";
 import { PurposesSection } from "@/components/PurposesSection";
 
 export function AboutSection() {
@@ -15,6 +16,8 @@ export function AboutSection() {
             ))}
           </div>
         </div>
+
+        <BoardSection />
 
         <PurposesSection />
       </div>
