@@ -49,9 +49,9 @@ export function BoardSection() {
         <ExpandIcon expanded={expanded} />
       </button>
 
-      <figure className="mt-8">
+      <figure className="mt-8 flex justify-center">
         <div
-          className="flex aspect-[5/3] items-center justify-center overflow-hidden rounded-2xl border border-ocean-100 bg-gradient-to-br from-ocean-50 via-white to-ocean-100/60 shadow-sm"
+          className="flex aspect-[5/3] w-full max-h-72 max-w-[min(100%,calc(18rem*5/3))] items-center justify-center overflow-hidden rounded-2xl border border-ocean-100 bg-gradient-to-br from-ocean-50 via-white to-ocean-100/60 shadow-sm sm:max-h-80 sm:max-w-[min(100%,calc(20rem*5/3))]"
           role="img"
           aria-label={boardContent.photoAlt}
         >
