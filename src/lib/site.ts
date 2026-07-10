@@ -48,7 +48,7 @@ export const aboutContent = {
     "We bring artists, educators, and communities together through exhibitions, education, and cultural programming — from local workshops to coast-to-coast collaboration.",
     "Whether you are an artist, educator, volunteer, or art enthusiast, we invite you to join our growing community.",
   ],
-  purposesHeading: "Our purposes",
+  purposesHeading: "Our Purposes",
   purposes: [
     {
       title: "Advancement of Visual Arts",

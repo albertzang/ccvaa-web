@@ -1,4 +1,5 @@
 import { aboutContent } from "@/lib/site";
+import { PurposesSection } from "@/components/PurposesSection";
 
 export function AboutSection() {
   return (
@@ -15,27 +16,7 @@ export function AboutSection() {
           </div>
         </div>
 
-        <div className="mt-16">
-          <h3 className="font-display text-xl font-semibold text-ocean-900 sm:text-2xl">
-            {aboutContent.purposesHeading}
-          </h3>
-
-          <ol className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-            {aboutContent.purposes.map((purpose, index) => (
-              <li
-                key={purpose.title}
-                className="overflow-hidden rounded-2xl border border-ocean-100 bg-white shadow-sm"
-              >
-                <h4 className="bg-ocean-100 px-4 py-2 font-display text-base font-semibold lining-nums tabular-nums text-ocean-700 select-none sm:px-4 sm:py-2.5">
-                  {index + 1}. {purpose.title}
-                </h4>
-                <p className="px-4 py-4 text-sm leading-relaxed text-ocean-600 sm:px-4 sm:py-4">
-                  {purpose.description}
-                </p>
-              </li>
-            ))}
-          </ol>
-        </div>
+        <PurposesSection />
       </div>
     </section>
   );
