@@ -67,7 +67,7 @@
 - After success: login section hidden; scaffold sections shown
 - Env: see `.env.example` (`ADMIN_SESSION_SECRET`, SMTP_*, `ADMIN_OTP_DEV_MODE`)
 - Local: `.env.local` (gitignored). Production: Vercel Environment Variables + redeploy
-- **QA OTP readout (current):** CEO-in-the-loop — `docs/protocols/QA_AUTH.md` (no standing agent mailbox access). Dedicated test inbox = Later on roadmap.
+- **QA OTP (current):** single-Send + CEO-in-the-loop — `docs/protocols/QA_AUTH.md` (no standing agent mailbox access; do not spam Send). Dedicated test inbox = Later on roadmap.
 
 ### Post-auth scaffolds (placeholders only)
 - **Members** — coming soon
@@ -119,4 +119,4 @@
 | 2026-07-10 | Ship path field: CEO owns `direct-to-main` approval; Developer follows handoff literally |
 | 2026-07-10 | Post-merge: delete feature branch local+remote before Pass 2; Pass 2 fixes = new branch from main |
 | 2026-07-10 | Added standard **baseline** QA pass (Production audit, no PR) |
-| 2026-07-10 | QA OTP readout: CEO-in-the-loop (`QA_AUTH.md`); dedicated test inbox on Later roadmap |
+| 2026-07-10 | QA OTP: single-Send + CEO-in-the-loop protocol (`QA_AUTH.md`) to protect rate limits |

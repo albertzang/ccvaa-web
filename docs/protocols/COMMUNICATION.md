@@ -49,11 +49,13 @@ Use `docs/templates/handoff-qa.md`. Include:
 - What changed (branch, PR, commit) — or for baseline: scope from FEATURES.md
 - Checklist focus
 - Known risks (incl. Preview env vars for admin OTP/mail)
-- If full admin login is required: note **OTP readout: CEO-in-the-loop** (`docs/protocols/QA_AUTH.md`)
+- If full admin login is required: note **OTP: single-Send + CEO-in-the-loop** (`docs/protocols/QA_AUTH.md`)
 
 **Baseline:** PM-initiated Production audit with no PR; skip Preview. See `docs/protocols/GIT_DEPLOY.md`.
 
-Never ask QA to verify https://ccvaa.ca/ — CEO handles that manually. Never use `ccvaa-web.vercel.app` as a feature Preview URL. Never put mailbox passwords or OTP codes in handoffs committed to git.
+Never ask QA to verify https://ccvaa.ca/ — CEO handles that manually. Never use `ccvaa-web.vercel.app` as a feature Preview URL. Never put mailbox passwords, OTP codes, or `VERCEL_AUTOMATION_BYPASS_SECRET` in handoffs committed to git.
+
+Preview protection: `docs/protocols/PREVIEW_PROTECTION.md` (bypass from `.env.local`).
 
 ## QA → Product Manager / Developer
 

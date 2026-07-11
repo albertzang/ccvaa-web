@@ -17,7 +17,7 @@ import {
 export async function POST(request: NextRequest) {
   const ip = getClientIp(request);
 
-  const ipLimit = checkRateLimit({
+  const ipLimit = await checkRateLimit({
     key: `otp-verify-ip:${ip}`,
     limit: OTP_VERIFY_IP_LIMIT,
     windowMs: OTP_VERIFY_IP_WINDOW_MS,
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     return jsonError("Enter the 6-digit code from your email.", 400);
   }
 
-  const result = verifyOtpChallenge(ip, code);
+  const result = await verifyOtpChallenge(ip, code);
   if (!result.ok) {
     const messages = {
       missing: "No active code found. Request a new one.",
