@@ -1,4 +1,4 @@
-# Preview deployment protection (Option B)
+# Preview deployment protection
 
 ## Decision
 

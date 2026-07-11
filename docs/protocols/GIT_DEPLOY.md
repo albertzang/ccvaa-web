@@ -16,7 +16,7 @@
 
 There is **no** long-lived staging site today. **Preview = pre-merge staging.**
 
-**Preview access (Option B):** Previews use Vercel Deployment Protection. QA bypasses via `VERCEL_AUTOMATION_BYPASS_SECRET` in gitignored `.env.local` (query `x-vercel-protection-bypass`). Full rules: `docs/protocols/PREVIEW_PROTECTION.md`.
+**Preview access:** Previews use Vercel Deployment Protection. QA bypasses via `VERCEL_AUTOMATION_BYPASS_SECRET` in gitignored `.env.local` (query `x-vercel-protection-bypass`). Full rules: `docs/protocols/PREVIEW_PROTECTION.md`.
 
 ## Who owns branch name vs Preview URL
 
@@ -25,7 +25,7 @@ There is **no** long-lived staging site today. **Preview = pre-merge staging.**
 | **Feature branch name** | **Developer** | Created when starting work. Convention: `feat/…`, `fix/…`, `chore/…`. PM may *suggest* a name in the Dev handoff; Developer decides and creates it. |
 | **PR** | **Developer** | Opened against `main` after the branch has commits. |
 | **Preview URL** | **Vercel** (generated) → **Developer records it** | Appears on the GitHub PR (Vercel bot / deployment checks) or Vercel dashboard. Typical shape: `https://ccvaa-web-git-<branch-slug>-<team>.vercel.app` — do **not** reconstruct by hand. |
-| **Preview protection bypass** | **CEO** sets secret in Vercel + `.env.local`; **QA** reads local env | Option B — see `docs/protocols/PREVIEW_PROTECTION.md`. Never commit the secret. |
+| **Preview protection bypass** | **CEO** sets secret in Vercel + `.env.local`; **QA** reads local env | See `docs/protocols/PREVIEW_PROTECTION.md`. Never commit the secret. |
 | **Pass 1 handoff to QA** | **Developer** (PM may copy) | Must paste the **exact** Preview URL into `docs/templates/handoff-qa.md`. |
 | **Feature branch cleanup** | **Developer** | Delete local + remote **immediately after merge**, before Pass 2. |
 | **Pass 2 bugfix** | **Developer** | New branch from latest `main` (or CEO-approved `direct-to-main`) — not the old feature branch. |
@@ -190,7 +190,7 @@ Pure docs/protocol updates by PM: usually **no QA** unless CEO asks.
 
 Preview deployments use Vercel **Preview** environment variables. If admin OTP/mail must be tested on Preview, those secrets must exist for Preview (not only Production). Note gaps in the QA handoff.
 
-**OTP readout for QA:** CEO-in-the-loop — see `docs/protocols/QA_AUTH.md`. Do not give agents standing mailbox credentials.
+**OTP readout for QA:** single-Send + CEO-in-the-loop — see `docs/protocols/QA_AUTH.md`. Do not give agents standing mailbox credentials. Do not spam **Send login code** (1/min, 5/hour/IP).
 
 ## Optional later: true staging
 

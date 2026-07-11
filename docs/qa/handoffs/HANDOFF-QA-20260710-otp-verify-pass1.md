@@ -9,7 +9,7 @@
 **PR link:** https://github.com/albertzang/ccvaa-web/pull/2  
 **Commit:** `f0dd5d8`  
 **Preview URL:** https://ccvaa-web-git-fix-otp-verify-shared-store-azang-projects.vercel.app  
-**Preview protection:** Option B — QA reads `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local` (do **not** paste the secret in this file). See `docs/protocols/PREVIEW_PROTECTION.md`.  
+**Preview protection:** QA reads `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local` (do **not** paste the secret in this file). See `docs/protocols/PREVIEW_PROTECTION.md`.  
 **Production URL:** https://ccvaa-web.vercel.app/ (Pass **2** and **baseline**)  
 
 **Post-merge cleanup (Pass 2 only):**  
@@ -38,7 +38,7 @@ Cleanup happens **right after merge**, before Pass 2 testing — see `docs/proto
 
 ## What changed
 
-Fix BUG-20260710-02: admin OTP verify failed on Production with “No active code found” because challenges lived in a per-instance in-memory `Map`. OTP challenges and rate-limit buckets now use **Upstash Redis** when Redis REST URL + token are set (shared across Vercel instances). Accepts either `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` or Vercel Marketplace `KV_REST_API_URL`/`KV_REST_API_TOKEN`. In-memory fallback remains for local `next dev` only.
+Fix BUG-20260710-02: admin OTP verify failed on Production with “No active code found” because challenges lived in a per-instance in-memory `Map`. OTP challenges and rate-limit buckets now use **Upstash Redis** when `KV_REST_API_URL` + `KV_REST_API_TOKEN` are set (shared across Vercel instances). In-memory fallback remains for local `next dev` only.
 
 ## Focus checklist
 
@@ -50,25 +50,24 @@ Fix BUG-20260710-02: admin OTP verify failed on Production with “No active cod
 
 ## Known risks / flaky areas
 
-- **Preview/Production must have Redis REST env vars** (`UPSTASH_REDIS_REST_*` or Marketplace `KV_REST_API_*`). Without them, Preview falls back to in-memory and the original cross-instance bug can still appear. If verify fails with “No active code found” on Preview, first confirm Redis/KV is linked for the **Preview** environment, then redeploy.
-- **Preview Deployment Protection (Option B):** without `VERCEL_AUTOMATION_BYPASS_SECRET` in `.env.local`, QA hits Vercel login wall — see `docs/protocols/PREVIEW_PROTECTION.md`.
-- OTP readout still CEO-in-the-loop (`docs/protocols/QA_AUTH.md`).
+- **Preview/Production must have Redis REST env vars** (`KV_REST_API_URL` + `KV_REST_API_TOKEN`). Without them, Preview falls back to in-memory and the original cross-instance bug can still appear. If verify fails with “No active code found” on Preview, first confirm Redis/KV is linked for the **Preview** environment, then redeploy.
+- **Preview Deployment Protection:** without `VERCEL_AUTOMATION_BYPASS_SECRET` in `.env.local`, QA hits Vercel login wall — see `docs/protocols/PREVIEW_PROTECTION.md`.
+- OTP readout: **single-Send** + CEO-in-the-loop (`docs/protocols/QA_AUTH.md`).
 
 ## Preview env notes (Pass 1)
 
-Required for this fix to be testable on Preview (same as Production before merge) — either pair:
+Required for this fix to be testable on Preview (same as Production before merge):
 
-- `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` (Upstash-native), **or**
-- `KV_REST_API_URL` + `KV_REST_API_TOKEN` (Vercel Marketplace Upstash/KV inject; no manual aliases needed)
+- `KV_REST_API_URL` + `KV_REST_API_TOKEN` (Vercel Marketplace Upstash Redis inject)
 
 Plus existing admin mail/OTP vars (`ADMIN_SESSION_SECRET`, SMTP_*, `ADMIN_OTP_DEV_MODE=false`, etc.).
 
-Provision: Vercel Marketplace → Upstash/KV for **Preview** and **Production**, then redeploy if vars were added after this Preview built.
+Provision: Vercel Marketplace → Upstash Redis for **Preview** and **Production**, then redeploy if vars were added after this Preview built.
 
 ## Production / baseline / Pass 2 auth notes
 
 - OTP emailed to `info@ccvaa.ca` (or `ADMIN_OTP_EMAIL`). **Do not commit codes.**
-- **OTP readout (current standard):** CEO-in-the-loop — see `docs/protocols/QA_AUTH.md`. QA triggers Send; CEO pastes the code into the QA chat for that session only.
+- **OTP readout (current standard):** **single-Send** + CEO-in-the-loop — see `docs/protocols/QA_AUTH.md`. QA Sends **once** → CEO pastes newest code → QA verifies **once**. No extra Sends.
 - If CEO unavailable: test request UI/cooldown/errors; mark full login/scaffolds **blocked** (not automatic product fail) unless handoff says otherwise.
 - Never give QA standing mailbox passwords.
 

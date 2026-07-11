@@ -11,7 +11,7 @@ alwaysApply: true
 |------|-----------------|------|
 | Product Manager | Human CEO | Scope, priorities, advice, product docs |
 | Developer | PM (via handoff) | Feature branches, PRs, implementation |
-| QA | PM (via handoff) | Pass 1 / Pass 2 / baseline; OTP via CEO; Preview bypass via `.env.local` |
+| QA | PM (via handoff) | Pass 1 / Pass 2 / baseline; single-Send OTP + CEO; Preview bypass via `.env.local` |
 
 CEO talks primarily to the **Product Manager**. Repo docs are the shared brain — not chat history.
 
