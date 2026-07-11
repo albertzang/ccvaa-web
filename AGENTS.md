@@ -30,7 +30,7 @@ Shared brain (not chat history):
 
 - `docs/product/FEATURES.md` — living feature inventory (PM maintains)
 - `docs/product/ROADMAP.md` — Now / Next / Later
-- `docs/protocols/` — communication, handoff, git/deploy, **QA auth (OTP readout)**
+- `docs/protocols/` — communication, handoff, git/deploy, QA auth, **Preview protection**
 - `docs/templates/` — bug / feature / QA / handoff templates
 - `.cursor/rules/` — shared + role rules
 - `.cursor/skills/` — `product-manager`, `developer`, `ccvaa-dev-memory`, `qa`
@@ -41,7 +41,7 @@ Shared brain (not chat history):
 | Name | URL | Tracks |
 |------|-----|--------|
 | Dev | http://localhost:3000/ | Local |
-| Preview | Vercel URL for the PR/branch (from GitHub/Vercel) | Feature branch — **pre-merge** |
+| Preview | Vercel URL for the PR/branch (from GitHub/Vercel) | Feature branch — **pre-merge** (Deployment Protection; QA bypass via `.env.local`) |
 | Production | https://ccvaa-web.vercel.app/ | `main` — QA Pass 2 and **baseline** |
 
 **CEO-only (out of agent flow):** https://ccvaa.ca/ — public domain; CEO handles manual testing (DNS/cache). Agents do not use it for Pass 1/2/baseline.

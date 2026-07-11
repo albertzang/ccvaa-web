@@ -9,6 +9,7 @@
 **PR link:** (n/a for baseline or direct-to-main)  
 **Commit:** (optional for baseline — note `main` tip if known)  
 **Preview URL:** (Pass **1** only — **required**; paste exact URL from Vercel / GitHub PR — do not reconstruct)  
+**Preview protection:** Option B — QA reads `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local` (do **not** paste the secret here). See `docs/protocols/PREVIEW_PROTECTION.md`.  
 **Production URL:** https://ccvaa-web.vercel.app/ (Pass **2** and **baseline**)  
 
 **Post-merge cleanup (Pass 2 only):**  
@@ -25,6 +26,10 @@ Cleanup happens **right after merge**, before Pass 2 testing — see `docs/proto
 2. Vercel posts the Preview deployment URL on the PR.
 3. Developer pastes that URL into **Preview URL** above.
 4. QA tests **only** that pasted URL. If blank on Pass 1 → block and ask Developer/PM.
+5. **Protection bypass:** Before navigating, QA loads `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local` and opens  
+   `<Preview URL>?x-vercel-protection-bypass=<secret>` (or `&…` if query already present).  
+   If the secret is empty/missing → **block** and ask CEO to fill `.env.local`. Never write the secret into this handoff or the QA report.  
+   Details: `docs/protocols/PREVIEW_PROTECTION.md`.
 
 ## Environments to test this pass
 

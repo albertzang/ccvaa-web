@@ -9,6 +9,7 @@
 **PR link:** https://github.com/albertzang/ccvaa-web/pull/2  
 **Commit:** `f0dd5d8`  
 **Preview URL:** https://ccvaa-web-git-fix-otp-verify-shared-store-azang-projects.vercel.app  
+**Preview protection:** Option B — QA reads `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local` (do **not** paste the secret in this file). See `docs/protocols/PREVIEW_PROTECTION.md`.  
 **Production URL:** https://ccvaa-web.vercel.app/ (Pass **2** and **baseline**)  
 
 **Post-merge cleanup (Pass 2 only):**  
@@ -25,6 +26,9 @@ Cleanup happens **right after merge**, before Pass 2 testing — see `docs/proto
 2. Vercel posts the Preview deployment URL on the PR.
 3. Developer pastes that URL into **Preview URL** above.
 4. QA tests **only** that pasted URL. If blank on Pass 1 → block and ask Developer/PM.
+5. **Protection bypass:** Load `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local`; open  
+   `<Preview URL>?x-vercel-protection-bypass=<secret>`. If empty → block (CEO fills `.env.local`). Never write the secret into reports.  
+   See `docs/protocols/PREVIEW_PROTECTION.md`.
 
 ## Environments to test this pass
 
@@ -47,6 +51,7 @@ Fix BUG-20260710-02: admin OTP verify failed on Production with “No active cod
 ## Known risks / flaky areas
 
 - **Preview/Production must have Redis REST env vars** (`UPSTASH_REDIS_REST_*` or Marketplace `KV_REST_API_*`). Without them, Preview falls back to in-memory and the original cross-instance bug can still appear. If verify fails with “No active code found” on Preview, first confirm Redis/KV is linked for the **Preview** environment, then redeploy.
+- **Preview Deployment Protection (Option B):** without `VERCEL_AUTOMATION_BYPASS_SECRET` in `.env.local`, QA hits Vercel login wall — see `docs/protocols/PREVIEW_PROTECTION.md`.
 - OTP readout still CEO-in-the-loop (`docs/protocols/QA_AUTH.md`).
 
 ## Preview env notes (Pass 1)

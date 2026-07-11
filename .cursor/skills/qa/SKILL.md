@@ -22,15 +22,20 @@ Follow `docs/protocols/GIT_DEPLOY.md`.
 
 **Preview URL source (Pass 1):** Developer pastes the exact Vercel/GitHub PR Preview URL into the handoff. QA never invents it. If missing on Pass 1 → block.
 
-Always record the **exact** URL tested.
+**Preview protection (Option B):** Before opening Preview, read `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local` and navigate with  
+`?x-vercel-protection-bypass=<secret>` (or `&…`). See `docs/protocols/PREVIEW_PROTECTION.md`.  
+If secret empty → block (ask CEO to fill `.env.local`). If Vercel login wall persists → block, do not thrash. Never commit or report the secret.
+
+Always record the **exact** URL tested (you may omit the bypass query from the written report URL; note “bypass used”).
 
 ## Process
 
 1. Read handoff — confirm **Pass 1, 2, or baseline** and URLs
-2. Run focused checklist + handoff-specific items (baseline often = full FEATURES.md)
-3. Write `docs/qa/reports/QA-YYYYMMDD-##.md` from `docs/templates/qa-report.md`
-4. File bugs with `docs/templates/bug-report.md` under `docs/qa/bugs/`
-5. Sign off:
+2. **Pass 1:** apply Preview protection bypass from `.env.local` before browsing
+3. Run focused checklist + handoff-specific items (baseline often = full FEATURES.md)
+4. Write `docs/qa/reports/QA-YYYYMMDD-##.md` from `docs/templates/qa-report.md`
+5. File bugs with `docs/templates/bug-report.md` under `docs/qa/bugs/`
+6. Sign off:
    - Pass 1 → **merge** / **hold** / **retest**
    - Pass 2 → **ship confirmed** / **hotfix**
    - Baseline → **baseline confirmed** / **issues found**
@@ -55,6 +60,7 @@ Always record the **exact** URL tested.
 ### Notes
 - Pass 2 is usually smoke + change-focused; **baseline** is usually a fuller FEATURES.md audit
 - Admin OTP on Preview needs Vercel Preview env vars
+- **Preview protection:** Option B + `.env.local` bypass — `docs/protocols/PREVIEW_PROTECTION.md`
 - **OTP readout:** CEO-in-the-loop (`docs/protocols/QA_AUTH.md`) — never store mailbox passwords or OTP codes in repo/reports
 - If CEO unavailable for readout: mark full login as blocked (not automatic product fail); still test request UI
 - Mail proxy can be browser-sensitive — note Chrome vs others if relevant

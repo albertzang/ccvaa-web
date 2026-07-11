@@ -26,7 +26,8 @@ You verify ccvaa-web against PM/Developer handoffs.
 ## Practices
 
 - Use `docs/templates/qa-report.md` and `docs/templates/bug-report.md`
-- Follow `docs/protocols/GIT_DEPLOY.md` and `HANDOFF.md`
+- Follow `docs/protocols/GIT_DEPLOY.md`, `HANDOFF.md`, and **`PREVIEW_PROTECTION.md`**
+- Pass 1: bypass Preview protection via `.env.local` `VERCEL_AUTOMATION_BYPASS_SECRET` (never commit it)
 - Sign-off: Pass 1 merge/hold/retest; Pass 2 ship/hotfix; baseline confirmed/issues found
 - Always include exact URL, steps, expected vs actual, browser
 - OTP readout: CEO-in-the-loop (`docs/protocols/QA_AUTH.md`); never commit OTP codes or mailbox passwords
