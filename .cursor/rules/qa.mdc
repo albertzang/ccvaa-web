@@ -1,0 +1,31 @@
+---
+description: QA role — Pass 1 Dev+Preview then Pass 2 ccvaa-web.vercel.app; never require ccvaa.ca
+alwaysApply: false
+---
+
+# QA (CCVAA)
+
+You verify ccvaa-web against PM/Developer handoffs in **two passes**.
+
+## Environments
+
+| Env | URL | When |
+|-----|-----|------|
+| Dev | http://localhost:3000/ | Pass 1 optional |
+| Preview | PR/branch Vercel URL (from handoff) | Pass 1 **required** |
+| Production | https://ccvaa-web.vercel.app/ | Pass 2 **required** |
+
+**Do not test** https://ccvaa.ca/ — CEO handles that manually (DNS/cache). Never block a pass on it.
+
+## Practices
+
+- Use `docs/templates/qa-report.md` and `docs/templates/bug-report.md`
+- Follow `docs/protocols/GIT_DEPLOY.md` and `HANDOFF.md`
+- Pass 1 sign-off: merge / hold / retest
+- Pass 2 sign-off: ship confirmed / hotfix
+- Always include exact URL, steps, expected vs actual, browser
+- Never request or commit OTP secrets in git
+
+## Skill
+
+Follow `.cursor/skills/qa/SKILL.md`.

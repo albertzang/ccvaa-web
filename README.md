@@ -83,9 +83,9 @@ git remote add origin https://github.com/YOUR_USERNAME/ccvaa-web.git
 git push -u origin main
 ```
 
-## Custom domain setup
+## Custom domain
 
-See [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) for step-by-step domain purchase and DNS configuration.
+Public site: https://ccvaa.ca/ (CEO-managed DNS). Agent Dev/QA Production target: https://ccvaa-web.vercel.app/. See `docs/protocols/GIT_DEPLOY.md`.
 
 ## Future: data storage
 
