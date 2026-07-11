@@ -11,7 +11,7 @@ alwaysApply: true
 |------|-----------------|------|
 | Product Manager | Human CEO | Scope, priorities, advice, product docs |
 | Developer | PM (via handoff) | Feature branches, PRs, implementation |
-| QA | PM (via handoff) | Pass 1 Preview (+ optional Dev); Pass 2 `ccvaa-web.vercel.app` |
+| QA | PM (via handoff) | Pass 1 / Pass 2 / baseline; OTP readout via CEO (`QA_AUTH.md`) |
 
 CEO talks primarily to the **Product Manager**. Repo docs are the shared brain — not chat history.
 
@@ -20,7 +20,7 @@ CEO talks primarily to the **Product Manager**. Repo docs are the shared brain �
 - `AGENTS.md` — OS overview
 - `docs/product/FEATURES.md` — living feature inventory (PM maintains)
 - `docs/product/ROADMAP.md` — Now / Next / Later
-- `docs/protocols/` — communication, handoff, **GIT_DEPLOY**
+- `docs/protocols/` — communication, handoff, GIT_DEPLOY, **QA_AUTH**
 - `docs/templates/` — bug, feature, QA, handoff templates
 
 ## Environments (agent Dev/QA)

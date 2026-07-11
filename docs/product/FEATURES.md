@@ -29,7 +29,7 @@
 
 ### About
 - Intro paragraphs
-- **Our Board** (collapsible): group photo placeholder; member cards (Zhong Liu / President, Yaqi Jing / VP, Albert Zang / Secretary); expand shows portrait + bio placeholders (1:1 portraits)
+- **Our Board** (collapsible section): group photo placeholder stays visible; member cards show name/role always; section expand reveals all portraits + bio placeholders together (Zhong Liu / President, Yaqi Jing / VP, Albert Zang / Secretary; 1:1 portraits)
 - **Our Purposes** (collapsible): 10 purpose cards; titles always visible; descriptions toggle together
 
 ### Contact
@@ -67,6 +67,7 @@
 - After success: login section hidden; scaffold sections shown
 - Env: see `.env.example` (`ADMIN_SESSION_SECRET`, SMTP_*, `ADMIN_OTP_DEV_MODE`)
 - Local: `.env.local` (gitignored). Production: Vercel Environment Variables + redeploy
+- **QA OTP readout (current):** CEO-in-the-loop — `docs/protocols/QA_AUTH.md` (no standing agent mailbox access). Dedicated test inbox = Later on roadmap.
 
 ### Post-auth scaffolds (placeholders only)
 - **Members** — coming soon
@@ -86,7 +87,7 @@
 | DNS / email | Hover |
 | CI | lint, typecheck, build (GitHub Actions) |
 | Package | `nodemailer` for OTP SMTP |
-| Ship path | Feature branch → QA Preview → merge → QA on `ccvaa-web.vercel.app` — see `docs/protocols/GIT_DEPLOY.md`. CEO may manually check `ccvaa.ca`. |
+| Ship path | Feature branch → QA Preview → merge → cleanup → QA on `ccvaa-web.vercel.app`. **Baseline** pass = Production audit with no PR. See `docs/protocols/GIT_DEPLOY.md`. CEO may manually check `ccvaa.ca`. |
 
 ### Important technical notes for Developer
 - Next.js 16: prefer `proxy.ts` over deprecated `middleware.ts`
@@ -117,3 +118,5 @@
 | 2026-07-10 | Encoded feature-branch → Preview QA → merge → Production QA (`ccvaa-web.vercel.app`); `ccvaa.ca` CEO-manual only |
 | 2026-07-10 | Ship path field: CEO owns `direct-to-main` approval; Developer follows handoff literally |
 | 2026-07-10 | Post-merge: delete feature branch local+remote before Pass 2; Pass 2 fixes = new branch from main |
+| 2026-07-10 | Added standard **baseline** QA pass (Production audit, no PR) |
+| 2026-07-10 | QA OTP readout: CEO-in-the-loop (`QA_AUTH.md`); dedicated test inbox on Later roadmap |

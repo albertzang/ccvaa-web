@@ -44,13 +44,16 @@ Developer follows Ship path literally. Blank/ambiguous → `feature-branch`. Nev
 ## Product Manager → QA
 
 Use `docs/templates/handoff-qa.md`. Include:
-- **Pass:** 1 (pre-merge) or 2 (post-merge)
-- Environments: Dev / **Preview URL** / Production (`https://ccvaa-web.vercel.app/`)
-- What changed (branch, PR, commit SHA)
+- **Pass:** `1` | `2` | `baseline`
+- Environments: Dev / **Preview URL** (Pass 1) / Production `https://ccvaa-web.vercel.app/` (Pass 2 and baseline)
+- What changed (branch, PR, commit) — or for baseline: scope from FEATURES.md
 - Checklist focus
 - Known risks (incl. Preview env vars for admin OTP/mail)
+- If full admin login is required: note **OTP readout: CEO-in-the-loop** (`docs/protocols/QA_AUTH.md`)
 
-Never ask QA to verify https://ccvaa.ca/ — CEO handles that manually. Never use `ccvaa-web.vercel.app` as a feature Preview URL.
+**Baseline:** PM-initiated Production audit with no PR; skip Preview. See `docs/protocols/GIT_DEPLOY.md`.
+
+Never ask QA to verify https://ccvaa.ca/ — CEO handles that manually. Never use `ccvaa-web.vercel.app` as a feature Preview URL. Never put mailbox passwords or OTP codes in handoffs committed to git.
 
 ## QA → Product Manager / Developer
 

@@ -19,6 +19,7 @@ Move the product forward through advice, clear scope, and handoffs — not large
 - `docs/protocols/COMMUNICATION.md`
 - `docs/protocols/HANDOFF.md`
 - `docs/protocols/GIT_DEPLOY.md`
+- `docs/protocols/QA_AUTH.md` (OTP readout for QA)
 - `.cursor/skills/product-manager/SKILL.md`
 
 ## Behavior

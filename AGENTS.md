@@ -14,7 +14,7 @@ This repo uses a **3-agent system**. The human CEO primarily talks to the **Prod
 |------|------------------------|------|
 | **Product Manager** | Primary CEO chat; `.cursor/agents/product-manager.md` | Priorities, advice, acceptance criteria, FEATURES/ROADMAP, OS refinement |
 | **Developer** | Dev chat or agent `developer` | Feature branches, PRs, implementation (merge when asked) |
-| **QA** | QA chat or agent `qa` | Pass 1 (Dev + Preview) then Pass 2 (`ccvaa-web.vercel.app`) |
+| **QA** | QA chat or agent `qa` | Pass 1 (Preview), Pass 2 (post-merge), or **baseline** (Production audit, no PR) |
 
 ### First-pass bootstrap (done)
 
@@ -30,7 +30,7 @@ Shared brain (not chat history):
 
 - `docs/product/FEATURES.md` — living feature inventory (PM maintains)
 - `docs/product/ROADMAP.md` — Now / Next / Later
-- `docs/protocols/` — communication, handoff, **git/deploy**
+- `docs/protocols/` — communication, handoff, git/deploy, **QA auth (OTP readout)**
 - `docs/templates/` — bug / feature / QA / handoff templates
 - `.cursor/rules/` — shared + role rules
 - `.cursor/skills/` — `product-manager`, `developer`, `ccvaa-dev-memory`, `qa`
@@ -42,11 +42,12 @@ Shared brain (not chat history):
 |------|-----|--------|
 | Dev | http://localhost:3000/ | Local |
 | Preview | Vercel URL for the PR/branch (from GitHub/Vercel) | Feature branch — **pre-merge** |
-| Production | https://ccvaa-web.vercel.app/ | `main` — **QA Pass 2** |
+| Production | https://ccvaa-web.vercel.app/ | `main` — QA Pass 2 and **baseline** |
 
-**CEO-only (out of agent flow):** https://ccvaa.ca/ — public domain; CEO handles manual testing (DNS/cache). Agents do not use it for Pass 1/2.
+**CEO-only (out of agent flow):** https://ccvaa.ca/ — public domain; CEO handles manual testing (DNS/cache). Agents do not use it for Pass 1/2/baseline.
 
-**Default ship path:** feature branch → QA on Dev (optional) + Preview (required) → merge to `main` → QA Production smoke on `ccvaa-web.vercel.app`.  
+**Default ship path:** feature branch → QA on Dev (optional) + Preview (required) → merge to `main` → delete feature branch → QA Production smoke on `ccvaa-web.vercel.app`.  
+**Baseline:** PM/CEO may request a Production-only audit with no PR (`Pass: baseline`).  
 Full rules: `docs/protocols/GIT_DEPLOY.md`.
 
 ## Stack (quick)

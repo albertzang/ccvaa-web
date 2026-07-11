@@ -63,6 +63,31 @@ PM handoff
 - Keep Pass 2 focused (smoke + change-specific checks)
 - Feature branch should already be deleted (see cleanup below)
 
+### Baseline — Production audit without a preceding PR (QA)
+
+Use when work is **already on `main`** and never got Pass 1/2, or whenever CEO/PM wants a full regression against Production outside a normal ship.
+
+| | |
+|--|--|
+| **Who initiates** | PM (with CEO ask), or CEO |
+| **Pass value on handoff** | `baseline` |
+| **Environment** | https://ccvaa-web.vercel.app/ **required** |
+| **Skip** | Preview / Pass 1 / merge / branch cleanup |
+| **Scope** | Usually full `docs/product/FEATURES.md` (or a listed subset) |
+| **Sign-off** | **baseline confirmed** / **issues found** (bugs → normal fix path) |
+
+```
+CEO/PM: baseline handoff (scope + Production URL)
+  → QA: full/focused checklist on https://ccvaa-web.vercel.app/
+  → QA report + bugs
+  → PM: triage fixes (new feature-branch or CEO direct-to-main)
+  → CEO (optional): manual ccvaa.ca check
+```
+
+**When to use again:** pre-multi-agent backlog, post-incident regression, “we’re not sure Production matches FEATURES.md,” or any CEO-requested Production audit without an open PR.
+
+Do **not** fake a Pass 1 against Production or re-branch old work only to fit the happy path.
+
 ## Feature branch cleanup (after merge)
 
 **Owner:** Developer  
@@ -161,6 +186,8 @@ Pure docs/protocol updates by PM: usually **no QA** unless CEO asks.
 ## Env vars on Preview
 
 Preview deployments use Vercel **Preview** environment variables. If admin OTP/mail must be tested on Preview, those secrets must exist for Preview (not only Production). Note gaps in the QA handoff.
+
+**OTP readout for QA:** CEO-in-the-loop — see `docs/protocols/QA_AUTH.md`. Do not give agents standing mailbox credentials.
 
 ## Optional later: true staging
 

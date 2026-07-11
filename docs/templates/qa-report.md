@@ -1,9 +1,9 @@
 # QA report
 
 **ID:** QA-YYYYMMDD-##  
-**Pass:** 1 (pre-merge) | 2 (post-merge)  
+**Pass:** 1 (pre-merge) | 2 (post-merge) | baseline  
 **Environment(s) + exact URLs:**  
-**Branch / PR / commit:**  
+**Branch / PR / commit:** (n/a for baseline unless noted)  
 **Date:**  
 **Result:** pass | pass-with-issues | fail
 
@@ -31,3 +31,4 @@
 
 **Pass 1:** merge / hold / retest after fixes  
 **Pass 2:** ship confirmed / hotfix needed  
+**Baseline:** baseline confirmed / issues found  

@@ -10,9 +10,10 @@
 | CEO/PM | Developer | Approve merge to `main` after Pass 1 |
 | Developer | (self) | After merge: delete feature branch local + remote |
 | Developer | QA (Pass 2) | PR merged; branch cleaned up; Production deploy live |
-| QA | PM | Pass 2 complete — ship confirmed or prod bugs |
+| PM | QA (baseline) | CEO/PM requests Production audit of already-on-main (or regression) scope |
+| QA | PM | Pass 2 or baseline complete — confirmed or issues found |
 | QA | Developer | Clear bug with repro (PM may triage first) |
-| PM | Developer | Pass 2 fail → new fix handoff (new branch from `main`, not old feature branch) |
+| PM | Developer | Pass 2 / baseline fail → new fix handoff (new branch from `main`, not old feature branch) |
 
 See also `docs/protocols/GIT_DEPLOY.md`.
 
@@ -40,6 +41,15 @@ See also `docs/protocols/GIT_DEPLOY.md`.
 - [ ] Bugs filed with severity + repro + Preview URL
 - [ ] Explicit recommendation: **merge** / **hold** / **retest**
 - [ ] FEATURES.md accuracy flagged if docs drift
+
+## Definition of verified — Baseline (QA → PM, no PR)
+
+- [ ] Checklist run on https://ccvaa-web.vercel.app/ for handoff scope (often full FEATURES.md)
+- [ ] No Pass 1 / Preview required
+- [ ] Bugs filed with severity + repro + Production URL
+- [ ] Explicit recommendation: **baseline confirmed** / **issues found**
+- [ ] FEATURES.md drift flagged
+- [ ] Do **not** block on https://ccvaa.ca/
 
 ## Definition of verified — Pass 2 (QA → PM, after merge)
 
