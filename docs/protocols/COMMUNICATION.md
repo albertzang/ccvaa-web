@@ -24,10 +24,11 @@ Git/deploy details: `docs/protocols/GIT_DEPLOY.md`.
 
 ## CEO ↔ Product Manager
 
-- CEO sets goals and priorities
-- PM advises (tradeoffs, sequencing, risk), proposes acceptance criteria
+- CEO sets goals and priorities; see **`docs/protocols/CEO.md`** for full CEO checklists
+- PM advises (tradeoffs, sequencing, risk), proposes acceptance criteria, and **reminds CEO** when a gate is due (Pass 1 kickoff, merge, Pass 2, secrets, OTP paste)
 - PM does **not** implement large code changes; delegates to Developer
-- PM may make small doc/protocol updates directly
+- PM does **not** merge to `main` or set Vercel secrets without CEO ask
+- PM may make small doc/protocol updates directly (push still when CEO asks)
 
 ## Product Manager → Developer
 

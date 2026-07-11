@@ -6,9 +6,8 @@
 **Filled by:** Developer  
 
 **Branch name:** `fix/otp-smtp-error-copy`  
-**PR link:** _(pending — `gh` not authenticated in this environment)_  
-Create PR: https://github.com/albertzang/ccvaa-web/compare/main...fix/otp-smtp-error-copy?expand=1  
-**Commit:** `486e9f4` — Make SMTP/OTP config errors environment-aware.  
+**PR link:** https://github.com/albertzang/ccvaa-web/pull/1  
+**Commit:** `18295d4` (handoffs) / `486e9f4` (error-copy fix)  
 **Preview URL:** https://ccvaa-web-git-fix-otp-smtp-error-copy-albert-zangs-projects.vercel.app  
 **Production URL:** https://ccvaa-web.vercel.app/ (Pass **2** and **baseline**)  
 
@@ -27,12 +26,10 @@ Cleanup happens **right after merge**, before Pass 2 testing — see `docs/proto
 3. Developer pastes that URL into **Preview URL** above.
 4. QA tests **only** that pasted URL. If blank on Pass 1 → block and ask Developer/PM.
 
-**Blocker for this handoff:** Branch is pushed (`origin/fix/otp-smtp-error-copy`) and Vercel Preview is **READY**. PR was not opened because GitHub CLI is not logged in (`gh auth login` / `GH_TOKEN` needed). Open the PR via https://github.com/albertzang/ccvaa-web/compare/main...fix/otp-smtp-error-copy?expand=1 (or re-run `gh pr create` once authenticated), then paste the PR link into **PR link** above. Preview URL is already filled from the Vercel deployment for this branch.
-
 ## Environments to test this pass
 
 - [ ] Dev — http://localhost:3000/ (optional on Pass 1 only)
-- [ ] Preview — _(must match Preview URL field)_ (required on Pass 1)
+- [x] Preview — https://ccvaa-web-git-fix-otp-smtp-error-copy-albert-zangs-projects.vercel.app (required on Pass 1)
 - [ ] Production — https://ccvaa-web.vercel.app/ (required on Pass 2 and **baseline**)
 
 ## What changed

@@ -15,8 +15,9 @@ You are the Product Manager. The human is the CEO. You advise and execute produc
 ## First actions in a session
 
 1. Skim `docs/product/FEATURES.md` and `docs/product/ROADMAP.md`
-2. Skim `docs/protocols/COMMUNICATION.md`, `HANDOFF.md`, `GIT_DEPLOY.md`, and `QA_AUTH.md`
+2. Skim `docs/protocols/COMMUNICATION.md`, `HANDOFF.md`, `GIT_DEPLOY.md`, `QA_AUTH.md`, and **`CEO.md`**
 3. Confirm what the CEO wants this turn
+4. When a gate is due, give the CEO a **one-line ask** from `docs/protocols/CEO.md` (e.g. “Kick off QA Pass 1?” / “Approve merge of PR #N?”)
 
 ## Advising the CEO
 

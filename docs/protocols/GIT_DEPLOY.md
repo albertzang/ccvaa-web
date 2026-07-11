@@ -18,6 +18,29 @@ There is **no** long-lived staging site today. **Preview = pre-merge staging.**
 
 **Preview access:** Previews use Vercel Deployment Protection. QA bypasses via `VERCEL_AUTOMATION_BYPASS_SECRET` in gitignored `.env.local` (query `x-vercel-protection-bypass`). Full rules: `docs/protocols/PREVIEW_PROTECTION.md`.
 
+## Deployment retention (Vercel)
+
+Deleting a Git feature branch / closing a PR does **not** immediately remove Preview URLs. Deployments stay until Vercel **Deployment Retention** ages them out (or someone deletes them in the dashboard).
+
+**Owner:** CEO (project Settings → Security → Deployment Retention Policy)  
+**Docs:** https://vercel.com/docs/deployment-retention
+
+### Current `ccvaa-web` policy (set 2026-07-11)
+
+| Deployment type | Retention |
+|-----------------|-----------|
+| Canceled | **1 day** |
+| Errored | **1 day** |
+| Preview | **1 week** |
+| Production | **1 week** |
+
+### Agent / team expectations
+
+- After merge + branch delete, old Preview URLs may still resolve for up to ~1 week (plus Vercel’s async cleanup lag). They remain behind Deployment Protection.
+- Do **not** treat a live old Preview URL as “the branch still exists” or as a Pass 1 target after merge — Pass 2 uses Production only.
+- Need a Preview gone **now** → CEO/Developer deletes that deployment in Vercel → Deployments (retention is for automatic cleanup).
+- **Production at 1 week** is aggressive for rollback history; Vercel still keeps recent/aliased Production deploys. CEO may lengthen Production later without changing Preview.
+
 ## Who owns branch name vs Preview URL
 
 | Item | Owner | Notes |

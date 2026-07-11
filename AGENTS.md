@@ -12,9 +12,10 @@ This repo uses a **3-agent system**. The human CEO primarily talks to the **Prod
 
 | Role | How to work with them | Owns |
 |------|------------------------|------|
-| **Product Manager** | Primary CEO chat; `.cursor/agents/product-manager.md` | Priorities, advice, acceptance criteria, FEATURES/ROADMAP, OS refinement |
+| **Product Manager** | Primary CEO chat; `.cursor/agents/product-manager.md` | Priorities, advice, handoffs, FEATURES/ROADMAP; **guides CEO gates** (`docs/protocols/CEO.md`) |
 | **Developer** | Dev chat or agent `developer` | Feature branches, PRs, implementation (merge when asked) |
 | **QA** | QA chat or agent `qa` | Pass 1 (Preview), Pass 2 (post-merge), or **baseline** (Production audit, no PR) |
+| **CEO (human)** | This chat via PM | Approvals, secrets, OTP readout, `ccvaa.ca`, kickoffs — `docs/protocols/CEO.md` |
 
 ### First-pass bootstrap (done)
 
@@ -30,7 +31,7 @@ Shared brain (not chat history):
 
 - `docs/product/FEATURES.md` — living feature inventory (PM maintains)
 - `docs/product/ROADMAP.md` — Now / Next / Later
-- `docs/protocols/` — communication, handoff, git/deploy, QA auth, **Preview protection**
+- `docs/protocols/` — communication, handoff, git/deploy, QA auth, Preview protection, **CEO responsibilities**
 - `docs/templates/` — bug / feature / QA / handoff templates
 - `.cursor/rules/` — shared + role rules
 - `.cursor/skills/` — `product-manager`, `developer`, `ccvaa-dev-memory`, `qa`
