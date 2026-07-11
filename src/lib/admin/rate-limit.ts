@@ -1,58 +1,84 @@
+import { getRedis } from "@/lib/admin/redis";
+
 type Bucket = {
   timestamps: number[];
 };
+
+const RATE_KEY_PREFIX = "ccvaa:rl:";
 
 const globalStore = globalThis as typeof globalThis & {
   __ccvaaRateLimit?: Map<string, Bucket>;
 };
 
-function store() {
+function memoryStore() {
   if (!globalStore.__ccvaaRateLimit) {
     globalStore.__ccvaaRateLimit = new Map();
   }
   return globalStore.__ccvaaRateLimit;
 }
 
+function redisKey(key: string) {
+  return `${RATE_KEY_PREFIX}${key}`;
+}
+
 function prune(bucket: Bucket, windowMs: number, now: number) {
   bucket.timestamps = bucket.timestamps.filter((t) => now - t < windowMs);
 }
 
+async function readBucket(key: string): Promise<Bucket> {
+  const redis = getRedis();
+  if (redis) {
+    const value = await redis.get<Bucket>(redisKey(key));
+    return value ?? { timestamps: [] };
+  }
+  return memoryStore().get(key) ?? { timestamps: [] };
+}
+
+async function writeBucket(key: string, bucket: Bucket, windowMs: number) {
+  const redis = getRedis();
+  if (redis) {
+    const ttlSec = Math.max(1, Math.ceil(windowMs / 1000));
+    await redis.set(redisKey(key), bucket, { ex: ttlSec });
+    return;
+  }
+  memoryStore().set(key, bucket);
+}
+
 /**
- * Sliding-window rate limiter (in-memory).
- * Fine for single-instance / warm serverless; use Redis for multi-region production.
+ * Sliding-window rate limiter.
+ * Uses Upstash Redis when configured (shared across Vercel instances);
+ * otherwise in-memory (local / single-instance only).
  */
-export function checkRateLimit(options: {
+export async function checkRateLimit(options: {
   key: string;
   limit: number;
   windowMs: number;
-}): { ok: true } | { ok: false; retryAfterMs: number } {
+}): Promise<{ ok: true } | { ok: false; retryAfterMs: number }> {
   const now = Date.now();
-  const buckets = store();
-  const bucket = buckets.get(options.key) ?? { timestamps: [] };
+  const bucket = await readBucket(options.key);
   prune(bucket, options.windowMs, now);
 
   if (bucket.timestamps.length >= options.limit) {
     const oldest = bucket.timestamps[0] ?? now;
     const retryAfterMs = Math.max(options.windowMs - (now - oldest), 1000);
-    buckets.set(options.key, bucket);
+    await writeBucket(options.key, bucket, options.windowMs);
     return { ok: false, retryAfterMs };
   }
 
   bucket.timestamps.push(now);
-  buckets.set(options.key, bucket);
+  await writeBucket(options.key, bucket, options.windowMs);
   return { ok: true };
 }
 
-export function peekRateLimit(options: {
+export async function peekRateLimit(options: {
   key: string;
   limit: number;
   windowMs: number;
-}): { remaining: number; retryAfterMs: number } {
+}): Promise<{ remaining: number; retryAfterMs: number }> {
   const now = Date.now();
-  const buckets = store();
-  const bucket = buckets.get(options.key) ?? { timestamps: [] };
+  const bucket = await readBucket(options.key);
   prune(bucket, options.windowMs, now);
-  buckets.set(options.key, bucket);
+  await writeBucket(options.key, bucket, options.windowMs);
 
   if (bucket.timestamps.length >= options.limit) {
     const oldest = bucket.timestamps[0] ?? now;

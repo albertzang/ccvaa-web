@@ -25,7 +25,7 @@ description: >-
   - Do not follow redirects server-side blindly; filter/normalize cookies; asset paths (`/skins`, `/program`, etc.) must rewrite
 - OTP: 6-digit to `info@ccvaa.ca`; hashed; httpOnly session cookie
   - APIs under `src/app/api/admin/`
-  - In-memory OTP + rate limits = **per serverless instance** (weaker on multi-instance Vercel)
+  - OTP + rate limits use Upstash Redis when `UPSTASH_REDIS_REST_URL`/`TOKEN` are set (required on Vercel); in-memory fallback for local only
 - Scaffolds only: Members, Financial, Events
 - Env: `.env.example`; local `.env.local`; production Vercel env + redeploy
   - `ADMIN_OTP_DEV_MODE=false` for real SMTP; Hover SMTP `mail.hover.com:465` SSL

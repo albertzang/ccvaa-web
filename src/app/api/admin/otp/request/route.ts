@@ -12,7 +12,7 @@ import { checkRateLimit, peekRateLimit } from "@/lib/admin/rate-limit";
 export async function POST(request: NextRequest) {
   const ip = getClientIp(request);
 
-  const cooldown = peekRateLimit({
+  const cooldown = await peekRateLimit({
     key: `otp-request-cooldown:${ip}`,
     limit: 1,
     windowMs: OTP_REQUEST_COOLDOWN_MS,
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const hourly = checkRateLimit({
+  const hourly = await checkRateLimit({
     key: `otp-request-hour:${ip}`,
     limit: OTP_REQUEST_HOUR_LIMIT,
     windowMs: OTP_REQUEST_HOUR_WINDOW_MS,
@@ -34,14 +34,14 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  checkRateLimit({
+  await checkRateLimit({
     key: `otp-request-cooldown:${ip}`,
     limit: 1,
     windowMs: OTP_REQUEST_COOLDOWN_MS,
   });
 
   const code = generateOtpCode();
-  createOtpChallenge(ip, code);
+  await createOtpChallenge(ip, code);
 
   try {
     const result = await sendAdminOtpEmail(code);
