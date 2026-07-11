@@ -9,6 +9,12 @@ type LoginSectionProps = {
   onAuthenticated: () => void;
 };
 
+function isLocalHost() {
+  if (typeof window === "undefined") return false;
+  const { hostname } = window.location;
+  return hostname === "localhost" || hostname === "127.0.0.1";
+}
+
 export function LoginSection({ onAuthenticated }: LoginSectionProps) {
   const [code, setCode] = useState("");
   const [status, setStatus] = useState<string | null>(null);
@@ -48,7 +54,9 @@ export function LoginSection({ onAuthenticated }: LoginSectionProps) {
       setCooldownMs(data.cooldownMs ?? 60_000);
       setStatus(
         data.mode === "dev"
-          ? "Dev mode is on — no email was sent. Check the terminal running next dev for the code, or set ADMIN_OTP_DEV_MODE=false and SMTP_PASS in .env.local."
+          ? isLocalHost()
+            ? "Dev mode is on — no email was sent. Check the terminal running next dev for the code, or set ADMIN_OTP_DEV_MODE=false and SMTP_PASS in .env.local."
+            : "Dev mode is on — no email was sent. Check server logs for the code, or set ADMIN_OTP_DEV_MODE=false and SMTP_PASS in this deployment’s Vercel environment variables, then redeploy."
           : `A 6-digit code was sent to ${organization.email}. Check that inbox (and spam).`,
       );
     } catch {
