@@ -34,7 +34,7 @@ Cleanup happens **right after merge**, before Pass 2 testing — see `docs/proto
 
 ## What changed
 
-Fix BUG-20260710-02: admin OTP verify failed on Production with “No active code found” because challenges lived in a per-instance in-memory `Map`. OTP challenges and rate-limit buckets now use **Upstash Redis** when `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` are set (shared across Vercel instances). In-memory fallback remains for local `next dev` only.
+Fix BUG-20260710-02: admin OTP verify failed on Production with “No active code found” because challenges lived in a per-instance in-memory `Map`. OTP challenges and rate-limit buckets now use **Upstash Redis** when Redis REST URL + token are set (shared across Vercel instances). Accepts either `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` or Vercel Marketplace `KV_REST_API_URL`/`KV_REST_API_TOKEN`. In-memory fallback remains for local `next dev` only.
 
 ## Focus checklist
 
@@ -46,19 +46,19 @@ Fix BUG-20260710-02: admin OTP verify failed on Production with “No active cod
 
 ## Known risks / flaky areas
 
-- **Preview/Production must have Upstash Redis env vars.** Without them, Preview falls back to in-memory and the original cross-instance bug can still appear. If verify fails with “No active code found” on Preview, first confirm Redis is linked for the **Preview** environment, then redeploy.
+- **Preview/Production must have Redis REST env vars** (`UPSTASH_REDIS_REST_*` or Marketplace `KV_REST_API_*`). Without them, Preview falls back to in-memory and the original cross-instance bug can still appear. If verify fails with “No active code found” on Preview, first confirm Redis/KV is linked for the **Preview** environment, then redeploy.
 - OTP readout still CEO-in-the-loop (`docs/protocols/QA_AUTH.md`).
 
 ## Preview env notes (Pass 1)
 
-Required for this fix to be testable on Preview (same as Production before merge):
+Required for this fix to be testable on Preview (same as Production before merge) — either pair:
 
-- `UPSTASH_REDIS_REST_URL`
-- `UPSTASH_REDIS_REST_TOKEN`
+- `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` (Upstash-native), **or**
+- `KV_REST_API_URL` + `KV_REST_API_TOKEN` (Vercel Marketplace Upstash/KV inject; no manual aliases needed)
 
 Plus existing admin mail/OTP vars (`ADMIN_SESSION_SECRET`, SMTP_*, `ADMIN_OTP_DEV_MODE=false`, etc.).
 
-Provision: Vercel Marketplace → Upstash Redis (or set env manually) for **Preview** and **Production**, then redeploy if vars were added after this Preview built.
+Provision: Vercel Marketplace → Upstash/KV for **Preview** and **Production**, then redeploy if vars were added after this Preview built.
 
 ## Production / baseline / Pass 2 auth notes
 
