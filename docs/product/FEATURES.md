@@ -115,3 +115,5 @@
 | 2026-07 | Public site, board/purposes UX, branding/logos, favicon |
 | 2026-07-10 | `/admin` OTP + Hover mail proxy + scaffolds; multi-agent OS bootstrapped |
 | 2026-07-10 | Encoded feature-branch → Preview QA → merge → Production QA (`ccvaa-web.vercel.app`); `ccvaa.ca` CEO-manual only |
+| 2026-07-10 | Ship path field: CEO owns `direct-to-main` approval; Developer follows handoff literally |
+| 2026-07-10 | Post-merge: delete feature branch local+remote before Pass 2; Pass 2 fixes = new branch from main |

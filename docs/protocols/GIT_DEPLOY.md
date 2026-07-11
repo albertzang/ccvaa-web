@@ -24,7 +24,8 @@ There is **no** long-lived staging site today. **Preview = pre-merge staging.**
 | **PR** | **Developer** | Opened against `main` after the branch has commits. |
 | **Preview URL** | **Vercel** (generated) → **Developer records it** | Appears on the GitHub PR (Vercel bot / deployment checks) or Vercel dashboard. Typical shape: `https://ccvaa-web-git-<branch-slug>-<team>.vercel.app` — do **not** reconstruct by hand. |
 | **Pass 1 handoff to QA** | **Developer** (PM may copy) | Must paste the **exact** Preview URL into `docs/templates/handoff-qa.md`. |
-| **QA Pass 1 target** | **QA** | Uses **only** the Preview URL from the handoff. If missing → **block** and ask Developer/PM. Never guess the URL from the branch name. |
+| **Feature branch cleanup** | **Developer** | Delete local + remote **immediately after merge**, before Pass 2. |
+| **Pass 2 bugfix** | **Developer** | New branch from latest `main` (or CEO-approved `direct-to-main`) — not the old feature branch. |
 
 ```
 PM handoff-dev (optional suggested branch name)
@@ -42,6 +43,7 @@ PM handoff
     → QA Pass 1: Dev (optional) + Preview (required)
     → CEO/PM: approve merge
     → Developer: merge PR into main (when asked)
+    → Developer: delete feature branch locally + remotely (immediately after merge)
     → QA Pass 2: Production smoke on https://ccvaa-web.vercel.app/
     → PM: update FEATURES.md
     → CEO (optional): manual check of https://ccvaa.ca/ outside this protocol
@@ -52,26 +54,105 @@ PM handoff
 - **Required:** exact Preview URL from handoff (Developer-provided)
 - **Optional:** Dev (`localhost:3000`) for early feedback while coding
 - **Do not** use Production (`ccvaa-web.vercel.app`) or `ccvaa.ca` for Pass 1 of new work
-- Result: **pass** → ready to merge; **fail** → bugs back to Developer; retest Preview after fixes
+- Result: **pass** → ready to merge; **fail** → bugs back to Developer on the **same** feature branch / PR; retest Preview after fixes
 
 ### Pass 2 — after merge (QA)
 
 - **Required:** Production smoke on https://ccvaa-web.vercel.app/
 - **Do not** require or block on https://ccvaa.ca/ — CEO handles that manually
 - Keep Pass 2 focused (smoke + change-specific checks)
+- Feature branch should already be deleted (see cleanup below)
+
+## Feature branch cleanup (after merge)
+
+**Owner:** Developer  
+**When:** **Immediately after the PR is merged** — before (or as you write) the QA Pass 2 handoff. Do **not** wait for Pass 2 to finish.
+
+**Why before Pass 2:** Once merged, the source of truth is `main`. Keeping the old feature branch invites fixing “on the merged branch,” which drifts from Production. Pass 2 issues get a **new** branch from latest `main` (below).
+
+```bash
+git checkout main
+git pull origin main
+git branch -d <feature-branch>           # local (use -D only if intentionally discarding unmerged work — rare after merge)
+git push origin --delete <feature-branch>  # remote
+```
+
+Also OK: use GitHub’s “Delete branch” on the merged PR, then delete the local branch and `git fetch --prune`.
+
+| Do | Don't |
+|----|--------|
+| Delete local **and** remote feature branch after merge | Leave remote feature branches hanging “until Pass 2” |
+| Confirm you’re on updated `main` before deleting | Delete `main` or anyone else’s active branch |
+| Note cleanup done in the Pass 2 handoff | Reuse the deleted branch name for unrelated work the same day without care |
+
+`direct-to-main` has no feature branch to delete.
+
+## Pass 2 failures — how to fix
+
+**Do not** continue work on the already-merged (and deleted) feature branch.
+
+| Situation | What to do |
+|-----------|------------|
+| Pass 2 finds bugs | PM/CEO triage → new Dev handoff. Developer cuts a **new** branch from latest `main` (e.g. `fix/…`), full **feature-branch** path: Preview Pass 1 → merge → cleanup → Pass 2 again |
+| Trivial Production hotfix | CEO may approve **Ship path: `direct-to-main`** instead |
+| Pass 1 finds bugs (before merge) | Keep using the **same** feature branch / PR; push fixes; retest Preview |
+
+```
+Pass 2 fail
+  → new fix branch from main (or CEO-approved direct-to-main)
+  → NOT: revive / push more commits to the old merged feature branch as the ship vehicle
+```
+
+## Ship path (feature-branch vs direct-to-main)
+
+Every Dev handoff must set **Ship path** explicitly. Developer never infers it from “this looks small.”
+
+| Ship path | Who decides | Who executes | When allowed |
+|-----------|-------------|--------------|--------------|
+| **`feature-branch`** (default) | PM writes it; CEO may override | **Developer** | All normal product/code work |
+| **`direct-to-main`** | **CEO must approve** (PM may recommend) | See below | Docs-only, emergency hotfix, or trivial one-liner — still prefer PR when practical |
+
+### Who executes `direct-to-main`
+
+| Change type | Executes | Notes |
+|-------------|----------|--------|
+| Small **doc / protocol / agent-OS** updates | **PM** | Already in PM remit; push only when CEO asks |
+| **Hotfix / trivial code** on `main` | **Developer** | Only if handoff says `direct-to-main` **and** CEO approved |
+| User-facing, auth, mail proxy, or uncertain scope | Stay on **`feature-branch`** | No shortcuts |
+
+### How Developer knows
+
+1. Open `docs/templates/handoff-dev.md`
+2. Read **Ship path:** `feature-branch` | `direct-to-main`
+3. If missing, blank, or ambiguous → treat as **`feature-branch`**
+4. If `direct-to-main` but CEO approval is not stated → **block** and ask PM/CEO (do not push)
+
+### Shortened flow when `direct-to-main` (code)
+
+```
+CEO-approved handoff (Ship path: direct-to-main)
+  → Developer commits on main (when CEO asks to push)
+  → Skip QA Pass 1 / Preview
+  → QA Pass 2 light smoke on https://ccvaa-web.vercel.app/ (recommended for code)
+  → PM updates FEATURES.md if behavior changed
+  → CEO may manually check ccvaa.ca
+```
+
+Pure docs/protocol updates by PM: usually **no QA** unless CEO asks.
 
 ## Developer git rules
 
 | Do | Don't |
 |----|--------|
-| Create and name the feature branch from latest `main` | Push product work straight to `main` by default |
+| Follow **Ship path** from the handoff | Invent `direct-to-main` because the change “looks small” |
+| Create and name the feature branch from latest `main` (default path) | Push product work straight to `main` without CEO-approved `direct-to-main` |
 | Open a PR; wait for CI + Preview deploy | Merge before Preview QA passes (unless CEO waives) |
 | Paste the exact Preview URL into the QA handoff | Invent the Preview URL from the branch name |
 | Use `ccvaa-web.vercel.app` only for Pass 2 | Use `ccvaa-web.vercel.app` as the feature Preview URL |
-| Merge only when CEO/PM asks after Pass 1 | Force-push `main` or skip hooks |
+| Merge / push `main` only when CEO/PM asks | Force-push `main` or skip hooks |
+| Delete feature branch local + remote **right after merge** | Wait for Pass 2 before cleanup; revive merged branch for Pass 2 fixes |
+| Pass 2 fixes: **new** branch from `main` (or CEO `direct-to-main`) | Keep committing on the old merged feature branch |
 | Point Pass 2 at `ccvaa-web.vercel.app` | Ask QA to verify `ccvaa.ca` |
-
-**Exceptions (CEO must approve):** docs-only, emergency hotfix, or trivial one-liners may go to `main` with a shortened path (still prefer PR when practical).
 
 ## Branch naming (Developer)
 

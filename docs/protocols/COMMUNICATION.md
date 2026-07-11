@@ -32,11 +32,14 @@ Git/deploy details: `docs/protocols/GIT_DEPLOY.md`.
 ## Product Manager → Developer
 
 Use `docs/templates/handoff-dev.md`. Include:
+- **Ship path:** `feature-branch` (default) or `direct-to-main` (CEO-approved only)
 - Goal / user value
 - Acceptance criteria (testable)
 - Out of scope
 - Relevant files / constraints
 - Link to FEATURES.md sections
+
+Developer follows Ship path literally. Blank/ambiguous → `feature-branch`. Never invent `direct-to-main`.
 
 ## Product Manager → QA
 

@@ -1,14 +1,20 @@
 # Handoff: Developer / PM → QA
 
 **Date:**  
-**Pass:** 1 (pre-merge: Dev + Preview) | 2 (post-merge: Production smoke)  
+**Pass:** 1 (pre-merge: Dev + Preview) | 2 (post-merge / direct-to-main: Production smoke)  
+**Ship path that led here:** `feature-branch` | `direct-to-main`  
 **Filled by:** Developer (required for Pass 1 Preview URL) / PM may copy  
 
-**Branch name:** (Developer-created)  
-**PR link:**  
+**Branch name:** (Developer-created; n/a if direct-to-main)  
+**PR link:** (n/a if direct-to-main)  
 **Commit:**  
-**Preview URL:** (Pass 1 — **required**; paste exact URL from Vercel / GitHub PR — do not reconstruct)  
+**Preview URL:** (Pass 1 only — **required**; paste exact URL from Vercel / GitHub PR — do not reconstruct)  
 **Production URL:** https://ccvaa-web.vercel.app/ (Pass 2)  
+
+**Post-merge cleanup (Pass 2 handoffs):**  
+- [ ] Feature branch deleted **locally**  
+- [ ] Feature branch deleted **on origin** (or n/a for `direct-to-main`)  
+Cleanup happens **right after merge**, before Pass 2 testing — see `docs/protocols/GIT_DEPLOY.md`.  
 
 **Out of scope for QA:** https://ccvaa.ca/ — CEO manual only (DNS/cache). Do not test or block on it.
 

@@ -7,12 +7,12 @@ alwaysApply: false
 
 You implement product work for ccvaa-web from PM handoffs.
 
-## Git default
+## Git / Ship path
 
-1. Branch from `main` (`feat/…`, `fix/…`, `chore/…`)
-2. Implement; open PR; wait for CI + Vercel **Preview**
-3. Put Preview URL in QA Pass 1 handoff
-4. Merge to `main` **only when CEO/PM asks** after Pass 1
+1. Read **Ship path** on the Dev handoff — never invent `direct-to-main`
+2. If `feature-branch` (default): name branch, PR, Preview, QA Pass 1, merge when asked
+3. After merge: delete feature branch **local + remote** before Pass 2; Pass 2 fixes = new branch from `main`
+4. `direct-to-main` only if handoff says so **and** CEO approved; push when CEO asks; skip Pass 1; light Pass 2 for code
 5. Notify PM for QA Pass 2 on https://ccvaa-web.vercel.app/
 
 Do **not** use `ccvaa-web.vercel.app` as your feature Preview URL. Do **not** ask QA to verify `ccvaa.ca` (CEO manual). See `docs/protocols/GIT_DEPLOY.md`.

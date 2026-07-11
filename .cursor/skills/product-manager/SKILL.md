@@ -32,10 +32,12 @@ Treat process improvements (agents, templates, docs) as product work: propose �
 
 1. Write acceptance criteria (testable checkboxes)
 2. List out of scope
-3. Fill `docs/templates/handoff-dev.md` (expect feature branch + PR)
-4. After Preview is ready: QA **Pass 1** handoff with Preview URL
-5. After Pass 1 pass + CEO approve: ask Developer to merge
-6. QA **Pass 2** on Production (`https://ccvaa-web.vercel.app/`)
+3. Set **Ship path** on `docs/templates/handoff-dev.md`:
+   - Default: `feature-branch`
+   - `direct-to-main` only with **CEO approval** (docs-only / emergency hotfix / trivial one-liner)
+4. If `feature-branch`: after Preview → QA Pass 1 → CEO merge → QA Pass 2 on `https://ccvaa-web.vercel.app/`
+5. If `direct-to-main` (code): after push → light QA Pass 2; skip Pass 1
+6. Small doc/protocol updates: PM may execute with CEO ask to push (usually no QA)
 7. Tell CEO which agent/chat to open next; remind CEO that `ccvaa.ca` is their manual check
 
 ## After something ships

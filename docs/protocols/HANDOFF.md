@@ -8,18 +8,22 @@
 | Developer | QA (Pass 1) | Feature branch pushed; Preview URL ready |
 | QA | PM | Pass 1 complete — recommend merge or hold |
 | CEO/PM | Developer | Approve merge to `main` after Pass 1 |
-| Developer | QA (Pass 2) | PR merged; Production deploy live |
+| Developer | (self) | After merge: delete feature branch local + remote |
+| Developer | QA (Pass 2) | PR merged; branch cleaned up; Production deploy live |
 | QA | PM | Pass 2 complete — ship confirmed or prod bugs |
 | QA | Developer | Clear bug with repro (PM may triage first) |
+| PM | Developer | Pass 2 fail → new fix handoff (new branch from `main`, not old feature branch) |
 
 See also `docs/protocols/GIT_DEPLOY.md`.
 
 ## Definition of ready (for Developer)
 
+- [ ] **Ship path** set: `feature-branch` (default) or `direct-to-main` (CEO-approved, stated)
 - [ ] Problem and success criteria written
 - [ ] Out of scope listed
 - [ ] Environment / secrets implications noted (incl. Preview vs Production env vars)
 - [ ] FEATURES.md section referenced or marked “new”
+- [ ] If Ship path blank/ambiguous → treat as `feature-branch`; if `direct-to-main` without CEO approval → block
 
 ## Definition of done (for Developer → QA Pass 1)
 
@@ -43,3 +47,11 @@ See also `docs/protocols/GIT_DEPLOY.md`.
 - [ ] Bugs filed if Production regresses
 - [ ] Explicit recommendation: **ship confirmed** / **rollback or hotfix**
 - [ ] Do **not** block on https://ccvaa.ca/ (CEO manual only)
+- [ ] If fail: expect a **new** fix branch from `main` (or CEO `direct-to-main`) — not the old feature branch
+
+## Definition of done (Developer, post-merge cleanup)
+
+- [ ] PR merged to `main` when CEO/PM asked
+- [ ] Local feature branch deleted
+- [ ] Remote feature branch deleted (`git push origin --delete …` or GitHub UI + prune)
+- [ ] Pass 2 handoff written (cleanup boxes checked)

@@ -23,19 +23,21 @@ Implement scoped work from Product Manager handoffs with minimal, high-quality d
 
 ## Behavior
 
-1. Confirm acceptance criteria; ask if ambiguous
-2. Work on a **feature branch you name** (`feat/…` / `fix/…` / `chore/…`); open a PR
-3. Implement matching existing patterns (`src/lib/site.ts`, admin, theme)
-4. Run lint + typecheck
-5. Hand off QA **Pass 1** with the **exact** Vercel Preview URL from the PR (never invent from branch name; not `ccvaa-web.vercel.app`)
-6. Merge to `main` only when CEO/PM asks after Pass 1
-7. Signal PM for QA **Pass 2** on https://ccvaa-web.vercel.app/
+1. Read **Ship path**; confirm acceptance criteria; ask if ambiguous
+2. If `feature-branch` (default): name branch, open PR, implement, Pass 1 with exact Preview URL
+3. After merge: delete feature branch local + remote **before** Pass 2; Pass 2 bugs → new branch from `main`
+4. If `direct-to-main`: only with CEO approval on handoff; no Preview; light Pass 2 for code after push
+5. Implement matching existing patterns (`src/lib/site.ts`, admin, theme)
+6. Run lint + typecheck
+7. Merge/push `main` only when CEO/PM asks
+8. Signal PM for QA **Pass 2** on https://ccvaa-web.vercel.app/ when code ships
 
 ## Hard constraints
 
 - `proxy.ts` not deprecated `middleware.ts`
 - Never commit `.env.local` or secrets
 - Preserve admin mobile gate and mail proxy unless handoff says otherwise
-- Do not push product work straight to `main` by default
+- Never invent `direct-to-main` because a change “looks small”
+- Never leave merged feature branches on origin; never fix Pass 2 on the old merged branch
 - Do not ask QA to verify `ccvaa.ca` (CEO manual)
 - Commit / push / merge only when CEO asks
