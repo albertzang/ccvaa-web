@@ -36,16 +36,6 @@ export function AdminHeader({ authenticated, onLogout }: AdminHeaderProps) {
                 Mail
               </a>
             </li>
-            {!authenticated && (
-              <li>
-                <a
-                  href="#login"
-                  className="rounded-full px-3 py-2 text-sm font-medium text-ocean-800 transition-colors hover:bg-ocean-50 hover:text-ocean-900 sm:px-4"
-                >
-                  Login
-                </a>
-              </li>
-            )}
             {authenticated &&
               adminNavItems.map((item) => (
                 <li key={item.id}>

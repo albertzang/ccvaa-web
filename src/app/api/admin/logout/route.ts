@@ -1,19 +1,16 @@
-import { ADMIN_SESSION_COOKIE } from "@/lib/admin/constants";
+import { NextRequest } from "next/server";
+import { clearUpstreamCookieHeaders } from "@/lib/admin/mail-cookies";
 
-export async function POST() {
+export const dynamic = "force-dynamic";
+
+export async function POST(request: NextRequest) {
+  const requestIsHttps = request.nextUrl.protocol === "https:";
   const response = Response.json({ ok: true });
-  response.headers.append(
-    "Set-Cookie",
-    [
-      `${ADMIN_SESSION_COOKIE}=`,
-      "Path=/",
-      "Max-Age=0",
-      "SameSite=Lax",
-      "HttpOnly",
-      process.env.NODE_ENV === "production" ? "Secure" : "",
-    ]
-      .filter(Boolean)
-      .join("; "),
-  );
+  for (const cookie of clearUpstreamCookieHeaders(
+    request.headers.get("cookie"),
+    requestIsHttps,
+  )) {
+    response.headers.append("Set-Cookie", cookie);
+  }
   return response;
 }

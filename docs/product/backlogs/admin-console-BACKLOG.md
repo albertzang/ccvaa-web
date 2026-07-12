@@ -3,9 +3,48 @@
 **Feature:** Admin Console  
 **Slug:** `admin-console`  
 **Owner:** Product Manager  
-**Next ID:** `0010`  
+**Next ID:** `0011`  
 
 Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
+
+---
+
+## admin-console-0010 — Auth = Hover mailbox iframe session (prune OTP)
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `in-progress` |
+| **Verifier** | `ceo` |
+| **Verify passes** | `pass1` |
+| **Ship path** | `feature-branch` |
+
+### Description
+
+Change admin console auth so **logging into / out of Hover webmail inside the `/admin` mail iframe** is the sole signal that the admin console is logged in / out. **Prune the entire OTP stack** (UI, APIs, libs, Redis OTP usage for this purpose, env/docs/ops that exist only for OTP).
+
+**Verifier / ship (CEO-specified):** feature branch + Preview; CEO does **Pass 1 only** on Preview; **skip Pass 2** on Production. Expect **multiple Iterations** on the same work ID (overwrite Dev handoff; keep `in-progress` until CEO **verified** for the ticket).
+
+**Goals / acceptance (product):**
+- No OTP send/verify UI or APIs required for admin access
+- When Hover mailbox is logged in (iframe), console treats user as authenticated (show Members / Financial / Events scaffolds, header Log out / logged-in nav as appropriate)
+- When Hover mailbox is logged out (or session ends), console is logged out (hide protected scaffolds; match logged-out chrome)
+- Explicit admin “Log out” (if kept) must log out mail session as well, or be replaced by mail logout as the only control — pick the coherent UX; document in handoff notes
+- Desktop/tablet gate unchanged
+- Docs/protocols/skills that describe OTP admin login updated or removed; `.env.example` and FEATURES.md pruned of OTP-only guidance; Redis/KV may remain only if still needed for something else (today it is OTP/rate-limit — remove if unused)
+- SMTP/OTP-related env can be marked removable from Vercel after ship (CEO ops) — code should not require them
+
+**Out of scope (unless CEO expands):**
+- Replacing Hover with another mail host
+- Building real Members/Financial/Events CRUD
+- Keeping a parallel OTP path “just in case”
+
+**Security note:** Admin privilege becomes “whoever can sign into `info@ccvaa.ca` (or configured mailbox) via the embedded webmail.” That matches prior OTP delivery to the same inbox; call out any residual risks in the PR.
+
+### Links
+
+- Dev: `docs/qa/handoffs/HANDOFF-DEV-admin-console-0010.md`
 
 ---
 
@@ -78,7 +117,7 @@ CEO verified 2026-07-11 on https://ccvaa-web.vercel.app/admin. Commit: `e38d35b`
 
 ### Description
 
-Replace the Members “coming soon” scaffold with a real auth-gated members list. Scope TBD with CEO (fields, CRUD vs read-only). Must remain behind admin OTP session.
+Replace the Members “coming soon” scaffold with a real auth-gated members list. Scope TBD with CEO (fields, CRUD vs read-only). Must remain behind admin mail-session auth.
 
 ### Links
 
@@ -162,7 +201,7 @@ Ops/checklist: confirm Vercel **Preview** has the same admin-critical env as Pro
 
 ### Description
 
-Throwaway mailbox for QA OTP (Preview-first `ADMIN_OTP_EMAIL` + Vercel-only secrets). Replace or supplement CEO-in-the-loop readout. Single-Send discipline still applies. See `docs/protocols/QA_AUTH.md`.
+**Obsolete after admin-console-0010** (OTP removed; admin auth = Hover mailbox session). Keep only if CEO revives a dedicated QA mailbox for a different purpose.
 
 ### Links
 

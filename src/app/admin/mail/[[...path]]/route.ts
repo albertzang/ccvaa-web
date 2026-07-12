@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ADMIN_SESSION_COOKIE } from "@/lib/admin/constants";
+import { filterUpstreamCookies } from "@/lib/admin/mail-cookies";
 
 const UPSTREAM_ORIGIN = "https://mail.hover.com";
 const PROXY_PREFIX = "/admin/mail";
@@ -12,14 +12,6 @@ const ROUNDCUBE_ROOTS = [
   "static",
   "bin",
 ] as const;
-
-/** Cookies that belong to Roundcube / Hover webmail — never forward our admin cookie. */
-const UPSTREAM_COOKIE_ALLOWLIST = [
-  /^roundcube_/i,
-  /^bi_wm/i,
-  /^HMAC_/i,
-  /^_ssid/i,
-];
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -142,20 +134,6 @@ async function proxyRequest(request: NextRequest, context: RouteContext) {
   });
 }
 
-function filterUpstreamCookies(cookieHeader: string | null) {
-  if (!cookieHeader) return "";
-  return cookieHeader
-    .split(";")
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .filter((part) => {
-      const name = part.split("=")[0]?.trim() ?? "";
-      if (!name || name === ADMIN_SESSION_COOKIE) return false;
-      return UPSTREAM_COOKIE_ALLOWLIST.some((pattern) => pattern.test(name));
-    })
-    .join("; ");
-}
-
 function rewriteCookie(cookie: string, requestIsHttps: boolean) {
   const nameValue = cookie.split(";", 1)[0]?.trim() ?? cookie;
   const attrs = [
@@ -251,7 +229,13 @@ const HASH_LINK_NAV_GUARD = `<script>(function(){document.addEventListener("clic
  */
 const HIDE_BLANK_HEADER = `<style id="ccvaa-hide-blank-header">#header{display:none!important}</style>`;
 
-const HTML_HEAD_INJECT = `${HIDE_BLANK_HEADER}${HASH_LINK_NAV_GUARD}`;
+/**
+ * Report mailbox login state to the parent /admin page (same-origin iframe).
+ * Fail closed in the parent if messages stop; parent also polls /api/admin/session.
+ */
+const AUTH_BRIDGE = `<script>(function(){var O=window.location.origin,S="ccvaa-admin-mail";function loggedIn(){try{if(window.rcmail&&rcmail.env){var t=rcmail.env.task;if(t&&t!=="login")return true;if(t==="login")return false;}}catch(e){}if(document.querySelector("#login-form,form[name=login],#login"))return false;if(document.querySelector("#mainscreen,#mailboxlist,#layout"))return true;return false;}function report(){try{parent.postMessage({source:S,authenticated:loggedIn()},O);}catch(e){}}report();document.addEventListener("DOMContentLoaded",report);window.addEventListener("load",report);setInterval(report,2000);})();</script>`;
+
+const HTML_HEAD_INJECT = `${HIDE_BLANK_HEADER}${HASH_LINK_NAV_GUARD}${AUTH_BRIDGE}`;
 
 function injectBaseTag(html: string) {
   const baseTag = `<base href="${PROXY_PREFIX}/">`;

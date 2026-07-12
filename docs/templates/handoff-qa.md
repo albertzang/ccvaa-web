@@ -56,11 +56,11 @@ Cleanup happens **right after merge**, before Pass 2 testing — see `docs/proto
 
 ## Preview env notes (Pass 1)
 
-Admin OTP/mail need Vercel **Preview** env vars if testing auth on Preview.
+Admin mail auth needs Preview Deployment Protection bypass if testing `/admin` on Preview (mailbox login in iframe — no OTP).
 
 ## Production / baseline / Pass 2 auth notes
 
-- OTP emailed to `info@ccvaa.ca` (or `ADMIN_OTP_EMAIL`). **Do not commit codes.**
+- Admin auth = Hover mailbox login in Mail iframe. **Do not commit mailbox passwords.**
 - **Full admin login:** **single-Send** + CEO-in-the-loop — see `docs/protocols/QA_AUTH.md`.
   - QA: exactly **one** successful Send → stop → CEO pastes newest code → verify **once**.
   - Do **not** spam Send (limits: 1/min, 5/hour/IP); do not ask CEO to Send on the same env during the attempt.

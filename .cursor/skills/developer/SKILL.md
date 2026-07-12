@@ -75,4 +75,4 @@ Do not use `ccvaa-web.vercel.app` as the feature Preview. Do not ask QA to verif
 - No secrets in logs or git
 - Document known fragilities near the code or in FEATURES.md
 - Prefer typed boundaries and explicit error messages for admin APIs
-- Remember Preview vs Production env vars for OTP/mail
+- Remember Preview vs Production differences for mail proxy / Deployment Protection

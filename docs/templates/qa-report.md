@@ -23,7 +23,7 @@
 | Contact | | |
 | Admin mobile gate | | |
 | Admin mail | | |
-| Admin OTP | | |
+| Admin auth (mail session) | | |
 | Admin scaffolds | | |
 
 ## Bugs found

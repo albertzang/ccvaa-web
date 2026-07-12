@@ -53,22 +53,20 @@
 
 ### Header
 - Same cream/scrolled visual language as public site
-- Nav: Mail; Login (when logged out); Members / Financial / Events + Log out (when logged in)
+- Nav: Mail; Members / Financial / Events + Log out (when mailbox is signed in)
 
-### Mail (always available on admin, no OTP required)
+### Mail (sign-in surface + always available)
 - Collapsible section embedding Hover webmail via **same-origin proxy** `/admin/mail`
 - Proxy rewrites Roundcube paths/assets/cookies so iframe works (Hover blocks direct iframe via `X-Frame-Options`)
-- Proxy also: forwards `X-Roundcube-Request` (refresh CSRF); avoids trailing-slash AJAX redirects; blocks hash-only toolbar navigations under `<base href>`; hides blank `#header` chrome after login
+- Proxy also: forwards `X-Roundcube-Request` (refresh CSRF); avoids trailing-slash AJAX redirects; blocks hash-only toolbar navigations under `<base href>`; hides blank `#header` chrome after login; injects same-origin auth `postMessage` bridge
 - Known fragility: third-party Roundcube reverse proxy; watch for session/cookie/browser differences
 
-### Admin login (OTP)
-- 6-digit OTP emailed to `info@ccvaa.ca` (or `ADMIN_OTP_EMAIL`)
-- UI cooldown + server rate limits (1/min, 5/hour send; 5 attempts/code; IP verify limits)
-- OTP hashed (SHA-256), ~10 min TTL; session signed httpOnly cookie ~12h
-- After success: login section hidden; scaffold sections shown
-- Env: see `.env.example` (`ADMIN_SESSION_SECRET`, SMTP_*, `ADMIN_OTP_DEV_MODE`)
-- Local: `.env.local` (gitignored). Production: Vercel Environment Variables + redeploy
-- **QA OTP (current):** single-Send + CEO-in-the-loop — `docs/protocols/QA_AUTH.md` (no standing agent mailbox access; do not spam Send). Dedicated test inbox = `admin-console-0005` on backlog.
+### Admin auth (Hover mailbox session)
+- Admin console is authenticated **iff** the Hover mailbox session inside the mail iframe is logged in
+- Detection: Roundcube session cookie + fail-closed upstream probe (`/api/admin/session`); iframe bridge `postMessage` for near-realtime updates when Mail is open
+- Header **Log out** clears proxied Roundcube cookies and remounts the mail iframe (same effect as signing out of mail)
+- No OTP UI/APIs; no `ADMIN_SESSION_SECRET` / SMTP / Redis required for admin login (see `.env.example`)
+- Security model: whoever can sign into `info@ccvaa.ca` via embedded webmail has admin chrome access
 
 ### Post-auth scaffolds (placeholders only)
 - **Members** — coming soon
@@ -87,16 +85,15 @@
 | Preview | Per-branch/PR Vercel URL (pre-merge QA target) |
 | DNS / email | Hover |
 | CI | lint, typecheck, build (GitHub Actions) |
-| Package | `nodemailer` for OTP SMTP; `@upstash/redis` for shared OTP/rate-limit store |
+| Package | Next.js / React only for admin auth (mail session); no OTP/SMTP/Redis deps |
 | Ship path | Feature branch → QA Preview → merge → cleanup → QA on `ccvaa-web.vercel.app` (Verifier = `agent`). **Verifier = `ceo`:** CEO verifies (defaults: `direct-to-main` + Production pass2). Work IDs `{feature-slug}-{NNNN}` — [`BACKLOG.md`](BACKLOG.md). **Baseline** pass = Production audit with no PR. See `docs/protocols/GIT_DEPLOY.md`. CEO may manually check `ccvaa.ca`. |
 
 ### Important technical notes for Developer
 - Next.js 16: prefer `proxy.ts` over deprecated `middleware.ts`
 - Read `node_modules/next/dist/docs/` before novel Next APIs
-- OTP challenges + rate-limit buckets use **Upstash Redis** when `KV_REST_API_URL` + `KV_REST_API_TOKEN` are set (shared across Vercel instances). In-memory fallback for local `next dev` only
 - Never commit `.env.local` or secrets
 - Default: feature branch + PR with backlog work ID `{feature-slug}-{NNNN}`; merge/push `main` only when CEO explicitly asks
-- Admin OTP/mail on Preview needs Vercel **Preview** environment variables
+- Admin mail proxy on Preview needs network reachability to `mail.hover.com` (no OTP/SMTP/Redis Preview env required for login)
 
 ---
 
@@ -122,3 +119,4 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 | 2026-07-11 | **Verifier** `agent` \| `ceo` \| `n/a` + **Verify passes**; CEO may bypass agent QA; `agent-os` uses `n/a`; **`verified` on agent-os ⇒ commit + push** |
 | 2026-07-11 | `/admin` page intro blurb removed (`admin-console-0008`) |
 | 2026-07-12 | Embedded Hover mail iframe fixes (`admin-console-0009`): refresh 403, More/Mark reload, hide blank `#header` |
+| 2026-07-12 | Admin auth = Hover mailbox iframe session; OTP stack pruned (`admin-console-0010`) |
