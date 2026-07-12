@@ -245,16 +245,24 @@ function rewritePayload(input: string, requestIsHttps: boolean) {
  */
 const HASH_LINK_NAV_GUARD = `<script>(function(){document.addEventListener("click",function(e){var t=e.target;if(!t||!t.closest)return;var a=t.closest("a[href]");if(!a)return;var h=a.getAttribute("href");if(h&&h.charAt(0)==="#")e.preventDefault();},true);})();</script>`;
 
+/**
+ * Hover's logged-in Roundcube chrome leaves #header empty in the iframe
+ * (no logo/user strip). Hide it via CSS so Roundcube JS still finds the node.
+ */
+const HIDE_BLANK_HEADER = `<style id="ccvaa-hide-blank-header">#header{display:none!important}</style>`;
+
+const HTML_HEAD_INJECT = `${HIDE_BLANK_HEADER}${HASH_LINK_NAV_GUARD}`;
+
 function injectBaseTag(html: string) {
   const baseTag = `<base href="${PROXY_PREFIX}/">`;
   // Drop any upstream <base> so we inject a single controlled pair.
   const next = html.replace(/<base\s[^>]*>/i, "");
   if (!/<head[^>]*>/i.test(next)) {
-    return `${baseTag}${HASH_LINK_NAV_GUARD}${next}`;
+    return `${baseTag}${HTML_HEAD_INJECT}${next}`;
   }
   return next.replace(
     /<head([^>]*)>/i,
-    `<head$1>${baseTag}${HASH_LINK_NAV_GUARD}`,
+    `<head$1>${baseTag}${HTML_HEAD_INJECT}`,
   );
 }
 

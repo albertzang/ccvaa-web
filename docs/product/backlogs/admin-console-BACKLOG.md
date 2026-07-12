@@ -33,27 +33,31 @@ Umbrella ticket for Hover webmail iframe issues on `/admin` (same-origin proxy `
 
 **Fix:** Forward `X-Roundcube-Request`; normalize `/admin/mail/?…` trailing-slash AJAX paths. Commit `6001ff1`.
 
-### Iteration 2 — Toolbar More / Mark reloads iframe (current)
+### Iteration 2 — Toolbar More / Mark reloads iframe (CEO verified 2026-07-12)
 
-**Summary:** With one or more messages selected, toolbar actions such as **More** and **Mark** cause the iframe document to fully refresh/reload, so menus/actions are not usable.
+**Summary:** With one or more messages selected, toolbar actions such as **More** and **Mark** caused the iframe document to fully refresh/reload.
+
+**Fix:** Capture-phase click guard on hash-only `<a href>` under injected `<base href="/admin/mail/">`. Commit `c107c5c`.
+
+### Iteration 3 — Blank `#header` after login (current)
+
+**Summary:** After signing into Hover in the iframe, a `div#header` (or element with `id="header"`) remains in the mail UI and is always blank — hide or remove it so it does not consume layout space.
 
 **Steps to reproduce:**
 1. Open `/admin` → Mail; sign into Hover in the iframe.
-2. Select one or more messages in the list.
-3. Click toolbar **More** or **Mark** (and similar selection-dependent toolbar controls).
+2. Inspect the embedded document for `#header` (blank chrome above the mailbox UI).
 
-**Expected:** Dropdown/menu or mark action works inside the iframe without a full iframe navigation/reload.
+**Expected:** No blank header strip after login (element hidden or removed via proxy HTML rewrite / injected CSS/JS). Prefer surgical hide/remove of that node only — do not break Roundcube layout or toolbars.
 
-**Actual:** Iframe content refreshes/reloads; control is unusable.
+**Actual:** Blank `#header` always present after login.
 
-**Severity:** medium–high for day-to-day mail triage in the embedded UI.
-
-**Hypothesis for Dev:** form/link `target`, top-level navigation, or unre written action URL leaving the iframe / forcing a full document load instead of Roundcube AJAX.
+**Severity:** low–medium (cosmetic / wasted vertical space).
 
 ### Links
 
 - Dev: `docs/qa/handoffs/HANDOFF-DEV-admin-console-0009.md`
 - Iteration 1 ship: `6001ff1`
+- Iteration 2 ship: `c107c5c`
 
 ---
 
