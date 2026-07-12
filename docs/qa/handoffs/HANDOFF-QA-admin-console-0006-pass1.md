@@ -2,6 +2,7 @@
 
 **Date:** 2026-07-10  
 **Pass:** `1`  
+**Backlog work ID:** `admin-console-0006`  
 **Ship path that led here:** `feature-branch`  
 **Filled by:** Developer  
 
@@ -34,7 +35,7 @@ Cleanup happens **right after merge**, before Pass 2 testing — see `docs/proto
 
 ## What changed
 
-Environment-aware SMTP/OTP config error copy (BUG-20260710-01 code side):
+Environment-aware SMTP/OTP config error copy (admin-console-0006 code side):
 
 - `src/lib/admin/email.ts` — missing `SMTP_PASS` errors mention Vercel Production/Preview env vars when `VERCEL` is set; local still mentions `.env.local`
 - `src/components/admin/LoginSection.tsx` — “dev mode” success status uses localhost vs deployed guidance
@@ -67,7 +68,7 @@ Admin OTP/mail need Vercel **Preview** env vars if testing auth on Preview. This
 
 ## Report back with
 
-`docs/templates/qa-report.md` + bugs via `docs/templates/bug-report.md`  
+`docs/templates/qa-report.md` (Bugs found → PM backlog triage)  
 - Pass 1: **merge** / **hold** / **retest**  
 - Pass 2: **ship confirmed** / **hotfix**  
 - Baseline: **baseline confirmed** / **issues found**

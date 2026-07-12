@@ -45,7 +45,7 @@ Deleting a Git feature branch / closing a PR does **not** immediately remove Pre
 
 | Item | Owner | Notes |
 |------|-------|--------|
-| **Feature branch name** | **Developer** | Created when starting work. Convention: `feat/…`, `fix/…`, `chore/…`. PM may *suggest* a name in the Dev handoff; Developer decides and creates it. |
+| **Feature branch name** | **Developer** | Created when starting work. Convention: `feat/{feature-slug}-{NNNN}-short-slug` or `fix/{feature-slug}-{NNNN}-…` (backlog work ID required). PM may *suggest* a name in the Dev handoff; Developer creates it. |
 | **PR** | **Developer** | Opened against `main` after the branch has commits. |
 | **Preview URL** | **Vercel** (generated) → **Developer records it** | Appears on the GitHub PR (Vercel bot / deployment checks) or Vercel dashboard. Typical shape: `https://ccvaa-web-git-<branch-slug>-<team>.vercel.app` — do **not** reconstruct by hand. |
 | **Preview protection bypass** | **CEO** sets secret in Vercel + `.env.local`; **QA** reads local env | See `docs/protocols/PREVIEW_PROTECTION.md`. Never commit the secret. |
@@ -207,7 +207,13 @@ Pure docs/protocol updates by PM: usually **no QA** unless CEO asks.
 
 ## Branch naming (Developer)
 
-`feat/…`, `fix/…`, `chore/…` — short and descriptive. Example: `feat/admin-members-list`.
+Include the backlog work ID. Examples:
+
+- `feat/admin-console-0001-members-list`
+- `fix/admin-console-0004-preview-env`
+
+Pure Agent OS / docs chores may use `chore/agent-os-0001-…`.  
+See `docs/product/BACKLOG.md`. Blank work ID on product work → block.
 
 ## Env vars on Preview
 

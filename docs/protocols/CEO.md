@@ -4,16 +4,18 @@ The CEO is the decision-maker and the only person who authorizes shipping to `ma
 
 PM should remind the CEO of the relevant checklist whenever an action is due.
 
+**Product backlog:** [`docs/product/BACKLOG.md`](../product/BACKLOG.md) — work IDs `{feature-slug}-{NNNN}`.
+
 ## Always CEO
 
 | Responsibility | Notes |
 |----------------|--------|
-| Goals & priorities | What to build next; accept/reject PM advice |
+| Goals & priorities | What to build next; accept/reject PM advice; backlog priorities |
 | Approve **Ship path: `direct-to-main`** | Explicit yes required on the Dev handoff |
-| Approve **kickoff** of Developer / QA | Until further automation is approved |
+| Approve **kickoff** of Developer / QA / baseline | Until further automation is approved |
 | Approve **merge to `main`** (or direct push) | After Pass 1 pass, or for approved direct-to-main |
 | Approve **process/OS changes** | Multi-agent protocol refinements |
-| **Vercel / Hover secrets & env** | e.g. `SMTP_PASS`, SMTP_*, `ADMIN_SESSION_SECRET` — never ask agents to store these in git |
+| **Vercel / Hover secrets & env** | e.g. `SMTP_PASS`, SMTP_*, `ADMIN_SESSION_SECRET`, `KV_REST_API_*` — never ask agents to store these in git |
 | **OTP readout** | **Single-Send** only: QA Sends once → you paste newest code → QA verifies once (`docs/protocols/QA_AUTH.md`). Do not Send yourself on the same env during the attempt |
 | **Manual check of https://ccvaa.ca/** | Out of agent Dev/QA flow (DNS/cache) |
 | `gh auth login` / GitHub access on this device | One-time (or refresh); needed for agent `gh pr` flows |
@@ -24,20 +26,59 @@ PM should remind the CEO of the relevant checklist whenever an action is due.
 |------|-----|
 | Implementation, feature branches, PRs | Developer |
 | Pass 1 / Pass 2 / baseline testing | QA |
-| Handoffs, FEATURES/ROADMAP, triage | PM |
+| Handoffs, FEATURES / feature backlogs, triage | PM |
 | Delete feature branch after merge | Developer |
 
 CEO may still skim a PR; deep code review is optional unless PM flags risk.
 
 ---
 
+## Checklist: baseline kickoff
+
+- [ ] Tell PM: **kick off baseline** (full FEATURES.md or a named subset)
+- [ ] No merge step — Production audit only on https://ccvaa-web.vercel.app/
+- [ ] After QA report: triage with PM — promote findings into feature backlog items (`task` / `bug`); set priorities
+- [ ] Ops findings (env/secrets) → you; code findings → kickoff a backlog ID when ready
+
+Handoff/report names: `HANDOFF-QA-baseline-{NNNN}.md` / `QA-baseline-{NNNN}.md` (auto-increment; date only inside the files). No feature backlog ID until findings are promoted.
+
+---
+
+## Checklist: report a bug to PM
+
+- [ ] Describe symptom, environment (Production / Preview / local), repro
+- [ ] PM creates a backlog item (`type: bug`, **Source:** `ceo`) in the right feature file and shares the **work ID**
+- [ ] Agree **priority** (`now` / `next` / `later`)
+- [ ] When ready: tell PM to **kick off `{feature-slug}-{NNNN}`** (Dev → Pass 1 → merge → Pass 2)
+
+Bugs live on the feature backlog only (no separate bug files). QA findings are promoted the same way with **Source:** `qa`.
+
+---
+
+## Checklist: backlog review
+
+- [ ] Ask PM to **list** a feature backlog (or all): open items by priority
+- [ ] Re-prioritize, cancel, or add items with PM
+- [ ] Pick one work ID to kick off when ready
+
+---
+
+## Checklist: pick backlog item + kickoff
+
+- [ ] Choose a work ID from PM’s list (e.g. `admin-console-0001`)
+- [ ] Tell PM: **kick off `{feature-slug}-{NNNN}`**
+- [ ] PM sets status `in-progress`, writes Dev handoff, suggests branch with that ID
+- [ ] Continue with feature-branch PR happy path below
+
+---
+
 ## Checklist: feature-branch PR (happy path)
 
-Use this whenever a PR is open (e.g. after Developer finishes).
+Use this whenever a PR is open for a kicked-off backlog item.
 
 ### 1. PR is open + Preview is ready
 
-- [ ] Confirm PR link (GitHub) and Preview URL (from PR checks or handoff)
+- [ ] Confirm PR link, Preview URL, and backlog work ID on the handoff
 - [ ] Optional: skim the diff for intent (not required for every change)
 - [ ] Tell PM: **kick off QA Pass 1** (do **not** merge yet)
 
@@ -47,7 +88,7 @@ Use this whenever a PR is open (e.g. after Developer finishes).
 |-------------|------------|
 | **merge** | Tell PM/Developer: **merge the PR** (then branch cleanup + Pass 2) |
 | **hold** / **retest** | Wait; do not merge; PM routes fixes back to Developer |
-| **fail** | Do not merge; PM opens fix handoff |
+| **fail** | Do not merge; PM opens fix handoff (same or new backlog ID as needed) |
 
 ### 3. After merge (Developer cleans up branch)
 
@@ -58,8 +99,8 @@ Use this whenever a PR is open (e.g. after Developer finishes).
 
 | QA sign-off | CEO action |
 |-------------|------------|
-| **ship confirmed** | Done (update priorities with PM if needed) |
-| **hotfix** | Approve next Ship path (`feature-branch` or `direct-to-main`) |
+| **ship confirmed** | Done — PM marks backlog item `completed` and updates FEATURES.md if needed |
+| **hotfix** | Approve next Ship path (`feature-branch` or `direct-to-main`); often a new backlog ID |
 
 ---
 
@@ -75,14 +116,6 @@ Agents cannot securely hold Production mailbox passwords.
 
 ---
 
-## Checklist: baseline / regression
-
-- [ ] Ask PM for a **baseline** QA handoff (or approve PM’s proposal)
-- [ ] No merge step — Production audit only
-- [ ] Triage bugs with PM (code → Dev; ops → you)
-
----
-
 ## Checklist: OTP when QA needs full admin login
 
 - [ ] Ensure SMTP (+ Redis/KV for shared OTP store) env works on that environment
@@ -93,15 +126,19 @@ Agents cannot securely hold Production mailbox passwords.
 
 ---
 
-## What “done” looks like for a typical PR
+## What “done” looks like for a typical backlog kickoff
 
 ```
-PR open → you: kick QA Pass 1
+you: pick ID + kick off
+     → PM: in-progress + Dev handoff
+     → Developer: branch feat/{feature-slug}-{NNNN}-… + PR
+     → you: kick QA Pass 1
      → QA: merge recommended
      → you: approve merge
      → Developer: merge + delete branch
      → you: kick QA Pass 2
      → QA: ship confirmed
+     → PM: backlog completed + FEATURES.md
      → you (optional): check ccvaa.ca
 ```
 

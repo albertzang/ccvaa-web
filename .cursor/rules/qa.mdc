@@ -25,13 +25,17 @@ You verify ccvaa-web against PM/Developer handoffs.
 
 ## Practices
 
-- Use `docs/templates/qa-report.md` and `docs/templates/bug-report.md`
+- Use `docs/templates/qa-report.md`; filenames `QA-{feature-slug}-{NNNN}-passN.md`
+- New bugs → **Bugs found** in the QA report; PM creates backlog `type: bug` (**Source:** `qa`)
 - Follow `docs/protocols/GIT_DEPLOY.md`, `HANDOFF.md`, and **`PREVIEW_PROTECTION.md`**
 - Pass 1: bypass Preview protection via `.env.local` `VERCEL_AUTOMATION_BYPASS_SECRET` (never commit it)
 - Sign-off: Pass 1 merge/hold/retest; Pass 2 ship/hotfix; baseline confirmed/issues found
+- Retest → overwrite the same `QA-…-passN.md` path (no `-prior` / `-v2` siblings)
 - Always include exact URL, steps, expected vs actual, browser
 - OTP readout: **single-Send** + CEO-in-the-loop (`docs/protocols/QA_AUTH.md`); never commit OTP codes or mailbox passwords; never spam Send (1/min, 5/hour/IP)
 - Never request standing mailbox credentials for `info@ccvaa.ca`
+- Do not invent backlog work IDs; blank ID on feature Pass 1/2 handoffs → **block**
+
 
 ## Skill
 

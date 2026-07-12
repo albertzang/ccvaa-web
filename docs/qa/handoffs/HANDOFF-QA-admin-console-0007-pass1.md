@@ -2,6 +2,7 @@
 
 **Date:** 2026-07-10  
 **Pass:** `1`  
+**Backlog work ID:** `admin-console-0007`  
 **Ship path that led here:** `feature-branch`  
 **Filled by:** Developer  
 
@@ -38,7 +39,7 @@ Cleanup happens **right after merge**, before Pass 2 testing — see `docs/proto
 
 ## What changed
 
-Fix BUG-20260710-02: admin OTP verify failed on Production with “No active code found” because challenges lived in a per-instance in-memory `Map`. OTP challenges and rate-limit buckets now use **Upstash Redis** when `KV_REST_API_URL` + `KV_REST_API_TOKEN` are set (shared across Vercel instances). In-memory fallback remains for local `next dev` only.
+Fix admin-console-0007: admin OTP verify failed on Production with “No active code found” because challenges lived in a per-instance in-memory `Map`. OTP challenges and rate-limit buckets now use **Upstash Redis** when `KV_REST_API_URL` + `KV_REST_API_TOKEN` are set (shared across Vercel instances). In-memory fallback remains for local `next dev` only.
 
 ## Focus checklist
 
@@ -80,7 +81,7 @@ Provision: Vercel Marketplace → Upstash Redis for **Preview** and **Production
 
 ## Report back with
 
-`docs/templates/qa-report.md` + bugs via `docs/templates/bug-report.md`  
+`docs/templates/qa-report.md` (Bugs found → PM backlog triage)  
 - Pass 1: **merge** / **hold** / **retest**  
 - Pass 2: **ship confirmed** / **hotfix**  
 - Baseline: **baseline confirmed** / **issues found**

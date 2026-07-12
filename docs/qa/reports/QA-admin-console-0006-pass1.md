@@ -1,6 +1,7 @@
 # QA report
 
-**ID:** QA-20260710-02  
+**ID:** QA-admin-console-0006-pass1
+**Backlog work ID:** admin-console-0006  
 **Pass:** 1 (pre-merge)  
 **Environment(s) + exact URLs:** Preview — https://ccvaa-web-git-fix-otp-smtp-error-copy-albert-zangs-projects.vercel.app  
 **Branch / PR / commit:** `fix/otp-smtp-error-copy` / [PR #1](https://github.com/albertzang/ccvaa-web/pull/1) / head `18295d4` (error-copy fix `486e9f4`)  
@@ -9,7 +10,7 @@
 
 ## Scope tested
 
-Handoff `docs/qa/handoffs/HANDOFF-QA-20260710-otp-error-copy-pass1.md` — environment-aware SMTP/OTP config error copy (BUG-20260710-01 code side).
+Handoff `docs/qa/handoffs/HANDOFF-QA-admin-console-0006-pass1.md` — environment-aware SMTP/OTP config error copy (admin-console-0006 code side).
 
 - Preview `/admin` at desktop width: load + **Send login code**
 - User-visible / API error wording when `SMTP_PASS` unset
@@ -56,11 +57,11 @@ Handoff `docs/qa/handoffs/HANDOFF-QA-20260710-otp-error-copy-pass1.md` — envir
 - Names **Vercel Preview** (correct for this deploy’s `VERCEL_ENV`)
 - Immediate second request → HTTP 429: `Please wait before requesting another code.` with `retryAfterMs`; UI then shows **Resend in Ns** and disables the button
 
-## Bugs filed
+## Bugs found
 
 None new.
 
-- [BUG-20260710-01](../bugs/BUG-20260710-01.md) remains **open** for missing `SMTP_PASS` (CEO/Vercel env). **Error-copy portion** of that bug is verified fixed on this Preview; mail still will not send until env is set + redeployed.
+- [admin-console-0006](../../product/backlogs/admin-console-BACKLOG.md) remains **open** for missing `SMTP_PASS` (CEO/Vercel env). **Error-copy portion** of that bug is verified fixed on this Preview; mail still will not send until env is set + redeployed.
 
 ## Suggestions (non-blocking)
 

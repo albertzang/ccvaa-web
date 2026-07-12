@@ -1,7 +1,9 @@
 # Handoff: PM → QA — Baseline audit (pre-multi-agent backlog)
 
 **Date:** 2026-07-10  
+**Baseline ID:** `0001`  
 **Pass:** `baseline`  
+**Backlog work ID:** n/a (baseline)  
 **Ship path that led here:** `n/a` (baseline)  
 **Filled by:** Product Manager  
 
@@ -56,6 +58,7 @@ OTP → `info@ccvaa.ca`. Do not commit codes.
 
 ## Report back with
 
-Write `docs/qa/reports/QA-20260710-01.md` (or next free id) from `docs/templates/qa-report.md`.  
-File bugs under `docs/qa/bugs/` from `docs/templates/bug-report.md`.  
-Sign-off: **baseline confirmed** / **issues found**.
+Write `docs/qa/reports/QA-baseline-0001.md` from `docs/templates/qa-report.md` (keep **Date** in the report body).  
+List Bugs found in the QA report; PM promotes to backlog (`type: bug`, **Source:** `qa`).  
+Sign-off: **baseline confirmed** / **issues found**.  
+Promote findings into feature backlogs afterward (`docs/product/BACKLOG.md`).

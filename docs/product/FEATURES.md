@@ -1,8 +1,8 @@
 # CCVAA Web — Feature Inventory
 
 > **Owner:** Product Manager agent  
-> **Updated:** 2026-07-10 (handoff from founding implementer chat)  
-> Keep this document current whenever features ship or change.
+> **Updated:** 2026-07-11  
+> Keep this document current whenever features ship or change. Work-to-do: [`BACKLOG.md`](BACKLOG.md).
 
 ## Product summary
 
@@ -67,7 +67,7 @@
 - After success: login section hidden; scaffold sections shown
 - Env: see `.env.example` (`ADMIN_SESSION_SECRET`, SMTP_*, `ADMIN_OTP_DEV_MODE`)
 - Local: `.env.local` (gitignored). Production: Vercel Environment Variables + redeploy
-- **QA OTP (current):** single-Send + CEO-in-the-loop — `docs/protocols/QA_AUTH.md` (no standing agent mailbox access; do not spam Send). Dedicated test inbox = Later on roadmap.
+- **QA OTP (current):** single-Send + CEO-in-the-loop — `docs/protocols/QA_AUTH.md` (no standing agent mailbox access; do not spam Send). Dedicated test inbox = `admin-console-0005` on backlog.
 
 ### Post-auth scaffolds (placeholders only)
 - **Members** — coming soon
@@ -86,26 +86,22 @@
 | Preview | Per-branch/PR Vercel URL (pre-merge QA target) |
 | DNS / email | Hover |
 | CI | lint, typecheck, build (GitHub Actions) |
-| Package | `nodemailer` for OTP SMTP |
-| Ship path | Feature branch → QA Preview → merge → cleanup → QA on `ccvaa-web.vercel.app`. **Baseline** pass = Production audit with no PR. See `docs/protocols/GIT_DEPLOY.md`. CEO may manually check `ccvaa.ca`. |
+| Package | `nodemailer` for OTP SMTP; `@upstash/redis` for shared OTP/rate-limit store |
+| Ship path | Feature branch → QA Preview → merge → cleanup → QA on `ccvaa-web.vercel.app`. Work IDs `{feature-slug}-{NNNN}` — [`BACKLOG.md`](BACKLOG.md). **Baseline** pass = Production audit with no PR. See `docs/protocols/GIT_DEPLOY.md`. CEO may manually check `ccvaa.ca`. |
 
 ### Important technical notes for Developer
 - Next.js 16: prefer `proxy.ts` over deprecated `middleware.ts`
 - Read `node_modules/next/dist/docs/` before novel Next APIs
-- In-memory OTP/rate-limit store is **per serverless instance** — weaker on multi-instance Vercel; Redis later if needed
+- OTP challenges + rate-limit buckets use **Upstash Redis** when `KV_REST_API_URL` + `KV_REST_API_TOKEN` are set (shared across Vercel instances). In-memory fallback for local `next dev` only
 - Never commit `.env.local` or secrets
-- Default: feature branch + PR; merge/push `main` only when CEO explicitly asks
+- Default: feature branch + PR with backlog work ID `{feature-slug}-{NNNN}`; merge/push `main` only when CEO explicitly asks
 - Admin OTP/mail on Preview needs Vercel **Preview** environment variables
 
 ---
 
 ## Known gaps / next candidates
 
-- Flesh out Members, Financial, Events CRUD
-- Stronger production rate limiting (Redis / KV)
-- Board real photos + bios
-- Optional: Apple touch icon / richer favicons
-- QA automation / scheduled smoke tests
+Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlogs/`). Do not duplicate long lists here.
 
 ---
 
@@ -120,3 +116,5 @@
 | 2026-07-10 | Post-merge: delete feature branch local+remote before Pass 2; Pass 2 fixes = new branch from main |
 | 2026-07-10 | Added standard **baseline** QA pass (Production audit, no PR) |
 | 2026-07-10 | QA OTP: single-Send + CEO-in-the-loop protocol (`QA_AUTH.md`) to protect rate limits |
+| 2026-07-11 | OTP shared store via Marketplace Redis (`KV_REST_API_*`); `admin-console-0007` closed |
+| 2026-07-11 | Feature backlogs replace ROADMAP; work IDs `{feature-slug}-{NNNN}` |

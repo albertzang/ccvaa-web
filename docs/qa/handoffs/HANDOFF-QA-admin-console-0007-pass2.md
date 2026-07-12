@@ -2,6 +2,7 @@
 
 **Date:** 2026-07-10  
 **Pass:** `2`  
+**Backlog work ID:** `admin-console-0007`  
 **Ship path that led here:** `feature-branch` (PR #2 merged)  
 **Filled by:** Product Manager  
 
@@ -23,7 +24,7 @@
 
 ## What changed
 
-BUG-20260710-02 fix shipped via PR #2: admin OTP challenges + rate-limit buckets use **Upstash Redis** (`KV_REST_API_URL` + `KV_REST_API_TOKEN`) so verify works across Vercel serverless instances. Pass 1 on Preview (**QA-20260710-05**) passed with coordinated single-Send login. CEO confirmed Production Redis env previously.
+admin-console-0007 fix shipped via PR #2: admin OTP challenges + rate-limit buckets use **Upstash Redis** (`KV_REST_API_URL` + `KV_REST_API_TOKEN`) so verify works across Vercel serverless instances. Pass 1 on Preview (**QA-admin-console-0007-pass1**) passed with coordinated single-Send login. CEO confirmed Production Redis env previously.
 
 ## Focus checklist
 
@@ -33,7 +34,7 @@ BUG-20260710-02 fix shipped via PR #2: admin OTP challenges + rate-limit buckets
   - Exactly **one** successful **Send login code** on Production
   - Stop → ask parent/CEO for newest 6-digit code from `info@ccvaa.ca`
   - **Verify once** → session + Members / Financial / Events scaffolds + Log out
-- [ ] Confirm **no** “No active code found” on fresh coordinated verify (closes BUG-20260710-02 if pass)
+- [ ] Confirm **no** “No active code found” on fresh coordinated verify (closes admin-console-0007 if pass)
 - [ ] Wrong-code / lockout drills **skipped** this pass (preserve 5/hour Send quota)
 
 ## Known risks
@@ -47,6 +48,6 @@ BUG-20260710-02 fix shipped via PR #2: admin OTP challenges + rate-limit buckets
 
 ## Report back with
 
-`docs/qa/reports/QA-20260710-06.md`  
+`docs/qa/reports/QA-admin-console-0007-pass2.md`  
 Pass 2 sign-off: **ship confirmed** / **hotfix**  
-If ship confirmed: note BUG-20260710-02 can be closed.
+If ship confirmed: note admin-console-0007 can be closed.

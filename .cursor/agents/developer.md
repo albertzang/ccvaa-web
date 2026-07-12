@@ -23,8 +23,8 @@ Implement scoped work from Product Manager handoffs with minimal, high-quality d
 
 ## Behavior
 
-1. Read **Ship path**; confirm acceptance criteria; ask if ambiguous
-2. If `feature-branch` (default): name branch, open PR, implement, Pass 1 with exact Preview URL
+1. Read **Ship path** and **Backlog work ID**; confirm acceptance criteria; ask if ambiguous. Blank work ID on product work → **block**
+2. If `feature-branch` (default): name branch with work ID (`feat/{feature-slug}-{NNNN}-…`), open PR (title includes ID), implement, Pass 1 with exact Preview URL
 3. After merge: delete feature branch local + remote **before** Pass 2; Pass 2 bugs → new branch from `main`
 4. If `direct-to-main`: only with CEO approval on handoff; no Preview; light Pass 2 for code after push
 5. Implement matching existing patterns (`src/lib/site.ts`, admin, theme)

@@ -2,7 +2,11 @@
 
 **Date:**  
 **Requested by:** CEO / PM  
-**Priority:** now | next
+**Backlog work ID:** `{feature-slug}-{NNNN}` (**required** — blank → Developer blocks)  
+**Backlog link:** `docs/product/backlogs/{feature-slug}-BACKLOG.md`  
+**Priority:** now | next | later  
+
+**Save as:** `docs/qa/handoffs/HANDOFF-DEV-{feature-slug}-{NNNN}.md`
 
 ## Ship path
 
@@ -19,6 +23,8 @@
 
 ## Goal
 
+(From backlog description; expand acceptance as needed.)
+
 ## User value
 
 ## Acceptance criteria
@@ -33,6 +39,7 @@
 - Relevant paths:
 - Env / secrets impact:
 - Related FEATURES.md section:
+- Related backlog item:
 
 ## Design / UX constraints
 
@@ -42,20 +49,22 @@ Match existing coastal theme; prefer minimal scope.
 
 ### If Ship path = `feature-branch` (default)
 
-- **You (Developer) own the feature branch name** — create `feat/…` / `fix/…` / `chore/…` from `main`.
-- Suggested branch name (optional): 
-- Open a PR; wait for Vercel Preview; fill `docs/templates/handoff-qa.md` with the **exact Preview URL**.
+- **You (Developer) own the feature branch name** — must include the work ID: `feat/{feature-slug}-{NNNN}-short-slug` or `fix/{feature-slug}-{NNNN}-…`.
+- Suggested branch name: 
+- PR title must include `{feature-slug}-{NNNN}`.
+- Open a PR; wait for Vercel Preview; fill QA Pass 1 handoff as `HANDOFF-QA-{feature-slug}-{NNNN}-pass1.md` with the **exact Preview URL**.
 - Path: Preview QA Pass 1 → merge when CEO asks → **delete feature branch local+remote** → QA Pass 2 on https://ccvaa-web.vercel.app/
-- Pass 2 bugs → new `fix/…` from `main` (or CEO `direct-to-main`); do not revive the merged feature branch.
+- Pass 2 bugs → new branch from `main` (same or new work ID per PM); do not revive the merged feature branch.
 
 ### If Ship path = `direct-to-main` (CEO-approved only)
 
 - Work on `main`; commit/push only when CEO asks.
 - Skip Preview / QA Pass 1.
 - After push: recommend light QA Pass 2 on https://ccvaa-web.vercel.app/ for **code** changes (skip QA for pure docs unless CEO asks).
+- Still record the backlog work ID on commits/messages where practical.
 
 ## Done means
 
-- **`feature-branch` (pre-merge):** lint/typecheck clean; PR open; exact Preview URL in QA Pass 1 handoff.
+- **`feature-branch` (pre-merge):** lint/typecheck clean; PR open (work ID in title); exact Preview URL in QA Pass 1 handoff.
 - **`feature-branch` (post-merge):** PR merged; local + remote feature branch **deleted**; Pass 2 handoff ready.
 - **`direct-to-main`:** lint/typecheck clean; ready to commit/push when CEO asks; Pass 2 handoff if code.

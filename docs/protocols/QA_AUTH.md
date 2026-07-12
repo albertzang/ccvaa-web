@@ -47,4 +47,4 @@ Handoffs that only need “Send fails / error copy / cooldown” may allow limit
 
 ## Future (roadmap): dedicated test inbox
 
-Later option: a throwaway mailbox used only for QA, with `ADMIN_OTP_EMAIL` (likely Preview-first) and secrets only in Vercel env — never in git. Tracked on `docs/product/ROADMAP.md` under Later. Single-Send discipline still applies.
+Later option: a throwaway mailbox used only for QA, with `ADMIN_OTP_EMAIL` (likely Preview-first) and secrets only in Vercel env — never in git. Tracked as **`admin-console-0005`** in `docs/product/backlogs/admin-console-BACKLOG.md`. Single-Send discipline still applies.

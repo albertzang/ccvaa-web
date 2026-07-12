@@ -32,11 +32,11 @@ Verify handoff scope. Report clearly. Do not expand product scope.
 
 ## Behavior
 
-1. Confirm **Pass 1, 2, or baseline**, environments, and exact URLs
+1. Confirm **Pass 1, 2, or baseline**, **Backlog work ID** (required for Pass 1/2), environments, and exact URLs
 2. **Pass 1:** load `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local`; open Preview with `x-vercel-protection-bypass` query; if missing/wall → block
 3. Run checklist (baseline → fuller FEATURES.md audit)
-4. Write QA report under `docs/qa/reports/`
-5. File bugs under `docs/qa/bugs/`
+4. Write QA report under `docs/qa/reports/` using work-ID filename pattern (retest → overwrite same path)
+5. List new defects under **Bugs found** in the QA report for PM backlog triage (**Source:** `qa`). No `docs/qa/bugs/` files
 6. Sign off appropriately for the pass type
 7. Flag FEATURES.md drift to Product Manager
 
@@ -47,4 +47,5 @@ Verify handoff scope. Report clearly. Do not expand product scope.
 - Preview bypass via `.env.local` only (`docs/protocols/PREVIEW_PROTECTION.md`)
 - Always include URL + repro in bugs
 - Never require `ccvaa.ca` in agent QA
-- Baseline: do not demand a Preview URL or feature branch
+- Baseline: do not demand a Preview URL, feature branch, or backlog ID
+- Feature Pass 1/2: blank backlog work ID → **block**

@@ -2,10 +2,16 @@
 
 **Date:**  
 **Pass:** `1` | `2` | `baseline`  
+**Baseline ID:** `{NNNN}` (baseline only — from `docs/qa/README.md` **Next baseline ID**; leave blank for Pass 1/2)  
+**Backlog work ID:** `{feature-slug}-{NNNN}` (**required** for Pass 1/2 feature work; `n/a` for baseline)  
 **Ship path that led here:** `feature-branch` | `direct-to-main` | `n/a` (baseline)  
 **Filled by:** Developer (Pass 1 Preview URL) / PM (baseline) / either (Pass 2)  
 
-**Branch name:** (n/a for baseline or direct-to-main)  
+**Save as:**  
+- Feature: `docs/qa/handoffs/HANDOFF-QA-{feature-slug}-{NNNN}-pass1.md` (or `-pass2`)  
+- Baseline: `docs/qa/handoffs/HANDOFF-QA-baseline-{NNNN}.md` (date stays in **Date** field only)  
+
+**Branch name:** (must include work ID; n/a for baseline or direct-to-main)  
 **PR link:** (n/a for baseline or direct-to-main)  
 **Commit:** (optional for baseline — note `main` tip if known)  
 **Preview URL:** (Pass **1** only — **required**; paste exact URL from Vercel / GitHub PR — do not reconstruct)  
@@ -63,7 +69,9 @@ Admin OTP/mail need Vercel **Preview** env vars if testing auth on Preview.
 
 ## Report back with
 
-`docs/templates/qa-report.md` + bugs via `docs/templates/bug-report.md`  
+`docs/templates/qa-report.md` → save as `QA-{feature-slug}-{NNNN}-passN.md` (or `QA-baseline-{NNNN}.md`)  
+Bugs found → list in this QA report for PM triage (backlog `type: bug`, **Source:** `qa`). No separate bug files.
+  
 - Pass 1: **merge** / **hold** / **retest**  
 - Pass 2: **ship confirmed** / **hotfix**  
 - Baseline: **baseline confirmed** / **issues found**

@@ -1,6 +1,7 @@
 # QA report
 
-**ID:** QA-20260710-01  
+**ID:** QA-baseline-0001
+**Backlog work ID:** n/a (baseline)  
 **Pass:** baseline  
 **Environment(s) + exact URLs:** Production — https://ccvaa-web.vercel.app/  
 **Branch / PR / commit:** n/a (baseline; current `main` Production deploy)  
@@ -9,7 +10,7 @@
 
 ## Scope tested
 
-Full living inventory from `docs/product/FEATURES.md` and handoff `docs/qa/handoffs/HANDOFF-QA-20260710-baseline.md`.
+Full living inventory from `docs/product/FEATURES.md` and handoff `docs/qa/handoffs/HANDOFF-QA-baseline-0001.md`.
 
 - Public site `/` (hero, header/scroll, Board, Purposes, Contact, Footer, favicon)
 - Admin `/admin` (mobile gate, desktop chrome, Mail iframe, OTP request UI/cooldown)
@@ -29,12 +30,12 @@ Full living inventory from `docs/product/FEATURES.md` and handoff `docs/qa/hando
 | Admin mobile gate | pass | 390×844: “Desktop or tablet required” |
 | Admin desktop | pass | Cream header; Mail + Login; robots `noindex, nofollow` |
 | Admin mail | pass | Section expands; iframe `/admin/mail` loads Hover webmail login (“Webmail :: Welcome to Webmail”) |
-| Admin OTP | pass-with-issues | Request UI + cooldown work; **send fails** — `SMTP_PASS` missing on Production (BUG-20260710-01). Error copy references `.env.local` |
+| Admin OTP | pass-with-issues | Request UI + cooldown work; **send fails** — `SMTP_PASS` missing on Production (admin-console-0006). Error copy references `.env.local` |
 | Admin scaffolds | blocked | Full login not completable (no mailbox + SMTP broken). Not scored as automatic product fail for mailbox; SMTP is a filed product issue |
 
-## Bugs filed
+## Bugs found
 
-- [BUG-20260710-01](../bugs/BUG-20260710-01.md) — Production admin OTP cannot send mail (`SMTP_PASS` unset)
+- [admin-console-0006](../../product/backlogs/admin-console-BACKLOG.md) — Production admin OTP cannot send mail (`SMTP_PASS` unset)
 
 ## Suggestions (non-blocking)
 

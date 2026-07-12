@@ -1,6 +1,7 @@
 # QA report
 
-**ID:** QA-20260710-06  
+**ID:** QA-admin-console-0007-pass2
+**Backlog work ID:** admin-console-0007  
 **Pass:** 2 (post-merge)  
 **Environment(s) + exact URLs:** Production — https://ccvaa-web.vercel.app/  
 **Branch / PR / commit:** `main` / [PR #2](https://github.com/albertzang/ccvaa-web/pull/2) (MERGED) / `f39f965`  
@@ -9,7 +10,7 @@
 
 ## Scope tested
 
-Pass 2 post-merge smoke for BUG-20260710-02 (OTP Redis / shared challenge store):
+Pass 2 post-merge smoke for admin-console-0007 (OTP Redis / shared challenge store):
 
 - Production homepage + `/admin` load (200)
 - **Single-Send** OTP + CEO-in-the-loop → **Verify once** (same client IP as Send)
@@ -34,11 +35,11 @@ Pass 2 post-merge smoke for BUG-20260710-02 (OTP Redis / shared challenge store)
 | Admin OTP | pass | One Send (`mode: smtp`, 200). One verify → `ok: true` (200). Challenge found (no `No active code found`) → Production Redis/KV shared store works |
 | Admin scaffolds | pass | After verify: `/api/admin/session` → `authenticated: true`. Production admin UI exposes Members / Financial dashboard / Events & posts + Log out. Logout → session `authenticated: false` |
 
-## Bugs filed
+## Bugs found
 
 None new.
 
-- [BUG-20260710-02](../bugs/BUG-20260710-02.md) — Production `No active code found` **not reproduced**; success-path login **verified** on Production. **Can be closed.**
+- [admin-console-0007](../../product/backlogs/admin-console-BACKLOG.md) — Production `No active code found` **not reproduced**; success-path login **verified** on Production. **Can be closed.**
 
 ## Suggestions (non-blocking)
 
@@ -46,6 +47,6 @@ None new.
 
 ## Sign-off
 
-**Pass 1:** n/a (completed in QA-20260710-05)  
+**Pass 1:** n/a (completed in QA-admin-console-0007-pass1)  
 **Pass 2:** ship confirmed  
 **Baseline:** n/a  

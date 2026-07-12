@@ -2,6 +2,8 @@
 
 **Date:** 2026-07-10  
 **Requested by:** CEO / PM  
+**Backlog work ID:** `admin-console-0006`  
+**Backlog link:** `docs/product/backlogs/admin-console-BACKLOG.md`  
 **Priority:** now  
 
 ## Ship path
@@ -14,7 +16,7 @@
 
 ## Goal
 
-Fix the **code** side of BUG-20260710-01: Production-facing OTP/SMTP config errors must not tell operators to edit `.env.local` only. Use environment-aware, safe messaging.
+Fix the **code** side of admin-console-0006: Production-facing OTP/SMTP config errors must not tell operators to edit `.env.local` only. Use environment-aware, safe messaging.
 
 ## User value
 
@@ -38,8 +40,9 @@ When SMTP is misconfigured on Vercel, admins/operators get actionable guidance (
 
 ## Technical hints
 
-- Bug: `docs/qa/bugs/BUG-20260710-01.md`
-- Report: `docs/qa/reports/QA-20260710-01.md`
+- Backlog: `admin-console-0006`
+- Backlog: `docs/product/backlogs/admin-console-BACKLOG.md` (`admin-console-0006`)
+- Baseline that found it: `docs/qa/reports/QA-baseline-0001.md`
 - Likely files: `src/lib/admin/email.ts`, `src/components/admin/LoginSection.tsx`
 - Related FEATURES.md: Admin login (OTP)
 
@@ -49,8 +52,8 @@ Match existing admin tone; concise errors; prefer minimal diff.
 
 ## Git / deploy expectations
 
-- You own the feature branch name (`fix/…` suggested: `fix/otp-smtp-error-copy`)
-- Open PR → Preview → fill `docs/templates/handoff-qa.md` for Pass 1
+- Branch with work ID preferred going forward; historical: `fix/otp-smtp-error-copy`
+- Open PR → Preview → `HANDOFF-QA-admin-console-0006-pass1.md`
 - After merge (when CEO asks): delete branch local+remote → Pass 2 handoff
 
 ## Done means

@@ -2,6 +2,7 @@
 
 **Date:** 2026-07-10  
 **Pass:** `2`  
+**Backlog work ID:** `admin-console-0006`  
 **Ship path that led here:** `feature-branch` (PR #1 merged)  
 **Filled by:** Product Manager  
 
@@ -30,15 +31,15 @@ Environment-aware SMTP/OTP config error copy shipped via PR #1. CEO has since se
 - [ ] `/admin` loads on desktop; mobile gate still works (spot-check)
 - [ ] **Send login code** succeeds (no `SMTP_PASS is not set` / no `.env.local`-only wording)
 - [ ] Login UI still presents verify form after send
-- [ ] Note: full verify may fail with “No active code found” — that is **BUG-20260710-02** (separate track). Do **not** fail Pass 2 solely for that if error-copy + send path look good; file/confirm under BUG-20260710-02 if reproduced
+- [ ] Note: full verify may fail with “No active code found” — that is **admin-console-0007** (separate track). Do **not** fail Pass 2 solely for that if error-copy + send path look good; file/confirm under admin-console-0007 if reproduced
 - [ ] Public homepage smoke (loads) optional light check
 
 ## Known risks
 
-- OTP verify across serverless instances (BUG-20260710-02)
+- OTP verify across serverless instances (admin-console-0007)
 - Do not commit OTP codes; CEO-in-the-loop if you attempt full login (`docs/protocols/QA_AUTH.md`)
 
 ## Report back with
 
-`docs/qa/reports/QA-20260710-03.md`  
+`docs/qa/reports/QA-admin-console-0006-pass2.md`  
 Pass 2 sign-off: **ship confirmed** / **hotfix**

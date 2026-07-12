@@ -2,6 +2,8 @@
 
 **Date:** 2026-07-10  
 **Requested by:** CEO / PM  
+**Backlog work ID:** `admin-console-0007`  
+**Backlog link:** `docs/product/backlogs/admin-console-BACKLOG.md`  
 **Priority:** now  
 
 ## Ship path
@@ -12,7 +14,7 @@
 
 ## Goal
 
-Fix Production admin OTP **verify**: codes email successfully but verify returns “No active code found. Request a new one.” (BUG-20260710-02).
+Fix Production admin OTP **verify**: codes email successfully but verify returns “No active code found. Request a new one.” (admin-console-0007).
 
 ## User value
 
@@ -29,17 +31,18 @@ CEO/admins can complete OTP login on Production after receiving the email code.
 
 ## Out of scope
 
-- Closing BUG-20260710-01 SMTP-missing (ops resolved; error-copy already shipped)
+- Closing admin-console-0006 SMTP-missing (ops resolved; error-copy already shipped)
 - Protocol/CEO.md docs (parked)
 - Changing Hover mail iframe proxy
 - Commit/merge unless CEO asks
 
 ## Technical hints
 
-- Bug: `docs/qa/bugs/BUG-20260710-02.md`
+- Backlog: `admin-console-0007`
+- Backlog: `docs/product/backlogs/admin-console-BACKLOG.md` (`admin-console-0007`)
 - Likely: `src/lib/admin/otp.ts` in-memory `Map`; verify route `src/app/api/admin/otp/verify/route.ts`
 - Prefer a durable shared store suitable for Vercel (e.g. Redis/KV) for challenges — and consider rate-limit store consistency
-- Read FEATURES.md note on per-instance memory
+- Read FEATURES.md note on OTP Redis store
 
 ## Design / UX constraints
 
@@ -47,7 +50,7 @@ Minimal user-facing change; keep existing login UI unless needed for clarity.
 
 ## Git / deploy expectations
 
-- Branch e.g. `fix/otp-verify-shared-store`
+- Historical branch: `fix/otp-verify-shared-store` (prefer `fix/admin-console-0007-…` going forward)
 - Feature-branch path: Preview Pass 1 → merge when CEO asks → cleanup → Pass 2
 
 ## Done means

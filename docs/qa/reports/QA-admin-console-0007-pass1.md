@@ -1,7 +1,8 @@
 # QA report
 
-**ID:** QA-20260710-05  
-**Pass:** 1 (pre-merge) — retest after QA-20260710-04  
+**ID:** QA-admin-console-0007-pass1
+**Backlog work ID:** admin-console-0007  
+**Pass:** 1 (pre-merge) — retest (same file overwritten; prior attempt in git history)  
 **Environment(s) + exact URLs:** Preview — https://ccvaa-web-git-fix-otp-verify-shared-store-azang-projects.vercel.app (protection bypass used; bypass query/header and OTP codes omitted from this report)  
 **Branch / PR / commit:** `fix/otp-verify-shared-store` / [PR #2](https://github.com/albertzang/ccvaa-web/pull/2) / `f0dd5d8`  
 **Date:** 2026-07-10  
@@ -9,7 +10,7 @@
 
 ## Scope tested
 
-Pass 1 retest for BUG-20260710-02 (OTP Redis / shared challenge store), after CEO confirmed Preview login works manually:
+Pass 1 for admin-console-0007 (OTP Redis / shared challenge store). Earlier attempt the same day signed **retest** (OTP mismatch / full login not proven); this report is the successful retest after CEO confirmed Preview login works manually:
 
 - Preview protection bypass via `.env.local` `VERCEL_AUTOMATION_BYPASS_SECRET` — works (no Vercel login wall)
 - Homepage + `/admin` load (200)
@@ -34,16 +35,16 @@ Pass 1 retest for BUG-20260710-02 (OTP Redis / shared challenge store), after CE
 | Admin OTP | pass | One Send (`mode: smtp`, 200). One verify → `ok: true` (200). Challenge found (no `No active code found`) → shared Redis/KV store behaves as intended on Preview |
 | Admin scaffolds | pass | After verify: `/api/admin/session` → `authenticated: true`. UI unlocks Members / Financial dashboard / Events & posts scaffolds + Log out. Logout → session `authenticated: false` |
 
-## Bugs filed
+## Bugs found
 
 None new.
 
-- [BUG-20260710-02](../bugs/BUG-20260710-02.md) — original Production `No active code found` **not reproduced** on Preview; success-path login **verified** this pass.
+- [admin-console-0007](../../product/backlogs/admin-console-BACKLOG.md) — original Production `No active code found` **not reproduced** on Preview; success-path login **verified** this pass.
 
 ## Suggestions (non-blocking)
 
 - Pass 2 on Production after merge should re-confirm one coordinated Send → verify (same Redis env on Production).
-- Wrong-code / lockout messaging was covered in QA-20260710-04; optional light recheck on Pass 2 if time allows.
+- Wrong-code / lockout messaging was covered in the earlier Pass 1 attempt (see git history for that revision); optional light recheck on Pass 2 if time allows.
 
 ## Sign-off
 

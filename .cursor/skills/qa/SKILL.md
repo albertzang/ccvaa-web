@@ -30,15 +30,15 @@ Always record the **exact** URL tested (you may omit the bypass query from the w
 
 ## Process
 
-1. Read handoff — confirm **Pass 1, 2, or baseline** and URLs
+1. Read handoff — confirm **Pass 1, 2, or baseline**, **Backlog work ID** (required for Pass 1/2; `n/a` for baseline), and URLs. Blank work ID on feature work → **block**.
 2. **Pass 1:** apply Preview protection bypass from `.env.local` before browsing
 3. Run focused checklist + handoff-specific items (baseline often = full FEATURES.md)
-4. Write `docs/qa/reports/QA-YYYYMMDD-##.md` from `docs/templates/qa-report.md`
-5. File bugs with `docs/templates/bug-report.md` under `docs/qa/bugs/`
+4. Write report as `docs/qa/reports/QA-{feature-slug}-{NNNN}-passN.md` (or `QA-baseline-{NNNN}.md`) from `docs/templates/qa-report.md`. On **retest**, overwrite the same file — never add `-prior` / `-v2` / `-attemptN`
+5. List new defects under **Bugs found** in the QA report (PM promotes to backlog `type: bug`, **Source:** `qa`). Do not create `docs/qa/bugs/` files
 6. Sign off:
    - Pass 1 → **merge** / **hold** / **retest**
    - Pass 2 → **ship confirmed** / **hotfix**
-   - Baseline → **baseline confirmed** / **issues found**
+   - Baseline → **baseline confirmed** / **issues found** (PM promotes findings to backlog)
 
 ## Baseline smoke checklist
 

@@ -18,14 +18,15 @@ Read **Ship path** on the handoff first (`docs/protocols/GIT_DEPLOY.md`).
 
 ### `feature-branch` (default; also if Ship path blank)
 
-1. Branch from latest `main`
-2. Implement on the feature branch
-3. Open PR; ensure CI + Vercel **Preview** deploy
-4. Fill QA Pass 1 handoff with **Preview URL** (`docs/templates/handoff-qa.md`)
-5. Merge to `main` only when CEO/PM asks after Pass 1
-6. **Immediately** delete the feature branch locally and on `origin` (do not wait for Pass 2)
-7. Tell PM Production (`https://ccvaa-web.vercel.app/`) is ready for QA Pass 2
-8. If Pass 2 fails: new `fix/…` from latest `main` (or CEO `direct-to-main`) — never revive the merged feature branch as the ship vehicle
+1. Confirm **Backlog work ID** on the handoff (`{feature-slug}-{NNNN}`). Blank → **block** and ask PM.
+2. Branch from latest `main` as `feat/{feature-slug}-{NNNN}-short-slug` or `fix/{feature-slug}-{NNNN}-…`
+3. Implement on the feature branch
+4. Open PR (title includes work ID); ensure CI + Vercel **Preview** deploy
+5. Fill QA Pass 1 handoff as `HANDOFF-QA-{feature-slug}-{NNNN}-pass1.md` with **Preview URL**
+6. Merge to `main` only when CEO/PM asks after Pass 1
+7. **Immediately** delete the feature branch locally and on `origin` (do not wait for Pass 2)
+8. Tell PM Production (`https://ccvaa-web.vercel.app/`) is ready for QA Pass 2
+9. If Pass 2 fails: new `fix/{feature-slug}-{NNNN}-…` from latest `main` (or CEO `direct-to-main`) — never revive the merged feature branch as the ship vehicle
 
 ### `direct-to-main` (only if handoff says so **and** CEO approved)
 
@@ -38,7 +39,7 @@ Do not use `ccvaa-web.vercel.app` as the feature Preview. Do not ask QA to verif
 
 ## Before coding
 
-1. Read Ship path, acceptance criteria, and out of scope
+1. Read Ship path, **Backlog work ID**, acceptance criteria, and out of scope
 2. Locate related code (`src/lib/site.ts`, admin routes, components)
 3. For unfamiliar Next 16 APIs: read `node_modules/next/dist/docs/`
 4. Load `.cursor/skills/ccvaa-dev-memory/SKILL.md` for institutional notes
