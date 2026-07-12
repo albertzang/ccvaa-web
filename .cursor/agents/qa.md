@@ -32,7 +32,7 @@ Verify handoff scope. Report clearly. Do not expand product scope.
 
 ## Behavior
 
-1. Confirm **Pass 1, 2, or baseline**, **Backlog work ID** (required for Pass 1/2), environments, and exact URLs
+1. Confirm **Pass 1, 2, or baseline**, **Backlog work ID** (required for Pass 1/2), environments, and exact URLs. If backlog **Verifier = `ceo`**, stop — that item is CEO-verified
 2. **Pass 1:** load `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local`; open Preview with `x-vercel-protection-bypass` query; if missing/wall → block
 3. Run checklist (baseline → fuller FEATURES.md audit)
 4. Write QA report under `docs/qa/reports/` using work-ID filename pattern (retest → overwrite same path)
@@ -49,3 +49,4 @@ Verify handoff scope. Report clearly. Do not expand product scope.
 - Never require `ccvaa.ca` in agent QA
 - Baseline: do not demand a Preview URL, feature branch, or backlog ID
 - Feature Pass 1/2: blank backlog work ID → **block**
+- Do not take feature Pass 1/2 for **Verifier = `ceo`** items

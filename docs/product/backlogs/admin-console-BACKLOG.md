@@ -16,6 +16,9 @@ Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.m
 | **Type** | `task` |
 | **Priority** | `next` |
 | **Status** | `not-started` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
 
 ### Description
 
@@ -34,6 +37,9 @@ Replace the Members “coming soon” scaffold with a real auth-gated members li
 | **Type** | `task` |
 | **Priority** | `next` |
 | **Status** | `not-started` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
 
 ### Description
 
@@ -52,6 +58,9 @@ Replace the Financial dashboard scaffold with a real auth-gated dashboard. Metri
 | **Type** | `task` |
 | **Priority** | `next` |
 | **Status** | `not-started` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
 
 ### Description
 
@@ -70,6 +79,9 @@ Replace Events & posts scaffold with list + CRUD for events/posts, auth-gated. C
 | **Type** | `task` |
 | **Priority** | `now` |
 | **Status** | `not-started` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
 
 ### Description
 
@@ -88,6 +100,9 @@ Ops/checklist: confirm Vercel **Preview** has the same admin-critical env as Pro
 | **Type** | `task` |
 | **Priority** | `later` |
 | **Status** | `not-started` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
 
 ### Description
 
@@ -107,6 +122,9 @@ Throwaway mailbox for QA OTP (Preview-first `ADMIN_OTP_EMAIL` + Vercel-only secr
 | **Priority** | `now` |
 | **Status** | `completed` |
 | **Source** | `qa` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
 
 ### Description
 
@@ -145,6 +163,9 @@ Shipped: error-copy via PR #1; CEO set Production SMTP.
 | **Priority** | `now` |
 | **Status** | `completed` |
 | **Source** | `ceo` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
 
 ### Description
 

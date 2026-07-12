@@ -14,8 +14,8 @@ This repo uses a **3-agent system**. The human CEO primarily talks to the **Prod
 |------|------------------------|------|
 | **Product Manager** | Primary CEO chat; `.cursor/agents/product-manager.md` | Priorities, advice, handoffs, FEATURES/backlogs; **guides CEO gates** (`docs/protocols/CEO.md`) |
 | **Developer** | Dev chat or agent `developer` | Feature branches, PRs, implementation (merge when asked) |
-| **QA** | QA chat or agent `qa` | Pass 1 (Preview), Pass 2 (post-merge), or **baseline** (Production audit, no PR) |
-| **CEO (human)** | This chat via PM | Approvals, secrets, OTP readout, `ccvaa.ca`, kickoffs — `docs/protocols/CEO.md` |
+| **QA** | QA chat or agent `qa` | Pass 1 (Preview), Pass 2 (post-merge), or **baseline** when **Verifier = `agent`**; skipped when Verifier = `ceo` (CEO verifies) |
+| **CEO (human)** | This chat via PM | Approvals, secrets, OTP readout, `ccvaa.ca`, kickoffs, optional **Verifier** — `docs/protocols/CEO.md` |
 
 ### First-pass bootstrap (done)
 
@@ -47,8 +47,9 @@ Shared brain (not chat history):
 
 **CEO-only (out of agent flow):** https://ccvaa.ca/ — public domain; CEO handles manual testing (DNS/cache). Agents do not use it for Pass 1/2/baseline.
 
-**Default ship path:** feature branch → QA on Dev (optional) + Preview (required) → merge to `main` → delete feature branch → QA Production smoke on `ccvaa-web.vercel.app`.  
-**Baseline:** PM/CEO may request a Production-only audit with no PR (`Pass: baseline`).  
+**Default ship path (Verifier = `agent`):** feature branch → QA on Dev (optional) + Preview (required) → merge to `main` → delete feature branch → QA Production smoke on `ccvaa-web.vercel.app`.  
+**Verifier = `ceo`:** defaults to `direct-to-main` + CEO Production verify (`pass2`); no agent QA.  
+**Baseline:** PM/CEO may request a Production-only audit with no PR (`Pass: baseline`). 
 Full rules: `docs/protocols/GIT_DEPLOY.md`.
 
 ## Stack (quick)

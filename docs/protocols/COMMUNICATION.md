@@ -10,18 +10,21 @@ Agents do **not** share live chat memory. The **repo + CEO** are the bus.
 CEO  ←→  Product Manager (primary)
               │
               ├─ writes handoff → Developer chat / /developer
-              ├─ writes handoff → QA chat / /qa
+              ├─ writes handoff → QA chat / /qa   (only if Verifier = agent)
+              ├─ asks CEO to verify               (only if Verifier = ceo)
               └─ updates docs/product/* (FEATURES + feature backlogs)
 ```
 
 **Work ID:** `{feature-slug}-{NNNN}` on Dev/QA handoffs, branches, PRs, reports — see `docs/product/BACKLOG.md`.
 
 ```
-Developer  →  feature branch + PR + Preview URL + handoff for QA (named with work ID)
-QA Pass 1  →  Dev (optional) + Preview → merge recommendation
-Developer  →  merge to main when CEO/PM asks
-QA Pass 2  →  Production smoke → ship confirmation
+Developer  →  ship per Ship path + Verifier
+QA Pass 1  →  (Verifier = agent + pass1) Dev optional + Preview → merge recommendation
+CEO verify →  (Verifier = ceo) Preview and/or Production per Verify passes
+Developer  →  merge / push when CEO/PM asks
+QA Pass 2  →  (Verifier = agent + pass2) Production smoke → ship confirmation
 QA         →  QA reports in docs (Bugs found → PM backlog triage)
+CEO        →  "verified" or Iteration notes (Verifier = ceo)
 PM         →  backlog status + FEATURES.md after ship / triage
 ```
 
@@ -29,8 +32,9 @@ Git/deploy details: `docs/protocols/GIT_DEPLOY.md`. Backlog workflows: `docs/pro
 
 ## CEO ↔ Product Manager
 
-- CEO sets goals and priorities; see **`docs/protocols/CEO.md`** for full CEO checklists (baseline, bug report, backlog review, kickoff, PR gates)
+- CEO sets goals and priorities; see **`docs/protocols/CEO.md`** for full CEO checklists (baseline, bug/task report, CEO Verifier, backlog review, kickoff, PR gates)
 - PM maintains **feature backlogs** (`docs/product/BACKLOG.md`); converts conversations into proposed backlog items; lists/reviews on CEO ask
+- PM sets **Verifier** / **Verify passes** / Ship path from CEO intent (`ceo` defaults: `direct-to-main` + `pass2`)
 - PM advises (tradeoffs, sequencing, risk), proposes acceptance criteria, and **reminds CEO** when a gate is due
 - PM does **not** implement large code changes; delegates to Developer
 - PM does **not** merge to `main` or set Vercel secrets without CEO ask
@@ -38,20 +42,22 @@ Git/deploy details: `docs/protocols/GIT_DEPLOY.md`. Backlog workflows: `docs/pro
 
 ## Product Manager → Developer
 
-Use `docs/templates/handoff-dev.md`. Save as `HANDOFF-DEV-{feature-slug}-{NNNN}.md`. Include:
+Use `docs/templates/handoff-dev.md`. Save as `HANDOFF-DEV-{feature-slug}-{NNNN}.md` (overwrite on Iterations). Include:
 - **Backlog work ID** (required) — blank → Developer **blocks**
-- **Ship path:** `feature-branch` (default) or `direct-to-main` (CEO-approved only)
-- Goal / user value (from backlog description)
+- **Verifier:** `agent` | `ceo`
+- **Verify passes:** `pass1+pass2` | `pass1` | `pass2`
+- **Ship path:** `feature-branch` | `direct-to-main` (apply Verifier defaults if blank)
+- Goal / user value (from backlog description); Iteration delta if rework
 - Acceptance criteria (testable)
 - Out of scope
 - Relevant files / constraints
 - Link to FEATURES.md sections + backlog item
 
-Developer follows Ship path literally. Blank/ambiguous Ship path → `feature-branch`. Never invent `direct-to-main`.
+Developer follows Verifier + Ship path literally. Never invent `direct-to-main` when Verifier = `agent` without CEO approval. When Verifier = `ceo`, do **not** create agent QA handoffs.
 
 ## Product Manager → QA
 
-Use `docs/templates/handoff-qa.md`. Save as `HANDOFF-QA-{feature-slug}-{NNNN}-pass1.md` (or `-pass2`). Include:
+**Only when Verifier = `agent`.** Use `docs/templates/handoff-qa.md`. Save as `HANDOFF-QA-{feature-slug}-{NNNN}-pass1.md` (or `-pass2`). Include:
 - **Backlog work ID** (required for Pass 1/2 feature work)
 - **Pass:** `1` | `2` | `baseline`
 - Environments: Dev / **Preview URL** (Pass 1) / Production `https://ccvaa-web.vercel.app/` (Pass 2 and baseline)
@@ -66,6 +72,11 @@ Never ask QA to verify https://ccvaa.ca/ — CEO handles that manually. Never us
 
 Preview protection: `docs/protocols/PREVIEW_PROTECTION.md` (bypass from `.env.local`).
 
+## Product Manager → CEO (Verifier = `ceo`)
+
+After Dev ships to the env(s) in Verify passes, PM sends a **one-line ask** (e.g. verify Production for `{work-id}`).  
+CEO replies **`verified`** or notes issues → Iteration on the same backlog ID. No agent QA files.
+
 ## QA → Product Manager / Developer
 
 Use `docs/templates/qa-report.md`.
@@ -73,14 +84,16 @@ Use `docs/templates/qa-report.md`.
 - New defects: list under **Bugs found** in the QA report (repro + severity); **PM** promotes to backlog `type: bug` (**Source:** `qa`)
 - Always include environment URL + repro steps
 - Do **not** create files under `docs/qa/bugs/`
+- Do **not** invent work for items with Verifier = `ceo` (those never get agent QA handoffs)
 
 ## Notifications
 
 There is no automatic agent-to-agent ping. CEO or PM triggers the next role after:
 - CEO picks a backlog ID to kick off (→ Dev handoff), or
-- A feature-branch PR + Preview deploy is ready (→ QA Pass 1), or
-- Pass 1 recommends merge and CEO approves (→ Developer merge), or
-- Merge to `main` + Production deploy finishes (→ QA Pass 2), or
+- A feature-branch PR + Preview deploy is ready (→ QA Pass 1 **or** CEO Preview verify), or
+- Pass 1 / CEO Preview check recommends merge and CEO approves (→ Developer merge), or
+- Merge / direct push + Production deploy finishes (→ QA Pass 2 **or** CEO Production verify), or
+- CEO says **verified** or notes Iteration issues, or
 - Baseline or bug triage needs backlog updates, or
 - A handoff doc is written
 

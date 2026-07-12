@@ -30,7 +30,7 @@ Always record the **exact** URL tested (you may omit the bypass query from the w
 
 ## Process
 
-1. Read handoff — confirm **Pass 1, 2, or baseline**, **Backlog work ID** (required for Pass 1/2; `n/a` for baseline), and URLs. Blank work ID on feature work → **block**.
+1. Read handoff — confirm **Pass 1, 2, or baseline**, **Backlog work ID** (required for Pass 1/2; `n/a` for baseline), and URLs. Blank work ID on feature work → **block**. If the backlog item’s **Verifier = `ceo`**, you should not receive a handoff — stop and ask PM.
 2. **Pass 1:** apply Preview protection bypass from `.env.local` before browsing
 3. Run focused checklist + handoff-specific items (baseline often = full FEATURES.md)
 4. Write report as `docs/qa/reports/QA-{feature-slug}-{NNNN}-passN.md` (or `QA-baseline-{NNNN}.md`) from `docs/templates/qa-report.md`. On **retest**, overwrite the same file — never add `-prior` / `-v2` / `-attemptN`
@@ -39,6 +39,8 @@ Always record the **exact** URL tested (you may omit the bypass query from the w
    - Pass 1 → **merge** / **hold** / **retest**
    - Pass 2 → **ship confirmed** / **hotfix**
    - Baseline → **baseline confirmed** / **issues found** (PM promotes findings to backlog)
+
+**Note:** Items with **Verifier = `ceo`** are verified by the CEO, not this agent. Baseline audits still use the QA agent.
 
 ## Baseline smoke checklist
 

@@ -16,6 +16,9 @@ Canonical work IDs: `public-homepage-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG
 | **Type** | `task` |
 | **Priority** | `later` |
 | **Status** | `not-started` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
 
 ### Description
 
@@ -34,6 +37,9 @@ Replace board photo placeholders and bio placeholders on the public homepage wit
 | **Type** | `task` |
 | **Priority** | `later` |
 | **Status** | `not-started` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
 
 ### Description
 

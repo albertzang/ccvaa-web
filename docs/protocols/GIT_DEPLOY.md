@@ -61,33 +61,63 @@ PM handoff-dev (optional suggested branch name)
   → QA Pass 1 tests that URL (Dev optional)
 ```
 
-## Default delivery flow
+## Verifier (who runs Pass 1 / Pass 2)
+
+Set on the backlog item and Dev handoff. See [`docs/product/BACKLOG.md`](../product/BACKLOG.md).
+
+| Verifier | Default Ship path | Default Verify passes | Agent QA? |
+|----------|-------------------|------------------------|--------------|
+| **`agent`** | `feature-branch` | `pass1+pass2` | QA agent (`HANDOFF-QA-*` / `QA-*`) |
+| **`ceo`** | `direct-to-main` | `pass2` | CEO manually — **no** agent QA files |
+| **`n/a`** | `direct-to-main` (typical) | `n/a` | **No** — **`agent-os`** / docs-process only; CEO reviews via chat |
+
+**Verify passes** may be `pass1+pass2`, `pass1` (Preview only), or `pass2` (Production only). Preview = pre-merge staging. **`agent-os-*` items always use Verifier / Verify passes = `n/a`.**
+
+**CEO Verifier:** after Dev ships to the listed env(s), PM asks CEO to verify. CEO says **`verified`** → backlog `completed`. Issues → **Iteration** on the **same** work ID (overwrite Dev handoff); stay `in-progress` until verified. Details: `docs/protocols/CEO.md`.
+
+## Default delivery flow (Verifier = `agent`)
 
 ```
 PM handoff
     → Developer: feature branch + PR (not direct push to main)
-    → QA Pass 1: Dev (optional) + Preview (required)
+    → QA Pass 1: Dev (optional) + Preview (required) — if Verify passes includes pass1
     → CEO/PM: approve merge
     → Developer: merge PR into main (when asked)
     → Developer: delete feature branch locally + remotely (immediately after merge)
-    → QA Pass 2: Production smoke on https://ccvaa-web.vercel.app/
+    → QA Pass 2: Production smoke on https://ccvaa-web.vercel.app/ — if Verify passes includes pass2
     → PM: update FEATURES.md
     → CEO (optional): manual check of https://ccvaa.ca/ outside this protocol
 ```
 
-### Pass 1 — before merge (QA)
+## CEO Verifier flow (typical defaults: direct-to-main + pass2)
 
+```
+PM handoff (Verifier: ceo)
+    → Developer: work on main; push when CEO asks
+    → Skip agent QA
+    → PM: ask CEO to verify https://ccvaa-web.vercel.app/ (and/or Preview if pass1)
+    → CEO: "verified" → PM completes backlog
+         OR notes issues → Iteration on same ID → Dev again
+    → CEO (optional): check ccvaa.ca
+```
+
+### Pass 1 — before merge (QA agent, or CEO if Verifier = `ceo`)
+
+- Only when **Verify passes** includes `pass1`
 - **Required:** exact Preview URL from handoff (Developer-provided)
 - **Optional:** Dev (`localhost:3000`) for early feedback while coding
 - **Do not** use Production (`ccvaa-web.vercel.app`) or `ccvaa.ca` for Pass 1 of new work
-- Result: **pass** → ready to merge; **fail** → bugs back to Developer on the **same** feature branch / PR; retest Preview after fixes
+- **Agent:** result **pass** → ready to merge; **fail** → same feature branch / PR; retest Preview after fixes
+- **CEO Verifier:** CEO replies **verified** (for this pass) or notes issues → Iteration
 
-### Pass 2 — after merge (QA)
+### Pass 2 — after merge / direct-to-main push (QA agent, or CEO if Verifier = `ceo`)
 
+- Only when **Verify passes** includes `pass2`
 - **Required:** Production smoke on https://ccvaa-web.vercel.app/
 - **Do not** require or block on https://ccvaa.ca/ — CEO handles that manually
 - Keep Pass 2 focused (smoke + change-specific checks)
-- Feature branch should already be deleted (see cleanup below)
+- Feature branch should already be deleted when Ship path was `feature-branch` (see cleanup below)
+- **CEO Verifier:** **`verified`** completes the item; issues → Iteration on same work ID
 
 ### Baseline — Production audit without a preceding PR (QA)
 
@@ -156,36 +186,38 @@ Pass 2 fail
 
 ## Ship path (feature-branch vs direct-to-main)
 
-Every Dev handoff must set **Ship path** explicitly. Developer never infers it from “this looks small.”
+Every Dev handoff must set **Ship path** (or inherit Verifier defaults). Developer never invents `direct-to-main` from “this looks small.”
 
 | Ship path | Who decides | Who executes | When allowed |
 |-----------|-------------|--------------|--------------|
-| **`feature-branch`** (default) | PM writes it; CEO may override | **Developer** | All normal product/code work |
-| **`direct-to-main`** | **CEO must approve** (PM may recommend) | See below | Docs-only, emergency hotfix, or trivial one-liner — still prefer PR when practical |
+| **`feature-branch`** | Default when **Verifier = `agent`**; CEO may override | **Developer** | Normal product/code work; also CEO Verifier when they want Preview |
+| **`direct-to-main`** | Default when **Verifier = `ceo`**; else **CEO must approve** | See below | CEO Verifier path; docs-only; emergency hotfix; trivial one-liner — still prefer PR when practical |
 
 ### Who executes `direct-to-main`
 
 | Change type | Executes | Notes |
 |-------------|----------|--------|
 | Small **doc / protocol / agent-OS** updates | **PM** | Already in PM remit; push only when CEO asks |
-| **Hotfix / trivial code** on `main` | **Developer** | Only if handoff says `direct-to-main` **and** CEO approved |
-| User-facing, auth, mail proxy, or uncertain scope | Stay on **`feature-branch`** | No shortcuts |
+| **Hotfix / code** on `main` (incl. CEO Verifier items) | **Developer** | Handoff says `direct-to-main` **and** (CEO approved **or** Verifier = `ceo`) |
+| User-facing / auth / mail with **Verifier = `agent`** | Prefer **`feature-branch`** | Agent QA needs Preview for pass1 |
 
 ### How Developer knows
 
 1. Open `docs/templates/handoff-dev.md`
-2. Read **Ship path:** `feature-branch` | `direct-to-main`
-3. If missing, blank, or ambiguous → treat as **`feature-branch`**
-4. If `direct-to-main` but CEO approval is not stated → **block** and ask PM/CEO (do not push)
+2. Read **Verifier**, **Verify passes**, **Ship path**
+3. If Ship path missing/blank → apply Verifier defaults (`agent` → `feature-branch`; `ceo` → `direct-to-main`)
+4. If `direct-to-main` but CEO approval is not stated **and** Verifier ≠ `ceo` → **block** and ask PM/CEO (do not push)
+5. If Verifier = `ceo` → **do not** write agent QA handoffs; notify PM when the verify env is ready
 
 ### Shortened flow when `direct-to-main` (code)
 
 ```
-CEO-approved handoff (Ship path: direct-to-main)
+CEO-approved handoff (Ship path: direct-to-main) — or Verifier: ceo
   → Developer commits on main (when CEO asks to push)
-  → Skip QA Pass 1 / Preview
-  → QA Pass 2 light smoke on https://ccvaa-web.vercel.app/ (recommended for code)
-  → PM updates FEATURES.md if behavior changed
+  → Skip Preview / agent Pass 1 (unless Verify passes includes pass1 — rare)
+  → If Verifier = agent + pass2: light QA Pass 2 on https://ccvaa-web.vercel.app/
+  → If Verifier = ceo + pass2: PM asks CEO to verify Production (no agent QA)
+  → PM updates FEATURES.md if behavior changed (after ship confirmed / CEO verified)
   → CEO may manually check ccvaa.ca
 ```
 
@@ -195,15 +227,16 @@ Pure docs/protocol updates by PM: usually **no QA** unless CEO asks.
 
 | Do | Don't |
 |----|--------|
-| Follow **Ship path** from the handoff | Invent `direct-to-main` because the change “looks small” |
-| Create and name the feature branch from latest `main` (default path) | Push product work straight to `main` without CEO-approved `direct-to-main` |
-| Open a PR; wait for CI + Preview deploy | Merge before Preview QA passes (unless CEO waives) |
-| Paste the exact Preview URL into the QA handoff | Invent the Preview URL from the branch name |
-| Use `ccvaa-web.vercel.app` only for Pass 2 | Use `ccvaa-web.vercel.app` as the feature Preview URL |
+| Follow **Verifier** + **Ship path** from the handoff | Invent `direct-to-main` because the change “looks small” |
+| Create and name the feature branch from latest `main` when Ship path is `feature-branch` | Push product work straight to `main` without CEO-approved / Verifier=`ceo` `direct-to-main` |
+| Open a PR; wait for CI + Preview deploy when on feature-branch | Merge before Preview verify when Verify passes includes `pass1` (unless CEO waives) |
+| Paste the exact Preview URL into the agent QA handoff **or** give it to PM for CEO | Invent the Preview URL from the branch name |
+| Skip agent QA files when Verifier = `ceo` | Write `HANDOFF-QA-*` for CEO Verifier items |
+| Use `ccvaa-web.vercel.app` only for Pass 2 / CEO pass2 | Use `ccvaa-web.vercel.app` as the feature Preview URL |
 | Merge / push `main` only when CEO/PM asks | Force-push `main` or skip hooks |
 | Delete feature branch local + remote **right after merge** | Wait for Pass 2 before cleanup; revive merged branch for Pass 2 fixes |
-| Pass 2 fixes: **new** branch from `main` (or CEO `direct-to-main`) | Keep committing on the old merged feature branch |
-| Point Pass 2 at `ccvaa-web.vercel.app` | Ask QA to verify `ccvaa.ca` |
+| Pass 2 / CEO-verify fixes: Iteration same ID; **new** branch from `main` if prior was merged | Keep committing on the old merged feature branch |
+| Point Pass 2 at `ccvaa-web.vercel.app` | Ask QA agent to verify `ccvaa.ca` |
 
 ## Branch naming (Developer)
 

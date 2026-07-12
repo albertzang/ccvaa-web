@@ -23,7 +23,24 @@
 | **Priority** | `now` \| `next` \| `later` |
 | **Status** | `not-started` \| `in-progress` \| `canceled` \| `completed` |
 | **Source** | **Bugs only:** `ceo` \| `qa` (baseline findings = `qa`; link the baseline QA report) |
-| **Description** | Enough for Dev/QA handoffs; bugs include repro / expected / actual |
+| **Verifier** | `agent` (default) \| `ceo` \| **`n/a`** — who verifies Dev’s work. **`n/a` for `agent-os`** (docs/process; no Pass 1/2) |
+| **Verify passes** | `pass1+pass2` \| `pass1` \| `pass2` \| **`n/a`** — **`n/a` for `agent-os`** |
+| **Ship path** | Optional on the item; **required** on the Dev handoff when code ships. Docs-only / `agent-os` usually `direct-to-main` |
+| **Description** | Enough for Dev (and agent QA if Verifier = `agent`); bugs include repro / expected / actual |
+
+### Verifier defaults
+
+| Verifier | Default Ship path | Default Verify passes | Agent QA? |
+|----------|-------------------|------------------------|-----------|
+| **`agent`** | `feature-branch` | `pass1+pass2` | Yes — Pass 1 Preview / Pass 2 Production per handoff |
+| **`ceo`** | `direct-to-main` | `pass2` | **No** — CEO verifies manually; no `HANDOFF-QA-*` / `QA-*` reports |
+| **`n/a`** | `direct-to-main` (typical) | `n/a` | **No** — used for **`agent-os`** (and other docs/process-only work). CEO reviews via chat / repo skim; say **`verified`** to complete when PM asks. On **`verified`** for `agent-os-*`, PM marks **`completed`**, then **commits and pushes** without a further ask (see [`CEO.md`](../protocols/CEO.md)) |
+
+CEO may override Ship path and Verify passes when Verifier is `agent` or `ceo`. **Verifier = `ceo`** implies CEO owns verification and (for the default Ship path) approves `direct-to-main`.
+
+**Do not** set Verifier / Verify passes to `agent` or `ceo` on **`agent-os-*`** items — always **`n/a`**.
+
+**CEO Verifier loop** (Verifier = `ceo` only): stay `in-progress` until CEO says **verified** → `completed`. If CEO finds issues, append an **Iteration** on the same backlog item, overwrite the Dev handoff, and kick Dev again — do not invent a new work ID unless scope is deliberately split. Details: [`docs/protocols/CEO.md`](../protocols/CEO.md).
 
 Copy shape from [`docs/templates/backlog-item.md`](../templates/backlog-item.md).
 
@@ -37,28 +54,32 @@ Copy shape from [`docs/templates/backlog-item.md`](../templates/backlog-item.md)
 | Branch | `feat/{feature-slug}-{NNNN}-short-slug` or `fix/{feature-slug}-{NNNN}-…` |
 | PR title | Include `{feature-slug}-{NNNN}` |
 
-**Retest:** overwrite the same `…-passN.md` / handoff path. Never create `-prior`, `-v2`, or `-attemptN` siblings — earlier content lives in git history.
+**Retest / Iteration:** overwrite the same `…-passN.md` / `HANDOFF-DEV-…` path. Never create `-prior`, `-v2`, or `-attemptN` siblings — earlier content lives in git history.
+
+**Verifier = `ceo`:** no agent QA handoff/report files for that work ID.
 
 **Baseline** (no feature backlog item yet): `HANDOFF-QA-baseline-{NNNN}.md` / `QA-baseline-{NNNN}.md` — IDs from `docs/qa/README.md` (**Next baseline ID**); date only in file body. PM promotes findings into backlog items (`type: bug` or `task`, **Source:** `qa`).
 
 Blank backlog ID on feature Dev/QA work → **block**.
 
-## Bug intake
+## Bug / task intake
 
 | Finder | Flow |
 |--------|------|
-| **CEO** | Chat → PM creates backlog `bug` (**Source:** `ceo`) → priority → kickoff when ready |
-| **QA** | Note finding in the QA report → PM promotes to backlog `bug` (**Source:** `qa`) → priority → kickoff |
+| **CEO** | Chat → PM creates backlog `bug` or `task` (**Source:** `ceo` for bugs) → set **Verifier** / **Verify passes** (CEO may choose `ceo` to self-verify) → priority → kickoff when ready |
+| **QA** | Note finding in the QA report → PM promotes to backlog `bug` (**Source:** `qa`, Verifier usually `agent`) → priority → kickoff |
 
 Do **not** create parallel bug files. Dev may notice issues while coding; they tell PM (or fix inside the current work ID) — Dev is not a backlog intake Source.
 
 ## PM workflows (summary)
 
 1. **Baseline kickoff** — CEO asks → Pass `baseline` handoff → triage findings into feature backlogs  
-2. **CEO reports bug** — create `type: bug` (**Source:** `ceo`) → kickoff → Dev/QA with work ID  
+2. **CEO reports bug/task** — create item → set Verifier (default `agent`; or `ceo` + defaults `direct-to-main` / `pass2`) → kickoff → Dev; agent QA only if Verifier = `agent`  
 3. **Backlog review** — list/prioritize/edit with CEO  
-4. **Pick + kickoff** — CEO chooses ID → set `in-progress` → Dev handoff  
+4. **Pick + kickoff** — CEO chooses ID → set `in-progress` → Dev handoff (include Verifier + Verify passes + Ship path)  
 5. **Conversation → backlog** — PM proposes/adds items as chats imply; keep statuses current  
+6. **CEO Verifier** — after Dev push: one-line ask for CEO to verify; **verified** → `completed`; issues → Iteration on same ID → Dev again  
+7. **`agent-os` verified** — CEO says **`verified`** → PM marks `completed` + **commit & push** (no second ask)  
 
 Full checklists: [`docs/protocols/CEO.md`](../protocols/CEO.md), [`HANDOFF.md`](../protocols/HANDOFF.md).
 

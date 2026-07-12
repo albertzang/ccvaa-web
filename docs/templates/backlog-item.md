@@ -6,10 +6,25 @@
 **Priority:** `now` | `next` | `later`  
 **Status:** `not-started` | `in-progress` | `canceled` | `completed`  
 **Source:** _(bugs only)_ `ceo` | `qa`  
+**Verifier:** `agent` (default) | `ceo` | `n/a`  
+**Verify passes:** `pass1+pass2` | `pass1` | `pass2` | `n/a`  
+**Ship path:** `feature-branch` | `direct-to-main` _(optional on the item; required on Dev handoff when code ships)_  
+
+### Defaults
+
+| Verifier | Default Ship path | Default Verify passes |
+|----------|-------------------|------------------------|
+| `agent` | `feature-branch` | `pass1+pass2` |
+| `ceo` | `direct-to-main` | `pass2` |
+| `n/a` | `direct-to-main` (typical) | `n/a` |
+
+**`agent-os-*` items:** always **Verifier = `n/a`** and **Verify passes = `n/a`** (docs/process OS work — not Pass 1/2). Other product features use `agent` or `ceo`.
+
+CEO may override Ship path / Verify passes when Verifier is `agent` or `ceo`. **Verifier = `ceo`** means no agent QA; CEO verifies manually (`docs/protocols/CEO.md`).
 
 ## Description
 
-Enough detail for Dev/QA handoffs: problem/goal, acceptance hints, out of scope, related FEATURES.md section.
+Enough detail for Dev (and agent QA if Verifier = `agent`) handoffs: problem/goal, acceptance hints, out of scope, related FEATURES.md section.
 
 For **`type: bug`**, include in Description (or subsections):
 
@@ -19,8 +34,18 @@ For **`type: bug`**, include in Description (or subsections):
 - Expected vs actual  
 - Severity: blocker | high | medium | low  
 
+## Iterations (Verifier = `ceo`, or any rework on the same ID)
+
+Keep **Status:** `in-progress` until CEO says **verified** (or agent Pass 2 ship confirmed). If CEO finds issues after a Dev push:
+
+1. Append an **Iteration N** subsection here (what failed, what to change)
+2. Overwrite `HANDOFF-DEV-{feature-slug}-{NNNN}.md` for the next Dev pass
+3. Repeat until CEO says **verified** → Status `completed`
+
+Do **not** mint a new work ID for the same bug/task unless CEO/PM explicitly splits scope.
+
 ## Links (optional)
 
-- QA report (pass that found or verified it):
+- QA report (pass that found or verified it) — agent Verifier only:
 - Dev handoff:
 - PR:
