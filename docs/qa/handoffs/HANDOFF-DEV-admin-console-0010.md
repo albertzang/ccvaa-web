@@ -5,10 +5,10 @@
 **Backlog work ID:** `admin-console-0010` (**required**)  
 **Backlog link:** `docs/product/backlogs/admin-console-BACKLOG.md`  
 **Priority:** now  
-**Iteration:** `1`
+**Iteration:** `2`
 
 **Save as:** `docs/qa/handoffs/HANDOFF-DEV-admin-console-0010.md`  
-**Rework:** overwrite this path on later Iterations.
+**Rework:** overwrite this path (Iteration 1 in git history).
 
 ## Verifier & Ship path
 
@@ -16,67 +16,62 @@
 **Verify passes:** `pass1`  
 **Ship path:** `feature-branch`
 
-**CEO approved direct-to-main?** no — feature branch required  
-**CEO Pass 2:** **skip** (Verify passes = `pass1` only)
-
-### Implications
-
-- Create `feat/admin-console-0010-…` from latest `main`; open PR; record **exact Preview URL** for CEO (no agent QA files)
-- After CEO Preview verify → CEO/PM ask merge → delete branch; **do not** kick agent Pass 2
-- Iterations: keep same branch/PR when possible; overwrite this handoff
+**CEO Pass 2:** skip  
+**Branch / PR:** continue on `feat/admin-console-0010-hover-auth` — PR #4
 
 ## Goal
 
-Admin console authentication is **Hover webmail session inside the mail iframe**. Log in to mail ⇒ admin logged in; log out of mail ⇒ admin logged out. **Remove OTP** end-to-end (code + docs/ops that exist only for OTP).
+**Iteration 2 only:** Redesign `/admin` layout:
+
+- **Left:** full-height sidebar navigation
+- **Right:** main content panel filling remaining width + height
+- **Interaction:** sidebar buttons switch which panel is shown (no hash scrolling / no stacked sections on one long page)
 
 ## User value
 
-One sign-in (mailbox) instead of OTP + mail; less SMTP/Redis/OTP ops burden.
+App-like admin console; mail and scaffolds each get full workspace; clearer navigation.
 
 ## Acceptance criteria
 
-- [ ] OTP request/verify UI gone from `/admin`
-- [ ] OTP API routes / libs / session-cookie-from-OTP flow removed or replaced; no dead imports
-- [ ] Authenticated chrome + scaffolds appear when mailbox is logged in inside the iframe
-- [ ] Logged-out chrome when mailbox is logged out / session missing
-- [ ] Header Log out behavior is coherent with mail logout (implement one clear model)
-- [ ] Mobile unsupported gate still works
-- [ ] Mail iframe + proxy still work (do not regress `admin-console-0009` embed fixes: CSRF header, hash-link guard, hide `#header`)
-- [ ] `.env.example`, `FEATURES.md`, and OTP-centric protocol/skill notes updated so agents/CEO are not told to use OTP for admin login
-- [ ] Preview ready; paste exact Preview URL for CEO Pass 1; **no** `HANDOFF-QA-*`
+- [ ] Layout: fixed/full-height sidebar left; main content right uses remaining viewport (below any minimal top chrome, or sidebar spans full height — pick one coherent model)
+- [ ] Sidebar nav switches panels: **Mail**, **Members**, **Financial**, **Events** (latter three only when authenticated, same rule as today)
+- [ ] **Mail** panel: iframe fills main panel height (remove collapsible expand/collapse accordion for Mail)
+- [ ] **Members / Financial / Events:** existing scaffold “coming soon” content, one panel at a time
+- [ ] **Log out** accessible from sidebar (or header + sidebar — avoid duplicate confusing controls)
+- [ ] Logged-out: Mail panel still reachable for sign-in; protected nav items hidden or disabled until authenticated
+- [ ] Iteration 1 auth unchanged (mail session = admin session; postMessage/poll/logout)
+- [ ] No regression on mail proxy (`admin-console-0009` fixes)
+- [ ] Mobile gate unchanged
+- [ ] Lint/typecheck clean; push to same feature branch; update Preview URL for CEO Pass 1
 
 ## Out of scope
 
-- Real Members / Financial / Events features
-- New mail provider
-- Pass 2 / Production verify (CEO skips per Verify passes)
-- Keeping OTP as fallback
+- Real CRUD for Members/Financial/Events
+- Pass 2 Production verify
+- Public site changes
 
 ## Technical hints
 
-- Today: `AdminPage` uses `/api/admin/session` + OTP (`LoginSection`, `src/lib/admin/otp.ts`, `src/app/api/admin/otp/*`, `src/lib/admin/session.ts`, Redis rate limits)
-- Mail: same-origin iframe `/admin/mail` — parent **can** observe proxied responses/cookies more easily than a cross-origin embed; design a reliable “mail session present?” signal (cookie presence, lightweight probe endpoint, injected page script + `postMessage`, etc.)
-- Prefer fail-closed: if mail session cannot be determined, treat as logged out
-- Prune: `ADMIN_OTP_*`, SMTP-only-for-OTP, `ADMIN_SESSION_SECRET` if unused, KV/Redis if only used for OTP — leave a short note in PR for CEO to delete unused Vercel env after merge
-- Related FEATURES.md: Admin login (OTP) + Mail sections
-- Institutional notes: `.cursor/skills/ccvaa-dev-memory/SKILL.md`, `docs/protocols/QA_AUTH.md` (OTP readout) — update or mark obsolete for admin login
+- Current files: `AdminPage.tsx`, `AdminHeader.tsx`, `MailSection.tsx`, `AdminScaffoldSections.tsx`, `adminNavItems` in `src/lib/admin/constants.ts`
+- Likely refactor: `AdminSidebar` + `AdminMainPanel` (or similar); lift `activePanel` state in `AdminPage`
+- Remove `#mail` / `#members` hash nav from header — sidebar replaces it
+- Header may shrink to logo/home link only, or merge branding into sidebar top — match coastal palette (`globals.css` ocean tokens)
+- Mail iframe: use `h-full` / `min-h-0` flex patterns so iframe grows in panel
 
 ## Design / UX constraints
 
-Keep coastal admin chrome; Mail section remains the natural place to sign in. Avoid adding a second parallel login form.
+- Coastal fog/forest theme; minimal scope
+- Desktop/tablet only
+- Default panel: **Mail** on load
 
 ## Git / deploy expectations
 
-### Ship path = `feature-branch` + CEO Pass 1 only
+- Commit to `feat/admin-console-0010-hover-auth`; push; same PR #4
+- No agent QA files
+- CEO verifies on Preview only
 
-- Branch: `feat/admin-console-0010-hover-auth` (or similar; include work ID)
-- PR title includes `admin-console-0010`
-- Wait for Vercel Preview; give PM/CEO the **exact Preview URL**
-- Merge only when CEO asks after Preview verify
-- Delete feature branch after merge; **skip Pass 2**
+## Done means
 
-## Done means (Iteration)
-
-- Lint/typecheck clean; PR + Preview URL ready for CEO
-- Summarize auth model + what was pruned
-- Ready for CEO Pass 1; backlog stays `in-progress` until CEO **verified** (may iterate)
+- Preview updated; exact Preview URL for CEO
+- Summarize layout model + any header/sidebar decisions
+- Backlog stays `in-progress` until CEO **verified** for whole ticket

@@ -1,14 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AdminHeader } from "@/components/admin/AdminHeader";
-import { AdminScaffoldSections } from "@/components/admin/AdminScaffoldSections";
+import { AdminScaffoldPanel } from "@/components/admin/AdminScaffoldSections";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { MailSection } from "@/components/admin/MailSection";
 import {
   MobileUnsupportedMessage,
   useIsUnsupportedMobile,
 } from "@/components/admin/MobileGate";
-import { ADMIN_MAIL_AUTH_MESSAGE_SOURCE } from "@/lib/admin/constants";
+import {
+  ADMIN_MAIL_AUTH_MESSAGE_SOURCE,
+  type AdminPanelId,
+} from "@/lib/admin/constants";
 
 const SESSION_POLL_MS = 8_000;
 
@@ -27,11 +30,16 @@ async function fetchMailAuthenticated(): Promise<boolean> {
   }
 }
 
+function isProtectedPanel(panel: AdminPanelId): panel is Exclude<AdminPanelId, "mail"> {
+  return panel !== "mail";
+}
+
 export function AdminPage() {
   const unsupported = useIsUnsupportedMobile();
   const [authenticated, setAuthenticated] = useState(false);
   const [ready, setReady] = useState(false);
   const [mailFrameKey, setMailFrameKey] = useState(0);
+  const [activePanel, setActivePanel] = useState<AdminPanelId>("mail");
 
   useEffect(() => {
     let cancelled = false;
@@ -71,6 +79,9 @@ export function AdminPage() {
     return () => window.removeEventListener("message", onMessage);
   }, []);
 
+  const visiblePanel =
+    !authenticated && isProtectedPanel(activePanel) ? "mail" : activePanel;
+
   const handleLogout = useCallback(async () => {
     try {
       await fetch("/api/admin/logout", { method: "POST" });
@@ -78,6 +89,7 @@ export function AdminPage() {
       // Still clear local chrome + remount iframe
     }
     setAuthenticated(false);
+    setActivePanel("mail");
     setMailFrameKey((key) => key + 1);
   }, []);
 
@@ -94,18 +106,27 @@ export function AdminPage() {
   }
 
   return (
-    <>
-      <AdminHeader authenticated={authenticated} onLogout={handleLogout} />
-      <main className="min-h-screen bg-cream pb-20 pt-28 sm:pb-28 sm:pt-32">
-        <div className="mx-auto max-w-6xl space-y-16 px-6">
-          <MailSection
-            authenticated={authenticated}
-            iframeKey={mailFrameKey}
-          />
-
-          {authenticated && <AdminScaffoldSections />}
-        </div>
+    <div className="flex h-screen bg-cream">
+      <AdminSidebar
+        activePanel={visiblePanel}
+        authenticated={authenticated}
+        onPanelChange={setActivePanel}
+        onLogout={handleLogout}
+      />
+      <main className="flex min-h-0 min-w-0 flex-1 flex-col">
+        {visiblePanel === "mail" && (
+          <MailSection authenticated={authenticated} iframeKey={mailFrameKey} />
+        )}
+        {authenticated && visiblePanel === "members" && (
+          <AdminScaffoldPanel panelId="members" />
+        )}
+        {authenticated && visiblePanel === "financial" && (
+          <AdminScaffoldPanel panelId="financial" />
+        )}
+        {authenticated && visiblePanel === "events" && (
+          <AdminScaffoldPanel panelId="events" />
+        )}
       </main>
-    </>
+    </div>
   );
 }

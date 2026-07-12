@@ -42,9 +42,24 @@ Change admin console auth so **logging into / out of Hover webmail inside the `/
 
 **Security note:** Admin privilege becomes “whoever can sign into `info@ccvaa.ca` (or configured mailbox) via the embedded webmail.” That matches prior OTP delivery to the same inbox; call out any residual risks in the PR.
 
+### Iteration 1 — Hover mail session auth + prune OTP (CEO verified 2026-07-12)
+
+Pass 1 on Preview (PR #4). Mail iframe session drives admin auth; OTP removed.
+
+### Iteration 2 — Sidebar layout + panel switching (current)
+
+**Summary:** Replace stacked scroll layout with **left sidebar nav** (full viewport height) and **right main panel** (fills remaining width/height). Clicking sidebar items switches the right-side content (Mail, Members, Financial, Events). Remove hash-anchor / collapsible Mail pattern.
+
+**Expected UX:**
+- Sidebar: Mail always; Members / Financial / Events when authenticated; Log out at bottom (or coherent placement)
+- Main panel: one section visible at a time; Mail iframe uses available height (not short collapsible strip)
+- Coastal theme; desktop/tablet only gate unchanged
+- Do not regress Iteration 1 auth or `admin-console-0009` mail proxy fixes
+
 ### Links
 
 - Dev: `docs/qa/handoffs/HANDOFF-DEV-admin-console-0010.md`
+- PR: https://github.com/albertzang/ccvaa-web/pull/4
 
 ---
 
