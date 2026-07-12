@@ -15,7 +15,7 @@ Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.m
 |-------|--------|
 | **Type** | `bug` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Source** | `ceo` |
 | **Verifier** | `ceo` |
 | **Verify passes** | `pass2` |
@@ -23,41 +23,26 @@ Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.m
 
 ### Description
 
-Umbrella ticket for Hover webmail iframe issues on `/admin` (same-origin proxy `/admin/mail`). Stay `in-progress` until CEO says **verified** on the whole ticket (or drops remaining iterations). Known fragile area: `src/app/admin/mail/[[...path]]/route.ts`, `src/proxy.ts`.
+Umbrella ticket for Hover webmail iframe issues on `/admin` (same-origin proxy `/admin/mail`). CEO verified 2026-07-12 after Iteration 3.
 
 **Environment:** Production — https://ccvaa-web.vercel.app/admin (Mail section)
 
-### Iteration 1 — Inbox refresh HTTP 403 (CEO verified 2026-07-12)
-
-**Summary:** Manual / auto inbox refresh returned HTTP 403 in the console.
+### Iteration 1 — Inbox refresh HTTP 403 (CEO verified)
 
 **Fix:** Forward `X-Roundcube-Request`; normalize `/admin/mail/?…` trailing-slash AJAX paths. Commit `6001ff1`.
 
-### Iteration 2 — Toolbar More / Mark reloads iframe (CEO verified 2026-07-12)
-
-**Summary:** With one or more messages selected, toolbar actions such as **More** and **Mark** caused the iframe document to fully refresh/reload.
+### Iteration 2 — Toolbar More / Mark reloads iframe (CEO verified)
 
 **Fix:** Capture-phase click guard on hash-only `<a href>` under injected `<base href="/admin/mail/">`. Commit `c107c5c`.
 
-### Iteration 3 — Blank `#header` after login (current)
+### Iteration 3 — Blank `#header` after login (CEO verified)
 
-**Summary:** After signing into Hover in the iframe, a `div#header` (or element with `id="header"`) remains in the mail UI and is always blank — hide or remove it so it does not consume layout space.
-
-**Steps to reproduce:**
-1. Open `/admin` → Mail; sign into Hover in the iframe.
-2. Inspect the embedded document for `#header` (blank chrome above the mailbox UI).
-
-**Expected:** No blank header strip after login (element hidden or removed via proxy HTML rewrite / injected CSS/JS). Prefer surgical hide/remove of that node only — do not break Roundcube layout or toolbars.
-
-**Actual:** Blank `#header` always present after login.
-
-**Severity:** low–medium (cosmetic / wasted vertical space).
+**Fix:** Inject CSS `#header{display:none!important}` in proxied HTML. Commit `12eebb5`.
 
 ### Links
 
 - Dev: `docs/qa/handoffs/HANDOFF-DEV-admin-console-0009.md`
-- Iteration 1 ship: `6001ff1`
-- Iteration 2 ship: `c107c5c`
+- Commits: `6001ff1`, `c107c5c`, `12eebb5`
 
 ---
 

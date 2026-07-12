@@ -58,6 +58,7 @@
 ### Mail (always available on admin, no OTP required)
 - Collapsible section embedding Hover webmail via **same-origin proxy** `/admin/mail`
 - Proxy rewrites Roundcube paths/assets/cookies so iframe works (Hover blocks direct iframe via `X-Frame-Options`)
+- Proxy also: forwards `X-Roundcube-Request` (refresh CSRF); avoids trailing-slash AJAX redirects; blocks hash-only toolbar navigations under `<base href>`; hides blank `#header` chrome after login
 - Known fragility: third-party Roundcube reverse proxy; watch for session/cookie/browser differences
 
 ### Admin login (OTP)
@@ -120,3 +121,4 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 | 2026-07-11 | Feature backlogs replace ROADMAP; work IDs `{feature-slug}-{NNNN}` |
 | 2026-07-11 | **Verifier** `agent` \| `ceo` \| `n/a` + **Verify passes**; CEO may bypass agent QA; `agent-os` uses `n/a`; **`verified` on agent-os ⇒ commit + push** |
 | 2026-07-11 | `/admin` page intro blurb removed (`admin-console-0008`) |
+| 2026-07-12 | Embedded Hover mail iframe fixes (`admin-console-0009`): refresh 403, More/Mark reload, hide blank `#header` |
