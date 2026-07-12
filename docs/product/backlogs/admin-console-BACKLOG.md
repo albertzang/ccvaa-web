@@ -3,9 +3,26 @@
 **Feature:** Admin Console  
 **Slug:** `admin-console`  
 **Owner:** Product Manager  
-**Next ID:** `0008`  
+**Next ID:** `0009`  
 
 Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
+
+---
+
+## admin-console-0008 — Remove admin page intro (CCVAA / Admin blurb)
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `in-progress` |
+| **Verifier** | `ceo` |
+| **Verify passes** | `pass2` |
+| **Ship path** | `direct-to-main` |
+
+### Description
+
+Remove the page-intro block on `/admin` (“CCVAA” / “Admin” / “Manage mail, members…”). Keep header, Mail, Login, and scaffolds. CEO verifies on Production after push.
 
 ---
 

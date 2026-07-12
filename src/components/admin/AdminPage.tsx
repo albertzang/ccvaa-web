@@ -56,19 +56,6 @@ export function AdminPage() {
       <AdminHeader authenticated={authenticated} onLogout={handleLogout} />
       <main className="min-h-screen bg-cream pb-20 pt-28 sm:pb-28 sm:pt-32">
         <div className="mx-auto max-w-6xl space-y-16 px-6">
-          <div>
-            <p className="text-sm font-medium uppercase tracking-wider text-ocean-500">
-              CCVAA
-            </p>
-            <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-ocean-900 sm:text-4xl">
-              Admin
-            </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ocean-600 sm:text-base">
-              Manage mail, members, finances, and events. Sign in with a one-time
-              code to unlock protected sections.
-            </p>
-          </div>
-
           <MailSection />
 
           {!authenticated && (
