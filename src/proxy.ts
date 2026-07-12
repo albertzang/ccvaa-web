@@ -18,6 +18,14 @@ const ROUNDCUBE_ROOTS = [
 export function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
+  // <base href="/admin/mail/"> resolves href="?…" to /admin/mail/?…; Next 308s to
+  // /admin/mail?… and the iframe flashes. Rewrite internally — no redirect.
+  if (pathname === `${PROXY_PREFIX}/`) {
+    const url = request.nextUrl.clone();
+    url.pathname = PROXY_PREFIX;
+    return NextResponse.rewrite(url);
+  }
+
   if (pathname === "/" && searchParams.has("_task")) {
     const url = request.nextUrl.clone();
     url.pathname = PROXY_PREFIX;
@@ -38,6 +46,7 @@ export function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     "/",
+    "/admin/mail/",
     "/skins/:path*",
     "/program/:path*",
     "/plugins/:path*",

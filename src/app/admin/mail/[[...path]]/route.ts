@@ -3,6 +3,7 @@ import { filterUpstreamCookies } from "@/lib/admin/mail-cookies";
 
 const UPSTREAM_ORIGIN = "https://mail.hover.com";
 const PROXY_PREFIX = "/admin/mail";
+const HOVER_HELP_URL = "https://mail.hover.com/help/en_US/help.html";
 
 const ROUNDCUBE_ROOTS = [
   "skins",
@@ -176,11 +177,15 @@ function rewriteLocation(location: string) {
 
 function rewritePayload(input: string, requestIsHttps: boolean) {
   let next = input;
+  // Keep Hover help docs on upstream origin (CEO: new tab, not proxied).
+  const helpMarker = "@@CCVAA_HOVER_HELP@@";
+  next = next.replace(/https?:\/\/mail\.hover\.com\/help\/[^"'\s)>]+/gi, helpMarker);
   next = next.replace(/https?:\/\/mail\.hover\.com(?::\d+)?/gi, PROXY_PREFIX);
   next = next.replace(
     /https?:\/\/mail\.hostedemail\.com(?::\d+)?/gi,
     PROXY_PREFIX,
   );
+  next = next.replaceAll(helpMarker, HOVER_HELP_URL);
 
   for (const root of ROUNDCUBE_ROOTS) {
     const pattern = new RegExp(`([=["'(])/(${root})(/|["'?\\s)]|$)`, "g");
@@ -214,6 +219,33 @@ function rewritePayload(input: string, requestIsHttps: boolean) {
   // Collapse /admin/mail/?… → /admin/mail?… (absolute URL rewrite leaves a slash).
   next = next.replaceAll(`${PROXY_PREFIX}/?`, `${PROXY_PREFIX}?`);
   next = next.replaceAll(`${PROXY_PREFIX}${PROXY_PREFIX}`, PROXY_PREFIX);
+  next = rewriteHelpLinks(next);
+  return next;
+}
+
+/** Help opens upstream in a new tab — same as native Hover webmail. */
+function rewriteHelpLinks(input: string) {
+  let next = input;
+  next = next.replace(
+    /(<a\b[^>]*\bhref=["'])(?:\/admin\/mail)?\/?help\/[^"']*(["'])/gi,
+    `$1${HOVER_HELP_URL}$2`,
+  );
+  next = next.replace(
+    /(<a\b[^>]*\bhref=["'])https?:\/\/mail\.hover\.com\/help\/[^"']*(["'])/gi,
+    `$1${HOVER_HELP_URL}$2`,
+  );
+  next = next.replace(
+    /(<a\b[^>]*\bhref=["'])(?:\/admin\/mail)\?_task=help[^"']*(["'])/gi,
+    `$1${HOVER_HELP_URL}$2`,
+  );
+  const helpHref = HOVER_HELP_URL.replace(/\//g, "\\/");
+  next = next.replace(
+    new RegExp(
+      `(<a\\b[^>]*\\bhref=["']${helpHref}["'])(?![^>]*\\btarget=)([^>]*>)`,
+      "gi",
+    ),
+    `$1 target="_blank" rel="noopener noreferrer"$2`,
+  );
   return next;
 }
 
@@ -226,11 +258,11 @@ function rewritePayload(input: string, requestIsHttps: boolean) {
 const HASH_LINK_NAV_GUARD = `<script>(function(){document.addEventListener("click",function(e){var t=e.target;if(!t||!t.closest)return;var a=t.closest("a[href]");if(!a)return;var h=a.getAttribute("href");if(h&&h.charAt(0)==="#")e.preventDefault();},true);})();</script>`;
 
 /**
- * Relative query links (href="?…") resolve under <base href="/admin/mail/"> to
- * /admin/mail/?… and Next.js 308-redirects to /admin/mail?… — a full iframe
- * flash. Rewrite to the slashless proxy path before navigation.
+ * Roundcube adds href="?…" links dynamically. Under <base href="/admin/mail/"> they
+ * resolve to /admin/mail/?… (Next 308 → flash). Fix href/action attributes only —
+ * do not intercept clicks; Roundcube handles folder/message nav via AJAX.
  */
-const QUERY_LINK_NAV_GUARD = `<script>(function(){var P="/admin/mail";function fix(u){return u.replace(/\\/admin\\/mail\\/\\?/g,P+"?");}document.addEventListener("click",function(e){var t=e.target;if(!t||!t.closest)return;var a=t.closest("a[href]");if(!a)return;var h=a.getAttribute("href");if(!h||h.charAt(0)==="#")return;if(h.charAt(0)==="?"||h.indexOf("./?")===0){e.preventDefault();window.location.assign(P+h.replace(/^\\.\\/?/,""));return;}if(h.indexOf(P+"/?")>=0){e.preventDefault();window.location.assign(fix(h));}},true);document.addEventListener("submit",function(e){var f=e.target;if(!f||!f.getAttribute)return;var act=f.getAttribute("action");if(!act||act.charAt(0)!=="?")return;e.preventDefault();f.action=P+act;f.submit();},true);})();</script>`;
+const PASSIVE_QUERY_LINK_FIXER = `<script>(function(){var P="/admin/mail",H="${HOVER_HELP_URL}";function fixHelp(a){var h=a.getAttribute("href");if(!h)return;if(/\\/help\\/|help\\.html|_task=help/.test(h)){a.setAttribute("href",H);a.setAttribute("target","_blank");a.setAttribute("rel","noopener noreferrer");}}function fixHref(a){var h=a.getAttribute("href");if(!h||h.charAt(0)==="#")return;fixHelp(a);if(a.getAttribute("href")===H)return;h=a.getAttribute("href");if(h.charAt(0)==="?"||h.indexOf("./?")===0)a.setAttribute("href",P+h.replace(/^\\.\\/?/,""));else if(h.indexOf(P+"/?")>=0)a.setAttribute("href",h.replace(/\\/admin\\/mail\\/\\?/g,P+"?"));}function fixForm(f){var a=f.getAttribute("action");if(a&&a.charAt(0)==="?")f.setAttribute("action",P+a);}function scan(r){if(!r.querySelectorAll)return;r.querySelectorAll("a[href]").forEach(fixHref);r.querySelectorAll("form[action]").forEach(fixForm);}scan(document);new MutationObserver(function(ms){ms.forEach(function(m){m.addedNodes.forEach(function(n){if(n.nodeType!==1)return;scan(n);if(n.matches){if(n.matches("a[href]"))fixHref(n);if(n.matches("form[action]"))fixForm(n);}});});}).observe(document.documentElement,{childList:true,subtree:true});})();</script>`;
 
 /**
  * Hover's logged-in Roundcube chrome leaves #header empty in the iframe
@@ -244,7 +276,7 @@ const HIDE_BLANK_HEADER = `<style id="ccvaa-hide-blank-header">#header{display:n
  */
 const AUTH_BRIDGE = `<script>(function(){var O=window.location.origin,S="ccvaa-admin-mail",last=null;function loggedIn(){try{if(window.rcmail&&rcmail.env){var t=rcmail.env.task;if(t&&t!=="login")return true;if(t==="login")return false;}}catch(e){}if(document.querySelector("#login-form,form[name=login],#login"))return false;if(document.querySelector("#mainscreen,#mailboxlist,#layout"))return true;return false;}function report(){var auth=loggedIn();if(last===auth)return;last=auth;try{parent.postMessage({source:S,authenticated:auth},O);}catch(e){}}report();document.addEventListener("DOMContentLoaded",report);window.addEventListener("load",report);setInterval(report,2000);})();</script>`;
 
-const HTML_HEAD_INJECT = `${HIDE_BLANK_HEADER}${HASH_LINK_NAV_GUARD}${QUERY_LINK_NAV_GUARD}${AUTH_BRIDGE}`;
+const HTML_HEAD_INJECT = `${HIDE_BLANK_HEADER}${HASH_LINK_NAV_GUARD}${PASSIVE_QUERY_LINK_FIXER}${AUTH_BRIDGE}`;
 
 function injectBaseTag(html: string) {
   const baseTag = `<base href="${PROXY_PREFIX}/">`;
