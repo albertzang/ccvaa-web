@@ -27,18 +27,22 @@ type ScaffoldPanelId = Exclude<AdminPanelId, "mail">;
 
 type AdminScaffoldPanelProps = {
   panelId: ScaffoldPanelId;
+  hidden?: boolean;
 };
 
-export function AdminScaffoldPanel({ panelId }: AdminScaffoldPanelProps) {
+export function AdminScaffoldPanel({
+  panelId,
+  hidden = false,
+}: AdminScaffoldPanelProps) {
   const section = scaffolds.find((item) => item.id === panelId);
   if (!section) return null;
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col overflow-y-auto p-6">
-      <h2 className="shrink-0 border-b border-ocean-100 pb-3 font-display text-xl font-semibold text-ocean-900 sm:text-2xl">
-        {section.title}
-      </h2>
-      <div className="mt-8 flex flex-1 items-start justify-center">
+    <section
+      className={`flex min-h-0 flex-1 flex-col overflow-y-auto p-6 ${hidden ? "hidden" : ""}`}
+      aria-hidden={hidden}
+    >
+      <div className="flex flex-1 items-start justify-center">
         <div className="w-full max-w-2xl rounded-2xl border border-dashed border-ocean-200 bg-white/70 px-6 py-10 text-center shadow-sm">
           <p className="text-sm font-medium uppercase tracking-wider text-ocean-500">
             Coming soon

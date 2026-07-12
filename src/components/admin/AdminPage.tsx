@@ -72,7 +72,8 @@ export function AdminPage() {
       if (event.origin !== window.location.origin) return;
       const data = event.data as MailAuthMessage;
       if (!data || data.source !== ADMIN_MAIL_AUTH_MESSAGE_SOURCE) return;
-      setAuthenticated(Boolean(data.authenticated));
+      const next = Boolean(data.authenticated);
+      setAuthenticated((prev) => (prev === next ? prev : next));
       setReady(true);
     }
     window.addEventListener("message", onMessage);
@@ -114,17 +115,25 @@ export function AdminPage() {
         onLogout={handleLogout}
       />
       <main className="flex min-h-0 min-w-0 flex-1 flex-col">
-        {visiblePanel === "mail" && (
-          <MailSection authenticated={authenticated} iframeKey={mailFrameKey} />
-        )}
-        {authenticated && visiblePanel === "members" && (
-          <AdminScaffoldPanel panelId="members" />
-        )}
-        {authenticated && visiblePanel === "financial" && (
-          <AdminScaffoldPanel panelId="financial" />
-        )}
-        {authenticated && visiblePanel === "events" && (
-          <AdminScaffoldPanel panelId="events" />
+        <MailSection
+          iframeKey={mailFrameKey}
+          hidden={visiblePanel !== "mail"}
+        />
+        {authenticated && (
+          <>
+            <AdminScaffoldPanel
+              panelId="members"
+              hidden={visiblePanel !== "members"}
+            />
+            <AdminScaffoldPanel
+              panelId="events"
+              hidden={visiblePanel !== "events"}
+            />
+            <AdminScaffoldPanel
+              panelId="financial"
+              hidden={visiblePanel !== "financial"}
+            />
+          </>
         )}
       </main>
     </div>

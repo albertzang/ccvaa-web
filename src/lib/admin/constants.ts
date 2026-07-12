@@ -8,8 +8,8 @@ export const ADMIN_MAIL_AUTH_MESSAGE_SOURCE = "ccvaa-admin-mail";
 export type AdminPanelId = "mail" | "members" | "financial" | "events";
 
 export const adminSidebarItems = [
-  { id: "mail" as const, label: "Mail" },
+  { id: "mail" as const, label: "Webmail" },
   { id: "members" as const, label: "Members", requiresAuth: true },
-  { id: "financial" as const, label: "Financial", requiresAuth: true },
   { id: "events" as const, label: "Events", requiresAuth: true },
+  { id: "financial" as const, label: "Financial", requiresAuth: true },
 ] as const;

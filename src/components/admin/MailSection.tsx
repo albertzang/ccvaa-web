@@ -1,25 +1,18 @@
 "use client";
 
 import { ADMIN_MAIL_EMBED_PATH } from "@/lib/admin/constants";
-import { organization } from "@/lib/site";
 
 type MailSectionProps = {
-  authenticated: boolean;
   iframeKey: number;
+  hidden?: boolean;
 };
 
-export function MailSection({ authenticated, iframeKey }: MailSectionProps) {
+export function MailSection({ iframeKey, hidden = false }: MailSectionProps) {
   return (
-    <section className="flex min-h-0 flex-1 flex-col">
-      {!authenticated && (
-        <p className="shrink-0 border-b border-ocean-100 bg-white/60 px-6 py-4 text-sm leading-relaxed text-ocean-600">
-          Sign in to{" "}
-          <span className="font-medium text-ocean-800">{organization.email}</span>{" "}
-          in Mail to unlock Members, Financial, and Events. Logging out of mail
-          (or using Log out in the sidebar) signs you out of admin.
-        </p>
-      )}
-
+    <section
+      className={`flex min-h-0 flex-1 flex-col ${hidden ? "hidden" : ""}`}
+      aria-hidden={hidden}
+    >
       <div className="min-h-0 flex-1 overflow-hidden bg-white">
         <iframe
           key={iframeKey}

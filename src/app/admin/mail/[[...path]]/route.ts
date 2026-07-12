@@ -190,6 +190,8 @@ function rewritePayload(input: string, requestIsHttps: boolean) {
   // Prefer /admin/mail?... (no trailing slash) so Next does not 308 AJAX POSTs.
   next = next.replace(/(=["'])\/\?/g, `$1${PROXY_PREFIX}?`);
   next = next.replace(/([:"'])\/\?/g, `$1${PROXY_PREFIX}?`);
+  next = next.replace(/(href=["'])\?(["'&])/g, `$1${PROXY_PREFIX}?$2`);
+  next = next.replace(/(action=["'])\?(["'&])/g, `$1${PROXY_PREFIX}?$2`);
   next = next.replace(/(action=["'])\/(["'?])/g, `$1${PROXY_PREFIX}$2`);
   next = next.replaceAll('"comm_path":"/?', `"comm_path":"${PROXY_PREFIX}?`);
   next = next.replaceAll("'comm_path':'/?", `'comm_path':'${PROXY_PREFIX}?`);
@@ -224,6 +226,13 @@ function rewritePayload(input: string, requestIsHttps: boolean) {
 const HASH_LINK_NAV_GUARD = `<script>(function(){document.addEventListener("click",function(e){var t=e.target;if(!t||!t.closest)return;var a=t.closest("a[href]");if(!a)return;var h=a.getAttribute("href");if(h&&h.charAt(0)==="#")e.preventDefault();},true);})();</script>`;
 
 /**
+ * Relative query links (href="?…") resolve under <base href="/admin/mail/"> to
+ * /admin/mail/?… and Next.js 308-redirects to /admin/mail?… — a full iframe
+ * flash. Rewrite to the slashless proxy path before navigation.
+ */
+const QUERY_LINK_NAV_GUARD = `<script>(function(){var P="/admin/mail";function fix(u){return u.replace(/\\/admin\\/mail\\/\\?/g,P+"?");}document.addEventListener("click",function(e){var t=e.target;if(!t||!t.closest)return;var a=t.closest("a[href]");if(!a)return;var h=a.getAttribute("href");if(!h||h.charAt(0)==="#")return;if(h.charAt(0)==="?"||h.indexOf("./?")===0){e.preventDefault();window.location.assign(P+h.replace(/^\\.\\/?/,""));return;}if(h.indexOf(P+"/?")>=0){e.preventDefault();window.location.assign(fix(h));}},true);document.addEventListener("submit",function(e){var f=e.target;if(!f||!f.getAttribute)return;var act=f.getAttribute("action");if(!act||act.charAt(0)!=="?")return;e.preventDefault();f.action=P+act;f.submit();},true);})();</script>`;
+
+/**
  * Hover's logged-in Roundcube chrome leaves #header empty in the iframe
  * (no logo/user strip). Hide it via CSS so Roundcube JS still finds the node.
  */
@@ -233,9 +242,9 @@ const HIDE_BLANK_HEADER = `<style id="ccvaa-hide-blank-header">#header{display:n
  * Report mailbox login state to the parent /admin page (same-origin iframe).
  * Fail closed in the parent if messages stop; parent also polls /api/admin/session.
  */
-const AUTH_BRIDGE = `<script>(function(){var O=window.location.origin,S="ccvaa-admin-mail";function loggedIn(){try{if(window.rcmail&&rcmail.env){var t=rcmail.env.task;if(t&&t!=="login")return true;if(t==="login")return false;}}catch(e){}if(document.querySelector("#login-form,form[name=login],#login"))return false;if(document.querySelector("#mainscreen,#mailboxlist,#layout"))return true;return false;}function report(){try{parent.postMessage({source:S,authenticated:loggedIn()},O);}catch(e){}}report();document.addEventListener("DOMContentLoaded",report);window.addEventListener("load",report);setInterval(report,2000);})();</script>`;
+const AUTH_BRIDGE = `<script>(function(){var O=window.location.origin,S="ccvaa-admin-mail",last=null;function loggedIn(){try{if(window.rcmail&&rcmail.env){var t=rcmail.env.task;if(t&&t!=="login")return true;if(t==="login")return false;}}catch(e){}if(document.querySelector("#login-form,form[name=login],#login"))return false;if(document.querySelector("#mainscreen,#mailboxlist,#layout"))return true;return false;}function report(){var auth=loggedIn();if(last===auth)return;last=auth;try{parent.postMessage({source:S,authenticated:auth},O);}catch(e){}}report();document.addEventListener("DOMContentLoaded",report);window.addEventListener("load",report);setInterval(report,2000);})();</script>`;
 
-const HTML_HEAD_INJECT = `${HIDE_BLANK_HEADER}${HASH_LINK_NAV_GUARD}${AUTH_BRIDGE}`;
+const HTML_HEAD_INJECT = `${HIDE_BLANK_HEADER}${HASH_LINK_NAV_GUARD}${QUERY_LINK_NAV_GUARD}${AUTH_BRIDGE}`;
 
 function injectBaseTag(html: string) {
   const baseTag = `<base href="${PROXY_PREFIX}/">`;
