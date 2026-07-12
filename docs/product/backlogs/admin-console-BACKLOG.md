@@ -3,9 +3,46 @@
 **Feature:** Admin Console  
 **Slug:** `admin-console`  
 **Owner:** Product Manager  
-**Next ID:** `0009`  
+**Next ID:** `0010`  
 
 Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
+
+---
+
+## admin-console-0009 — Mail iframe refresh returns HTTP 403
+
+| Field | Value |
+|-------|--------|
+| **Type** | `bug` |
+| **Priority** | `now` |
+| **Status** | `in-progress` |
+| **Source** | `ceo` |
+| **Verifier** | `ceo` |
+| **Verify passes** | `pass2` |
+| **Ship path** | `direct-to-main` |
+
+### Description
+
+**Summary:** Inside the Hover webmail iframe on `/admin`, clicking refresh inbox (or when auto-refresh runs) surfaces an HTTP **403** server error in the console.
+
+**Environment:** Production (CEO report) — https://ccvaa-web.vercel.app/admin (Mail section / `/admin/mail` proxy)
+
+**Steps to reproduce:**
+1. Open `/admin` at desktop width; expand Mail; sign into Hover webmail in the iframe if needed.
+2. Click refresh inbox, **or** wait for Roundcube auto-refresh.
+3. Observe console: HTTP 403 from a proxied mail request.
+
+**Expected:** Refresh / auto-refresh succeed; inbox updates without 403.
+
+**Actual:** Console shows HTTP 403 server error on refresh/auto-refresh.
+
+**Severity:** medium (mail still usable until refresh fails; known fragile Roundcube reverse-proxy area — `src/app/admin/mail/[[...path]]/route.ts`, `src/proxy.ts`)
+
+CEO will verify on Production after fix (`Verifier: ceo`).
+
+### Links
+
+- Dev: `docs/qa/handoffs/HANDOFF-DEV-admin-console-0009.md`
 
 ---
 

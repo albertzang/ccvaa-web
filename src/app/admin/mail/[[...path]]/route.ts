@@ -38,12 +38,15 @@ async function proxyRequest(request: NextRequest, context: RouteContext) {
   const requestIsHttps = request.nextUrl.protocol === "https:";
 
   const headers = new Headers();
+  // Roundcube AJAX (inbox refresh / keep-alive) sends CSRF in X-Roundcube-Request
+  // only — dropping it makes Hover return HTTP 403 on refresh.
   for (const name of [
     "accept",
     "accept-language",
     "content-type",
     "user-agent",
     "x-requested-with",
+    "x-roundcube-request",
   ]) {
     const value = request.headers.get(name);
     if (value) headers.set(name, value);
@@ -178,10 +181,14 @@ function rewriteLocation(location: string) {
       url.hostname === "mail.hover.com" ||
       url.hostname === "mail.hostedemail.com"
     ) {
-      return `${PROXY_PREFIX}${url.pathname}${url.search}${url.hash}`;
+      const path = url.pathname === "/" ? "" : url.pathname;
+      return `${PROXY_PREFIX}${path}${url.search}${url.hash}`;
     }
   } catch {
     // keep original
+  }
+  if (location.startsWith("/?")) {
+    return `${PROXY_PREFIX}${location.slice(1)}`;
   }
   if (location.startsWith("/")) {
     return `${PROXY_PREFIX}${location}`;
@@ -202,9 +209,12 @@ function rewritePayload(input: string, requestIsHttps: boolean) {
     next = next.replace(pattern, `$1${PROXY_PREFIX}/$2$3`);
   }
 
-  next = next.replace(/(=["'])\/\?/g, `$1${PROXY_PREFIX}/?`);
-  next = next.replace(/([:"'])\/\?/g, `$1${PROXY_PREFIX}/?`);
-  next = next.replace(/(action=["'])\/(["'?])/g, `$1${PROXY_PREFIX}/$2`);
+  // Prefer /admin/mail?... (no trailing slash) so Next does not 308 AJAX POSTs.
+  next = next.replace(/(=["'])\/\?/g, `$1${PROXY_PREFIX}?`);
+  next = next.replace(/([:"'])\/\?/g, `$1${PROXY_PREFIX}?`);
+  next = next.replace(/(action=["'])\/(["'?])/g, `$1${PROXY_PREFIX}$2`);
+  next = next.replaceAll('"comm_path":"/?', `"comm_path":"${PROXY_PREFIX}?`);
+  next = next.replaceAll("'comm_path':'/?", `'comm_path':'${PROXY_PREFIX}?`);
   next = next.replaceAll('"comm_path":"/', `"comm_path":"${PROXY_PREFIX}/`);
   next = next.replaceAll("'comm_path':'/", `'comm_path':'${PROXY_PREFIX}/`);
 
@@ -221,6 +231,8 @@ function rewritePayload(input: string, requestIsHttps: boolean) {
     `url($1${PROXY_PREFIX}/$2/`,
   );
 
+  // Collapse /admin/mail/?… → /admin/mail?… (absolute URL rewrite leaves a slash).
+  next = next.replaceAll(`${PROXY_PREFIX}/?`, `${PROXY_PREFIX}?`);
   next = next.replaceAll(`${PROXY_PREFIX}${PROXY_PREFIX}`, PROXY_PREFIX);
   return next;
 }
