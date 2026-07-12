@@ -1,13 +1,14 @@
 # Handoff: Product Manager → Developer
 
-**Date:** 2026-07-11  
+**Date:** 2026-07-12  
 **Requested by:** CEO / PM  
 **Backlog work ID:** `admin-console-0009` (**required**)  
 **Backlog link:** `docs/product/backlogs/admin-console-BACKLOG.md`  
 **Priority:** now  
-**Iteration:** `1`
+**Iteration:** `2`
 
-**Save as:** `docs/qa/handoffs/HANDOFF-DEV-admin-console-0009.md`
+**Save as:** `docs/qa/handoffs/HANDOFF-DEV-admin-console-0009.md`  
+**Rework:** overwrite this same path (Iteration 1 content lives in git history).
 
 ## Verifier & Ship path
 
@@ -17,45 +18,48 @@
 
 **CEO approved direct-to-main?** yes (Verifier = `ceo` default)
 
-**Reason for direct-to-main (if any):** CEO will verify on Production; no agent QA.
+**Reason for direct-to-main (if any):** CEO verifies on Production; no agent QA. Same umbrella ticket as Iteration 1.
 
 ## Goal
 
-Stop HTTP **403** errors in the admin Hover webmail iframe when the user refreshes the inbox or when Roundcube auto-refresh runs.
+**Iteration 2 only:** Make Hover toolbar actions that operate on selected message(s) — especially **More** and **Mark** — usable inside the `/admin` mail iframe without causing a full iframe content refresh/reload.
+
+(Iteration 1 refresh-403 is CEO-verified and must not regress.)
 
 ## User value
 
-Admins can keep the Mail panel open and rely on refresh without console/server errors breaking inbox updates.
+Admins can mark, bulk-act, and use overflow toolbar menus on selected mail without the embedded client resetting.
 
 ## Acceptance criteria
 
-- [ ] On `/admin` → Mail iframe (signed into Hover): manual inbox refresh does **not** produce HTTP 403 from proxied `/admin/mail…` requests
-- [ ] Auto-refresh (if enabled in Roundcube) likewise does not 403
-- [ ] Normal mail UI still loads (list, open message, compose if previously working)
-- [ ] Admin session cookie is still **not** forwarded upstream; only Roundcube/Hover cookies
-- [ ] No agent QA handoffs — after push, notify PM that Production is ready for CEO verify
+- [ ] Select one or more messages → **More** opens/works without a full iframe document reload
+- [ ] Select one or more messages → **Mark** (and its submenu actions) works without a full iframe document reload
+- [ ] Prefer fixing similar selection-toolbar controls if they share the same root cause (note any left broken)
+- [ ] Iteration 1 behavior still holds: inbox manual/auto refresh does not 403
+- [ ] Admin session cookie still not forwarded upstream
+- [ ] No agent QA handoffs — after push, cue PM for CEO Production verify
 
 ## Out of scope
 
-- Dedicated QA test inbox (`admin-console-0005`)
-- OTP / Redis
-- Replacing Hover with another mail client
-- Changes to public site
+- Closing the whole `admin-console-0009` umbrella (CEO may add more iterations)
+- OTP / Redis / dedicated QA inbox
+- Replacing Hover
+- Public site
 
 ## Technical hints
 
 - Relevant paths:
-  - `src/app/admin/mail/[[...path]]/route.ts` — main reverse proxy + HTML/JSON/JS rewrite
-  - `src/proxy.ts` — keep Roundcube root-absolute paths under `/admin/mail`
-  - `src/components/admin/MailSection.tsx` — iframe `src` = `ADMIN_MAIL_EMBED_PATH`
-- Env / secrets impact: none expected (proxy already live on Production)
-- Related FEATURES.md section: Admin → Mail (same-origin proxy; known Roundcube fragility)
-- Related backlog item: `admin-console-0009`
-- Debug tips: reproduce in DevTools Network tab inside the iframe context; note failing URL, method, request headers, and whether response is from our proxy vs Hover; check if refresh hits a path/cookie/token not covered by `rewritePayload` / cookie allowlist (`roundcube_`, `bi_wm`, `HMAC_`, `_ssid`)
+  - `src/app/admin/mail/[[...path]]/route.ts` — HTML/JSON/JS rewrite, Location, cookies, CSRF header (`X-Roundcube-Request` already forwarded in Iteration 1)
+  - `src/proxy.ts` — root-absolute Roundcube path rewrites
+  - `src/components/admin/MailSection.tsx` — iframe embed
+- Likely causes: links/forms navigating the iframe top document; `target="_top"` / `_parent`; unre written action URLs; 302/308 full navigations instead of XHR; base href edge cases on toolbar POSTs
+- Debug: DevTools on iframe — watch document navigation vs XHR when clicking More/Mark; capture request URL + whether response is full HTML login/list shell
+- Related FEATURES.md: Admin → Mail
+- Related backlog: `admin-console-0009` Iteration 2
 
 ## Design / UX constraints
 
-No visual redesign required — fix proxy behavior only.
+Proxy/behavior fix only; no visual redesign of admin chrome.
 
 ## Git / deploy expectations
 
@@ -63,11 +67,11 @@ No visual redesign required — fix proxy behavior only.
 
 - Work on `main`; commit/push only when CEO asks.
 - Skip Preview / agent QA files.
-- After push: tell PM CEO can verify https://ccvaa-web.vercel.app/admin (Mail section).
-- Still mention `admin-console-0009` in the commit message.
+- After push: tell PM CEO can verify https://ccvaa-web.vercel.app/admin (Mail).
+- Commit message should include `admin-console-0009` and mention Iteration 2 / toolbar.
 
 ## Done means
 
 - Lint/typecheck clean; ready to commit/push when CEO asks.
-- Production deploy live; PM cued for CEO verify — **no** `HANDOFF-QA-*`.
-- Backlog stays `in-progress` until CEO says **verified** (or Iteration if issues).
+- Production ready for CEO verify of Iteration 2 — **no** `HANDOFF-QA-*`.
+- Backlog stays `in-progress` (umbrella) until CEO says **verified** for the ticket as a whole (or explicitly closes remaining work).

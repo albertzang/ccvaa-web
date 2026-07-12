@@ -9,7 +9,7 @@ Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.m
 
 ---
 
-## admin-console-0009 — Mail iframe refresh returns HTTP 403
+## admin-console-0009 — Embedded Hover mailbox issues
 
 | Field | Value |
 |-------|--------|
@@ -23,26 +23,37 @@ Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.m
 
 ### Description
 
-**Summary:** Inside the Hover webmail iframe on `/admin`, clicking refresh inbox (or when auto-refresh runs) surfaces an HTTP **403** server error in the console.
+Umbrella ticket for Hover webmail iframe issues on `/admin` (same-origin proxy `/admin/mail`). Stay `in-progress` until CEO says **verified** on the whole ticket (or drops remaining iterations). Known fragile area: `src/app/admin/mail/[[...path]]/route.ts`, `src/proxy.ts`.
 
-**Environment:** Production (CEO report) — https://ccvaa-web.vercel.app/admin (Mail section / `/admin/mail` proxy)
+**Environment:** Production — https://ccvaa-web.vercel.app/admin (Mail section)
+
+### Iteration 1 — Inbox refresh HTTP 403 (CEO verified 2026-07-12)
+
+**Summary:** Manual / auto inbox refresh returned HTTP 403 in the console.
+
+**Fix:** Forward `X-Roundcube-Request`; normalize `/admin/mail/?…` trailing-slash AJAX paths. Commit `6001ff1`.
+
+### Iteration 2 — Toolbar More / Mark reloads iframe (current)
+
+**Summary:** With one or more messages selected, toolbar actions such as **More** and **Mark** cause the iframe document to fully refresh/reload, so menus/actions are not usable.
 
 **Steps to reproduce:**
-1. Open `/admin` at desktop width; expand Mail; sign into Hover webmail in the iframe if needed.
-2. Click refresh inbox, **or** wait for Roundcube auto-refresh.
-3. Observe console: HTTP 403 from a proxied mail request.
+1. Open `/admin` → Mail; sign into Hover in the iframe.
+2. Select one or more messages in the list.
+3. Click toolbar **More** or **Mark** (and similar selection-dependent toolbar controls).
 
-**Expected:** Refresh / auto-refresh succeed; inbox updates without 403.
+**Expected:** Dropdown/menu or mark action works inside the iframe without a full iframe navigation/reload.
 
-**Actual:** Console shows HTTP 403 server error on refresh/auto-refresh.
+**Actual:** Iframe content refreshes/reloads; control is unusable.
 
-**Severity:** medium (mail still usable until refresh fails; known fragile Roundcube reverse-proxy area — `src/app/admin/mail/[[...path]]/route.ts`, `src/proxy.ts`)
+**Severity:** medium–high for day-to-day mail triage in the embedded UI.
 
-CEO will verify on Production after fix (`Verifier: ceo`).
+**Hypothesis for Dev:** form/link `target`, top-level navigation, or unre written action URL leaving the iframe / forcing a full document load instead of Roundcube AJAX.
 
 ### Links
 
 - Dev: `docs/qa/handoffs/HANDOFF-DEV-admin-console-0009.md`
+- Iteration 1 ship: `6001ff1`
 
 ---
 

@@ -237,13 +237,24 @@ function rewritePayload(input: string, requestIsHttps: boolean) {
   return next;
 }
 
+/**
+ * Roundcube toolbar controls (Mark, More, reply/forward carets, etc.) use
+ * href="#" / href="#menu-id". With <base href="/admin/mail/"> the browser
+ * resolves those to /admin/mail/#…, drops ?_task=…, and fully reloads the
+ * iframe. Keep the base tag for relative assets; block hash-only navigation.
+ */
+const HASH_LINK_NAV_GUARD = `<script>(function(){document.addEventListener("click",function(e){var t=e.target;if(!t||!t.closest)return;var a=t.closest("a[href]");if(!a)return;var h=a.getAttribute("href");if(h&&h.charAt(0)==="#")e.preventDefault();},true);})();</script>`;
+
 function injectBaseTag(html: string) {
-  if (/<base\s/i.test(html)) {
-    return html.replace(/<base\s[^>]*>/i, `<base href="${PROXY_PREFIX}/">`);
+  const baseTag = `<base href="${PROXY_PREFIX}/">`;
+  // Drop any upstream <base> so we inject a single controlled pair.
+  const next = html.replace(/<base\s[^>]*>/i, "");
+  if (!/<head[^>]*>/i.test(next)) {
+    return `${baseTag}${HASH_LINK_NAV_GUARD}${next}`;
   }
-  return html.replace(
+  return next.replace(
     /<head([^>]*)>/i,
-    `<head$1><base href="${PROXY_PREFIX}/">`,
+    `<head$1>${baseTag}${HASH_LINK_NAV_GUARD}`,
   );
 }
 
