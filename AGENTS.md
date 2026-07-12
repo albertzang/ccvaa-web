@@ -57,3 +57,15 @@ Full rules: `docs/protocols/GIT_DEPLOY.md`.
 - Email: Hover (`info@ccvaa.ca`), SMTP for admin OTP
 - Admin auth: 6-digit OTP + signed httpOnly cookie
 - Secrets: `.env.local` (local), Vercel env vars (Production / Preview) — never commit secrets
+
+## Cursor Cloud specific instructions
+
+Single Next.js 16 service; standard commands are in `README.md` (`npm run dev` / `lint` / `typecheck` / `build`). Dependencies (`npm ci`) are refreshed automatically on startup.
+
+Non-obvious setup for local dev (do this once per fresh VM; `.env.local` is gitignored and must never be committed):
+
+- Create `.env.local` with `ADMIN_SESSION_SECRET` set to a random string of **at least 32 chars** (shorter secrets make login silently fail) and `ADMIN_OTP_DEV_MODE=true`.
+- With `ADMIN_OTP_DEV_MODE=true`, the admin OTP is **printed to the `next dev` terminal logs** (`[admin-otp] DEV MODE — code ...`) instead of emailed — no SMTP/Hover creds needed locally.
+- Upstash Redis (`KV_REST_API_URL` / `KV_REST_API_TOKEN`) is **optional locally**: the app falls back to in-memory OTP/rate-limit stores, which is fine for a single-process `next dev` but not for Production/Preview.
+- Node: `.nvmrc` pins 20, but the app also runs fine on the VM's Node 22.
+- To verify the admin login end-to-end without a browser: `POST /api/admin/otp/request`, read the 6-digit code from the dev logs, then `POST /api/admin/otp/verify` with `{"code":"..."}` (send the cookie jar through), and confirm via `GET /api/admin/session`.
