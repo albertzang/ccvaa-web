@@ -15,7 +15,7 @@ Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.m
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `ceo` |
 | **Verify passes** | `pass2` |
 | **Ship path** | `direct-to-main` |
@@ -23,6 +23,8 @@ Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.m
 ### Description
 
 Remove the page-intro block on `/admin` (“CCVAA” / “Admin” / “Manage mail, members…”). Keep header, Mail, Login, and scaffolds. CEO verifies on Production after push.
+
+CEO verified 2026-07-11 on https://ccvaa-web.vercel.app/admin. Commit: `e38d35b`.
 
 ---
 
