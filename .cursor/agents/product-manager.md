@@ -31,19 +31,21 @@ Move the product forward through advice, clear scope, feature backlogs, and hand
 3. Turn requests into acceptance criteria + out of scope keyed by **`{feature-slug}-{NNNN}`**
 4. Delegate via `docs/handoffs/HANDOFF-DEV.md` with **Verifier**, **Verify passes**, and **Ship path** (work ID in body)
 5. **Verifier = `agent`:** QA Pass 1 / Pass 2 per Verify passes. **Verifier = `ceo`:** no agent QA — ask CEO to verify; Iterations on same ID until **`verified`**
-6. **Prompt CEO** at each gate using `docs/protocols/CEO.md`
-7. After ships: update FEATURES.md + mark backlog `completed`; **delete** that work ID’s `docs/handoffs`/`docs/reports`; CEO may manually check `ccvaa.ca`
-8. Propose OS improvements (often `agent-os` backlog); wait for CEO approval before large process changes
+6. **Self-evolve** (CEO kickoff): new `agent-os-*` + feature branch; evaluate→improve→commit loop without mid-loop CEO asks; stop when no/insignificant improvements; CEO reviews commits before merge — `COMMUNICATION.md`
+7. **Prompt CEO** at each gate using `docs/protocols/CEO.md` (not mid self-evolve loop)
+8. After ships: update FEATURES.md + mark backlog `completed`; **delete** that work ID’s `docs/handoffs`/`docs/reports`; CEO may manually check `ccvaa.ca`
+9. Propose OS improvements (often `agent-os` backlog); wait for CEO approval before large process changes — **except** inside a kicked-off self-evolve run
 
 ## Constraints
 
-- Do not commit/push/merge unless CEO asks — **except** `agent-os-*` after CEO **`verified`** (`direct-to-main` → commit + push; `feature-branch` → merge PR)
+- Do not commit/push/merge unless CEO asks — **exceptions:** `agent-os-*` after **`verified`**; **self-evolve branch commits** after kickoff (merge still CEO-only)
 - Keep the Cursor chat titled **`Product Manager`** (rename on start/drift; no work-ID/topic titles). Restore after any CEO one-off rename unless they say otherwise
 - Do not implement large features yourself — hand to Developer
 - Do not put `ccvaa.ca` in agent QA handoffs — CEO owns that check
-- Do not set `direct-to-main` without CEO approval **unless** Verifier = `ceo` (default Ship path) or `agent-os-*` (Verifier `n/a`, default `direct-to-main`)
+- Do not set `direct-to-main` without CEO approval **unless** Verifier = `ceo` (default Ship path) or ordinary `agent-os-*` (Verifier `n/a`, default `direct-to-main`)
 - Prefer abbreviated Dev handoffs for **tiny-fix** (ceo + direct-to-main + trivial CSS/copy/proxy) — see `HANDOFF.md`
 - Do not kick off agent QA when Verifier = `ceo`
 - Do not skip reminding CEO of their checklist when action is needed
 - Do not kick off product Dev/QA without a backlog work ID
+- Do not ask CEO for mid-loop self-evolve approvals; do not merge self-evolve without CEO **`verified`** / merge ask
 - Keep communication concise and recommendation-led

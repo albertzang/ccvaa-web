@@ -3,11 +3,40 @@
 **Feature:** Agent OS  
 **Slug:** `agent-os`  
 **Owner:** Product Manager  
-**Next ID:** `0008`  
+**Next ID:** `0009`  
 
 Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
-**Note:** All `agent-os-*` items use **Verifier = `n/a`**, **Verify passes = `n/a`**, and default **Ship path = `direct-to-main`** (docs/process — not code Pass 1/2). Use `feature-branch` only for multi-iteration umbrellas when CEO sets it.
+**Note:** All `agent-os-*` items use **Verifier = `n/a`**, **Verify passes = `n/a`**. Default **Ship path = `direct-to-main`**. Use **`feature-branch`** for **self-evolve** runs (required) and optional multi-iteration umbrellas.
+
+---
+
+## agent-os-0008 — Add OS self-evolve workflow
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `in-progress` |
+| **Verifier** | `n/a` |
+| **Verify passes** | `n/a` |
+| **Ship path** | `direct-to-main` |
+
+### Description
+
+Encode a CEO-kickoff **self-evolve** workflow: PM drives an evaluate→improve→commit loop on a feature branch without per-change CEO approval; CEO reviews commit history and alone authorizes merge.
+
+**Acceptance:**
+- [x] Workflow map lists **Self-evolve** as a common lane
+- [x] CEO checklist: kick off + review/merge
+- [x] PM skill/agent: loop rules, branch + backlog item per run, no CEO ask mid-loop, stop when no/insignificant improvements
+- [x] Clear vs default `agent-os` `direct-to-main` + **`verified`** ship
+- [x] FEATURES changelog updated
+
+### Overall
+
+- Encoded **self-evolve** common lane: CEO kickoff → PM creates `agent-os-*` + `chore/agent-os-{NNNN}-self-evolve` → evaluate vs Guiding principles → improve → commit loop (PM decides mid-loop) → stop when no/insignificant improvements → CEO reviews commit history → merge only with CEO **`verified`** / merge approve
+- Wired into `COMMUNICATION.md`, `CEO.md` (kickoff checklist), `HANDOFF.md`, gates matrix, `BACKLOG.md`, PM skill/agent, templates
 
 ---
 

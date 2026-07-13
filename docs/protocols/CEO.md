@@ -12,8 +12,11 @@ PM should remind the CEO of the relevant checklist whenever an action is due.
 | Context | Completes backlog? | Also authorizes ship? |
 |---------|--------------------|------------------------|
 | **Verifier = `ceo`** (product) | Yes → PM marks `completed` | **No** — you already approved (or still must approve) push/merge separately |
-| **`agent-os-*`** | Yes → PM marks `completed` | **Yes** — PM ships same turn (`direct-to-main` → commit + push; `feature-branch` → merge PR) |
-| You note issues instead | No — Iteration on same ID | No |
+| **`agent-os-*`** + `direct-to-main` | Yes → PM marks `completed` | **Yes** — PM commit + push `main` same turn |
+| **`agent-os-*` self-evolve** (`feature-branch`) | Yes → PM marks `completed` | **Yes** — PM **merges PR** + deletes branch same turn (after you reviewed commits) |
+| You note issues / hold instead | No — Iteration on same ID | No |
+
+Canonical detail: [`COMMUNICATION.md`](COMMUNICATION.md#what-ceo-verified-means).
 
 ---
 
@@ -23,10 +26,10 @@ PM should remind the CEO of the relevant checklist whenever an action is due.
 |----------------|--------|
 | Goals & priorities | What to build next; accept/reject PM advice; backlog priorities |
 | Choose **Verifier** | `agent` (default) or `ceo` (you verify; bypass agent QA) — see below |
-| Approve **Ship path: `direct-to-main`** | Explicit yes required — **or** implied when Verifier = `ceo` and Ship path stays the default `direct-to-main`, or for **`agent-os-*`** (Verifier `n/a`, default Ship path `direct-to-main`) |
-| Approve **kickoff** of Developer / QA / baseline | Until further automation is approved |
-| Approve **merge to `main`** (or direct push) | After Pass 1 (agent or your Preview check), or for approved direct-to-main |
-| Approve **process/OS changes** | Multi-agent protocol refinements; for `agent-os-*`, **`verified`** authorizes PM to mark completed **and ship** (`direct-to-main` → commit + push; `feature-branch` → merge PR) |
+| Approve **Ship path: `direct-to-main`** | Explicit yes required — **or** implied when Verifier = `ceo` and Ship path stays the default `direct-to-main`, or for ordinary **`agent-os-*`** docs (`n/a`, default `direct-to-main`) |
+| Approve **kickoff** of Developer / QA / baseline / **self-evolve** | Until further automation is approved |
+| Approve **merge to `main`** (or direct push) | After Pass 1 (agent or your Preview check), approved direct-to-main, or **self-evolve** PR after commit-history review |
+| Approve **process/OS changes** | Multi-agent protocol refinements; for `agent-os-*`, **`verified`** (or explicit merge ask) authorizes PM to mark completed **and ship** per Ship path |
 | **Vercel / Hover secrets & env** | e.g. `ADMIN_EMAIL` / `ADMIN_PASS` in local `.env.local`, `VERCEL_AUTOMATION_BYPASS_SECRET`, any future Vercel secrets — never ask agents to store these in git |
 | **Admin mailbox for QA** | Keep `.env.local` `ADMIN_EMAIL` / `ADMIN_PASS` current for Hover sign-in (`docs/protocols/QA_AUTH.md`). When **you** are Verifier, you run login yourself |
 | **Manual check of https://ccvaa.ca/** | Out of agent Dev/QA flow (DNS/cache) |
@@ -39,7 +42,8 @@ PM should remind the CEO of the relevant checklist whenever an action is due.
 | Implementation, feature branches, PRs | Developer |
 | Pass 1 / Pass 2 / baseline testing | QA agent — **unless** backlog **Verifier = `ceo`** (then you verify) |
 | Handoffs, FEATURES / feature backlogs, triage | PM |
-| Delete feature branch after merge | Developer |
+| **Self-evolve mid-loop OS edits + commits** | **PM** (after you kick off self-evolve — no per-change ask) |
+| Delete feature branch after merge | Developer (or PM for `agent-os` self-evolve / feature-branch ship) |
 
 CEO may still skim a PR; deep code review is optional unless PM flags risk.
 
@@ -86,9 +90,9 @@ No agent `HANDOFF-QA-*` / `QA-*` files for this path. Do not mint a new work ID 
 
 ## Checklist: agent-os docs / process (`Verifier = n/a`)
 
-Use for `agent-os-*` items (protocols, templates, skills — not product code Pass 1/2).
+Use for ordinary `agent-os-*` items (protocols, templates, skills — not product code Pass 1/2). **Not** the self-evolve loop — see below.
 
-- [ ] Ship path defaults to **`direct-to-main`** (PM should not leave `tbd`); use `feature-branch` only for multi-iteration OS umbrellas
+- [ ] Ship path defaults to **`direct-to-main`** (PM should not leave `tbd`); use `feature-branch` for multi-iteration umbrellas or **self-evolve**
 - [ ] PM implements (on `main` or the feature branch)
 - [ ] PM asks you to skim / approve
 - [ ] Reply **`verified`** → PM marks **`completed`**, then ships in the same turn:
@@ -97,6 +101,21 @@ Use for `agent-os-*` items (protocols, templates, skills — not product code Pa
 - [ ] **Or** note issues → PM Iterates on the same `agent-os-*` ID until you say **`verified`**
 
 Saying **`verified`** on an `agent-os-*` item is standing authorization to ship that work ID (no separate “please commit/merge” ask).
+
+---
+
+## Checklist: kick off OS self-evolve
+
+Use when you want PM to improve the Agent OS in a bounded loop **without** asking you for each change.
+
+- [ ] Tell PM: **kick off self-evolve** (optional scope hint, e.g. “protocols only”)
+- [ ] PM creates a **new** `agent-os-{NNNN}` with Ship path **`feature-branch`**, opens `chore/agent-os-{NNNN}-self-evolve`, and runs the evaluate→improve→commit loop
+- [ ] You do **not** need to approve mid-loop commits — kickoff authorized that
+- [ ] When PM stops the loop: review the **commit history** on the PR/branch
+- [ ] Reply **`verified`** or **merge** → PM merges + deletes branch + marks `completed`
+- [ ] **Or** note issues / hold → PM continues on the **same** work ID until you approve
+
+Full flow: [`COMMUNICATION.md`](COMMUNICATION.md#self-evolve-ceo-kickoff-os-improve-loop).
 
 ---
 

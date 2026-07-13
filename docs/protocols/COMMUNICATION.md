@@ -16,7 +16,7 @@ Intake → Prioritize → Kickoff → Ship → Verify → Close
 |-------|----------------|---------------|
 | **Intake** | CEO bug/task / chat goal, or QA **Bugs found** → backlog item (`{feature-slug}-{NNNN}`) | [`BACKLOG.md`](../product/BACKLOG.md), [`CEO.md`](CEO.md) report checklist |
 | **Prioritize** | Backlog review: `now` / `next` / `later`, `closed`, Verifier | [`CEO.md`](CEO.md) backlog review |
-| **Kickoff** | CEO picks ID → `in-progress` + `HANDOFF-DEV.md` (tiny-fix abbrev OK) | [`HANDOFF.md`](HANDOFF.md), [`CEO.md`](CEO.md) kickoff |
+| Kickoff | CEO picks ID → `in-progress` + Dev handoff (or **self-evolve** → new `agent-os-*` + feature branch) | [`BACKLOG.md`](../product/BACKLOG.md), [`HANDOFF.md`](HANDOFF.md), [`CEO.md`](CEO.md) |
 | **Ship** | Per **Ship path** + Verifier defaults | [`GIT_DEPLOY.md`](GIT_DEPLOY.md) |
 | **Verify** | Agent Pass 1/2, CEO smoke, baseline, or agent-os skim | [`GIT_DEPLOY.md`](GIT_DEPLOY.md), [`HANDOFF.md`](HANDOFF.md#gates-matrix-ready--done--verified), [`CEO.md`](CEO.md) |
 | **Close** | `completed` / `closed` → delete handoffs/reports; FEATURES if needed | [`HANDOFF.md`](HANDOFF.md) lifespan |
@@ -29,17 +29,46 @@ Intake → Prioritize → Kickoff → Ship → Verify → Close
 | **CEO Verifier** | `ceo` | `direct-to-main` | `pass2` | CEO self-verifies; no agent QA |
 | **Tiny-fix** | `ceo` | `direct-to-main` | `pass2` | Trivial CSS/copy/proxy; abbreviated handoff |
 | **agent-os** | `n/a` | `direct-to-main` | `n/a` | Docs/process; `verified` **ships** |
+| **Self-evolve** | `n/a` | **`feature-branch`** (required) | CEO reviews commits | CEO kickoff; PM loops improve→commit; merge only with CEO approval |
 | **Baseline** | (no feature ID yet) | — | Production audit | FEATURES drift / regression; then promote findings |
 
 **Unusual overrides** (CEO must say so explicitly): see [Rare paths](#rare-paths-overrides) below.
+
+### Self-evolve (CEO-kickoff OS improve loop)
+
+CEO-authorized PM autonomy for refining the Agent OS. Kickoff = standing approval for PM to **decide and commit** on the feature branch without per-change CEO yes. **Merge to `main` stays CEO-only.**
+
+```
+CEO: kick off self-evolve
+  → PM: create new agent-os-{NNNN} (Ship path feature-branch) + branch chore/agent-os-{NNNN}-self-evolve
+  → loop until stop:
+       1. Evaluate OS vs Guiding principles (AGENTS.md); pick most valuable improvement
+          — stop if none, or remaining ideas are insignificant
+       2. Implement; commit on the feature branch; update backlog Overall
+       3. back to 1
+  → PM: push branch + open PR; ask CEO to review commit history
+  → CEO: approve merge (or note changes) → PM merges + deletes branch + marks completed
+```
+
+| Rule | Detail |
+|------|--------|
+| **Who decides mid-loop** | **PM** — no CEO approval per improvement |
+| **Who merges** | **CEO** only (explicit merge ask / **`verified`** on that work ID) |
+| **Backlog** | One **new** `agent-os-*` item per run; Verifier/`Verify passes` = `n/a`; Ship path = **`feature-branch`** |
+| **Branch** | `chore/agent-os-{NNNN}-self-evolve` (work ID required) |
+| **Stop** | No valuable opportunity left, **or** PM judges further changes insignificant |
+| **Out of scope** | Product code, secrets, Verifier=`agent`/`ceo` product lanes — docs/process OS only |
+
+Mechanics: [`CEO.md`](CEO.md) self-evolve checklists · [`HANDOFF.md`](HANDOFF.md) · PM skill.
 
 ### What CEO **`verified`** means
 
 | Context | Completes backlog? | Also authorizes ship? |
 |---------|--------------------|------------------------|
 | **Verifier = `ceo`** (product code) | Yes → `completed` | **No** — push/merge already happened (or still needs a separate CEO push/merge ask per Ship path) |
-| **`agent-os-*`** (Verifier = `n/a`) | Yes → `completed` | **Yes** — same turn: `direct-to-main` → commit + push; `feature-branch` → merge PR + delete branch |
-| Issues noted instead of `verified` | No — stay `in-progress` | No — **Iteration** on the **same** work ID |
+| **`agent-os-*`** + `direct-to-main` | Yes → `completed` | **Yes** — same turn: commit + push `main` |
+| **`agent-os-*` self-evolve** (`feature-branch`) | Yes → `completed` | **Yes** — same turn: **merge PR** + delete branch (after CEO reviewed commit history) |
+| Issues / hold instead | No — stay `in-progress` | No — PM Iterates on the **same** work ID (self-evolve: more loop commits, or address CEO notes) |
 
 Full checklists: [`CEO.md`](CEO.md). Definitions: [`HANDOFF.md`](HANDOFF.md).
 
@@ -52,7 +81,7 @@ Prefer the common lanes. These are **allowed only when CEO explicitly overrides*
 | Verifier=`agent` + Ship path=`direct-to-main` | Agent QA without a Preview is awkward for pass1 | Keep `feature-branch`, or switch Verifier to `ceo` |
 | Verifier=`ceo` + Ship path=`feature-branch` | CEO wants Preview before merge | OK as override; not the default story |
 | Verify passes=`pass1` or `pass2` alone (agent) | Skips half the safety net | Default `pass1+pass2`; use alone only for scoped exceptions |
-| `agent-os` + `feature-branch` | Extra PR ceremony | Default `direct-to-main`; use only for multi-iteration OS umbrellas |
+| `agent-os` + `feature-branch` | Extra PR ceremony vs default docs path | Default `direct-to-main` for ordinary OS docs; **required** for **self-evolve** runs (and optional multi-iteration umbrellas) |
 
 Developer still **blocks** inventing `direct-to-main` when Verifier=`agent` without CEO approval on the handoff.
 

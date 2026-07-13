@@ -73,9 +73,9 @@ Set on the backlog item and Dev handoff. See [`docs/product/BACKLOG.md`](../prod
 
 **Verify passes** may be `pass1+pass2`, `pass1` (Preview only), or `pass2` (Production only). Preview = pre-merge staging. **`agent-os-*` items always use Verifier / Verify passes = `n/a`**, and Ship path defaults to **`direct-to-main`** (do not leave `tbd`).
 
-**Prefer common lanes** (happy path / CEO Verifier / tiny-fix / agent-os / baseline): [`COMMUNICATION.md`](COMMUNICATION.md). **Rare overrides** (e.g. `agent` + `direct-to-main`, agent `pass1`-only) need explicit CEO wording — do not invent them.
+**Prefer common lanes** (happy path / CEO Verifier / tiny-fix / agent-os / **self-evolve** / baseline): [`COMMUNICATION.md`](COMMUNICATION.md). **Rare overrides** (e.g. `agent` + `direct-to-main`, agent `pass1`-only) need explicit CEO wording — do not invent them.
 
-**CEO Verifier:** after Dev ships to the listed env(s), PM asks CEO to verify. CEO says **`verified`** → backlog `completed` (**does not** auto-push product code). Issues → **Iteration** on the **same** work ID. On **`agent-os-*`**, **`verified`** also ships. Table: [`COMMUNICATION.md`](COMMUNICATION.md#what-ceo-verified-means). Details: `docs/protocols/CEO.md`.
+**CEO Verifier:** after Dev ships to the listed env(s), PM asks CEO to verify. CEO says **`verified`** → backlog `completed` (**does not** auto-push product code). Issues → **Iteration** on the **same** work ID. On **`agent-os-*`**, **`verified`** also ships (`direct-to-main` → push; **self-evolve** / `feature-branch` → merge). Table: [`COMMUNICATION.md`](COMMUNICATION.md#what-ceo-verified-means). Details: `docs/protocols/CEO.md`.
 
 ## Default delivery flow (Verifier = `agent`)
 

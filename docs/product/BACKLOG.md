@@ -38,7 +38,7 @@
 
 CEO may override Ship path and Verify passes when Verifier is `agent` or `ceo`. **Verifier = `ceo`** implies CEO owns verification and (for the default Ship path) approves `direct-to-main`. Prefer **common lanes** in [`COMMUNICATION.md`](../protocols/COMMUNICATION.md) (happy path / CEO Verifier / tiny-fix / agent-os / baseline).
 
-**Do not** set Verifier / Verify passes to `agent` or `ceo` on **`agent-os-*`** items — always **`n/a`**. **Ship path for `agent-os-*`:** default **`direct-to-main`**; use **`feature-branch`** only for multi-iteration umbrellas (CEO sets, e.g. `agent-os-0005`). Never leave Ship path as `tbd`.
+**Do not** set Verifier / Verify passes to `agent` or `ceo` on **`agent-os-*`** items — always **`n/a`**. **Ship path for `agent-os-*`:** default **`direct-to-main`**; use **`feature-branch`** for **self-evolve** runs (required) and optional multi-iteration umbrellas. Never leave Ship path as `tbd`.
 
 ### Rare paths (CEO must override explicitly)
 
@@ -47,7 +47,9 @@ CEO may override Ship path and Verify passes when Verifier is `agent` or `ceo`. 
 | `agent` + `direct-to-main` | `agent` + `feature-branch`, or Verifier `ceo` |
 | `ceo` + `feature-branch` | OK when CEO wants Preview; not the default |
 | Agent Verify passes = `pass1` or `pass2` alone | Default `pass1+pass2` unless CEO scopes an exception |
-| `agent-os` + `feature-branch` | Default `direct-to-main` unless multi-iteration umbrella |
+| Ordinary `agent-os` docs on `feature-branch` | Default `direct-to-main` unless umbrella or **self-evolve** |
+
+**Self-evolve:** CEO kickoff → PM creates a new `agent-os-*` + feature branch and loops improve→commit without mid-loop CEO asks; merge only with CEO approval. See [`COMMUNICATION.md`](../protocols/COMMUNICATION.md#self-evolve-ceo-kickoff-os-improve-loop).
 
 **CEO Verifier loop** (Verifier = `ceo` only): stay `in-progress` until CEO says **verified** → `completed`. If CEO finds issues, append an **Iteration** on the same backlog item, overwrite the Dev handoff, and kick Dev again — do not invent a new work ID unless scope is deliberately split. **`verified`** on product code does **not** auto-push — see [`COMMUNICATION.md`](../protocols/COMMUNICATION.md). Details: [`CEO.md`](../protocols/CEO.md).
 

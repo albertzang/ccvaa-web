@@ -19,7 +19,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 Operating docs live under [`docs/`](docs/README.md). Refine this OS via `agent-os-*` backlog items with CEO approval.
 
-**Workflow map:** [`docs/protocols/COMMUNICATION.md`](docs/protocols/COMMUNICATION.md) — Intake → Prioritize → Kickoff → Ship → Verify → Close (plus common lanes, what **`verified`** means, and rare overrides).
+**Workflow map:** [`docs/protocols/COMMUNICATION.md`](docs/protocols/COMMUNICATION.md) — Intake → Prioritize → Kickoff → Ship → Verify → Close (plus common lanes incl. **self-evolve**, what **`verified`** means, and rare overrides).
 
 ## Multi-agent roles
 

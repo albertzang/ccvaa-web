@@ -115,6 +115,21 @@ Developer still blocks on blank work ID and still must not invent `direct-to-mai
 4. Dev implements; PM asks CEO to verify again  
 5. Repeat until CEO says **`verified`** → `completed` + FEATURES.md if needed  
 
+### Self-evolve (CEO kickoff)
+
+1. CEO: **kick off self-evolve** (optional scope hint)  
+2. PM: create **new** `agent-os-{NNNN}` — Verifier/`Verify passes`=`n/a`, Ship path=**`feature-branch`**, status `in-progress`  
+3. PM: branch `chore/agent-os-{NNNN}-self-evolve` from latest `main`; open PR when ready for review (or before asking CEO)  
+4. **Loop** (PM decides; **no** mid-loop CEO approval):
+   - Evaluate Agent OS vs Guiding principles in `AGENTS.md`; pick the **most valuable** improvement  
+   - **Stop** if none remain, or further ideas are **insignificant**  
+   - Otherwise implement, **commit on the feature branch**, append to backlog **Overall**, repeat  
+5. PM: push branch; one-line ask CEO to **review commit history** on the PR  
+6. CEO **`verified`** / merge approve → PM marks `completed`, merges PR, deletes branch, updates FEATURES if needed  
+7. CEO notes / hold → same work ID; PM continues loop or addresses notes  
+
+No Dev/QA handoffs. Docs/process only. Canonical: [`COMMUNICATION.md`](COMMUNICATION.md#self-evolve-ceo-kickoff-os-improve-loop).
+
 ## Gates matrix (ready / done / verified)
 
 One place for “what must be true” at each gate. Workflow index: [`COMMUNICATION.md`](COMMUNICATION.md). What CEO **`verified`** means (complete vs ship): [`COMMUNICATION.md`](COMMUNICATION.md#what-ceo-verified-means).
@@ -128,7 +143,8 @@ One place for “what must be true” at each gate. Workflow index: [`COMMUNICAT
 | **QA** | **Pass 2 verified** | Only if Verifier=`agent` + pass2; Production smoke on https://ccvaa-web.vercel.app/; work ID in report; **Bugs found** if needed; sign-off **ship confirmed** / **hotfix**; fail → Iteration + **new** branch from `main` (not revived merged branch); do **not** block on `ccvaa.ca` |
 | **QA** | **Baseline verified** | Production audit (no Preview / no feature work ID); **Bugs found** + **baseline confirmed** / **issues found**; PM promotes (**Source:** `qa`); do **not** block on `ccvaa.ca` |
 | **CEO** | **Product verified** (Verifier=`ceo`) | Smoked Verify-passes env(s); reply **`verified`** → PM marks `completed` (**no** auto-push/merge); or note issues → Iteration same ID; no agent QA files; `ccvaa.ca` optional/separate |
-| **CEO** | **agent-os verified** | Skim/approve `agent-os-*`; reply **`verified`** → PM marks `completed` **and ships** same turn (`direct-to-main` → commit+push; `feature-branch` → merge+delete branch); or Iteration same ID |
+| **CEO** | **agent-os verified** | Skim/approve `agent-os-*`; reply **`verified`** → PM marks `completed` **and ships** same turn (`direct-to-main` → commit+push; `feature-branch` / **self-evolve** → merge+delete branch); or Iteration same ID |
+| **PM** | **Self-evolve loop** | After CEO kickoff: new `agent-os-*` + feature branch; evaluate→improve→commit without mid-loop CEO asks; stop when no/insignificant improvements; then ask CEO to review commits before merge |
 | **PM** | **Close done** | Status `completed` / `closed`; FEATURES updated if behavior changed; delete matching `docs/handoffs` + `docs/reports`; strip dead file Links; on `agent-os-*` + **`verified`**, ship per Ship path in the same turn |
 
 **Always Iteration on the same work ID** when verify fails or CEO notes issues; Ship path decides branch vs `main` (see [`GIT_DEPLOY.md`](GIT_DEPLOY.md)).
