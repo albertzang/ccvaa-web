@@ -15,7 +15,7 @@ Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.m
 |-------|--------|
 | **Type** | `bug` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Source** | `ceo` |
 | **Verifier** | `ceo` |
 | **Verify passes** | `pass2` |
@@ -33,11 +33,11 @@ Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.m
 
 **Severity:** low
 
-**Fix approach:** Same family as Help → new tab — HTML rewrite and/or passive link fixer in `src/app/admin/mail/[[...path]]/route.ts` for `www.hover.com` (and plain `hover.com` if present) anchors.
+**Fix:** Mail proxy rewrite + runtime fixer for `www.hover.com` / `hover.com` home anchors. Commit `d908c66`. CEO verified 2026-07-12.
 
 ### Links
 
-- Related: Help new-tab rewrite in mail proxy; `admin-console-0011`
+- Commit: `d908c66`
 
 ---
 
