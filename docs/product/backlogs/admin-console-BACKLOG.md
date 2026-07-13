@@ -180,14 +180,14 @@ Shipped: error-copy via PR #1; CEO set Production SMTP.
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `later` |
-| **Status** | `not-started` |
+| **Status** | `closed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
 
 ### Description
 
-**Obsolete after admin-console-0010** (OTP removed; admin auth = Hover mailbox session). Keep only if CEO revives a dedicated QA mailbox for a different purpose.
+**Closed 2026-07-12:** Obsolete after `admin-console-0010` (OTP removed; admin auth = Hover mailbox session). Reopen only if CEO wants a dedicated QA mailbox for a different purpose.
 
 ### Links
 
@@ -201,14 +201,14 @@ Shipped: error-copy via PR #1; CEO set Production SMTP.
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `not-started` |
+| **Status** | `closed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
 
 ### Description
 
-Ops/checklist: confirm Vercel **Preview** has the same admin-critical env as Production where needed for Pass 1 (SMTP, `ADMIN_SESSION_SECRET`, `KV_REST_API_*`, etc.). Document gaps in handoffs; CEO sets secrets. Not a product UI change unless missing env causes code/docs fixes.
+**Closed 2026-07-12:** Obsolete after `admin-console-0010`. Preview no longer needs SMTP / `ADMIN_SESSION_SECRET` / `KV_REST_API_*` for admin login. Remaining Preview needs (Deployment Protection bypass, mail proxy reachability to Hover) are covered by existing protocols — not this OTP-era checklist.
 
 ### Links
 
