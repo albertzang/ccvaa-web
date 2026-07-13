@@ -221,6 +221,7 @@ function rewritePayload(input: string, requestIsHttps: boolean) {
   next = next.replaceAll(`${PROXY_PREFIX}${PROXY_PREFIX}`, PROXY_PREFIX);
   next = rewriteBreakoutTargets(next);
   next = rewriteHelpLinks(next);
+  next = rewriteHoverHomeLinks(next);
   return next;
 }
 
@@ -264,6 +265,24 @@ function rewriteHelpLinks(input: string) {
 }
 
 /**
+ * Login “Go back to Hover.com” must open marketing home in a new tab.
+ * rewriteBreakoutTargets may have already coerced _top/_parent → _self, so
+ * force target/_rel even when a target is already present.
+ */
+function rewriteHoverHomeLinks(input: string) {
+  return input.replace(
+    /<a\b([^>]*?)\bhref=(["'])(https?:\/\/(?:www\.)?hover\.com\/?)\2([^>]*)>/gi,
+    (_match, before: string, quote: string, href: string, after: string) => {
+      let attrs = `${before}href=${quote}${href}${quote}${after}`;
+      attrs = attrs.replace(/\s*\btarget\s*=\s*(["'][^"']*["']|\S+)/gi, "");
+      attrs = attrs.replace(/\s*\brel\s*=\s*(["'][^"']*["']|\S+)/gi, "");
+      attrs = attrs.replace(/\s+$/, "");
+      return `<a ${attrs.trimStart()} target="_blank" rel="noopener noreferrer">`;
+    },
+  );
+}
+
+/**
  * Roundcube toolbar controls (Mark, More, reply/forward carets, etc.) use
  * href="#" / href="#menu-id". With <base href="/admin/mail/"> the browser
  * resolves those to /admin/mail/#…, drops ?_task=…, and fully reloads the
@@ -276,7 +295,7 @@ const HASH_LINK_NAV_GUARD = `<script>(function(){document.addEventListener("clic
  * resolve to /admin/mail/?… (Next 308 → flash). Fix href/action attributes only —
  * do not intercept clicks; Roundcube handles folder/message nav via AJAX.
  */
-const PASSIVE_QUERY_LINK_FIXER = `<script>(function(){var P="/admin/mail",H="${HOVER_HELP_URL}";function fixHelp(a){var h=a.getAttribute("href");if(!h)return;if(/\\/help\\/|help\\.html|_task=help/.test(h)){a.setAttribute("href",H);a.setAttribute("target","_blank");a.setAttribute("rel","noopener noreferrer");}}function fixTarget(a){if(a.getAttribute("href")===H)return;if(/\\/help\\/|help\\.html|_task=help/.test(a.getAttribute("href")||""))return;var t=a.getAttribute("target");if(t==="_top"||t==="_parent")a.setAttribute("target","_self");}function fixHref(a){var h=a.getAttribute("href");if(!h||h.charAt(0)==="#")return;fixHelp(a);if(a.getAttribute("href")===H)return;fixTarget(a);h=a.getAttribute("href");if(h.charAt(0)==="?"||h.indexOf("./?")===0)a.setAttribute("href",P+h.replace(/^\\.\\/?/,""));else if(h.indexOf(P+"/?")>=0)a.setAttribute("href",h.replace(/\\/admin\\/mail\\/\\?/g,P+"?"));else if((h==="/"||h.indexOf("/?")===0)&&h.indexOf(P)!==0)a.setAttribute("href",P+h.slice(1));else if(h.charAt(0)==="/"&&h.indexOf(P)!==0&&h.indexOf("//")!==0&&/_task=/.test(h))a.setAttribute("href",P+h.replace(/^\\//,""));}function fixForm(f){var a=f.getAttribute("action");if(a&&a.charAt(0)==="?")f.setAttribute("action",P+a);else if(a&&(a==="/"||a.indexOf("/?")===0)&&a.indexOf(P)!==0)f.setAttribute("action",P+a.slice(1));var t=f.getAttribute("target");if(t==="_top"||t==="_parent")f.setAttribute("target","_self");}function scan(r){if(!r.querySelectorAll)return;r.querySelectorAll("a[href]").forEach(fixHref);r.querySelectorAll("form[action]").forEach(fixForm);}scan(document);new MutationObserver(function(ms){ms.forEach(function(m){m.addedNodes.forEach(function(n){if(n.nodeType!==1)return;scan(n);if(n.matches){if(n.matches("a[href]"))fixHref(n);if(n.matches("form[action]"))fixForm(n);}});});}).observe(document.documentElement,{childList:true,subtree:true});})();</script>`;
+const PASSIVE_QUERY_LINK_FIXER = `<script>(function(){var P="/admin/mail",H="${HOVER_HELP_URL}",HOME=/^https?:\\/\\/(www\\.)?hover\\.com\\/?$/i;function isHoverHome(h){return!!h&&HOME.test(h);}function fixHelp(a){var h=a.getAttribute("href");if(!h)return;if(/\\/help\\/|help\\.html|_task=help/.test(h)){a.setAttribute("href",H);a.setAttribute("target","_blank");a.setAttribute("rel","noopener noreferrer");}}function fixHoverHome(a){var h=a.getAttribute("href");if(!isHoverHome(h))return;a.setAttribute("target","_blank");a.setAttribute("rel","noopener noreferrer");}function fixTarget(a){var h=a.getAttribute("href")||"";if(h===H||isHoverHome(h))return;if(/\\/help\\/|help\\.html|_task=help/.test(h))return;var t=a.getAttribute("target");if(t==="_top"||t==="_parent")a.setAttribute("target","_self");}function fixHref(a){var h=a.getAttribute("href");if(!h||h.charAt(0)==="#")return;fixHelp(a);fixHoverHome(a);h=a.getAttribute("href");if(h===H||isHoverHome(h))return;fixTarget(a);if(h.charAt(0)==="?"||h.indexOf("./?")===0)a.setAttribute("href",P+h.replace(/^\\.\\/?/,""));else if(h.indexOf(P+"/?")>=0)a.setAttribute("href",h.replace(/\\/admin\\/mail\\/\\?/g,P+"?"));else if((h==="/"||h.indexOf("/?")===0)&&h.indexOf(P)!==0)a.setAttribute("href",P+h.slice(1));else if(h.charAt(0)==="/"&&h.indexOf(P)!==0&&h.indexOf("//")!==0&&/_task=/.test(h))a.setAttribute("href",P+h.replace(/^\\//,""));}function fixForm(f){var a=f.getAttribute("action");if(a&&a.charAt(0)==="?")f.setAttribute("action",P+a);else if(a&&(a==="/"||a.indexOf("/?")===0)&&a.indexOf(P)!==0)f.setAttribute("action",P+a.slice(1));var t=f.getAttribute("target");if(t==="_top"||t==="_parent")f.setAttribute("target","_self");}function scan(r){if(!r.querySelectorAll)return;r.querySelectorAll("a[href]").forEach(fixHref);r.querySelectorAll("form[action]").forEach(fixForm);}scan(document);new MutationObserver(function(ms){ms.forEach(function(m){m.addedNodes.forEach(function(n){if(n.nodeType!==1)return;scan(n);if(n.matches){if(n.matches("a[href]"))fixHref(n);if(n.matches("form[action]"))fixForm(n);}});});}).observe(document.documentElement,{childList:true,subtree:true});})();</script>`;
 
 /**
  * Iteration 7: same-origin iframe lets Roundcube set top/parent.location to
