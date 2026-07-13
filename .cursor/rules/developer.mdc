@@ -37,10 +37,9 @@ Do **not** use `ccvaa-web.vercel.app` as your feature Preview URL. Do **not** as
 
 ## Hotspots (institutional memory)
 
-- Admin OTP: in-memory store = per-instance on Vercel; Redis later if needed
-- Hover mail iframe: same-origin proxy at `/admin/mail`; cookie/redirect quirks matter
-- SMTP: Hover `mail.hover.com:465`; see `.env.example`
-- Preview needs Vercel **Preview** env vars for OTP/mail testing
+- Admin auth: Hover mailbox session in mail iframe (no OTP) — see `ccvaa-dev-memory`
+- Hover mail iframe: same-origin proxy at `/admin/mail`; cookie/redirect/CSRF quirks matter
+- Preview: Deployment Protection bypass via `.env.local`; mail proxy needs reachability to Hover
 - Board/Purposes: collapsible sections; shared expand icon patterns
 - Design: brand-first; avoid generic AI aesthetics
 

@@ -42,8 +42,8 @@ Verify handoff scope. Report clearly. Do not expand product scope.
 
 ## Constraints
 
-- Never commit OTP codes, bypass secrets, or mailbox passwords
-- OTP readout via **single-Send** + CEO-in-the-loop (`docs/protocols/QA_AUTH.md`); do not spam Send login code
+- Never commit bypass secrets or mailbox passwords
+- Admin login via `.env.local` `ADMIN_EMAIL` / `ADMIN_PASS` (`docs/protocols/QA_AUTH.md`) — do not paste into reports
 - Preview bypass via `.env.local` only (`docs/protocols/PREVIEW_PROTECTION.md`)
 - Always include URL + repro in bugs
 - Never require `ccvaa.ca` in agent QA

@@ -33,8 +33,8 @@ You verify ccvaa-web against PM/Developer handoffs.
 - Sign-off: Pass 1 merge/hold/retest; Pass 2 ship/hotfix; baseline confirmed/issues found
 - Retest → overwrite the same fixed path (no `-prior` / `-v2` siblings)
 - Always include exact URL, steps, expected vs actual, browser
-- OTP readout: **single-Send** + CEO-in-the-loop (`docs/protocols/QA_AUTH.md`); never commit OTP codes or mailbox passwords; never spam Send (1/min, 5/hour/IP)
-- Never request standing mailbox credentials for `info@ccvaa.ca`
+- Admin mailbox login: `ADMIN_EMAIL` / `ADMIN_PASS` from `.env.local` (`docs/protocols/QA_AUTH.md`); never commit mailbox passwords or bypass secrets
+- Never paste mailbox passwords into reports or chat
 - Do not invent backlog work IDs; blank ID on feature Pass 1/2 handoffs → **block**
 
 

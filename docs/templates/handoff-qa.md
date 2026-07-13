@@ -55,16 +55,13 @@ Cleanup happens **right after merge**, before Pass 2 testing — see `docs/proto
 
 ## Preview env notes (Pass 1)
 
-Admin mail auth needs Preview Deployment Protection bypass if testing `/admin` on Preview (mailbox login in iframe — no OTP).
+Admin mail auth needs Preview Deployment Protection bypass if testing `/admin` on Preview (mailbox login in iframe).
 
 ## Production / baseline / Pass 2 auth notes
 
-- Admin auth = Hover mailbox login in Mail iframe. **Do not commit mailbox passwords.**
-- **Full admin login:** **single-Send** + CEO-in-the-loop — see `docs/protocols/QA_AUTH.md`.
-  - QA: exactly **one** successful Send → stop → CEO pastes newest code → verify **once**.
-  - Do **not** spam Send (limits: 1/min, 5/hour/IP); do not ask CEO to Send on the same env during the attempt.
-- If CEO unavailable: test request UI carefully (prefer ≤1 Send); mark full login/scaffolds **blocked** (not automatic product fail) unless handoff says otherwise.
-- Never give QA standing mailbox passwords.
+- Admin auth = Hover mailbox login in Mail iframe — see `docs/protocols/QA_AUTH.md`
+- QA reads `ADMIN_EMAIL` / `ADMIN_PASS` from `.env.local` to sign in — **do not** paste into handoffs or reports
+- Never commit mailbox passwords or give them standing share outside `.env.local`
 
 ## Report back with
 

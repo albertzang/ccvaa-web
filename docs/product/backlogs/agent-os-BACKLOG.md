@@ -29,6 +29,7 @@ CEO-led refinement of the multi-agent OS (principles → concrete doc/protocol c
 ### Overall
 
 - Guiding principles encoded in `AGENTS.md` (repo-as-brain, CEO as decision-maker, thin roles, defaults, same-ID loops, encode friction, least process, observable done)
+- **Stale-doc sweep:** removed OTP-era copy from CEO/COMMUNICATION/QA_AUTH/PREVIEW_PROTECTION, handoff-qa template, and Dev/QA/PM rules·agents·skills; left historical backlog + FEATURES changelog rows intact
 
 ---
 

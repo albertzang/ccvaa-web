@@ -16,8 +16,8 @@ PM should remind the CEO of the relevant checklist whenever an action is due.
 | Approve **kickoff** of Developer / QA / baseline | Until further automation is approved |
 | Approve **merge to `main`** (or direct push) | After Pass 1 (agent or your Preview check), or for approved direct-to-main |
 | Approve **process/OS changes** | Multi-agent protocol refinements; for `agent-os-*`, **`verified`** authorizes PM to mark completed **and ship** (`direct-to-main` → commit + push; `feature-branch` → merge PR) |
-| **Vercel / Hover secrets & env** | e.g. `SMTP_PASS`, SMTP_*, `ADMIN_SESSION_SECRET`, `KV_REST_API_*` — never ask agents to store these in git |
-| **OTP readout** | **Single-Send** only: QA Sends once → you paste newest code → QA verifies once (`docs/protocols/QA_AUTH.md`). Do not Send yourself on the same env during the attempt. When **you** are Verifier, you run login yourself (no agent OTP loop) |
+| **Vercel / Hover secrets & env** | e.g. `ADMIN_EMAIL` / `ADMIN_PASS` in local `.env.local`, `VERCEL_AUTOMATION_BYPASS_SECRET`, any future Vercel secrets — never ask agents to store these in git |
+| **Admin mailbox for QA** | Keep `.env.local` `ADMIN_EMAIL` / `ADMIN_PASS` current for Hover sign-in (`docs/protocols/QA_AUTH.md`). When **you** are Verifier, you run login yourself |
 | **Manual check of https://ccvaa.ca/** | Out of agent Dev/QA flow (DNS/cache) |
 | `gh auth login` / GitHub access on this device | One-time (or refresh); needed for agent `gh pr` flows |
 
@@ -152,23 +152,21 @@ Use this whenever a PR is open for a kicked-off backlog item with **agent** QA.
 
 ## Checklist: ops / secrets (no PR)
 
-When QA/PM report env gaps (e.g. missing `SMTP_PASS`):
+When QA/PM report env gaps (e.g. missing Preview bypass, bad mailbox password):
 
-- [ ] Set the variable in **Vercel** for the right environment (Production and/or Preview)
+- [ ] Set the variable in **Vercel** and/or local `.env.local` for the right environment
 - [ ] Redeploy if required
-- [ ] Tell PM to retest (Pass 2, baseline slice, CEO Verifier, or CEO-in-the-loop OTP login)
+- [ ] Tell PM to retest (Pass 2, baseline, or CEO Verifier)
 
-Agents cannot securely hold Production mailbox passwords.
+Agents cannot securely hold Production mailbox passwords in git.
 
 ---
 
-## Checklist: OTP when QA needs full admin login
+## Checklist: admin login when QA needs full `/admin`
 
-- [ ] Ensure SMTP (+ Redis/KV for shared OTP store) env works on that environment
-- [ ] Wait for QA to **Send once** — do **not** click Send yourself on Preview/Production during the attempt
-- [ ] Open Hover for `info@ccvaa.ca`; paste the **newest** 6-digit code into the **PM/QA chat** for that session
-- [ ] Do not commit the code or put it in docs
-- [ ] If verify fails with a fresh code → stop (do not spam Send); PM/QA escalate (flush Redis rate keys or wait)
+- [ ] Ensure local `.env.local` has working `ADMIN_EMAIL` / `ADMIN_PASS` (Hover mailbox)
+- [ ] QA signs into the Mail iframe using those credentials — do **not** paste passwords into chat/docs
+- [ ] If login fails → check Hover credentials / mail proxy; do not invent alternate auth flows
 
 ---
 

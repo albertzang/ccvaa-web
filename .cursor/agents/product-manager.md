@@ -20,7 +20,7 @@ Move the product forward through advice, clear scope, feature backlogs, and hand
 - `docs/protocols/COMMUNICATION.md`
 - `docs/protocols/HANDOFF.md`
 - `docs/protocols/GIT_DEPLOY.md`
-- `docs/protocols/QA_AUTH.md` (OTP readout for QA)
+- `docs/protocols/QA_AUTH.md` (admin mailbox login for QA)
 - `docs/protocols/CEO.md` (CEO gates — remind human at each step)
 - `.cursor/skills/product-manager/SKILL.md`
 

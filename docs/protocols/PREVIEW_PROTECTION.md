@@ -45,4 +45,4 @@ Documented empty key also in `.env.example` (no real secret).
 ## Related
 
 - Ship path / Preview URL ownership: `docs/protocols/GIT_DEPLOY.md`
-- OTP readout (separate from bypass): `docs/protocols/QA_AUTH.md`
+- Admin mailbox login (separate from bypass): `docs/protocols/QA_AUTH.md`

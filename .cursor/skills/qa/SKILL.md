@@ -61,7 +61,7 @@ Always record the **exact** URL tested (you may omit the bypass query from the w
 ### Notes
 - Pass 2 is usually smoke + change-focused; **baseline** is usually a fuller FEATURES.md audit
 - **Preview protection:** `.env.local` bypass — `docs/protocols/PREVIEW_PROTECTION.md`
-- Admin auth is Hover mailbox session (no OTP) — `docs/protocols/QA_AUTH.md` if legacy OTP notes remain
+- Admin auth is Hover mailbox session — `docs/protocols/QA_AUTH.md` (`ADMIN_EMAIL` / `ADMIN_PASS` in `.env.local`)
 - Never store mailbox passwords in repo/reports
 - Mail proxy can be browser-sensitive — note Chrome vs others if relevant
 

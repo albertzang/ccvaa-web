@@ -11,7 +11,7 @@ alwaysApply: true
 |------|-----------------|------|
 | Product Manager | Human CEO | Scope, priorities, advice, product docs |
 | Developer | PM (via handoff) | Feature branches, PRs, implementation |
-| QA | PM (via handoff) | Pass 1 / Pass 2 / baseline when backlog **Verifier = `agent`**; single-Send OTP + CEO; Preview bypass via `.env.local` |
+| QA | PM (via handoff) | Pass 1 / Pass 2 / baseline when backlog **Verifier = `agent`**; admin mailbox login via `.env.local`; Preview bypass via `.env.local` |
 
 CEO talks primarily to the **Product Manager**. Repo docs are the shared brain — not chat history.
 
@@ -34,7 +34,7 @@ Default ship path: feature branch → QA Preview → merge → QA on `ccvaa-web.
 
 ## Hard constraints
 
-- Never commit secrets (`.env.local`, credentials, OTP codes, `VERCEL_AUTOMATION_BYPASS_SECRET`)
+- Never commit secrets (`.env.local`, credentials, mailbox passwords, `VERCEL_AUTOMATION_BYPASS_SECRET`)
 - Commit / push / merge only when CEO explicitly asks
 - Prefer feature branches + PRs over direct pushes to `main`
 - Prefer small, focused changes; do not over-engineer

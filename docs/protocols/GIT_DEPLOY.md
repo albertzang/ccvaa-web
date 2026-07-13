@@ -250,7 +250,7 @@ See `docs/product/BACKLOG.md`. Blank work ID on product work → block.
 
 ## Env vars on Preview
 
-Preview deployments use Vercel **Preview** environment variables. Admin login no longer needs OTP/SMTP/Redis Preview secrets (mail-session auth). Deployment Protection bypass still applies for agent/CEO Preview access — see `docs/protocols/PREVIEW_PROTECTION.md`.
+Preview deployments use Vercel **Preview** environment variables. Admin login uses mail-session auth (no OTP/SMTP/Redis Preview secrets). Deployment Protection bypass still applies for agent/CEO Preview access — see `docs/protocols/PREVIEW_PROTECTION.md`.
 
 **Admin auth for QA/CEO:** sign into Hover webmail inside `/admin` Mail — see `docs/protocols/QA_AUTH.md`. Do not give agents standing mailbox credentials in git.
 

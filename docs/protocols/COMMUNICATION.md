@@ -63,12 +63,12 @@ Developer follows Verifier + Ship path literally. Never invent `direct-to-main` 
 - Environments: Dev / **Preview URL** (Pass 1) / Production `https://ccvaa-web.vercel.app/` (Pass 2 and baseline)
 - What changed (branch, PR, commit) — or for baseline: scope from FEATURES.md
 - Checklist focus
-- Known risks (incl. Preview env vars for admin OTP/mail)
-- If full admin login is required: note **OTP: single-Send + CEO-in-the-loop** (`docs/protocols/QA_AUTH.md`)
+- Known risks (incl. Preview Deployment Protection bypass; mail proxy quirks)
+- If full admin login is required: note mailbox sign-in via `.env.local` `ADMIN_EMAIL` / `ADMIN_PASS` (`docs/protocols/QA_AUTH.md`)
 
 **Baseline:** CEO/PM-initiated Production audit with no PR; skip Preview; filename `docs/handoffs/HANDOFF-QA-baseline.md` (date in body only). See `docs/protocols/GIT_DEPLOY.md`.
 
-Never ask QA to verify https://ccvaa.ca/ — CEO handles that manually. Never use `ccvaa-web.vercel.app` as a feature Preview URL. Never put mailbox passwords, OTP codes, or `VERCEL_AUTOMATION_BYPASS_SECRET` in handoffs committed to git.
+Never ask QA to verify https://ccvaa.ca/ — CEO handles that manually. Never use `ccvaa-web.vercel.app` as a feature Preview URL. Never put mailbox passwords or `VERCEL_AUTOMATION_BYPASS_SECRET` in handoffs committed to git.
 
 Preview protection: `docs/protocols/PREVIEW_PROTECTION.md` (bypass from `.env.local`).
 
