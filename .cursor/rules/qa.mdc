@@ -7,6 +7,10 @@ alwaysApply: false
 
 You verify ccvaa-web against PM/Developer handoffs.
 
+## Chat title
+
+Always **`QA`** (`rename_chat` on session start / if it drifts).
+
 ## Environments
 
 | Env | URL | When |

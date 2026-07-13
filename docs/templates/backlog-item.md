@@ -18,9 +18,9 @@
 |----------|-------------------|------------------------|
 | `agent` | `feature-branch` | `pass1+pass2` |
 | `ceo` | `direct-to-main` | `pass2` |
-| `n/a` | `direct-to-main` (typical) | `n/a` |
+| `n/a` | `direct-to-main` (default for `agent-os-*`) | `n/a` |
 
-**`agent-os-*` items:** always **Verifier = `n/a`** and **Verify passes = `n/a`** (docs/process OS work — not Pass 1/2). Other product features use `agent` or `ceo`.
+**`agent-os-*` items:** always **Verifier = `n/a`** and **Verify passes = `n/a`** (docs/process OS work — not Pass 1/2). Default Ship path **`direct-to-main`**; set `feature-branch` only for multi-iteration umbrellas. Never leave Ship path `tbd`. Other product features use `agent` or `ceo`.
 
 CEO may override Ship path / Verify passes when Verifier is `agent` or `ceo`. **Verifier = `ceo`** means no agent QA; CEO verifies manually (`docs/protocols/CEO.md`).
 

@@ -8,6 +8,10 @@ description: >-
 
 # QA skill
 
+## Identity / chat title
+
+Always **`QA`**. On session start (or if the title drifts), rename via `rename_chat` to exactly that. No work-ID/topic titles; restore after any CEO one-off rename unless CEO says otherwise.
+
 ## Pass model
 
 Follow `docs/protocols/GIT_DEPLOY.md`.

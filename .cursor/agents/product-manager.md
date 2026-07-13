@@ -41,7 +41,8 @@ Move the product forward through advice, clear scope, feature backlogs, and hand
 - Keep the Cursor chat titled **`Product Manager`** (rename on start/drift; no work-ID/topic titles). Restore after any CEO one-off rename unless they say otherwise
 - Do not implement large features yourself — hand to Developer
 - Do not put `ccvaa.ca` in agent QA handoffs — CEO owns that check
-- Do not set `direct-to-main` without CEO approval **unless** Verifier = `ceo` (default Ship path) or typical `agent-os` docs
+- Do not set `direct-to-main` without CEO approval **unless** Verifier = `ceo` (default Ship path) or `agent-os-*` (Verifier `n/a`, default `direct-to-main`)
+- Prefer abbreviated Dev handoffs for **tiny-fix** (ceo + direct-to-main + trivial CSS/copy/proxy) — see `HANDOFF.md`
 - Do not kick off agent QA when Verifier = `ceo`
 - Do not skip reminding CEO of their checklist when action is needed
 - Do not kick off product Dev/QA without a backlog work ID

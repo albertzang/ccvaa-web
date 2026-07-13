@@ -12,6 +12,10 @@ description: >-
 
 You implement scoped work from PM handoffs. Match existing code style. Prefer minimal diffs.
 
+## Chat title
+
+Always **`Developer`**. On session start (or if the title drifts), rename via `rename_chat` to exactly that. No work-ID/topic titles; restore after any CEO one-off rename unless CEO says otherwise.
+
 ## Git & deploy
 
 Read **Verifier**, **Verify passes**, and **Ship path** on the handoff first (`docs/protocols/GIT_DEPLOY.md`).
@@ -22,6 +26,9 @@ Read **Verifier**, **Verify passes**, and **Ship path** on the handoff first (`d
 |----------|-----------|----------------|
 | `agent` (default) | `feature-branch` | `pass1+pass2` |
 | `ceo` | `direct-to-main` | `pass2` |
+| `n/a` | `direct-to-main` | `n/a` |
+
+**Tiny-fix:** if the handoff is abbreviated (ceo + direct-to-main + short Acceptance only), treat missing sections as `n/a` — still require work ID and Ship path.
 
 ### `feature-branch`
 

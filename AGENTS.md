@@ -32,7 +32,15 @@ This repo uses a **3-agent system**. The human CEO primarily talks to the **Prod
 
 ### How to start a role chat
 
-1. **PM (default):** continue in the Product Manager chat; attach rule/skill `product-manager` if needed. **Chat title must stay `Product Manager`.**
+Fixed chat titles (rename on session start / if the title drifts; no work-ID or topic titles):
+
+| Role | Chat title |
+|------|------------|
+| Product Manager | `Product Manager` |
+| Developer | `Developer` |
+| QA | `QA` |
+
+1. **PM (default):** continue in the Product Manager chat; attach rule/skill `product-manager` if needed
 2. **Developer:** new chat → “You are the CCVAA Developer” or invoke agent `developer`; attach handoff
 3. **QA:** new chat → “You are CCVAA QA” or invoke agent `qa`; name environments / Preview URL
 

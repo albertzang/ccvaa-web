@@ -25,7 +25,7 @@
 | **Source** | **Bugs only:** `ceo` \| `qa` (baseline findings = `qa`; link the baseline QA report) |
 | **Verifier** | `agent` (default) \| `ceo` \| **`n/a`** — who verifies Dev’s work. **`n/a` for `agent-os`** (docs/process; no Pass 1/2) |
 | **Verify passes** | `pass1+pass2` \| `pass1` \| `pass2` \| **`n/a`** — **`n/a` for `agent-os`** |
-| **Ship path** | Optional on the item; **required** on the Dev handoff when code ships. Docs-only / `agent-os` usually `direct-to-main` |
+| **Ship path** | Optional on the item; **required** on the Dev handoff when code ships. **`agent-os-*` defaults to `direct-to-main`** |
 | **Description** | Enough for Dev (and agent QA if Verifier = `agent`); bugs include repro / expected / actual |
 
 ### Verifier defaults
@@ -34,11 +34,11 @@
 |----------|-------------------|------------------------|-----------|
 | **`agent`** | `feature-branch` | `pass1+pass2` | Yes — Pass 1 Preview / Pass 2 Production per handoff |
 | **`ceo`** | `direct-to-main` | `pass2` | **No** — CEO verifies manually; no `HANDOFF-QA-*` / `QA-*` reports |
-| **`n/a`** | `direct-to-main` (typical; CEO may set `feature-branch`) | `n/a` | **No** — used for **`agent-os`** (and other docs/process-only work). CEO reviews via chat / repo skim; say **`verified`** to complete when PM asks. On **`verified`** for `agent-os-*`, PM marks **`completed`** and ships without a further ask: **`direct-to-main`** → commit + push; **`feature-branch`** → merge PR (see [`CEO.md`](../protocols/CEO.md)) |
+| **`n/a`** | **`direct-to-main`** (default for `agent-os-*`) | `n/a` | **No** — used for **`agent-os`** (and other docs/process-only work). CEO reviews via chat / repo skim; say **`verified`** to complete when PM asks. On **`verified`** for `agent-os-*`, PM marks **`completed`** and ships without a further ask: **`direct-to-main`** → commit + push; **`feature-branch`** → merge PR (see [`CEO.md`](../protocols/CEO.md)) |
 
 CEO may override Ship path and Verify passes when Verifier is `agent` or `ceo`. **Verifier = `ceo`** implies CEO owns verification and (for the default Ship path) approves `direct-to-main`.
 
-**Do not** set Verifier / Verify passes to `agent` or `ceo` on **`agent-os-*`** items — always **`n/a`**.
+**Do not** set Verifier / Verify passes to `agent` or `ceo` on **`agent-os-*`** items — always **`n/a`**. **Ship path for `agent-os-*`:** default **`direct-to-main`**; use **`feature-branch`** only for multi-iteration umbrellas (CEO sets, e.g. `agent-os-0005`). Never leave Ship path as `tbd`.
 
 **CEO Verifier loop** (Verifier = `ceo` only): stay `in-progress` until CEO says **verified** → `completed`. If CEO finds issues, append an **Iteration** on the same backlog item, overwrite the Dev handoff, and kick Dev again — do not invent a new work ID unless scope is deliberately split. Details: [`docs/protocols/CEO.md`](../protocols/CEO.md).
 

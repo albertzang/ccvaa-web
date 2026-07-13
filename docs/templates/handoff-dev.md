@@ -10,6 +10,10 @@
 **Save as:** `docs/handoffs/HANDOFF-DEV.md`  
 **Rework:** overwrite this same path — do not create `-v2` / `-iterN` siblings.
 
+### Tiny-fix (optional abbreviation)
+
+When **Verifier = `ceo`**, **Ship path = `direct-to-main`**, **Verify passes = `pass2`**, and scope is a trivial one-file / CSS / copy / proxy tweak: keep **Date**, **Backlog work ID**, **Verifier & Ship path**, and **Acceptance criteria** (1–3 lines). Mark other sections `n/a` or omit. Still save as `HANDOFF-DEV.md`. See `docs/protocols/HANDOFF.md`.
+
 ## Verifier & Ship path
 
 **Verifier:** `agent` (default) | `ceo` | `n/a`  
@@ -22,11 +26,11 @@
 |----------|-----------|----------------|
 | `agent` | `feature-branch` | `pass1+pass2` |
 | `ceo` | `direct-to-main` | `pass2` |
-| `n/a` | `direct-to-main` (typical) | `n/a` |
+| `n/a` | `direct-to-main` (default for `agent-os-*`) | `n/a` |
 
 - **Verifier = `agent`:** run agent QA for the listed Verify passes (`HANDOFF-QA-*` / `QA-*`).  
 - **Verifier = `ceo`:** **do not** write agent QA handoffs. After Dev ships to the target env, PM asks CEO to verify. CEO says **verified** to complete the backlog item, or reports issues → Iteration on the **same** work ID.  
-- **Verifier = `n/a`:** docs/process (`agent-os`); no Pass 1/2. PM may ask CEO to skim/approve; push when CEO asks.  
+- **Verifier = `n/a`:** docs/process (`agent-os`); no Pass 1/2. Ship path defaults to `direct-to-main` (CEO may set `feature-branch` for multi-iteration umbrellas).  
 - **`direct-to-main`** requires CEO approval (stated here, or implied when Verifier = `ceo` / `n/a` and Ship path is `direct-to-main`).  
 - If Ship path blank/ambiguous → apply Verifier defaults above (not always `feature-branch`).  
 - See `docs/protocols/GIT_DEPLOY.md` and `docs/protocols/CEO.md`.

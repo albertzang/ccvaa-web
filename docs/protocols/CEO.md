@@ -12,7 +12,7 @@ PM should remind the CEO of the relevant checklist whenever an action is due.
 |----------------|--------|
 | Goals & priorities | What to build next; accept/reject PM advice; backlog priorities |
 | Choose **Verifier** | `agent` (default) or `ceo` (you verify; bypass agent QA) — see below |
-| Approve **Ship path: `direct-to-main`** | Explicit yes required — **or** implied when Verifier = `ceo` and Ship path stays the default `direct-to-main`, or for typical `agent-os` docs (`n/a`) |
+| Approve **Ship path: `direct-to-main`** | Explicit yes required — **or** implied when Verifier = `ceo` and Ship path stays the default `direct-to-main`, or for **`agent-os-*`** (Verifier `n/a`, default Ship path `direct-to-main`) |
 | Approve **kickoff** of Developer / QA / baseline | Until further automation is approved |
 | Approve **merge to `main`** (or direct push) | After Pass 1 (agent or your Preview check), or for approved direct-to-main |
 | Approve **process/OS changes** | Multi-agent protocol refinements; for `agent-os-*`, **`verified`** authorizes PM to mark completed **and ship** (`direct-to-main` → commit + push; `feature-branch` → merge PR) |
@@ -77,7 +77,7 @@ No agent `HANDOFF-QA-*` / `QA-*` files for this path. Do not mint a new work ID 
 
 Use for `agent-os-*` items (protocols, templates, skills — not product code Pass 1/2).
 
-- [ ] Confirm **Ship path** with PM: usually `direct-to-main`; use `feature-branch` for multi-iteration OS work
+- [ ] Ship path defaults to **`direct-to-main`** (PM should not leave `tbd`); use `feature-branch` only for multi-iteration OS umbrellas
 - [ ] PM implements (on `main` or the feature branch)
 - [ ] PM asks you to skim / approve
 - [ ] Reply **`verified`** → PM marks **`completed`**, then ships in the same turn:
@@ -112,8 +112,9 @@ Handoff/report names: `HANDOFF-QA-baseline.md` / `QA-baseline.md` (date in body 
 
 - [ ] Choose a work ID from PM’s list (e.g. `admin-console-0001`)
 - [ ] Confirm Verifier (`agent` vs `ceo`) and Verify passes if not already set
+- [ ] For **trivial** CSS/copy/proxy tweaks you will self-verify: Verifier `ceo` + defaults is fine; PM may use an **abbreviated** Dev handoff (`HANDOFF.md` tiny-fix path)
 - [ ] Tell PM: **kick off `{feature-slug}-{NNNN}`**
-- [ ] PM sets status `in-progress`, writes Dev handoff, suggests branch with that ID
+- [ ] PM sets status `in-progress`, writes Dev handoff, suggests branch with that ID (when feature-branch)
 - [ ] Continue with feature-branch PR happy path **or** CEO Verifier path above
 
 ---

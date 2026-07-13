@@ -15,6 +15,8 @@ CEO  ←→  Product Manager (primary)
               └─ updates docs/product/* (FEATURES + feature backlogs)
 ```
 
+**Chat titles (fixed):** `Product Manager` · `Developer` · `QA` — rename on session start; no work-ID/topic titles.
+
 **Work ID:** `{feature-slug}-{NNNN}` in Dev/QA handoff **bodies**, branches, and PRs — see `docs/product/BACKLOG.md`. Handoff/report **filenames** are fixed (no slug/ID).
 
 ```
@@ -52,6 +54,8 @@ Use `docs/templates/handoff-dev.md`. Save as `docs/handoffs/HANDOFF-DEV.md` (ove
 - Out of scope
 - Relevant files / constraints
 - Link to FEATURES.md sections + backlog item
+
+**Tiny-fix:** when Verifier = `ceo` + `direct-to-main` + trivial CSS/copy/proxy scope, abbreviated handoff is enough (work ID + Verifier/Ship path + Acceptance) — see `HANDOFF.md`.
 
 Developer follows Verifier + Ship path literally. Never invent `direct-to-main` when Verifier = `agent` without CEO approval. When Verifier = `ceo`, do **not** create agent QA handoffs.
 

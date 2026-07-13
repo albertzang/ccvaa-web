@@ -28,6 +28,8 @@ Handoffs and QA reports are **ephemeral working docs** for an open work ID (or o
 
 PM deletes these in the **same turn** as the status change (or baseline close). Recover prior text from **git history** if needed. Do not leave backlog **Links** pointing at deleted paths — keep PR / commit links only.
 
+Status change + handoff/report deletion may land in the **same commit** as other doc updates for that close — no separate “please commit cleanup” ask when CEO already authorized the ship (`verified`, merge ask, or explicit commit ask).
+
 **Bugs** live only as backlog items (`type: bug`, **Source:** `ceo` | `qa`). No parallel bugs directory.
 
 **Verifier** on the backlog item / Dev handoff: `agent` (default) | `ceo`.  
@@ -93,6 +95,14 @@ CEO asks to list/review → PM summarizes open items by feature and priority (in
 
 CEO chooses `{feature-slug}-{NNNN}` → PM sets `in-progress` → writes `HANDOFF-DEV.md` (Verifier + Verify passes + Ship path) → CEO gates per `CEO.md`.
 
+**Tiny-fix fast path** (least process for trivial CEO-verified tweaks): when **all** of the following hold, PM may write an **abbreviated** Dev handoff (required fields only — see template):
+
+- Verifier = `ceo`, Ship path = `direct-to-main`, Verify passes = `pass2` (defaults OK)
+- Scope is one small change: CSS/copy/proxy tweak, one-file fix, or similar — **not** auth redesign, schema, or multi-surface UX
+- Backlog item still exists with work ID + one clear Acceptance line
+
+Developer still blocks on blank work ID and still must not invent `direct-to-main` for Verifier = `agent`.
+
 ### Conversation → backlog
 
 PM proposes backlog items from chat when goals/bugs emerge; does not invent large `now` scope without CEO priority agreement. Keeps statuses current through the ship path.
@@ -109,12 +119,12 @@ PM proposes backlog items from chat when goals/bugs emerge; does not invent larg
 
 - [ ] **Backlog work ID** present (`{feature-slug}-{NNNN}`) — required for product work
 - [ ] **Verifier** and **Verify passes** present (or apply defaults from `BACKLOG.md`)
-- [ ] **Ship path** set: apply Verifier defaults if blank (`agent` → `feature-branch`; `ceo` → `direct-to-main`)
+- [ ] **Ship path** set: apply Verifier defaults if blank (`agent` → `feature-branch`; `ceo` / `n/a` → `direct-to-main`)
 - [ ] Problem and success criteria written (from backlog description + handoff)
-- [ ] Out of scope listed
-- [ ] Environment / secrets implications noted (incl. Preview vs Production env vars)
-- [ ] FEATURES.md section referenced or marked “new”
-- [ ] If `direct-to-main` without CEO approval and Verifier ≠ `ceo` → **block**
+- [ ] Out of scope listed — **except** tiny-fix abbreviated handoffs (Acceptance alone is enough)
+- [ ] Environment / secrets implications noted when relevant (incl. Preview vs Production)
+- [ ] FEATURES.md section referenced or marked “new” — **except** tiny-fix when unchanged
+- [ ] If `direct-to-main` without CEO approval and Verifier ≠ `ceo` / `n/a` → **block**
 - [ ] If backlog ID blank on feature work → **block** and ask PM
 
 ## Definition of done (for Developer → next verify step)

@@ -15,6 +15,8 @@ alwaysApply: true
 
 CEO talks primarily to the **Product Manager**. Repo docs are the shared brain — not chat history.
 
+**Chat titles:** `Product Manager` · `Developer` · `QA` (fixed; rename on session start).
+
 ## Canonical docs
 
 - `AGENTS.md` — OS overview

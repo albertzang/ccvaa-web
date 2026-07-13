@@ -7,7 +7,7 @@
 
 Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
-**Note:** All `agent-os-*` items use **Verifier = `n/a`** and **Verify passes = `n/a`** (docs/process — not code Pass 1/2).
+**Note:** All `agent-os-*` items use **Verifier = `n/a`**, **Verify passes = `n/a`**, and default **Ship path = `direct-to-main`** (docs/process — not code Pass 1/2). Use `feature-branch` only for multi-iteration umbrellas when CEO sets it.
 
 ---
 
@@ -20,16 +20,19 @@ Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 | **Status** | `in-progress` |
 | **Verifier** | `n/a` |
 | **Verify passes** | `n/a` |
-| **Ship path** | `tbd` |
+| **Ship path** | `direct-to-main` |
 
 ### Description
 
-CEO-led refinement of the multi-agent OS (principles → concrete doc/protocol changes). Do not invent large process changes until CEO directs them. Ship path TBD (`direct-to-main` or `feature-branch`).
+CEO-led refinement of the multi-agent OS (principles → concrete doc/protocol changes). Do not invent large process changes until CEO directs them. Ships on `main` via `direct-to-main` (commit when CEO asks; push on **`verified`**).
 
 ### Overall
 
 - Guiding principles encoded in `AGENTS.md` (repo-as-brain, CEO as decision-maker, thin roles, defaults, same-ID loops, encode friction, least process, observable done)
 - **Stale-doc sweep:** removed OTP-era copy from CEO/COMMUNICATION/QA_AUTH/PREVIEW_PROTECTION, handoff-qa template, and Dev/QA/PM rules·agents·skills; left historical backlog + FEATURES changelog rows intact
+- **Role chat titles:** `Product Manager` / `Developer` / `QA` (fixed; rename on session start)
+- **agent-os Ship path default:** `direct-to-main` (no `tbd`); `feature-branch` only for multi-iteration umbrellas
+- **Tiny-fix fast path:** trivial CEO-verified CSS/copy/proxy tweaks may use abbreviated Dev handoff (see `HANDOFF.md`)
 
 ---
 
