@@ -33,7 +33,7 @@ Umbrella for Agent OS doc/process refinements on **`chore/agent-os-0005-iter`**.
 - **PM chat title:** always exactly `Product Manager` (rename on session start / if it drifts; no work-ID or topic titles; restore after any CEO one-off rename unless CEO says otherwise)
 - **Handoff/report lifespan:** delete matching fixed files under `docs/handoffs/` + `docs/reports/` when the backlog item is `completed` / `closed` (or baseline triage closes); strip dead file Links; recover from git history if needed
 - **Handoff/report paths:** `docs/handoffs/` + `docs/reports/` with **fixed filenames** (no feature slug / backlog ID in the name; work ID in body only); **Next baseline ID** in `docs/reports/README.md`
-- **Status values:** `canceled` renamed to **`closed`**
+- **`.env.example`:** Preview bypass + `ADMIN_EMAIL` / `ADMIN_PASS` for QA Hover sign-in (not read by the app)
 - **agent-os ship paths:** `direct-to-main` → commit + push on `verified`; `feature-branch` → merge PR on `verified`
 - **Backlog file order:** items listed by work ID **descending** (newest first)
 

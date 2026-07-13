@@ -29,7 +29,7 @@ description: >-
   - Do not follow redirects server-side blindly; filter/normalize cookies; asset paths (`/skins`, `/program`, etc.) must rewrite
   - Keep CSRF header, hash-link guard, hide `#header` (admin-console-0009)
 - Scaffolds only: Members, Financial, Events
-- Env: `.env.example` — Preview bypass only for admin; no SMTP/OTP/Redis required for login
+- Env: `.env.example` — `ADMIN_EMAIL` / `ADMIN_PASS` for QA Hover sign-in (not app-runtime); `VERCEL_AUTOMATION_BYPASS_SECRET` for Preview
 
 ## Ops
 
