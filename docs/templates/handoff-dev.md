@@ -7,7 +7,7 @@
 **Priority:** now | next | later  
 **Iteration:** `1` | `2` | … (same work ID; bump when CEO/PM sends rework)
 
-**Save as:** `docs/handoffs/HANDOFF-DEV-{feature-slug}-{NNNN}.md`  
+**Save as:** `docs/handoffs/HANDOFF-DEV.md`  
 **Rework:** overwrite this same path — do not create `-v2` / `-iterN` siblings.
 
 ## Verifier & Ship path
@@ -67,7 +67,7 @@ Match existing coastal theme; prefer minimal scope.
 - Suggested branch name: 
 - PR title must include `{feature-slug}-{NNNN}`.
 - Open a PR; wait for Vercel Preview.
-- **If Verifier = `agent` and Verify passes includes `pass1`:** fill `HANDOFF-QA-{feature-slug}-{NNNN}-pass1.md` with the **exact Preview URL**; path continues merge → cleanup → Pass 2 if required.
+- **If Verifier = `agent` and Verify passes includes `pass1`:** fill `docs/handoffs/HANDOFF-QA-pass1.md` with the **exact Preview URL**; path continues merge → cleanup → Pass 2 if required.
 - **If Verifier = `ceo` and Verify passes includes `pass1`:** paste Preview URL for **CEO** (via PM); no agent QA file. Merge when CEO asks after their Preview check (or skip Preview check if Verify passes is `pass2` only — unusual on feature-branch).
 - **If Verify passes includes `pass2`:** after merge + branch delete → agent Pass 2 **or** CEO Production verify per Verifier.
 - Pass 2 / CEO-verify fails → Iteration on same work ID (new branch from `main` if previous feature branch was merged); do not revive a deleted merged branch.

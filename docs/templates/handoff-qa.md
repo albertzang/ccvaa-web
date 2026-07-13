@@ -8,8 +8,8 @@
 **Filled by:** Developer (Pass 1 Preview URL) / PM (baseline) / either (Pass 2)  
 
 **Save as:**  
-- Feature: `docs/handoffs/HANDOFF-QA-{feature-slug}-{NNNN}-pass1.md` (or `-pass2`)  
-- Baseline: `docs/handoffs/HANDOFF-QA-baseline-{NNNN}.md` (date stays in **Date** field only)  
+- Feature: `docs/handoffs/HANDOFF-QA-pass1.md` (or `HANDOFF-QA-pass2.md`)  
+- Baseline: `docs/handoffs/HANDOFF-QA-baseline.md` (Baseline ID + date in body only)  
 
 **Branch name:** (must include work ID; n/a for baseline or direct-to-main)  
 **PR link:** (n/a for baseline or direct-to-main)  
@@ -69,7 +69,7 @@ Admin mail auth needs Preview Deployment Protection bypass if testing `/admin` o
 
 ## Report back with
 
-`docs/templates/qa-report.md` → save as `QA-{feature-slug}-{NNNN}-passN.md` (or `QA-baseline-{NNNN}.md`)  
+`docs/templates/qa-report.md` → save as `docs/reports/QA-pass1.md` (or `QA-pass2.md` / `QA-baseline.md`)  
 Bugs found → list in this QA report for PM triage (backlog `type: bug`, **Source:** `qa`). No separate bug files.
   
 - Pass 1: **merge** / **hold** / **retest**  

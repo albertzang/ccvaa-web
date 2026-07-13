@@ -52,19 +52,19 @@ List work items **by ID descending** (highest / newest first). When adding a new
 
 | Artifact | Pattern |
 |----------|---------|
-| Dev handoff | `docs/handoffs/HANDOFF-DEV-{feature-slug}-{NNNN}.md` |
-| QA handoff | `docs/handoffs/HANDOFF-QA-{feature-slug}-{NNNN}-pass1.md` (also `-pass2`) |
-| QA report | `docs/reports/QA-{feature-slug}-{NNNN}-pass1.md` |
+| Dev handoff | `docs/handoffs/HANDOFF-DEV.md` (work ID in body) |
+| QA handoff | `docs/handoffs/HANDOFF-QA-pass1.md` / `HANDOFF-QA-pass2.md` / `HANDOFF-QA-baseline.md` |
+| QA report | `docs/reports/QA-pass1.md` / `QA-pass2.md` / `QA-baseline.md` |
 | Branch | `feat/{feature-slug}-{NNNN}-short-slug` or `fix/{feature-slug}-{NNNN}-…` |
 | PR title | Include `{feature-slug}-{NNNN}` |
 
-**Retest / Iteration:** overwrite the same `…-passN.md` / `HANDOFF-DEV-…` path. Never create `-prior`, `-v2`, or `-attemptN` siblings — earlier content lives in git history.
+**Retest / Iteration:** overwrite the same fixed path. Never create `-prior`, `-v2`, or `-attemptN` siblings — earlier content lives in git history.
 
-**Close:** when the backlog item is **`completed`** or **`canceled`**, PM deletes that work ID’s handoff and report files under `docs/handoffs/` and `docs/reports/` (same turn). See [`HANDOFF.md`](../protocols/HANDOFF.md) lifespan.
+**Close:** when the backlog item is **`completed`** or **`canceled`**, PM deletes the matching fixed handoff/report files under `docs/handoffs/` and `docs/reports/` (same turn). See [`HANDOFF.md`](../protocols/HANDOFF.md) lifespan.
 
 **Verifier = `ceo`:** no agent QA handoff/report files for that work ID.
 
-**Baseline** (no feature backlog item yet): `HANDOFF-QA-baseline-{NNNN}.md` / `QA-baseline-{NNNN}.md` — IDs from `docs/reports/README.md` (**Next baseline ID**); date only in file body. PM promotes findings into backlog items (`type: bug` or `task`, **Source:** `qa`).
+**Baseline** (no feature backlog item yet): `HANDOFF-QA-baseline.md` / `QA-baseline.md` — Baseline ID from `docs/reports/README.md` (**Next baseline ID**) goes in the **body** only; date only in file body. PM promotes findings into backlog items (`type: bug` or `task`, **Source:** `qa`).
 
 Blank backlog ID on feature Dev/QA work → **block**.
 

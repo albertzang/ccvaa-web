@@ -29,7 +29,7 @@ Read **Verifier**, **Verify passes**, and **Ship path** on the handoff first (`d
 2. Branch from latest `main` as `feat/{feature-slug}-{NNNN}-short-slug` or `fix/{feature-slug}-{NNNN}-…`
 3. Implement on the feature branch
 4. Open PR (title includes work ID); ensure CI + Vercel **Preview** deploy
-5. **If Verifier = `agent` and Verify passes includes `pass1`:** fill `HANDOFF-QA-{feature-slug}-{NNNN}-pass1.md` with **Preview URL**
+5. **If Verifier = `agent` and Verify passes includes `pass1`:** fill `docs/handoffs/HANDOFF-QA-pass1.md` with **Preview URL**
 6. **If Verifier = `ceo` and Verify passes includes `pass1`:** give Preview URL to PM for CEO — **do not** write agent QA files
 7. Merge to `main` only when CEO/PM asks
 8. **Immediately** delete the feature branch locally and on `origin` (do not wait for Pass 2 / CEO verify)

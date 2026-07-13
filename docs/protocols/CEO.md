@@ -96,7 +96,7 @@ Saying **`verified`** on an `agent-os-*` item is standing authorization to ship 
 - [ ] After QA report: triage with PM — promote findings into feature backlog items (`task` / `bug`); set priorities (and Verifier if you will self-verify fixes)
 - [ ] Ops findings (env/secrets) → you; code findings → kickoff a backlog ID when ready
 
-Handoff/report names: `HANDOFF-QA-baseline-{NNNN}.md` / `QA-baseline-{NNNN}.md` (auto-increment; date only inside the files). No feature backlog ID until findings are promoted.
+Handoff/report names: `HANDOFF-QA-baseline.md` / `QA-baseline.md` (Baseline ID + date in body only). No feature backlog ID until findings are promoted.
 
 ---
 

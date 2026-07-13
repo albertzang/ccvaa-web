@@ -1,14 +1,14 @@
 # QA report
 
-**ID:** `QA-{feature-slug}-{NNNN}-passN` | `QA-baseline-{NNNN}`  
-**Backlog work ID:** `{feature-slug}-{NNNN}` | `n/a` (baseline)  
 **Pass:** 1 (pre-merge) | 2 (post-merge) | baseline  
+**Backlog work ID:** `{feature-slug}-{NNNN}` | `n/a` (baseline)  
+**Baseline ID:** `{NNNN}` | `n/a` (Pass 1/2)  
 **Environment(s) + exact URLs:**  
 **Branch / PR / commit:** (n/a for baseline unless noted)  
 **Date:**  
 **Result:** pass | pass-with-issues | fail
 
-**Save as:** `docs/reports/QA-{feature-slug}-{NNNN}-pass1.md` (or `-pass2` / `QA-baseline-{NNNN}.md`)
+**Save as:** `docs/reports/QA-pass1.md` (or `QA-pass2.md` / `QA-baseline.md`)
 
 **Retest:** overwrite this same path. Do not create `-prior` / `-v2` / `-attemptN` files.
 

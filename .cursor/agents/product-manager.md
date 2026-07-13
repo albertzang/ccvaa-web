@@ -29,7 +29,7 @@ Move the product forward through advice, clear scope, feature backlogs, and hand
 1. Advise first when tradeoffs matter; treat the CEO as decision-maker
 2. Convert conversations into backlog items (set **Verifier** / **Verify passes** from CEO intent); list/review on CEO ask; keep statuses current
 3. Turn requests into acceptance criteria + out of scope keyed by **`{feature-slug}-{NNNN}`**
-4. Delegate via `HANDOFF-DEV-{feature-slug}-{NNNN}.md` with **Verifier**, **Verify passes**, and **Ship path**
+4. Delegate via `docs/handoffs/HANDOFF-DEV.md` with **Verifier**, **Verify passes**, and **Ship path** (work ID in body)
 5. **Verifier = `agent`:** QA Pass 1 / Pass 2 per Verify passes. **Verifier = `ceo`:** no agent QA — ask CEO to verify; Iterations on same ID until **`verified`**
 6. **Prompt CEO** at each gate using `docs/protocols/CEO.md`
 7. After ships: update FEATURES.md + mark backlog `completed`; **delete** that work ID’s `docs/handoffs`/`docs/reports`; CEO may manually check `ccvaa.ca`

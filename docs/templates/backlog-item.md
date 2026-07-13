@@ -41,7 +41,7 @@ For **`type: bug`**, include in Description (or subsections):
 Keep **Status:** `in-progress` until CEO says **verified** (or agent Pass 2 ship confirmed). If CEO finds issues after a Dev push:
 
 1. Append an **Iteration N** subsection here (what failed, what to change)
-2. Overwrite `HANDOFF-DEV-{feature-slug}-{NNNN}.md` for the next Dev pass
+2. Overwrite `docs/handoffs/HANDOFF-DEV.md` for the next Dev pass
 3. Repeat until CEO says **verified** → Status `completed`
 
 Do **not** mint a new work ID for the same bug/task unless CEO/PM explicitly splits scope.
