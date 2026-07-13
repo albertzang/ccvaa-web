@@ -121,5 +121,5 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 | 2026-07-11 | **Verifier** `agent` \| `ceo` \| `n/a` + **Verify passes**; CEO may bypass agent QA; `agent-os` uses `n/a`; **`verified` on agent-os ⇒ commit + push** |
 | 2026-07-11 | `/admin` page intro blurb removed (`admin-console-0008`) |
 | 2026-07-12 | Embedded Hover mail iframe fixes (`admin-console-0009`): refresh 403, More/Mark reload, hide blank `#header` |
-| 2026-07-12 | Admin auth = Hover mailbox iframe session; OTP pruned; sidebar console + mail embed UX (`admin-console-0010`, 11 iterations, PR #4) |
+| 2026-07-12 | Admin auth = Hover mailbox iframe session; OTP pruned; dark sidebar console + mail embed UX (`admin-console-0010`, 12 iterations, PR #4) |
 | 2026-07-12 | Admin sidebar dark theme + logo width match nav column; drop “· Admin” (`admin-console-0010` Iteration 12, PR #4) |

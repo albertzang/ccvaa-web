@@ -24,12 +24,12 @@ Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.m
 
 Replace OTP admin login with **Hover webmail iframe session** as the sole auth signal, prune the OTP stack, and ship a sidebar admin console with a polished embedded mailbox.
 
-**Verifier / ship:** feature branch + CEO Pass 1 on Preview only (skip Pass 2). **11 iterations** on this work ID (PR #4).
+**Verifier / ship:** feature branch + CEO Pass 1 on Preview only (skip Pass 2). **12 iterations** on this work ID (PR #4).
 
 ### Accomplished (overall)
 
 - **Auth:** Admin logged in/out iff Hover mailbox in the iframe is logged in/out; OTP UI/APIs/libs/env deps removed; sticky auth so in-iframe nav does not flash logged-out chrome
-- **Layout:** Full-height left sidebar (Webmail → Members → Events → Financial) + right main panel; logo keeps original aspect ratio; no page title/login banner chrome
+- **Layout:** Full-height **dark** left sidebar (Webmail → Members → Events → Financial) + cream main panel; logo + “Visual Arts Association” share nav-button width with original aspect ratio; no “Admin” label / page title / login banner
 - **Mail embed UX:** Help opens Hover docs in a new tab; task switches (Mail/Files/Calendar/Contacts) stay in-iframe with preload-then-swap (no white flash); Hover compose discard dialog preserved; prior proxy hardening retained (CSRF refresh, More/Mark, hide blank `#header`)
 - **Docs:** FEATURES.md / `.env.example` / OTP-centric notes updated for mail-session auth
 
