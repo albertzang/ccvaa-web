@@ -22,72 +22,26 @@ Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.m
 
 ### Description
 
-Change admin console auth so **logging into / out of Hover webmail inside the `/admin` mail iframe** is the sole signal that the admin console is logged in / out. **Prune the entire OTP stack** (UI, APIs, libs, Redis OTP usage for this purpose, env/docs/ops that exist only for OTP).
+Replace OTP admin login with **Hover webmail iframe session** as the sole auth signal, prune the OTP stack, and ship a sidebar admin console with a polished embedded mailbox.
 
-**Verifier / ship (CEO-specified):** feature branch + Preview; CEO does **Pass 1 only** on Preview; **skip Pass 2** on Production. Expect **multiple Iterations** on the same work ID (overwrite Dev handoff; keep `in-progress` until CEO **verified** for the ticket).
+**Verifier / ship:** feature branch + CEO Pass 1 on Preview only (skip Pass 2). **11 iterations** on this work ID (PR #4).
 
-**Goals / acceptance (product):**
-- No OTP send/verify UI or APIs required for admin access
-- When Hover mailbox is logged in (iframe), console treats user as authenticated (show Members / Financial / Events scaffolds, header Log out / logged-in nav as appropriate)
-- When Hover mailbox is logged out (or session ends), console is logged out (hide protected scaffolds; match logged-out chrome)
-- Explicit admin “Log out” (if kept) must log out mail session as well, or be replaced by mail logout as the only control — pick the coherent UX; document in handoff notes
-- Desktop/tablet gate unchanged
-- Docs/protocols/skills that describe OTP admin login updated or removed; `.env.example` and FEATURES.md pruned of OTP-only guidance; Redis/KV may remain only if still needed for something else (today it is OTP/rate-limit — remove if unused)
-- SMTP/OTP-related env can be marked removable from Vercel after ship (CEO ops) — code should not require them
+### Accomplished (overall)
 
-**Out of scope (unless CEO expands):**
-- Replacing Hover with another mail host
-- Building real Members/Financial/Events CRUD
-- Keeping a parallel OTP path “just in case”
+- **Auth:** Admin logged in/out iff Hover mailbox in the iframe is logged in/out; OTP UI/APIs/libs/env deps removed; sticky auth so in-iframe nav does not flash logged-out chrome
+- **Layout:** Full-height left sidebar (Webmail → Members → Events → Financial) + right main panel; logo keeps original aspect ratio; no page title/login banner chrome
+- **Mail embed UX:** Help opens Hover docs in a new tab; task switches (Mail/Files/Calendar/Contacts) stay in-iframe with preload-then-swap (no white flash); Hover compose discard dialog preserved; prior proxy hardening retained (CSRF refresh, More/Mark, hide blank `#header`)
+- **Docs:** FEATURES.md / `.env.example` / OTP-centric notes updated for mail-session auth
 
-**Security note:** Admin privilege becomes “whoever can sign into `info@ccvaa.ca` (or configured mailbox) via the embedded webmail.” That matches prior OTP delivery to the same inbox; call out any residual risks in the PR.
+**Security:** Admin privilege = whoever can sign into `info@ccvaa.ca` via embedded webmail (same inbox OTP previously used).
 
-### Iteration 1 — Hover mail session auth + prune OTP (CEO verified 2026-07-12)
-
-Pass 1 on Preview (PR #4). Mail iframe session drives admin auth; OTP removed.
-
-### Iteration 2 — Sidebar layout + panel switching (CEO verified 2026-07-12)
-
-Full-height left sidebar + right main panel; one section at a time. PR #4.
-
-### Iteration 3 — Nav labels, strip chrome, keep mail iframe stable (CEO partially verified 2026-07-12)
-
-Sidebar Webmail/Members/Events/Financial, no login banner/titles, iframe kept mounted. **Remaining:** in-iframe navigation still **blinks** (full document flash) vs native Hover.
-
-### Iteration 4 — Smooth in-mail nav + Help in new tab (CEO partially verified 2026-07-12)
-
-Help button works (new tab → Hover help URL). In-iframe nav still problematic.
-
-### Iteration 5 — Task bar must not reload admin shell (attempted; CEO not verified)
-
-Target stripping / task-nav guards shipped (`162d523`). CEO reports **whole admin page still reloads** on task switch.
-
-### Iteration 6 — Fix `rcmail.command('switch-task')` breakout (CEO: still broken)
-
-Patches shipped; CEO still sees whole admin reload. Clarified: problem is **Hover iframe task bar**, not our sidebar.
-
-### Iteration 7 — Frame isolation (CEO corrected diagnosis)
-
-Frame isolation may still help, but CEO clarified the symptom is **not** a full `/admin` reload.
-
-### Iteration 8 — Stop auth blink on in-iframe navigation (CEO verified 2026-07-12)
-
-Sticky auth + quieter AUTH_BRIDGE. Sidebar auth items no longer blink.
-
-### Iteration 9 — Instant in-iframe task switch (CEO verified 2026-07-12)
-
-Double-buffer preload-then-swap. White flash fixed.
-
-### Iteration 10 — Restore Hover compose discard dialog (current)
-
-**Symptom (CEO):** Leaving **Compose** showed Chrome **“Leave site?”** instead of Hover’s discard dialog after Iter 9 preload/swap.
-
-**Fix:** Before preload/swap, if compose is dirty (`cmp_hash` vs `compose_field_hash`), call Roundcube `confirm_dialog(notsentwarning)` (same as native leave-compose). Set `compose_skip_unsavedcheck` on confirm so blanking the old iframe does not trip `beforeunload`. Clean task switches keep Iter 9 double-buffer.
+**Out of scope:** Real Members/Events/Financial CRUD; replacing Hover.
 
 ### Links
 
 - Dev: `docs/qa/handoffs/HANDOFF-DEV-admin-console-0010.md`
 - PR: https://github.com/albertzang/ccvaa-web/pull/4
+- Preview: https://ccvaa-web-git-feat-admin-console-0010-hover-auth-azang-projects.vercel.app/admin
 
 ---
 
