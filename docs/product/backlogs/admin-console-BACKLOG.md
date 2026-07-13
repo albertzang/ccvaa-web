@@ -24,7 +24,7 @@ Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.m
 
 Replace OTP admin login with **Hover webmail iframe session** as the sole auth signal, prune the OTP stack, and ship a sidebar admin console with a polished embedded mailbox.
 
-**Verifier / ship:** feature branch + CEO Pass 1 on Preview only (skip Pass 2). **12 iterations** on this work ID (PR #4).
+**Verifier / ship:** feature branch + CEO Pass 1 on Preview only (skip Pass 2). **13 iterations** on this work ID (PR #4).
 
 ### Accomplished (overall)
 
