@@ -51,27 +51,29 @@
 - **Desktop / tablet only** — phones see “Desktop or tablet required”
 - `robots: noindex` on admin page
 
-### Header
-- Same cream/scrolled visual language as public site
-- Nav: Mail; Members / Financial / Events + Log out (when mailbox is signed in)
+### Layout (left sidebar)
+- Cream left sidebar with CCVAA logo (original aspect ratio) + nav subtitle · Admin
+- Nav order: **Webmail**, **Members**, **Events**, **Financial**
+- Members / Events / Financial require mailbox sign-in; **Log out** appears at sidebar bottom when authenticated
+- Main pane shows the active panel (Webmail embed or scaffold placeholders)
 
-### Mail (sign-in surface + always available)
-- Collapsible section embedding Hover webmail via **same-origin proxy** `/admin/mail`
+### Webmail (sign-in surface + always available)
+- Full-pane Hover webmail via **same-origin proxy** `/admin/mail` (iframe embed)
 - Proxy rewrites Roundcube paths/assets/cookies so iframe works (Hover blocks direct iframe via `X-Frame-Options`)
-- Proxy also: forwards `X-Roundcube-Request` (refresh CSRF); avoids trailing-slash AJAX redirects; blocks hash-only toolbar navigations under `<base href>`; hides blank `#header` chrome after login; injects same-origin auth `postMessage` bridge
+- Proxy also: forwards `X-Roundcube-Request` (refresh CSRF); avoids trailing-slash AJAX redirects; blocks hash-only toolbar navigations under `<base href>`; hides blank `#header` chrome after login; injects same-origin auth `postMessage` bridge; preload-then-swap for task switches; compose discard dialog preserved
 - Known fragility: third-party Roundcube reverse proxy; watch for session/cookie/browser differences
 
 ### Admin auth (Hover mailbox session)
 - Admin console is authenticated **iff** the Hover mailbox session inside the mail iframe is logged in
-- Detection: Roundcube session cookie + fail-closed upstream probe (`/api/admin/session`); iframe bridge `postMessage` for near-realtime updates when Mail is open
-- Header **Log out** clears proxied Roundcube cookies and remounts the mail iframe (same effect as signing out of mail)
+- Detection: Roundcube session cookie + fail-closed upstream probe (`/api/admin/session`); iframe bridge `postMessage` for near-realtime updates when Webmail is open
+- Sidebar **Log out** clears proxied Roundcube cookies and remounts the mail iframe (same effect as signing out of mail)
 - No OTP UI/APIs; no `ADMIN_SESSION_SECRET` / SMTP / Redis required for admin login (see `.env.example`)
 - Security model: whoever can sign into `info@ccvaa.ca` via embedded webmail has admin chrome access
 
 ### Post-auth scaffolds (placeholders only)
 - **Members** — coming soon
-- **Financial dashboard** — coming soon
-- **Events & posts** — coming soon (future CRUD)
+- **Events** — coming soon (future CRUD)
+- **Financial** — coming soon
 
 ---
 

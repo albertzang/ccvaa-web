@@ -25,11 +25,11 @@ export function AdminSidebar({
   return (
     <aside className="flex w-56 shrink-0 flex-col border-r border-ocean-100 bg-cream">
       <div className="border-b border-ocean-100 px-4 py-5">
-        <Link href="/" className="group flex flex-col gap-1">
+        <Link href="/" className="group flex flex-col items-start gap-1">
           <CoastToCoastLogo
             priority
             onLight
-            className="h-7 w-auto transition-opacity group-hover:opacity-90"
+            className="h-7 w-auto max-w-full object-contain transition-opacity group-hover:opacity-90"
           />
           <span className="text-xs text-ocean-600">
             {siteConfig.navSubtitle}
