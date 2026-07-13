@@ -36,11 +36,20 @@
 | **`ceo`** | `direct-to-main` | `pass2` | **No** — CEO verifies manually; no `HANDOFF-QA-*` / `QA-*` reports |
 | **`n/a`** | **`direct-to-main`** (default for `agent-os-*`) | `n/a` | **No** — used for **`agent-os`** (and other docs/process-only work). CEO reviews via chat / repo skim; say **`verified`** to complete when PM asks. On **`verified`** for `agent-os-*`, PM marks **`completed`** and ships without a further ask: **`direct-to-main`** → commit + push; **`feature-branch`** → merge PR (see [`CEO.md`](../protocols/CEO.md)) |
 
-CEO may override Ship path and Verify passes when Verifier is `agent` or `ceo`. **Verifier = `ceo`** implies CEO owns verification and (for the default Ship path) approves `direct-to-main`.
+CEO may override Ship path and Verify passes when Verifier is `agent` or `ceo`. **Verifier = `ceo`** implies CEO owns verification and (for the default Ship path) approves `direct-to-main`. Prefer **common lanes** in [`COMMUNICATION.md`](../protocols/COMMUNICATION.md) (happy path / CEO Verifier / tiny-fix / agent-os / baseline).
 
 **Do not** set Verifier / Verify passes to `agent` or `ceo` on **`agent-os-*`** items — always **`n/a`**. **Ship path for `agent-os-*`:** default **`direct-to-main`**; use **`feature-branch`** only for multi-iteration umbrellas (CEO sets, e.g. `agent-os-0005`). Never leave Ship path as `tbd`.
 
-**CEO Verifier loop** (Verifier = `ceo` only): stay `in-progress` until CEO says **verified** → `completed`. If CEO finds issues, append an **Iteration** on the same backlog item, overwrite the Dev handoff, and kick Dev again — do not invent a new work ID unless scope is deliberately split. Details: [`docs/protocols/CEO.md`](../protocols/CEO.md).
+### Rare paths (CEO must override explicitly)
+
+| Combo | Prefer instead |
+|-------|----------------|
+| `agent` + `direct-to-main` | `agent` + `feature-branch`, or Verifier `ceo` |
+| `ceo` + `feature-branch` | OK when CEO wants Preview; not the default |
+| Agent Verify passes = `pass1` or `pass2` alone | Default `pass1+pass2` unless CEO scopes an exception |
+| `agent-os` + `feature-branch` | Default `direct-to-main` unless multi-iteration umbrella |
+
+**CEO Verifier loop** (Verifier = `ceo` only): stay `in-progress` until CEO says **verified** → `completed`. If CEO finds issues, append an **Iteration** on the same backlog item, overwrite the Dev handoff, and kick Dev again — do not invent a new work ID unless scope is deliberately split. **`verified`** on product code does **not** auto-push — see [`COMMUNICATION.md`](../protocols/COMMUNICATION.md). Details: [`CEO.md`](../protocols/CEO.md).
 
 Copy shape from [`docs/templates/backlog-item.md`](../templates/backlog-item.md).
 
@@ -79,16 +88,17 @@ Do **not** create parallel bug files. Dev may notice issues while coding; they t
 
 ## PM workflows (summary)
 
-1. **Baseline kickoff** — CEO asks → Pass `baseline` handoff → triage findings into feature backlogs  
-2. **CEO reports bug/task** — create item → set Verifier (default `agent`; or `ceo` + defaults `direct-to-main` / `pass2`) → kickoff → Dev; agent QA only if Verifier = `agent`  
-3. **Backlog review** — list/prioritize/edit with CEO  
-4. **Pick + kickoff** — CEO chooses ID → set `in-progress` → Dev handoff (include Verifier + Verify passes + Ship path)  
-5. **Conversation → backlog** — PM proposes/adds items as chats imply; keep statuses current  
-6. **CEO Verifier** — after Dev push: one-line ask for CEO to verify; **verified** → `completed`; issues → Iteration on same ID → Dev again  
-7. **`agent-os` verified** — CEO says **`verified`** → PM marks `completed` + ships per Ship path (no second ask); delete any handoffs for that ID if present  
-8. **Close cleanup** — on `completed` / `closed`, delete that work ID’s `docs/handoffs` + `docs/reports` (git history retains them)  
+Canonical index: **[workflow map](../protocols/COMMUNICATION.md#workflow-map-canonical-index)** (Intake → Prioritize → Kickoff → Ship → Verify → Close).
 
-Full checklists: [`docs/protocols/CEO.md`](../protocols/CEO.md), [`HANDOFF.md`](../protocols/HANDOFF.md).
+| Step | Notes |
+|------|--------|
+| Intake / promote | CEO chat or QA Bugs found → backlog item |
+| Prioritize | Backlog review with CEO |
+| Kickoff | `in-progress` + Dev handoff (tiny-fix abbrev OK) |
+| Ship / Verify | Common lanes + defaults; agent-os `verified` ships |
+| Close | `completed` / `closed` → delete handoffs/reports |
+
+CEO checklists: [`CEO.md`](../protocols/CEO.md). Mechanics: [`HANDOFF.md`](../protocols/HANDOFF.md).
 
 ## Assigning IDs
 

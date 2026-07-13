@@ -19,6 +19,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 Operating docs live under [`docs/`](docs/README.md). Refine this OS via `agent-os-*` backlog items with CEO approval.
 
+**Workflow map:** [`docs/protocols/COMMUNICATION.md`](docs/protocols/COMMUNICATION.md) — Intake → Prioritize → Kickoff → Ship → Verify → Close (plus common lanes, what **`verified`** means, and rare overrides).
+
 ## Multi-agent roles
 
 This repo uses a **3-agent system**. The human CEO primarily talks to the **Product Manager** (advisor + product owner). Developer and QA are specialists invoked via separate chats, `@` rules/skills, or Task subagents.

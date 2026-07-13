@@ -73,7 +73,9 @@ Set on the backlog item and Dev handoff. See [`docs/product/BACKLOG.md`](../prod
 
 **Verify passes** may be `pass1+pass2`, `pass1` (Preview only), or `pass2` (Production only). Preview = pre-merge staging. **`agent-os-*` items always use Verifier / Verify passes = `n/a`**, and Ship path defaults to **`direct-to-main`** (do not leave `tbd`).
 
-**CEO Verifier:** after Dev ships to the listed env(s), PM asks CEO to verify. CEO says **`verified`** → backlog `completed`. Issues → **Iteration** on the **same** work ID (overwrite Dev handoff); stay `in-progress` until verified. Details: `docs/protocols/CEO.md`.
+**Prefer common lanes** (happy path / CEO Verifier / tiny-fix / agent-os / baseline): [`COMMUNICATION.md`](COMMUNICATION.md). **Rare overrides** (e.g. `agent` + `direct-to-main`, agent `pass1`-only) need explicit CEO wording — do not invent them.
+
+**CEO Verifier:** after Dev ships to the listed env(s), PM asks CEO to verify. CEO says **`verified`** → backlog `completed` (**does not** auto-push product code). Issues → **Iteration** on the **same** work ID. On **`agent-os-*`**, **`verified`** also ships. Table: [`COMMUNICATION.md`](COMMUNICATION.md#what-ceo-verified-means). Details: `docs/protocols/CEO.md`.
 
 ## Default delivery flow (Verifier = `agent`)
 
@@ -190,8 +192,8 @@ Every Dev handoff must set **Ship path** (or inherit Verifier defaults). Develop
 
 | Ship path | Who decides | Who executes | When allowed |
 |-----------|-------------|--------------|--------------|
-| **`feature-branch`** | Default when **Verifier = `agent`**; CEO may override | **Developer** | Normal product/code work; also CEO Verifier when they want Preview |
-| **`direct-to-main`** | Default when **Verifier = `ceo`**; else **CEO must approve** | See below | CEO Verifier path; docs-only; emergency hotfix; trivial one-liner — still prefer PR when practical |
+| **`feature-branch`** | Default when **Verifier = `agent`**; CEO may override | **Developer** | Normal product/code work; CEO Verifier + Preview is a **rare** override |
+| **`direct-to-main`** | Default when **Verifier = `ceo`** or **`n/a`**; else **CEO must approve** | See below | CEO Verifier; agent-os; emergency hotfix — **not** the default for Verifier=`agent` |
 
 ### Who executes `direct-to-main`
 
@@ -199,7 +201,7 @@ Every Dev handoff must set **Ship path** (or inherit Verifier defaults). Develop
 |-------------|----------|--------|
 | Small **doc / protocol / agent-OS** updates | **PM** | Already in PM remit; push only when CEO asks |
 | **Hotfix / code** on `main` (incl. CEO Verifier items) | **Developer** | Handoff says `direct-to-main` **and** (CEO approved **or** Verifier = `ceo`) |
-| User-facing / auth / mail with **Verifier = `agent`** | Prefer **`feature-branch`** | Agent QA needs Preview for pass1 |
+| User-facing / auth / mail with **Verifier = `agent`** | Prefer **`feature-branch`** | Agent QA needs Preview for pass1; `agent` + `direct-to-main` is a **rare** override |
 
 ### How Developer knows
 
@@ -214,8 +216,8 @@ Every Dev handoff must set **Ship path** (or inherit Verifier defaults). Develop
 ```
 CEO-approved handoff (Ship path: direct-to-main) — or Verifier: ceo
   → Developer commits on main (when CEO asks to push)
-  → Skip Preview / agent Pass 1 (unless Verify passes includes pass1 — rare)
-  → If Verifier = agent + pass2: light QA Pass 2 on https://ccvaa-web.vercel.app/
+  → Skip Preview / agent Pass 1 (unless Verify passes includes pass1 — **rare** override)
+  → If Verifier = agent + pass2: light QA Pass 2 on https://ccvaa-web.vercel.app/ (**unusual** vs happy path; CEO should have overridden Ship path)
   → If Verifier = ceo + pass2: PM asks CEO to verify Production (no agent QA)
   → PM updates FEATURES.md if behavior changed (after ship confirmed / CEO verified)
   → CEO may manually check ccvaa.ca

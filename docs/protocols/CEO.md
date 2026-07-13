@@ -4,7 +4,18 @@ The CEO is the decision-maker and the only person who authorizes shipping to `ma
 
 PM should remind the CEO of the relevant checklist whenever an action is due.
 
-**Product backlog:** [`docs/product/BACKLOG.md`](../product/BACKLOG.md) — work IDs `{feature-slug}-{NNNN}`.
+**Product backlog:** [`docs/product/BACKLOG.md`](../product/BACKLOG.md) — work IDs `{feature-slug}-{NNNN}`.  
+**Workflow map (index):** [`COMMUNICATION.md`](COMMUNICATION.md) — Intake → Prioritize → Kickoff → Ship → Verify → Close. This file stays **CEO-facing checklists**; do not duplicate the full map here.
+
+### What **`verified`** means (CEO word)
+
+| Context | Completes backlog? | Also authorizes ship? |
+|---------|--------------------|------------------------|
+| **Verifier = `ceo`** (product) | Yes → PM marks `completed` | **No** — you already approved (or still must approve) push/merge separately |
+| **`agent-os-*`** | Yes → PM marks `completed` | **Yes** — PM ships same turn (`direct-to-main` → commit + push; `feature-branch` → merge PR) |
+| You note issues instead | No — Iteration on same ID | No |
+
+---
 
 ## Always CEO
 

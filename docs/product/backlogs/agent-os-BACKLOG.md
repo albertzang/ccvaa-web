@@ -33,6 +33,9 @@ CEO-led refinement of the multi-agent OS (principles → concrete doc/protocol c
 - **Role chat titles:** `Product Manager` / `Developer` / `QA` (fixed; rename on session start)
 - **agent-os Ship path default:** `direct-to-main` (no `tbd`); `feature-branch` only for multi-iteration umbrellas
 - **Tiny-fix fast path:** trivial CEO-verified CSS/copy/proxy tweaks may use abbreviated Dev handoff (see `HANDOFF.md`)
+- **Workflow map:** canonical index in `COMMUNICATION.md` (Intake → Prioritize → Kickoff → Ship → Verify → Close); CEO.md stays checklists-only
+- **`verified` table:** product CEO Verifier completes but does not auto-ship; `agent-os-*` completes and ships same turn
+- **Rare paths:** soft-narrowed (`agent`+`direct-to-main`, ceo+feature-branch, partial Verify passes) — CEO must override explicitly
 
 ---
 

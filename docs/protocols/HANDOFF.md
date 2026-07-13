@@ -1,5 +1,7 @@
 # Handoff protocol
 
+**Workflow map:** [`COMMUNICATION.md`](COMMUNICATION.md) (stages, common lanes, what **`verified`** means, rare overrides). This file owns **artifact paths, lifespan, handoff triggers, and definitions of ready/done/verified**.
+
 ## Work ID (required for feature work)
 
 Canonical ID: **`{feature-slug}-{NNNN}`** (e.g. `admin-console-0003`).  
@@ -61,9 +63,11 @@ Blank backlog ID on feature Dev/QA work → **block**.
 | QA | PM | New defects in a QA report (PM creates backlog `bug` items) |
 | PM | Developer | Pass 2 / baseline / CEO-verify fail → Iteration Dev handoff (same work ID unless scope split); new branch from `main` if prior feature branch was merged |
 
-See also `docs/protocols/GIT_DEPLOY.md` and `docs/protocols/CEO.md`.
+See also `docs/protocols/GIT_DEPLOY.md` and `docs/protocols/CEO.md`. Workflow index: [`COMMUNICATION.md`](COMMUNICATION.md).
 
-## Workflows (PM)
+## Workflows (PM) — mechanics under the map
+
+Stages **Intake → Prioritize → Kickoff → Ship → Verify → Close** are indexed in [`COMMUNICATION.md`](COMMUNICATION.md). Below are PM mechanics only (not a second map).
 
 ### Baseline kickoff
 
@@ -72,13 +76,13 @@ See also `docs/protocols/GIT_DEPLOY.md` and `docs/protocols/CEO.md`.
 3. QA: report on Production  
 4. PM: promote issues into feature backlogs (`task`/`bug`, **Source:** `qa`); CEO confirms priorities + Verifier  
 
-### CEO reports bug or task
+### Intake (CEO report or conversation → backlog)
 
-1. CEO describes bug/goal → PM creates backlog item (`type: bug` with **Source:** `ceo`, or `task`)  
-2. Set **Verifier** / **Verify passes** / Ship path (CEO may choose `ceo` → defaults `direct-to-main` + `pass2`)  
+1. CEO describes bug/goal (or PM proposes from chat) → PM creates backlog item (`type: bug` with **Source:** `ceo`, or `task`)  
+2. Set **Verifier** / **Verify passes** / Ship path — prefer [common lanes](COMMUNICATION.md#common-lanes-use-defaults-unless-ceo-overrides)  
 3. On kickoff: status `in-progress` → Dev handoff with work ID + Verifier fields  
 4. **If Verifier = `agent`:** Pass 1/2 per Verify passes → `completed` + FEATURES.md if needed  
-5. **If Verifier = `ceo`:** after Dev ships → ask CEO to verify → **`verified`** completes; issues → Iteration on same ID  
+5. **If Verifier = `ceo`:** after Dev ships → ask CEO to verify → **`verified`** completes backlog (**does not** auto-push); issues → Iteration on same ID  
 
 ### QA finds a bug during a pass
 
@@ -91,7 +95,7 @@ See also `docs/protocols/GIT_DEPLOY.md` and `docs/protocols/CEO.md`.
 
 CEO asks to list/review → PM summarizes open items by feature and priority (incl. Verifier) → edit priorities/status/close/add together.
 
-### Pick + kickoff
+### Kickoff (+ tiny-fix)
 
 CEO chooses `{feature-slug}-{NNNN}` → PM sets `in-progress` → writes `HANDOFF-DEV.md` (Verifier + Verify passes + Ship path) → CEO gates per `CEO.md`.
 
@@ -102,10 +106,6 @@ CEO chooses `{feature-slug}-{NNNN}` → PM sets `in-progress` → writes `HANDOF
 - Backlog item still exists with work ID + one clear Acceptance line
 
 Developer still blocks on blank work ID and still must not invent `direct-to-main` for Verifier = `agent`.
-
-### Conversation → backlog
-
-PM proposes backlog items from chat when goals/bugs emerge; does not invent large `now` scope without CEO priority agreement. Keeps statuses current through the ship path.
 
 ### CEO Verifier Iteration
 
@@ -166,6 +166,16 @@ PM proposes backlog items from chat when goals/bugs emerge; does not invent larg
 - [ ] Do **not** block on https://ccvaa.ca/ (CEO manual only)
 - [ ] If fail: expect Iteration / **new** fix branch from `main` (or CEO `direct-to-main`) — not the old feature branch
 - [ ] Only when **Verifier = `agent`** and Verify passes includes `pass2`
+
+## What CEO **`verified`** means
+
+Canonical table: [`COMMUNICATION.md`](COMMUNICATION.md#what-ceo-verified-means).
+
+| Context | Completes? | Ships? |
+|---------|------------|--------|
+| Verifier = `ceo` (product) | Yes → `completed` | **No** auto-push/merge |
+| `agent-os-*` | Yes → `completed` | **Yes** same turn per Ship path |
+| Issues instead | No — Iteration same ID | No |
 
 ## Definition of verified — CEO Verifier (CEO → PM)
 

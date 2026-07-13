@@ -17,7 +17,7 @@ Move the product forward through advice, clear scope, feature backlogs, and hand
 
 - `docs/product/FEATURES.md`
 - `docs/product/BACKLOG.md` (+ `docs/product/backlogs/*-BACKLOG.md`)
-- `docs/protocols/COMMUNICATION.md`
+- `docs/protocols/COMMUNICATION.md` (**workflow map** + what **`verified`** means)
 - `docs/protocols/HANDOFF.md`
 - `docs/protocols/GIT_DEPLOY.md`
 - `docs/protocols/QA_AUTH.md` (admin mailbox login for QA)

@@ -28,16 +28,16 @@ When **Verifier = `ceo`**, **Ship path = `direct-to-main`**, **Verify passes = `
 | `ceo` | `direct-to-main` | `pass2` |
 | `n/a` | `direct-to-main` (default for `agent-os-*`) | `n/a` |
 
-- **Verifier = `agent`:** run agent QA for the listed Verify passes (`HANDOFF-QA-*` / `QA-*`).  
-- **Verifier = `ceo`:** **do not** write agent QA handoffs. After Dev ships to the target env, PM asks CEO to verify. CEO says **verified** to complete the backlog item, or reports issues → Iteration on the **same** work ID.  
-- **Verifier = `n/a`:** docs/process (`agent-os`); no Pass 1/2. Ship path defaults to `direct-to-main` (CEO may set `feature-branch` for multi-iteration umbrellas).  
+- **Verifier = `agent`:** run agent QA for the listed Verify passes (`HANDOFF-QA-*` / `QA-*`). Prefer defaults (`feature-branch` + `pass1+pass2`); other combos are **rare** — see [`COMMUNICATION.md`](../protocols/COMMUNICATION.md#rare-paths-overrides).  
+- **Verifier = `ceo`:** **do not** write agent QA handoffs. After Dev ships to the target env, PM asks CEO to verify. CEO says **verified** to **complete** the backlog item (**does not** auto-push); issues → Iteration on the **same** work ID.  
+- **Verifier = `n/a`:** docs/process (`agent-os`); no Pass 1/2. Ship path defaults to `direct-to-main`. CEO **`verified`** completes **and ships** (see COMMUNICATION `verified` table).  
 - **`direct-to-main`** requires CEO approval (stated here, or implied when Verifier = `ceo` / `n/a` and Ship path is `direct-to-main`).  
 - If Ship path blank/ambiguous → apply Verifier defaults above (not always `feature-branch`).  
-- See `docs/protocols/GIT_DEPLOY.md` and `docs/protocols/CEO.md`.
+- See `docs/protocols/GIT_DEPLOY.md`, `CEO.md`, and workflow map in `COMMUNICATION.md`.
 
 **CEO approved direct-to-main?** yes / no / n/a  
 
-**Reason for direct-to-main (if any):**  
+**Reason for direct-to-main (if any):** _(required if Verifier=`agent` — rare override)_  
 
 ## Goal
 
