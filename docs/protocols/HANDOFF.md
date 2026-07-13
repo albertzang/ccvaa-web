@@ -13,7 +13,7 @@ Put the work ID in the **handoff/report body** — not in the filename.
 | QA report | `docs/reports/QA-pass1.md` / `QA-pass2.md` / `QA-baseline.md` |
 | Branch | `feat/{feature-slug}-{NNNN}-short-slug` or `fix/{feature-slug}-{NNNN}-…` (work ID still required here) |
 
-**Shared fixed paths.** Filenames do **not** include feature slug or backlog ID. Only one active feature handoff/report set should exist at a time; a new kickoff **overwrites** these paths. Prefer closing (complete/cancel + delete) the prior item’s artifacts first.
+**Shared fixed paths.** Filenames do **not** include feature slug or backlog ID. Only one active feature handoff/report set should exist at a time; a new kickoff **overwrites** these paths. Prefer finishing the prior item first (`completed` / `closed` + delete artifacts).
 
 **Retest / Iteration:** overwrite the same fixed path. Do **not** create `-prior`, `-v2`, `-attemptN`, or dated copies — earlier content lives in **git history**.
 
@@ -23,7 +23,7 @@ Handoffs and QA reports are **ephemeral working docs** for an open work ID (or o
 
 | When | Delete |
 |------|--------|
-| Backlog item → **`completed`** or **`canceled`** | `HANDOFF-DEV.md`, `HANDOFF-QA-pass1.md`, `HANDOFF-QA-pass2.md`, `QA-pass1.md`, `QA-pass2.md` (whichever exist) |
+| Backlog item → **`completed`** or **`closed`** | `HANDOFF-DEV.md`, `HANDOFF-QA-pass1.md`, `HANDOFF-QA-pass2.md`, `QA-pass1.md`, `QA-pass2.md` (whichever exist) |
 | Baseline closed (findings promoted / triage done) | `HANDOFF-QA-baseline.md` and `QA-baseline.md` |
 
 PM deletes these in the **same turn** as the status change (or baseline close). Recover prior text from **git history** if needed. Do not leave backlog **Links** pointing at deleted paths — keep PR / commit links only.
@@ -87,7 +87,7 @@ See also `docs/protocols/GIT_DEPLOY.md` and `docs/protocols/CEO.md`.
 
 ### Backlog review
 
-CEO asks to list/review → PM summarizes open items by feature and priority (incl. Verifier) → edit priorities/status/cancel/add together.
+CEO asks to list/review → PM summarizes open items by feature and priority (incl. Verifier) → edit priorities/status/close/add together.
 
 ### Pick + kickoff
 
@@ -185,7 +185,7 @@ PM proposes backlog items from chat when goals/bugs emerge; does not invent larg
 
 ## Definition of done (PM, after ship confirmed / CEO verified)
 
-- [ ] Backlog item status → `completed` (or `canceled` if dropped)
+- [ ] Backlog item status → `completed` (or `closed` if dropped)
 - [ ] `FEATURES.md` updated if behavior changed
 - [ ] **Delete** matching fixed handoff/report files under `docs/handoffs/` + `docs/reports/` (same turn); strip dead file Links from the backlog item — keep PR/commit links if useful
 - [ ] **If `agent-os-*` and CEO said `verified`:** ship per Ship path in the same turn (standing authorization)

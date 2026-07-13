@@ -6,7 +6,7 @@
 **Title:**  
 **Type:** `task` | `bug`  
 **Priority:** `now` | `next` | `later`  
-**Status:** `not-started` | `in-progress` | `canceled` | `completed`  
+**Status:** `not-started` | `in-progress` | `completed` | `closed`  
 **Source:** _(bugs only)_ `ceo` | `qa`  
 **Verifier:** `agent` (default) | `ceo` | `n/a`  
 **Verify passes:** `pass1+pass2` | `pass1` | `pass2` | `n/a`  

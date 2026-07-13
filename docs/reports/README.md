@@ -14,7 +14,7 @@
 
 **Concurrency:** shared fixed paths — prefer one active feature handoff/report set at a time; a new kickoff overwrites.
 
-**Lifespan:** these files exist only while the matching backlog item is open, or while a baseline is still being triaged. When the item is **`completed`** or **`canceled`** (or baseline triage is done), PM **deletes** them. Recover from git history if needed. Canonical shipped behavior lives in `docs/product/FEATURES.md` and the feature backlogs.
+**Lifespan:** these files exist only while the matching backlog item is open, or while a baseline is still being triaged. When the item is **`completed`** or **`closed`** (or baseline triage is done), PM **deletes** them. Recover from git history if needed. Canonical shipped behavior lives in `docs/product/FEATURES.md` and the feature backlogs.
 
 **Baseline IDs** are global auto-increment integers (`0001`, `0002`, …), independent of feature backlog IDs. Put Baseline ID and calendar **Date** inside the handoff/report body only.
 

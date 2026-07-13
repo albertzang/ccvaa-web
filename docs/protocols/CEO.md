@@ -103,7 +103,7 @@ Handoff/report names: `HANDOFF-QA-baseline.md` / `QA-baseline.md` (Baseline ID +
 ## Checklist: backlog review
 
 - [ ] Ask PM to **list** a feature backlog (or all): open items by priority
-- [ ] Re-prioritize, cancel, or add items with PM (incl. Verifier / Verify passes)
+- [ ] Re-prioritize, set **`closed`**, or add items with PM (incl. Verifier / Verify passes)
 - [ ] Pick one work ID to kick off when ready
 
 ---

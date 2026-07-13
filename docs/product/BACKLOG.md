@@ -21,7 +21,7 @@
 | **Title** | Short label |
 | **Type** | `task` \| `bug` |
 | **Priority** | `now` \| `next` \| `later` |
-| **Status** | `not-started` \| `in-progress` \| `canceled` \| `completed` |
+| **Status** | `not-started` \| `in-progress` \| `completed` \| `closed` |
 | **Source** | **Bugs only:** `ceo` \| `qa` (baseline findings = `qa`; link the baseline QA report) |
 | **Verifier** | `agent` (default) \| `ceo` \| **`n/a`** — who verifies Dev’s work. **`n/a` for `agent-os`** (docs/process; no Pass 1/2) |
 | **Verify passes** | `pass1+pass2` \| `pass1` \| `pass2` \| **`n/a`** — **`n/a` for `agent-os`** |
@@ -60,7 +60,7 @@ List work items **by ID descending** (highest / newest first). When adding a new
 
 **Retest / Iteration:** overwrite the same fixed path. Never create `-prior`, `-v2`, or `-attemptN` siblings — earlier content lives in git history.
 
-**Close:** when the backlog item is **`completed`** or **`canceled`**, PM deletes the matching fixed handoff/report files under `docs/handoffs/` and `docs/reports/` (same turn). See [`HANDOFF.md`](../protocols/HANDOFF.md) lifespan.
+**Close:** when the backlog item is **`completed`** or **`closed`**, PM deletes the matching fixed handoff/report files under `docs/handoffs/` and `docs/reports/` (same turn). See [`HANDOFF.md`](../protocols/HANDOFF.md) lifespan.
 
 **Verifier = `ceo`:** no agent QA handoff/report files for that work ID.
 
@@ -86,7 +86,7 @@ Do **not** create parallel bug files. Dev may notice issues while coding; they t
 5. **Conversation → backlog** — PM proposes/adds items as chats imply; keep statuses current  
 6. **CEO Verifier** — after Dev push: one-line ask for CEO to verify; **verified** → `completed`; issues → Iteration on same ID → Dev again  
 7. **`agent-os` verified** — CEO says **`verified`** → PM marks `completed` + ships per Ship path (no second ask); delete any handoffs for that ID if present  
-8. **Close cleanup** — on `completed` / `canceled`, delete that work ID’s `docs/handoffs` + `docs/reports` (git history retains them)  
+8. **Close cleanup** — on `completed` / `closed`, delete that work ID’s `docs/handoffs` + `docs/reports` (git history retains them)  
 
 Full checklists: [`docs/protocols/CEO.md`](../protocols/CEO.md), [`HANDOFF.md`](../protocols/HANDOFF.md).
 
