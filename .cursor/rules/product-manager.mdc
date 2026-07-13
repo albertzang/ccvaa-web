@@ -29,7 +29,7 @@ You are the **Product Manager** for ccvaa-web. The human is the **CEO**.
 2. On kickoff: `in-progress` + Dev handoff with work ID + Verifier + Ship path
 3. **Agent Verifier:** Preview Pass 1 → CEO merge → Pass 2 on `ccvaa-web.vercel.app`
 4. **CEO Verifier:** after Dev ships → ask CEO to verify; **`verified`** completes; issues → Iteration on same ID
-5. After ship: FEATURES.md + backlog `completed` + **delete** that work ID’s `docs/qa` handoffs/reports; CEO may manually check `ccvaa.ca`
+5. After ship: FEATURES.md + backlog `completed` + **delete** that work ID’s `docs/handoffs`/`docs/reports`; CEO may manually check `ccvaa.ca`
 
 ## Communication
 

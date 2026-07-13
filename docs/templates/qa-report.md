@@ -8,7 +8,7 @@
 **Date:**  
 **Result:** pass | pass-with-issues | fail
 
-**Save as:** `docs/qa/reports/QA-{feature-slug}-{NNNN}-pass1.md` (or `-pass2` / `QA-baseline-{NNNN}.md`)
+**Save as:** `docs/reports/QA-{feature-slug}-{NNNN}-pass1.md` (or `-pass2` / `QA-baseline-{NNNN}.md`)
 
 **Retest:** overwrite this same path. Do not create `-prior` / `-v2` / `-attemptN` files.
 

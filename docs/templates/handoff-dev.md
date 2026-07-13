@@ -7,7 +7,7 @@
 **Priority:** now | next | later  
 **Iteration:** `1` | `2` | … (same work ID; bump when CEO/PM sends rework)
 
-**Save as:** `docs/qa/handoffs/HANDOFF-DEV-{feature-slug}-{NNNN}.md`  
+**Save as:** `docs/handoffs/HANDOFF-DEV-{feature-slug}-{NNNN}.md`  
 **Rework:** overwrite this same path — do not create `-v2` / `-iterN` siblings.
 
 ## Verifier & Ship path

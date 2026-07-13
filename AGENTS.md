@@ -33,6 +33,7 @@ Shared brain (not chat history):
 - `docs/product/BACKLOG.md` — feature backlogs + work IDs `{feature-slug}-{NNNN}`
 - `docs/protocols/` — communication, handoff, git/deploy, QA auth, Preview protection, **CEO responsibilities**
 - `docs/templates/` — bug / feature / QA / handoff templates
+- `docs/handoffs/` / `docs/reports/` — ephemeral handoffs & reports (deleted when work closes)
 - `.cursor/rules/` — shared + role rules
 - `.cursor/skills/` — `product-manager`, `developer`, `ccvaa-dev-memory`, `qa`
 - `.cursor/agents/` — `product-manager`, `developer`, `qa`

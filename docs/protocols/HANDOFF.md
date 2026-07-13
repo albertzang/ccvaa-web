@@ -7,9 +7,9 @@ Source of truth: [`docs/product/BACKLOG.md`](../product/BACKLOG.md).
 
 | Artifact | Filename pattern |
 |----------|------------------|
-| Dev handoff | `docs/qa/handoffs/HANDOFF-DEV-{feature-slug}-{NNNN}.md` |
-| QA handoff | `docs/qa/handoffs/HANDOFF-QA-{feature-slug}-{NNNN}-pass1.md` (also `-pass2`) |
-| QA report | `docs/qa/reports/QA-{feature-slug}-{NNNN}-pass1.md` |
+| Dev handoff | `docs/handoffs/HANDOFF-DEV-{feature-slug}-{NNNN}.md` |
+| QA handoff | `docs/handoffs/HANDOFF-QA-{feature-slug}-{NNNN}-pass1.md` (also `-pass2`) |
+| QA report | `docs/reports/QA-{feature-slug}-{NNNN}-pass1.md` |
 | Branch | `feat/{feature-slug}-{NNNN}-short-slug` or `fix/{feature-slug}-{NNNN}-…` |
 
 **One path per work ID + pass.** If Pass 1/2 signs **retest** / **hold** and QA runs again, **overwrite** the same `…-passN.md` (and the same handoff filename). Do **not** create `-prior`, `-v2`, `-attemptN`, or dated copies — earlier content lives in **git history**. Optionally note “retest after earlier hold” in the report body.
@@ -22,18 +22,18 @@ Handoffs and QA reports are **ephemeral working docs** for an open work ID (or o
 
 | When | Delete |
 |------|--------|
-| Backlog item → **`completed`** or **`canceled`** | All `HANDOFF-DEV|QA-*{feature-slug}-{NNNN}*` and `QA-{feature-slug}-{NNNN}*` under `docs/qa/` |
+| Backlog item → **`completed`** or **`canceled`** | All `HANDOFF-DEV|QA-*{feature-slug}-{NNNN}*` and `QA-{feature-slug}-{NNNN}*` under `docs/handoffs/` and `docs/reports/` |
 | Baseline closed (findings promoted / triage done) | `HANDOFF-QA-baseline-{NNNN}.md` and `QA-baseline-{NNNN}.md` |
 
 PM deletes these in the **same turn** as the status change (or baseline close). Recover prior text from **git history** if needed. Do not leave backlog **Links** pointing at deleted paths — keep PR / commit links only.
 
-**Bugs** live only as backlog items (`type: bug`, **Source:** `ceo` | `qa`). No `docs/qa/bugs/` files.
+**Bugs** live only as backlog items (`type: bug`, **Source:** `ceo` | `qa`). No parallel bugs directory.
 
 **Verifier** on the backlog item / Dev handoff: `agent` (default) | `ceo`.  
 **Verify passes:** `pass1+pass2` | `pass1` | `pass2`.  
 When **Verifier = `ceo`**, skip agent QA artifacts entirely; CEO verifies per [`CEO.md`](CEO.md). Defaults: Ship path `direct-to-main`, Verify passes `pass2`.
 
-**Baseline** (no feature backlog item yet): `HANDOFF-QA-baseline-{NNNN}.md` / `QA-baseline-{NNNN}.md`. Assign `{NNNN}` from **Next baseline ID** in `docs/qa/README.md`, then increment it. Put the calendar date only in the handoff/report **Date** field (multiple baselines per day allowed). After the report, PM promotes findings into backlog items (**Source:** `qa`), then **deletes** the baseline handoff + report (lifespan rule above).
+**Baseline** (no feature backlog item yet): `HANDOFF-QA-baseline-{NNNN}.md` / `QA-baseline-{NNNN}.md`. Assign `{NNNN}` from **Next baseline ID** in `docs/reports/README.md`, then increment it. Put the calendar date only in the handoff/report **Date** field (multiple baselines per day allowed). After the report, PM promotes findings into backlog items (**Source:** `qa`), then **deletes** the baseline handoff + report (lifespan rule above).
 
 Blank backlog ID on feature Dev/QA work → **block**.
 
@@ -64,7 +64,7 @@ See also `docs/protocols/GIT_DEPLOY.md` and `docs/protocols/CEO.md`.
 ### Baseline kickoff
 
 1. CEO: kick off baseline  
-2. PM: take **Next baseline ID** from `docs/qa/README.md` → Pass=`baseline` handoff `HANDOFF-QA-baseline-{NNNN}.md` (date in body only); increment Next ID; scope = FEATURES.md (full or subset)  
+2. PM: take **Next baseline ID** from `docs/reports/README.md` → Pass=`baseline` handoff `HANDOFF-QA-baseline-{NNNN}.md` (date in body only); increment Next ID; scope = FEATURES.md (full or subset)  
 3. QA: report on Production  
 4. PM: promote issues into feature backlogs (`task`/`bug`, **Source:** `qa`); CEO confirms priorities + Verifier  
 
@@ -185,5 +185,5 @@ PM proposes backlog items from chat when goals/bugs emerge; does not invent larg
 
 - [ ] Backlog item status → `completed` (or `canceled` if dropped)
 - [ ] `FEATURES.md` updated if behavior changed
-- [ ] **Delete** all `docs/qa/handoffs/` + `docs/qa/reports/` files for that work ID (same turn); strip dead file Links from the backlog item — keep PR/commit links if useful
+- [ ] **Delete** all `docs/handoffs/` + `docs/reports/` files for that work ID (same turn); strip dead file Links from the backlog item — keep PR/commit links if useful
 - [ ] **If `agent-os-*` and CEO said `verified`:** ship per Ship path in the same turn (standing authorization)

@@ -3,7 +3,7 @@
 > **Owner:** Product Manager (with CEO).  
 > **Shipped behavior** lives in [`FEATURES.md`](FEATURES.md).  
 > **Work-to-do** lives in the feature backlog files below.  
-> **Bugs** are backlog items (`type: bug`) — no separate `docs/qa/bugs/` files.
+> **Bugs** are backlog items (`type: bug`) — no parallel bugs directory.
 
 ## Features
 
@@ -52,19 +52,19 @@ List work items **by ID descending** (highest / newest first). When adding a new
 
 | Artifact | Pattern |
 |----------|---------|
-| Dev handoff | `docs/qa/handoffs/HANDOFF-DEV-{feature-slug}-{NNNN}.md` |
-| QA handoff | `docs/qa/handoffs/HANDOFF-QA-{feature-slug}-{NNNN}-pass1.md` (also `-pass2`) |
-| QA report | `docs/qa/reports/QA-{feature-slug}-{NNNN}-pass1.md` |
+| Dev handoff | `docs/handoffs/HANDOFF-DEV-{feature-slug}-{NNNN}.md` |
+| QA handoff | `docs/handoffs/HANDOFF-QA-{feature-slug}-{NNNN}-pass1.md` (also `-pass2`) |
+| QA report | `docs/reports/QA-{feature-slug}-{NNNN}-pass1.md` |
 | Branch | `feat/{feature-slug}-{NNNN}-short-slug` or `fix/{feature-slug}-{NNNN}-…` |
 | PR title | Include `{feature-slug}-{NNNN}` |
 
 **Retest / Iteration:** overwrite the same `…-passN.md` / `HANDOFF-DEV-…` path. Never create `-prior`, `-v2`, or `-attemptN` siblings — earlier content lives in git history.
 
-**Close:** when the backlog item is **`completed`** or **`canceled`**, PM deletes that work ID’s handoff and report files under `docs/qa/` (same turn). See [`HANDOFF.md`](../protocols/HANDOFF.md) lifespan.
+**Close:** when the backlog item is **`completed`** or **`canceled`**, PM deletes that work ID’s handoff and report files under `docs/handoffs/` and `docs/reports/` (same turn). See [`HANDOFF.md`](../protocols/HANDOFF.md) lifespan.
 
 **Verifier = `ceo`:** no agent QA handoff/report files for that work ID.
 
-**Baseline** (no feature backlog item yet): `HANDOFF-QA-baseline-{NNNN}.md` / `QA-baseline-{NNNN}.md` — IDs from `docs/qa/README.md` (**Next baseline ID**); date only in file body. PM promotes findings into backlog items (`type: bug` or `task`, **Source:** `qa`).
+**Baseline** (no feature backlog item yet): `HANDOFF-QA-baseline-{NNNN}.md` / `QA-baseline-{NNNN}.md` — IDs from `docs/reports/README.md` (**Next baseline ID**); date only in file body. PM promotes findings into backlog items (`type: bug` or `task`, **Source:** `qa`).
 
 Blank backlog ID on feature Dev/QA work → **block**.
 
@@ -86,7 +86,7 @@ Do **not** create parallel bug files. Dev may notice issues while coding; they t
 5. **Conversation → backlog** — PM proposes/adds items as chats imply; keep statuses current  
 6. **CEO Verifier** — after Dev push: one-line ask for CEO to verify; **verified** → `completed`; issues → Iteration on same ID → Dev again  
 7. **`agent-os` verified** — CEO says **`verified`** → PM marks `completed` + ships per Ship path (no second ask); delete any handoffs for that ID if present  
-8. **Close cleanup** — on `completed` / `canceled`, delete that work ID’s `docs/qa` handoffs + reports (git history retains them)  
+8. **Close cleanup** — on `completed` / `canceled`, delete that work ID’s `docs/handoffs` + `docs/reports` (git history retains them)  
 
 Full checklists: [`docs/protocols/CEO.md`](../protocols/CEO.md), [`HANDOFF.md`](../protocols/HANDOFF.md).
 

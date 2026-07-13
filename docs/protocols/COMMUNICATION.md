@@ -66,7 +66,7 @@ Developer follows Verifier + Ship path literally. Never invent `direct-to-main` 
 - Known risks (incl. Preview env vars for admin OTP/mail)
 - If full admin login is required: note **OTP: single-Send + CEO-in-the-loop** (`docs/protocols/QA_AUTH.md`)
 
-**Baseline:** CEO/PM-initiated Production audit with no PR; skip Preview; filename `HANDOFF-QA-baseline-{NNNN}.md` (Next ID in `docs/qa/README.md`; date in body only). See `docs/protocols/GIT_DEPLOY.md`.
+**Baseline:** CEO/PM-initiated Production audit with no PR; skip Preview; filename `HANDOFF-QA-baseline-{NNNN}.md` (Next ID in `docs/reports/README.md`; date in body only). See `docs/protocols/GIT_DEPLOY.md`.
 
 Never ask QA to verify https://ccvaa.ca/ — CEO handles that manually. Never use `ccvaa-web.vercel.app` as a feature Preview URL. Never put mailbox passwords, OTP codes, or `VERCEL_AUTOMATION_BYPASS_SECRET` in handoffs committed to git.
 
@@ -80,10 +80,10 @@ CEO replies **`verified`** or notes issues → Iteration on the same backlog ID.
 ## QA → Product Manager / Developer
 
 Use `docs/templates/qa-report.md`.
-- Reports: `docs/qa/reports/QA-{feature-slug}-{NNNN}-passN.md` (or `QA-baseline-{NNNN}.md`)
+- Reports: `docs/reports/QA-{feature-slug}-{NNNN}-passN.md` (or `QA-baseline-{NNNN}.md`)
 - New defects: list under **Bugs found** in the QA report (repro + severity); **PM** promotes to backlog `type: bug` (**Source:** `qa`)
 - Always include environment URL + repro steps
-- Do **not** create files under `docs/qa/bugs/`
+- Do **not** create a parallel bugs directory
 - Do **not** invent work for items with Verifier = `ceo` (those never get agent QA handoffs)
 - Handoffs/reports are ephemeral: PM deletes them when the backlog item is **`completed`** / **`canceled`** (or baseline triage closes) — see `HANDOFF.md`
 

@@ -32,7 +32,7 @@ Move the product forward through advice, clear scope, feature backlogs, and hand
 4. Delegate via `HANDOFF-DEV-{feature-slug}-{NNNN}.md` with **Verifier**, **Verify passes**, and **Ship path**
 5. **Verifier = `agent`:** QA Pass 1 / Pass 2 per Verify passes. **Verifier = `ceo`:** no agent QA — ask CEO to verify; Iterations on same ID until **`verified`**
 6. **Prompt CEO** at each gate using `docs/protocols/CEO.md`
-7. After ships: update FEATURES.md + mark backlog `completed`; **delete** that work ID’s `docs/qa` handoffs/reports; CEO may manually check `ccvaa.ca`
+7. After ships: update FEATURES.md + mark backlog `completed`; **delete** that work ID’s `docs/handoffs`/`docs/reports`; CEO may manually check `ccvaa.ca`
 8. Propose OS improvements (often `agent-os` backlog); wait for CEO approval before large process changes
 
 ## Constraints
