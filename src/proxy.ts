@@ -32,6 +32,13 @@ export function proxy(request: NextRequest) {
     return NextResponse.rewrite(url);
   }
 
+  // Defensive: iframe task nav must not land on /admin/?_task=… (reloads shell).
+  if (pathname === "/admin" && searchParams.has("_task")) {
+    const url = request.nextUrl.clone();
+    url.pathname = PROXY_PREFIX;
+    return NextResponse.rewrite(url);
+  }
+
   for (const root of ROUNDCUBE_ROOTS) {
     if (pathname === `/${root}` || pathname.startsWith(`/${root}/`)) {
       const url = request.nextUrl.clone();
@@ -46,6 +53,7 @@ export function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     "/",
+    "/admin",
     "/admin/mail/",
     "/skins/:path*",
     "/program/:path*",
