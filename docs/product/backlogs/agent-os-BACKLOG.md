@@ -17,14 +17,14 @@ Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `n/a` |
 | **Verify passes** | `n/a` |
 | **Ship path** | `direct-to-main` |
 
 ### Description
 
-CEO-led refinement of the multi-agent OS (principles → concrete doc/protocol changes). Do not invent large process changes until CEO directs them. Ships on `main` via `direct-to-main` (commit when CEO asks; push on **`verified`**).
+CEO-led refinement of the multi-agent OS (principles → concrete doc/protocol changes). CEO **verified** 2026-07-12 → completed; shipped `direct-to-main`.
 
 ### Overall
 
