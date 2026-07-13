@@ -305,6 +305,10 @@ try{
  *
  * Iteration 9: task switches ask the parent to preload-then-swap (double-buffer)
  * so the current document stays painted until the next task HTML is ready.
+ *
+ * Iteration 10: before preload/swap away from dirty compose, run Roundcube's
+ * confirm_dialog (Hover discard UI). Only swap after confirm or when clean —
+ * otherwise blanking the iframe trips Chrome's beforeunload "Leave site?".
  */
 const SWITCH_TASK_FRAME_PATCH = `<script>(function(){
 var P="/admin/mail",H="${HOVER_HELP_URL}",O=window.location.origin,S="ccvaa-admin-mail";
@@ -331,8 +335,34 @@ function rw(u){
   return u;
 }
 function go(u){var n=rw(u);if(!n||isHelp(n))return;try{window.location.assign(n);}catch(e){window.location.href=n;}}
-function requestSwap(u){
-  var n=rw(u);if(!n||isHelp(n))return;
+function composeDirty(){
+  var rc=window.rcmail;
+  try{
+    if(!rc||rc.task!=="mail"||!rc.env||rc.env.action!=="compose"||rc.env.server_error)return!1;
+    if(rc.compose_skip_unsavedcheck||rc.env.is_sent)return!1;
+    if(typeof rc.compose_field_hash!=="function")return!1;
+    return rc.cmp_hash!=rc.compose_field_hash();
+  }catch(e){return!1;}
+}
+function withComposeConfirm(fn){
+  var rc=window.rcmail;
+  if(!composeDirty()){fn();return;}
+  function proceed(){
+    try{if(rc&&typeof rc.remove_compose_data==="function")rc.remove_compose_data(rc.env.compose_id);}catch(e){}
+    if(rc)rc.compose_skip_unsavedcheck=!0;
+    fn();
+  }
+  try{
+    if(rc&&typeof rc.confirm_dialog==="function"){
+      rc.confirm_dialog(rc.get_label("notsentwarning"),"discard",proceed);
+      return;
+    }
+  }catch(e){}
+  try{
+    if(window.confirm(rc&&rc.get_label?rc.get_label("notsentwarning"):"Discard unsaved message?"))proceed();
+  }catch(e2){}
+}
+function doRequestSwap(n){
   var rp=window.__ccvaaRealParent,href;
   try{href=new URL(n,location.href).href;}catch(e){href=n;}
   try{
@@ -342,6 +372,10 @@ function requestSwap(u){
     }
   }catch(e){}
   go(n);
+}
+function requestSwap(u){
+  var n=rw(u);if(!n||isHelp(n))return;
+  withComposeConfirm(function(){doRequestSwap(n);});
 }
 function taskAnchor(a){
   if(!a||!a.getAttribute)return!1;

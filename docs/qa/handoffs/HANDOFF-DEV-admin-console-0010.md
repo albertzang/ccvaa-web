@@ -2,31 +2,35 @@
 
 **Date:** 2026-07-12  
 **Backlog work ID:** `admin-console-0010`  
-**Iteration:** `9`  
+**Iteration:** `10`  
 **Branch / PR:** `feat/admin-console-0010-hover-auth` — PR #4  
 **Verifier:** `ceo` | **Verify passes:** `pass1`
 
 ## Goal
 
-CEO verified Iteration 8 (auth blink fixed). Remaining:
+CEO verified Iteration 9 (no white flash). Regression:
 
-**White flash inside the mail iframe** on Hover task-bar navigation (Mail / Files / Calendar / Contacts). Native Hover feels **instant**; our embed shows a significant white blank while the next task document loads through the proxy.
+Leaving **Compose** shows Chrome **“Leave site?”** instead of Hover’s built-in **discard draft / are you sure?** dialog (which worked before recent intercept/preload iterations, and matches native Hover).
 
-## Approach
+## Cause
 
-Roundcube task switch = full HTML navigation. Proxy adds latency → visible white unload.
+Switch-task intercept + preload/swap navigates without Roundcube’s compose dirty-check → browser `beforeunload` instead of Hover UI.
 
-**Preferred fix:** double-buffer / preload-then-swap so the current iframe stays painted until the next task document is ready, then swap (no white interstitial).
+## Fix
 
-Options:
-- Parent `MailSection`: two stacked iframes; on `switch-task` (postMessage from inject, or detect), load next URL in hidden frame, on `load` promote it
-- Or inject in Roundcube: intercept `switch-task`, open hidden iframe sibling… harder inside one frame — parent coordination via `postMessage` is cleaner
-
-Keep sticky auth (Iter 8), Help, logout, 0009.
+- Before preload/swap away from compose (dirty compose / compose mode), invoke Roundcube’s normal confirm path so **Hover’s dialog** shows
+- Only proceed with navigation/swap after confirm or if clean
+- Keep Iter 9 double-buffer for clean task switches (Mail↔Calendar etc. without compose dirty)
+- Must not break sticky auth, Help, logout
 
 ## Acceptance
 
-- [ ] Mail ↔ Files ↔ Calendar ↔ Contacts: **no significant white flash** inside mail panel (feels closer to native Hover)
-- [ ] Auth sidebar items still stable (no Iter 8 regression)
-- [ ] Help / logout / login still work
+- [ ] Switch away from dirty Compose → **Hover discard dialog** (not Chrome Leave site)
+- [ ] Confirm discard → leave compose; cancel → stay in compose
+- [ ] Clean task switches (no compose) still no significant white flash
 - [ ] Lint/typecheck; push; Preview URL
+
+## Dev notes (Iteration 10)
+
+- Patch in `SWITCH_TASK_FRAME_PATCH`: `withComposeConfirm` → `doRequestSwap` only after clean or Hover `confirm_dialog` discard
+- Sticky auth / Help / logout unchanged; Iter 9 buffer kept for non-dirty switches

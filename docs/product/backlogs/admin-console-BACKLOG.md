@@ -74,18 +74,15 @@ Frame isolation may still help, but CEO clarified the symptom is **not** a full 
 
 Sticky auth + quieter AUTH_BRIDGE. Sidebar auth items no longer blink.
 
-### Iteration 9 — Instant in-iframe task switch (no white flash) (current)
+### Iteration 9 — Instant in-iframe task switch (CEO verified 2026-07-12)
 
-**Symptom (CEO):** Significant **white page blink inside the iframe** when navigating Hover task bar (Mail / Files / Calendar / Contacts). Native https://mail.hover.com feels like an **instant switch**.
+Double-buffer preload-then-swap. White flash fixed.
 
-**Why (likely):** Roundcube `switch-task` does a **full document load**. Through our proxy that means: unload iframe → white empty document → Vercel function → fetch Hover → rewrite HTML → paint. Extra latency vs direct Hover makes the white flash obvious.
+### Iteration 10 — Restore Hover compose discard dialog (current)
 
-**Fix direction (prefer UX over micro-optimizing proxy only):**
-1. **Preload-then-swap (recommended):** intercept task switches; load next task URL in a hidden buffer iframe (or second frame); when `load` fires, swap into view so the user never sees a blank white document
-2. And/or: keep previous iframe painted until replacement is ready (double-buffer in `MailSection` parent)
-3. Optional: reduce proxy TTFB (less rewrite work, cache static Roundcube assets) — secondary
+**Symptom (CEO):** Leaving **Compose** showed Chrome **“Leave site?”** instead of Hover’s discard dialog after Iter 9 preload/swap.
 
-Must not regress: sticky auth (Iter 8), Help new-tab, logout, 0009 fixes.
+**Fix:** Before preload/swap, if compose is dirty (`cmp_hash` vs `compose_field_hash`), call Roundcube `confirm_dialog(notsentwarning)` (same as native leave-compose). Set `compose_skip_unsavedcheck` on confirm so blanking the old iframe does not trip `beforeunload`. Clean task switches keep Iter 9 double-buffer.
 
 ### Links
 
