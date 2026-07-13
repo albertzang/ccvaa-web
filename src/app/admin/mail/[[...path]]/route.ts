@@ -279,18 +279,42 @@ const HASH_LINK_NAV_GUARD = `<script>(function(){document.addEventListener("clic
 const PASSIVE_QUERY_LINK_FIXER = `<script>(function(){var P="/admin/mail",H="${HOVER_HELP_URL}";function fixHelp(a){var h=a.getAttribute("href");if(!h)return;if(/\\/help\\/|help\\.html|_task=help/.test(h)){a.setAttribute("href",H);a.setAttribute("target","_blank");a.setAttribute("rel","noopener noreferrer");}}function fixTarget(a){if(a.getAttribute("href")===H)return;if(/\\/help\\/|help\\.html|_task=help/.test(a.getAttribute("href")||""))return;var t=a.getAttribute("target");if(t==="_top"||t==="_parent")a.setAttribute("target","_self");}function fixHref(a){var h=a.getAttribute("href");if(!h||h.charAt(0)==="#")return;fixHelp(a);if(a.getAttribute("href")===H)return;fixTarget(a);h=a.getAttribute("href");if(h.charAt(0)==="?"||h.indexOf("./?")===0)a.setAttribute("href",P+h.replace(/^\\.\\/?/,""));else if(h.indexOf(P+"/?")>=0)a.setAttribute("href",h.replace(/\\/admin\\/mail\\/\\?/g,P+"?"));else if((h==="/"||h.indexOf("/?")===0)&&h.indexOf(P)!==0)a.setAttribute("href",P+h.slice(1));else if(h.charAt(0)==="/"&&h.indexOf(P)!==0&&h.indexOf("//")!==0&&/_task=/.test(h))a.setAttribute("href",P+h.replace(/^\\//,""));}function fixForm(f){var a=f.getAttribute("action");if(a&&a.charAt(0)==="?")f.setAttribute("action",P+a);else if(a&&(a==="/"||a.indexOf("/?")===0)&&a.indexOf(P)!==0)f.setAttribute("action",P+a.slice(1));var t=f.getAttribute("target");if(t==="_top"||t==="_parent")f.setAttribute("target","_self");}function scan(r){if(!r.querySelectorAll)return;r.querySelectorAll("a[href]").forEach(fixHref);r.querySelectorAll("form[action]").forEach(fixForm);}scan(document);new MutationObserver(function(ms){ms.forEach(function(m){m.addedNodes.forEach(function(n){if(n.nodeType!==1)return;scan(n);if(n.matches){if(n.matches("a[href]"))fixHref(n);if(n.matches("form[action]"))fixForm(n);}});});}).observe(document.documentElement,{childList:true,subtree:true});})();</script>`;
 
 /**
- * Iteration 6: Calendar/Mail/Files/Contacts use
+ * Iteration 7: same-origin iframe lets Roundcube set top/parent.location to
+ * `/?_task=…`, which unloads the React /admin shell (proxy rewrites root to
+ * mail HTML). Capture the real parent first, then make parent/top return the
+ * iframe window so breakout assignments only navigate the iframe. AUTH_BRIDGE
+ * must postMessage via __ccvaaRealParent (not the redefined parent).
+ */
+const FRAME_PARENT_ISOLATION = `<script>(function(){
+if(window.__ccvaaFrameIsolated)return;
+window.__ccvaaFrameIsolated=1;
+var realParent=window.parent,realTop=window.top;
+window.__ccvaaRealParent=realParent;
+window.__ccvaaRealTop=realTop;
+try{
+  Object.defineProperty(window,"parent",{configurable:!0,enumerable:!0,get:function(){return window;}});
+  Object.defineProperty(window,"top",{configurable:!0,enumerable:!0,get:function(){return window;}});
+}catch(e){}
+})();</script>`;
+
+/**
+ * Belt-and-suspenders (Iteration 6+): Calendar/Mail/Files/Contacts use
  *   onclick="return rcmail.command('switch-task', task, this, event)"
- * with an already-correct href="/admin/mail?_task=…". Roundcube's switch_task →
- * redirect → location_href (or parent/top.location) navigates the admin shell.
- * Always steal those clicks in capture phase and patch rcmail helpers so
- * navigation stays on window (the iframe). Help stays a new-tab upstream URL.
+ * Steal those clicks + patch rcmail helpers so nav stays in the iframe.
+ * Help stays a new-tab upstream URL. FRAME_PARENT_ISOLATION is the primary fix.
  */
 const SWITCH_TASK_FRAME_PATCH = `<script>(function(){
 var P="/admin/mail",H="${HOVER_HELP_URL}";
 function isHelp(u){return!u?!1:u===H||/\\/help\\//.test(u)||/help\\.html/.test(u)||/_task=help/.test(u);}
 function rw(u){
   if(typeof u!=="string"||!u||isHelp(u))return u;
+  if(/^https?:\\/\\//i.test(u)){
+    try{
+      var abs=new URL(u,location.href);
+      if(abs.origin===location.origin)return rw(abs.pathname+abs.search+abs.hash);
+    }catch(e){}
+    return u;
+  }
   if(u==="/"||u==="")return P;
   if(u.charAt(0)==="?"||u.indexOf("./?")===0)return P+u.replace(/^\\.\\/?/,"");
   if(u.indexOf("/?")===0)return P+u.slice(1);
@@ -323,7 +347,7 @@ document.addEventListener("click",function(e){
   if(n&&n!==h)a.setAttribute("href",n);
   go(a.getAttribute("href"));
 },true);
-function guardLoc(loc,toFrame){
+function guardLoc(loc){
   if(!loc||loc.__ccvaaG)return;
   try{
     var proto=Object.getPrototypeOf(loc);
@@ -332,20 +356,16 @@ function guardLoc(loc,toFrame){
       Object.defineProperty(loc,"href",{
         configurable:!0,enumerable:!0,
         get:d.get?function(){return d.get.call(loc);}:function(){return String(loc);},
-        set:function(v){if(toFrame)go(v);else d.set.call(loc,rw(v));}
+        set:function(v){d.set.call(loc,rw(v));}
       });
     }
     var as=loc.assign,rp=loc.replace;
-    if(typeof as==="function")loc.assign=function(v){if(toFrame)go(v);else as.call(loc,rw(v));};
-    if(typeof rp==="function")loc.replace=function(v){if(toFrame)go(v);else rp.call(loc,rw(v));};
+    if(typeof as==="function")loc.assign=function(v){as.call(loc,rw(v));};
+    if(typeof rp==="function")loc.replace=function(v){rp.call(loc,rw(v));};
     loc.__ccvaaG=1;
   }catch(x){}
 }
-function guardBreakouts(){
-  guardLoc(window.location,!1);
-  try{if(window.parent&&window.parent!==window)guardLoc(window.parent.location,!0);}catch(x){}
-  try{if(window.top&&window.top!==window)guardLoc(window.top.location,!0);}catch(x){}
-}
+function guardBreakouts(){guardLoc(window.location);}
 function patchRcmail(){
   var rc=window.rcmail;if(!rc||rc.__ccvaaTaskPatch)return!!rc;
   rc.__ccvaaTaskPatch=1;
@@ -369,7 +389,7 @@ function patchRcmail(){
   if(typeof rc.location_href==="function"){
     var lh=rc.location_href.bind(rc);
     rc.location_href=function(url,target,frame,replace){
-      if(!target||target===window.parent||target===window.top)target=window;
+      if(!target||target===window.parent||target===window.top||target===window.__ccvaaRealParent||target===window.__ccvaaRealTop)target=window;
       if(typeof url==="string")url=rw(url);
       return lh(url,target,frame,replace);
     };
@@ -399,12 +419,13 @@ var n=0,t=setInterval(function(){if(patchRcmail()||++n>200)clearInterval(t);},25
 const HIDE_BLANK_HEADER = `<style id="ccvaa-hide-blank-header">#header{display:none!important}</style>`;
 
 /**
- * Report mailbox login state to the parent /admin page (same-origin iframe).
+ * Report mailbox login state to the real parent /admin page.
+ * Uses __ccvaaRealParent because FRAME_PARENT_ISOLATION redefines window.parent.
  * Fail closed in the parent if messages stop; parent also polls /api/admin/session.
  */
-const AUTH_BRIDGE = `<script>(function(){var O=window.location.origin,S="ccvaa-admin-mail",last=null;function loggedIn(){try{if(window.rcmail&&rcmail.env){var t=rcmail.env.task;if(t&&t!=="login")return true;if(t==="login")return false;}}catch(e){}if(document.querySelector("#login-form,form[name=login],#login"))return false;if(document.querySelector("#mainscreen,#mailboxlist,#layout"))return true;return false;}function report(){var auth=loggedIn();if(last===auth)return;last=auth;try{parent.postMessage({source:S,authenticated:auth},O);}catch(e){}}report();document.addEventListener("DOMContentLoaded",report);window.addEventListener("load",report);setInterval(report,2000);})();</script>`;
+const AUTH_BRIDGE = `<script>(function(){var O=window.location.origin,S="ccvaa-admin-mail",last=null,realParent=window.__ccvaaRealParent;function loggedIn(){try{if(window.rcmail&&rcmail.env){var t=rcmail.env.task;if(t&&t!=="login")return true;if(t==="login")return false;}}catch(e){}if(document.querySelector("#login-form,form[name=login],#login"))return false;if(document.querySelector("#mainscreen,#mailboxlist,#layout"))return true;return false;}function report(){var auth=loggedIn();if(last===auth)return;last=auth;try{if(realParent&&realParent!==window)realParent.postMessage({source:S,authenticated:auth},O);}catch(e){}}report();document.addEventListener("DOMContentLoaded",report);window.addEventListener("load",report);setInterval(report,2000);})();</script>`;
 
-const HTML_HEAD_INJECT = `${HIDE_BLANK_HEADER}${HASH_LINK_NAV_GUARD}${SWITCH_TASK_FRAME_PATCH}${PASSIVE_QUERY_LINK_FIXER}${AUTH_BRIDGE}`;
+const HTML_HEAD_INJECT = `${FRAME_PARENT_ISOLATION}${HIDE_BLANK_HEADER}${HASH_LINK_NAV_GUARD}${SWITCH_TASK_FRAME_PATCH}${PASSIVE_QUERY_LINK_FIXER}${AUTH_BRIDGE}`;
 
 function injectBaseTag(html: string) {
   const baseTag = `<base href="${PROXY_PREFIX}/">`;
