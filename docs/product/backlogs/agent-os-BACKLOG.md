@@ -17,14 +17,14 @@ Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `n/a` |
 | **Verify passes** | `n/a` |
 | **Ship path** | `direct-to-main` |
 
 ### Description
 
-Encode a CEO-kickoff **self-evolve** workflow: PM drives an evaluate→improve→commit loop on a feature branch without per-change CEO approval; CEO reviews commit history and alone authorizes merge.
+Encode a CEO-kickoff **self-evolve** workflow: PM drives an evaluate→improve→commit loop on a feature branch without per-change CEO approval; CEO reviews commit history and alone authorizes merge. CEO **verified** 2026-07-12 → completed; shipped `direct-to-main`.
 
 **Acceptance:**
 - [x] Workflow map lists **Self-evolve** as a common lane
