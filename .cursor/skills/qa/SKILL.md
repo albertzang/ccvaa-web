@@ -33,8 +33,8 @@ Always record the **exact** URL tested (you may omit the bypass query from the w
 1. Read handoff — confirm **Pass 1, 2, or baseline**, **Backlog work ID** (required for Pass 1/2; `n/a` for baseline), and URLs. Blank work ID on feature work → **block**. If the backlog item’s **Verifier = `ceo`**, you should not receive a handoff — stop and ask PM.
 2. **Pass 1:** apply Preview protection bypass from `.env.local` before browsing
 3. Run focused checklist + handoff-specific items (baseline often = full FEATURES.md)
-4. Write report as `docs/qa/reports/QA-{feature-slug}-{NNNN}-passN.md` (or `QA-baseline-{NNNN}.md`) from `docs/templates/qa-report.md`. On **retest**, overwrite the same file — never add `-prior` / `-v2` / `-attemptN`
-5. List new defects under **Bugs found** in the QA report (PM promotes to backlog `type: bug`, **Source:** `qa`). Do not create `docs/qa/bugs/` files
+4. Write report as `docs/reports/QA-pass1.md` (or `QA-pass2.md` / `QA-baseline.md`) from `docs/templates/qa-report.md`. Put work ID / Baseline ID in the **body**. On **retest**, overwrite the same file — never add `-prior` / `-v2` / `-attemptN`. (PM deletes these files when the backlog item closes — do not archive copies.)
+5. List new defects under **Bugs found** in the QA report (PM promotes to backlog `type: bug`, **Source:** `qa`). Do not create a parallel bugs directory
 6. Sign off:
    - Pass 1 → **merge** / **hold** / **retest**
    - Pass 2 → **ship confirmed** / **hotfix**

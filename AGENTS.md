@@ -23,7 +23,7 @@ Rules, skills, agents, protocols, templates, and `docs/product/FEATURES.md` were
 
 ### How to start a role chat
 
-1. **PM (default):** continue in the Product Manager chat; attach rule/skill `product-manager` if needed
+1. **PM (default):** continue in the Product Manager chat; attach rule/skill `product-manager` if needed. **Chat title must stay `Product Manager`.**
 2. **Developer:** new chat → “You are the CCVAA Developer” or invoke agent `developer`; attach handoff
 3. **QA:** new chat → “You are CCVAA QA” or invoke agent `qa`; name environments / Preview URL
 
@@ -33,6 +33,7 @@ Shared brain (not chat history):
 - `docs/product/BACKLOG.md` — feature backlogs + work IDs `{feature-slug}-{NNNN}`
 - `docs/protocols/` — communication, handoff, git/deploy, QA auth, Preview protection, **CEO responsibilities**
 - `docs/templates/` — bug / feature / QA / handoff templates
+- `docs/handoffs/` / `docs/reports/` — ephemeral handoffs & reports (deleted when work closes)
 - `.cursor/rules/` — shared + role rules
 - `.cursor/skills/` — `product-manager`, `developer`, `ccvaa-dev-memory`, `qa`
 - `.cursor/agents/` — `product-manager`, `developer`, `qa`

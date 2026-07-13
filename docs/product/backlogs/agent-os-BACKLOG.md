@@ -3,11 +3,39 @@
 **Feature:** Agent OS  
 **Slug:** `agent-os`  
 **Owner:** Product Manager  
-**Next ID:** `0005`  
+**Next ID:** `0006`  
 
 Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
 **Note:** All `agent-os-*` items use **Verifier = `n/a`** and **Verify passes = `n/a`** (docs/process — not code Pass 1/2).
+
+---
+
+## agent-os-0005 — Iterative OS improvements (feature branch)
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `completed` |
+| **Verifier** | `n/a` |
+| **Verify passes** | `n/a` |
+| **Ship path** | `feature-branch` |
+
+### Description
+
+Umbrella for Agent OS doc/process refinements on **`chore/agent-os-0005-iter`**. CEO verified 2026-07-12 → merge PR + delete branch.
+
+### Overall
+
+- **PM chat title:** always exactly `Product Manager` (rename on session start / if it drifts; no work-ID or topic titles; restore after any CEO one-off rename unless CEO says otherwise)
+- **Handoff/report lifespan:** delete matching fixed files under `docs/handoffs/` + `docs/reports/` when the backlog item is `completed` / `closed` (or baseline triage closes); strip dead file Links; recover from git history if needed
+- **Handoff/report paths:** `docs/handoffs/` + `docs/reports/` with **fixed filenames** (no feature slug / backlog ID in the name; work ID in body only); **Next baseline ID** in `docs/reports/README.md`
+- **Status values:** `canceled` → **`closed`**
+- **`.env.example`:** Preview bypass + `ADMIN_EMAIL` / `ADMIN_PASS` for QA Hover sign-in (not read by the app)
+- **agent-os ship paths:** `direct-to-main` → commit + push on `verified`; `feature-branch` → merge PR on `verified`
+- **Backlog file order:** items listed by work ID **descending** (newest first)
+- **Housekeeping:** closed obsolete OTP-era items `admin-console-0004` / `0005`
 
 ---
 
@@ -30,29 +58,26 @@ Allow **product** backlog items (`public-homepage`, `admin-console`, …) to set
 
 CEO verified 2026-07-11.
 
-### Iteration 2 — agent-os verified ⇒ commit + push
+### Iteration 2 — agent-os verified ⇒ ship
 
-On CEO **`verified`** for any `agent-os-*` item, PM marks `completed` and **commits + pushes to `main` in the same turn** (no second ask). Encoded in `CEO.md`, `HANDOFF.md`, `BACKLOG.md`, PM skill.
+On CEO **`verified`** for any `agent-os-*` item, PM marks `completed` and ships in the same turn (no second ask). Default Ship path was `direct-to-main` (commit + push). **`agent-os-0005`** adds `feature-branch` (merge PR). Encoded in `CEO.md`, `HANDOFF.md`, `BACKLOG.md`, PM skill.
+
 ---
 
-## agent-os-0001 — Feature backlog OS (replace ROADMAP)
+## agent-os-0003 — Optional long-lived staging branch/domain
 
 | Field | Value |
 |-------|--------|
 | **Type** | `task` |
-| **Priority** | `now` |
-| **Status** | `completed` |
+| **Priority** | `later` |
+| **Status** | `not-started` |
 | **Verifier** | `n/a` |
 | **Verify passes** | `n/a` |
-| **Ship path** | `direct-to-main` |
+| **Ship path** | `tbd` |
 
 ### Description
 
-Replace flat `ROADMAP.md` with feature backlogs (`public-homepage`, `admin-console`, `agent-os`), work IDs `{feature-slug}-{NNNN}`, and PM workflows (baseline, bug report, review, kickoff, conversation→backlog). Docs/protocol only.
-
-### Links
-
-- [`../BACKLOG.md`](../BACKLOG.md)
+If Preview-per-PR is not enough, add a long-lived `staging` branch + dedicated domain. Until then Preview = staging (`docs/protocols/GIT_DEPLOY.md`).
 
 ---
 
@@ -73,17 +98,21 @@ Optional CI or scheduled smoke against Preview/Production deploy (beyond current
 
 ---
 
-## agent-os-0003 — Optional long-lived staging branch/domain
+## agent-os-0001 — Feature backlog OS (replace ROADMAP)
 
 | Field | Value |
 |-------|--------|
 | **Type** | `task` |
-| **Priority** | `later` |
-| **Status** | `not-started` |
+| **Priority** | `now` |
+| **Status** | `completed` |
 | **Verifier** | `n/a` |
 | **Verify passes** | `n/a` |
-| **Ship path** | `tbd` |
+| **Ship path** | `direct-to-main` |
 
 ### Description
 
-If Preview-per-PR is not enough, add a long-lived `staging` branch + dedicated domain. Until then Preview = staging (`docs/protocols/GIT_DEPLOY.md`).
+Replace flat `ROADMAP.md` with feature backlogs (`public-homepage`, `admin-console`, `agent-os`), work IDs `{feature-slug}-{NNNN}`, and PM workflows (baseline, bug report, review, kickoff, conversation→backlog). Docs/protocol only.
+
+### Links
+
+- [`../BACKLOG.md`](../BACKLOG.md)

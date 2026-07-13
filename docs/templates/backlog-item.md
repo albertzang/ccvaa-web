@@ -1,10 +1,12 @@
 # Backlog item (copy into a feature backlog file)
 
+**Place in file:** Insert new items at the **top** of the feature backlog (ID descending — newest first). See `docs/product/BACKLOG.md`.
+
 **ID:** `{feature-slug}-{NNNN}` (e.g. `admin-console-0001`)  
 **Title:**  
 **Type:** `task` | `bug`  
 **Priority:** `now` | `next` | `later`  
-**Status:** `not-started` | `in-progress` | `canceled` | `completed`  
+**Status:** `not-started` | `in-progress` | `completed` | `closed`  
 **Source:** _(bugs only)_ `ceo` | `qa`  
 **Verifier:** `agent` (default) | `ceo` | `n/a`  
 **Verify passes:** `pass1+pass2` | `pass1` | `pass2` | `n/a`  
@@ -39,7 +41,7 @@ For **`type: bug`**, include in Description (or subsections):
 Keep **Status:** `in-progress` until CEO says **verified** (or agent Pass 2 ship confirmed). If CEO finds issues after a Dev push:
 
 1. Append an **Iteration N** subsection here (what failed, what to change)
-2. Overwrite `HANDOFF-DEV-{feature-slug}-{NNNN}.md` for the next Dev pass
+2. Overwrite `docs/handoffs/HANDOFF-DEV.md` for the next Dev pass
 3. Repeat until CEO says **verified** → Status `completed`
 
 Do **not** mint a new work ID for the same bug/task unless CEO/PM explicitly splits scope.

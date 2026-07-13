@@ -3,7 +3,7 @@
 > **Owner:** Product Manager (with CEO).  
 > **Shipped behavior** lives in [`FEATURES.md`](FEATURES.md).  
 > **Work-to-do** lives in the feature backlog files below.  
-> **Bugs** are backlog items (`type: bug`) — no separate `docs/qa/bugs/` files.
+> **Bugs** are backlog items (`type: bug`) — no parallel bugs directory.
 
 ## Features
 
@@ -21,7 +21,7 @@
 | **Title** | Short label |
 | **Type** | `task` \| `bug` |
 | **Priority** | `now` \| `next` \| `later` |
-| **Status** | `not-started` \| `in-progress` \| `canceled` \| `completed` |
+| **Status** | `not-started` \| `in-progress` \| `completed` \| `closed` |
 | **Source** | **Bugs only:** `ceo` \| `qa` (baseline findings = `qa`; link the baseline QA report) |
 | **Verifier** | `agent` (default) \| `ceo` \| **`n/a`** — who verifies Dev’s work. **`n/a` for `agent-os`** (docs/process; no Pass 1/2) |
 | **Verify passes** | `pass1+pass2` \| `pass1` \| `pass2` \| **`n/a`** — **`n/a` for `agent-os`** |
@@ -34,7 +34,7 @@
 |----------|-------------------|------------------------|-----------|
 | **`agent`** | `feature-branch` | `pass1+pass2` | Yes — Pass 1 Preview / Pass 2 Production per handoff |
 | **`ceo`** | `direct-to-main` | `pass2` | **No** — CEO verifies manually; no `HANDOFF-QA-*` / `QA-*` reports |
-| **`n/a`** | `direct-to-main` (typical) | `n/a` | **No** — used for **`agent-os`** (and other docs/process-only work). CEO reviews via chat / repo skim; say **`verified`** to complete when PM asks. On **`verified`** for `agent-os-*`, PM marks **`completed`**, then **commits and pushes** without a further ask (see [`CEO.md`](../protocols/CEO.md)) |
+| **`n/a`** | `direct-to-main` (typical; CEO may set `feature-branch`) | `n/a` | **No** — used for **`agent-os`** (and other docs/process-only work). CEO reviews via chat / repo skim; say **`verified`** to complete when PM asks. On **`verified`** for `agent-os-*`, PM marks **`completed`** and ships without a further ask: **`direct-to-main`** → commit + push; **`feature-branch`** → merge PR (see [`CEO.md`](../protocols/CEO.md)) |
 
 CEO may override Ship path and Verify passes when Verifier is `agent` or `ceo`. **Verifier = `ceo`** implies CEO owns verification and (for the default Ship path) approves `direct-to-main`.
 
@@ -44,21 +44,27 @@ CEO may override Ship path and Verify passes when Verifier is `agent` or `ceo`. 
 
 Copy shape from [`docs/templates/backlog-item.md`](../templates/backlog-item.md).
 
+## Item order in feature backlog files
+
+List work items **by ID descending** (highest / newest first). When adding a new item, insert it **immediately after the file header** (above older IDs). Do not sort by priority or status in the file — priority lives in the item fields; PM **list/review** answers can filter/sort in chat.
+
 ## Naming (handoffs, branches, reports)
 
 | Artifact | Pattern |
 |----------|---------|
-| Dev handoff | `docs/qa/handoffs/HANDOFF-DEV-{feature-slug}-{NNNN}.md` |
-| QA handoff | `docs/qa/handoffs/HANDOFF-QA-{feature-slug}-{NNNN}-pass1.md` (also `-pass2`) |
-| QA report | `docs/qa/reports/QA-{feature-slug}-{NNNN}-pass1.md` |
+| Dev handoff | `docs/handoffs/HANDOFF-DEV.md` (work ID in body) |
+| QA handoff | `docs/handoffs/HANDOFF-QA-pass1.md` / `HANDOFF-QA-pass2.md` / `HANDOFF-QA-baseline.md` |
+| QA report | `docs/reports/QA-pass1.md` / `QA-pass2.md` / `QA-baseline.md` |
 | Branch | `feat/{feature-slug}-{NNNN}-short-slug` or `fix/{feature-slug}-{NNNN}-…` |
 | PR title | Include `{feature-slug}-{NNNN}` |
 
-**Retest / Iteration:** overwrite the same `…-passN.md` / `HANDOFF-DEV-…` path. Never create `-prior`, `-v2`, or `-attemptN` siblings — earlier content lives in git history.
+**Retest / Iteration:** overwrite the same fixed path. Never create `-prior`, `-v2`, or `-attemptN` siblings — earlier content lives in git history.
+
+**Close:** when the backlog item is **`completed`** or **`closed`**, PM deletes the matching fixed handoff/report files under `docs/handoffs/` and `docs/reports/` (same turn). See [`HANDOFF.md`](../protocols/HANDOFF.md) lifespan.
 
 **Verifier = `ceo`:** no agent QA handoff/report files for that work ID.
 
-**Baseline** (no feature backlog item yet): `HANDOFF-QA-baseline-{NNNN}.md` / `QA-baseline-{NNNN}.md` — IDs from `docs/qa/README.md` (**Next baseline ID**); date only in file body. PM promotes findings into backlog items (`type: bug` or `task`, **Source:** `qa`).
+**Baseline** (no feature backlog item yet): `HANDOFF-QA-baseline.md` / `QA-baseline.md` — Baseline ID from `docs/reports/README.md` (**Next baseline ID**) goes in the **body** only; date only in file body. PM promotes findings into backlog items (`type: bug` or `task`, **Source:** `qa`).
 
 Blank backlog ID on feature Dev/QA work → **block**.
 
@@ -79,7 +85,8 @@ Do **not** create parallel bug files. Dev may notice issues while coding; they t
 4. **Pick + kickoff** — CEO chooses ID → set `in-progress` → Dev handoff (include Verifier + Verify passes + Ship path)  
 5. **Conversation → backlog** — PM proposes/adds items as chats imply; keep statuses current  
 6. **CEO Verifier** — after Dev push: one-line ask for CEO to verify; **verified** → `completed`; issues → Iteration on same ID → Dev again  
-7. **`agent-os` verified** — CEO says **`verified`** → PM marks `completed` + **commit & push** (no second ask)  
+7. **`agent-os` verified** — CEO says **`verified`** → PM marks `completed` + ships per Ship path (no second ask); delete any handoffs for that ID if present  
+8. **Close cleanup** — on `completed` / `closed`, delete that work ID’s `docs/handoffs` + `docs/reports` (git history retains them)  
 
 Full checklists: [`docs/protocols/CEO.md`](../protocols/CEO.md), [`HANDOFF.md`](../protocols/HANDOFF.md).
 
@@ -87,4 +94,5 @@ Full checklists: [`docs/protocols/CEO.md`](../protocols/CEO.md), [`HANDOFF.md`](
 
 1. Open the feature backlog file  
 2. Use **Next ID** in the header (zero-padded four digits)  
-3. After adding the item, increment **Next ID**  
+3. Insert the new item **at the top** of the item list (ID descending order)  
+4. After adding the item, increment **Next ID**  

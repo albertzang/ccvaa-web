@@ -39,9 +39,7 @@ Replace OTP admin login with **Hover webmail iframe session** as the sole auth s
 
 ### Links
 
-- Dev: `docs/qa/handoffs/HANDOFF-DEV-admin-console-0010.md`
 - PR: https://github.com/albertzang/ccvaa-web/pull/4
-- Preview: https://ccvaa-web-git-feat-admin-console-0010-hover-auth-azang-projects.vercel.app/admin
 
 ---
 
@@ -77,7 +75,6 @@ Umbrella ticket for Hover webmail iframe issues on `/admin` (same-origin proxy `
 
 ### Links
 
-- Dev: `docs/qa/handoffs/HANDOFF-DEV-admin-console-0009.md`
 - Commits: `6001ff1`, `c107c5c`, `12eebb5`
 
 ---
@@ -98,152 +95,6 @@ Umbrella ticket for Hover webmail iframe issues on `/admin` (same-origin proxy `
 Remove the page-intro block on `/admin` (“CCVAA” / “Admin” / “Manage mail, members…”). Keep header, Mail, Login, and scaffolds. CEO verifies on Production after push.
 
 CEO verified 2026-07-11 on https://ccvaa-web.vercel.app/admin. Commit: `e38d35b`.
-
----
-
-## admin-console-0001 — Members list (auth-gated)
-
-| Field | Value |
-|-------|--------|
-| **Type** | `task` |
-| **Priority** | `next` |
-| **Status** | `not-started` |
-| **Verifier** | `agent` |
-| **Verify passes** | `pass1+pass2` |
-| **Ship path** | `feature-branch` |
-
-### Description
-
-Replace the Members “coming soon” scaffold with a real auth-gated members list. Scope TBD with CEO (fields, CRUD vs read-only). Must remain behind admin mail-session auth.
-
-### Links
-
-- FEATURES.md: Post-auth scaffolds → Members
-
----
-
-## admin-console-0002 — Financial dashboard (auth-gated)
-
-| Field | Value |
-|-------|--------|
-| **Type** | `task` |
-| **Priority** | `next` |
-| **Status** | `not-started` |
-| **Verifier** | `agent` |
-| **Verify passes** | `pass1+pass2` |
-| **Ship path** | `feature-branch` |
-
-### Description
-
-Replace the Financial dashboard scaffold with a real auth-gated dashboard. Metrics and data source TBD with CEO.
-
-### Links
-
-- FEATURES.md: Post-auth scaffolds → Financial dashboard
-
----
-
-## admin-console-0003 — Events & posts list + CRUD
-
-| Field | Value |
-|-------|--------|
-| **Type** | `task` |
-| **Priority** | `next` |
-| **Status** | `not-started` |
-| **Verifier** | `agent` |
-| **Verify passes** | `pass1+pass2` |
-| **Ship path** | `feature-branch` |
-
-### Description
-
-Replace Events & posts scaffold with list + CRUD for events/posts, auth-gated. Content model TBD with CEO.
-
-### Links
-
-- FEATURES.md: Post-auth scaffolds → Events & posts
-
----
-
-## admin-console-0004 — Ensure Preview env covers admin OTP/mail
-
-| Field | Value |
-|-------|--------|
-| **Type** | `task` |
-| **Priority** | `now` |
-| **Status** | `not-started` |
-| **Verifier** | `agent` |
-| **Verify passes** | `pass1+pass2` |
-| **Ship path** | `feature-branch` |
-
-### Description
-
-Ops/checklist: confirm Vercel **Preview** has the same admin-critical env as Production where needed for Pass 1 (SMTP, `ADMIN_SESSION_SECRET`, `KV_REST_API_*`, etc.). Document gaps in handoffs; CEO sets secrets. Not a product UI change unless missing env causes code/docs fixes.
-
-### Links
-
-- `docs/protocols/GIT_DEPLOY.md`, `QA_AUTH.md`, `PREVIEW_PROTECTION.md`
-
----
-
-## admin-console-0005 — Dedicated QA test inbox for OTP
-
-| Field | Value |
-|-------|--------|
-| **Type** | `task` |
-| **Priority** | `later` |
-| **Status** | `not-started` |
-| **Verifier** | `agent` |
-| **Verify passes** | `pass1+pass2` |
-| **Ship path** | `feature-branch` |
-
-### Description
-
-**Obsolete after admin-console-0010** (OTP removed; admin auth = Hover mailbox session). Keep only if CEO revives a dedicated QA mailbox for a different purpose.
-
-### Links
-
-- `docs/protocols/QA_AUTH.md`
-
----
-
-## admin-console-0006 — Env-aware SMTP/OTP error copy
-
-| Field | Value |
-|-------|--------|
-| **Type** | `bug` |
-| **Priority** | `now` |
-| **Status** | `completed` |
-| **Source** | `qa` |
-| **Verifier** | `agent` |
-| **Verify passes** | `pass1+pass2` |
-| **Ship path** | `feature-branch` |
-
-### Description
-
-**Summary:** Production OTP send failed with missing `SMTP_PASS`; error copy incorrectly pointed at `.env.local`. Code fix: environment-aware messaging for Production/Preview. SMTP env set by CEO (ops).
-
-**Environment:** Production — https://ccvaa-web.vercel.app/
-
-**Steps to reproduce (original):**
-1. Open `/admin` at desktop width.
-2. Click **Send login code**.
-3. Observe error under the login form.
-
-**Expected:** OTP emailed, or a clear Production-appropriate config error (Vercel env), not `.env.local`-only wording.
-
-**Actual (pre-fix):** `SMTP_PASS is not set. Add your Hover mailbox password to .env.local…`
-
-**Severity:** high
-
-Shipped: error-copy via PR #1; CEO set Production SMTP.
-
-### Links
-
-- Found in: `docs/qa/reports/QA-baseline-0001.md`
-- Dev: `docs/qa/handoffs/HANDOFF-DEV-admin-console-0006.md`
-- QA Pass 1: `docs/qa/reports/QA-admin-console-0006-pass1.md`
-- QA Pass 2: `docs/qa/reports/QA-admin-console-0006-pass2.md`
-- PR: https://github.com/albertzang/ccvaa-web/pull/1
 
 ---
 
@@ -281,7 +132,147 @@ Shipped: error-copy via PR #1; CEO set Production SMTP.
 
 ### Links
 
-- Dev: `docs/qa/handoffs/HANDOFF-DEV-admin-console-0007.md`
-- QA Pass 1: `docs/qa/reports/QA-admin-console-0007-pass1.md`
-- QA Pass 2: `docs/qa/reports/QA-admin-console-0007-pass2.md`
 - PR: https://github.com/albertzang/ccvaa-web/pull/2
+
+---
+
+## admin-console-0006 — Env-aware SMTP/OTP error copy
+
+| Field | Value |
+|-------|--------|
+| **Type** | `bug` |
+| **Priority** | `now` |
+| **Status** | `completed` |
+| **Source** | `qa` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
+
+### Description
+
+**Summary:** Production OTP send failed with missing `SMTP_PASS`; error copy incorrectly pointed at `.env.local`. Code fix: environment-aware messaging for Production/Preview. SMTP env set by CEO (ops).
+
+**Environment:** Production — https://ccvaa-web.vercel.app/
+
+**Steps to reproduce (original):**
+1. Open `/admin` at desktop width.
+2. Click **Send login code**.
+3. Observe error under the login form.
+
+**Expected:** OTP emailed, or a clear Production-appropriate config error (Vercel env), not `.env.local`-only wording.
+
+**Actual (pre-fix):** `SMTP_PASS is not set. Add your Hover mailbox password to .env.local…`
+
+**Severity:** high
+
+Shipped: error-copy via PR #1; CEO set Production SMTP.
+
+### Links
+
+- Source: baseline-0001 (git history)
+- PR: https://github.com/albertzang/ccvaa-web/pull/1
+
+---
+
+## admin-console-0005 — Dedicated QA test inbox for OTP
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `later` |
+| **Status** | `closed` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
+
+### Description
+
+**Closed 2026-07-12:** Obsolete after `admin-console-0010` (OTP removed; admin auth = Hover mailbox session). Reopen only if CEO wants a dedicated QA mailbox for a different purpose.
+
+### Links
+
+- `docs/protocols/QA_AUTH.md`
+
+---
+
+## admin-console-0004 — Ensure Preview env covers admin OTP/mail
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `closed` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
+
+### Description
+
+**Closed 2026-07-12:** Obsolete after `admin-console-0010`. Preview no longer needs SMTP / `ADMIN_SESSION_SECRET` / `KV_REST_API_*` for admin login. Remaining Preview needs (Deployment Protection bypass, mail proxy reachability to Hover) are covered by existing protocols — not this OTP-era checklist.
+
+### Links
+
+- `docs/protocols/GIT_DEPLOY.md`, `QA_AUTH.md`, `PREVIEW_PROTECTION.md`
+
+---
+
+## admin-console-0003 — Events & posts list + CRUD
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `next` |
+| **Status** | `not-started` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
+
+### Description
+
+Replace Events & posts scaffold with list + CRUD for events/posts, auth-gated. Content model TBD with CEO.
+
+### Links
+
+- FEATURES.md: Post-auth scaffolds → Events & posts
+
+---
+
+## admin-console-0002 — Financial dashboard (auth-gated)
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `next` |
+| **Status** | `not-started` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
+
+### Description
+
+Replace the Financial dashboard scaffold with a real auth-gated dashboard. Metrics and data source TBD with CEO.
+
+### Links
+
+- FEATURES.md: Post-auth scaffolds → Financial dashboard
+
+---
+
+## admin-console-0001 — Members list (auth-gated)
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `next` |
+| **Status** | `not-started` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
+
+### Description
+
+Replace the Members “coming soon” scaffold with a real auth-gated members list. Scope TBD with CEO (fields, CRUD vs read-only). Must remain behind admin mail-session auth.
+
+### Links
+
+- FEATURES.md: Post-auth scaffolds → Members
