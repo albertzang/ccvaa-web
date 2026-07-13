@@ -16,7 +16,7 @@ Intake → Prioritize → Kickoff → Ship → Verify → Close
 |-------|----------------|---------------|
 | **Intake** | CEO bug/task / chat goal, or QA **Bugs found** → backlog item (`{feature-slug}-{NNNN}`) | [`BACKLOG.md`](../product/BACKLOG.md), [`CEO.md`](CEO.md) report checklist |
 | **Prioritize** | Backlog review: `now` / `next` / `later`, `closed`, Verifier | [`CEO.md`](CEO.md) backlog review |
-| Kickoff | CEO picks ID → `in-progress` + Dev handoff (or **self-evolve** → new `agent-os-*` + feature branch) | [`BACKLOG.md`](../product/BACKLOG.md), [`HANDOFF.md`](HANDOFF.md), [`CEO.md`](CEO.md) |
+| **Kickoff** | CEO picks ID → `in-progress` + Dev handoff (or **self-evolve** → new `agent-os-*` + feature branch) | [`BACKLOG.md`](../product/BACKLOG.md), [`HANDOFF.md`](HANDOFF.md), [`CEO.md`](CEO.md) |
 | **Ship** | Per **Ship path** + Verifier defaults | [`GIT_DEPLOY.md`](GIT_DEPLOY.md) |
 | **Verify** | Agent Pass 1/2, CEO smoke, baseline, or agent-os skim | [`GIT_DEPLOY.md`](GIT_DEPLOY.md), [`HANDOFF.md`](HANDOFF.md#gates-matrix-ready--done--verified), [`CEO.md`](CEO.md) |
 | **Close** | `completed` / `closed` → delete handoffs/reports; FEATURES if needed | [`HANDOFF.md`](HANDOFF.md) lifespan |
@@ -30,7 +30,7 @@ Intake → Prioritize → Kickoff → Ship → Verify → Close
 | **Tiny-fix** | `ceo` | `direct-to-main` | `pass2` | Trivial CSS/copy/proxy; abbreviated handoff |
 | **agent-os** | `n/a` | `direct-to-main` | `n/a` | Docs/process; `verified` **ships** |
 | **Self-evolve** | `n/a` | **`feature-branch`** (required) | CEO reviews commits | CEO kickoff; PM loops improve→commit; merge only with CEO approval |
-| **Baseline** | (no feature ID yet) | — | Production audit | FEATURES drift / regression; then promote findings |
+| **Baseline** | (no feature ID yet) | — | Production audit | Same env as Pass 2; no PR / no feature work ID — then promote findings |
 
 **Unusual overrides** (CEO must say so explicitly): see [Rare paths](#rare-paths-overrides) below.
 
@@ -176,7 +176,9 @@ Use `docs/templates/qa-report.md`.
 
 ## Notifications
 
-There is no automatic agent-to-agent ping. CEO or PM triggers the next role after each [workflow map](#workflow-map-canonical-index) stage when the next role is blocked (kickoff, Preview ready, merge ask, Production ready, `verified`, baseline triage, handoff written).
+There is no automatic agent-to-agent ping. CEO or PM triggers the next role when blocked — except on the **agent happy path** after kickoff: PM/Dev may start Pass 1 when Preview is ready, and Pass 2 after merge, without a separate CEO “kick off QA” ask (CEO still owns merge / hold / secrets). See [`CEO.md`](CEO.md) feature-branch checklist.
+
+Typical triggers: kickoff, Preview ready → Pass 1, Pass 1 merge ask, Production ready → Pass 2, `verified`, baseline triage, handoff written, self-evolve commit-history review.
 
 ## Refinement
 

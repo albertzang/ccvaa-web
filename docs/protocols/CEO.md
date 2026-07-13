@@ -27,7 +27,7 @@ Canonical detail: [`COMMUNICATION.md`](COMMUNICATION.md#what-ceo-verified-means)
 | Goals & priorities | What to build next; accept/reject PM advice; backlog priorities |
 | Choose **Verifier** | `agent` (default) or `ceo` (you verify; bypass agent QA) — see below |
 | Approve **Ship path: `direct-to-main`** | Explicit yes required — **or** implied when Verifier = `ceo` and Ship path stays the default `direct-to-main`, or for ordinary **`agent-os-*`** docs (`n/a`, default `direct-to-main`) |
-| Approve **kickoff** of Developer / QA / baseline / **self-evolve** | Until further automation is approved |
+| Approve **kickoff** of Developer / baseline / **self-evolve** | Product kickoff still required; agent **Pass 1/2** after kickoff do **not** need a second CEO “kick off QA” ask (see happy-path checklist) |
 | Approve **merge to `main`** (or direct push) | After Pass 1 (agent or your Preview check), approved direct-to-main, or **self-evolve** PR after commit-history review |
 | Approve **process/OS changes** | Multi-agent protocol refinements; for `agent-os-*`, **`verified`** (or explicit merge ask) authorizes PM to mark completed **and ship** per Ship path |
 | **Vercel / Hover secrets & env** | e.g. `ADMIN_EMAIL` / `ADMIN_PASS` in local `.env.local`, `VERCEL_AUTOMATION_BYPASS_SECRET`, any future Vercel secrets — never ask agents to store these in git |
@@ -153,24 +153,27 @@ Handoff/report names: `HANDOFF-QA-baseline.md` / `QA-baseline.md` (date in body 
 
 Use this whenever a PR is open for a kicked-off backlog item with **agent** QA.
 
+**Standing after kickoff:** Once you kicked off the work ID, PM/Developer may advance **Pass 1** (and after your merge, **Pass 2**) without a separate “kick off QA” ask from you. You still own **merge to `main`** (and secrets / holds).
+
 ### 1. PR is open + Preview is ready
 
-- [ ] Confirm PR link, Preview URL, and backlog work ID on the handoff
-- [ ] Optional: skim the diff for intent (not required for every change)
-- [ ] Tell PM: **kick off QA Pass 1** (do **not** merge yet) — skip if Verify passes is `pass2` only
+- [ ] Optional: confirm PR link / Preview URL / work ID (skim diff only if you want)
+- [ ] PM starts QA Pass 1 when Preview is ready (**do not** merge yet) — skip if Verify passes is `pass2` only
+- [ ] Hold / intervene only if you want to pause before Pass 1
 
 ### 2. After QA Pass 1
 
 | QA sign-off | CEO action |
 |-------------|------------|
-| **merge** | Tell PM/Developer: **merge the PR** (then branch cleanup + Pass 2 if required) |
+| **merge** | Tell PM/Developer: **merge the PR** (then branch cleanup; Pass 2 follows if required — no second QA kickoff ask) |
 | **hold** / **retest** | Wait; do not merge; PM routes fixes back to Developer |
 | **fail** | Do not merge; PM opens fix handoff (same work ID Iteration or new ID as needed) |
 
-### 3. After merge (Developer cleans up branch)
+### 3. After merge + branch cleanup
 
-- [ ] Tell PM: **kick off QA Pass 2** on https://ccvaa-web.vercel.app/ (if Verify passes includes `pass2`)
-- [ ] Optional later: manual smoke on https://ccvaa.ca/
+- [ ] Production deploy live on https://ccvaa-web.vercel.app/
+- [ ] PM starts QA Pass 2 if Verify passes includes `pass2` (no separate kickoff ask unless you held)
+- [ ] Optional later: manual check on https://ccvaa.ca/
 
 ### 4. After Pass 2
 
@@ -208,12 +211,12 @@ Agents cannot securely hold Production mailbox passwords in git.
 ```
 you: pick ID + kick off
      → PM: in-progress + Dev handoff
-     → Developer: branch feat/{feature-slug}-{NNNN}-… + PR
-     → you: kick QA Pass 1
+     → Developer: branch feat/{feature-slug}-{NNNN}-… + PR + Preview
+     → PM: QA Pass 1 (no second kickoff ask from you)
      → QA: merge recommended
      → you: approve merge
      → Developer: merge + delete branch
-     → you: kick QA Pass 2
+     → PM: QA Pass 2 if required (no second kickoff ask)
      → QA: ship confirmed
      → PM: backlog completed + FEATURES.md
      → you (optional): check ccvaa.ca
