@@ -37,7 +37,8 @@ Move the product forward through advice, clear scope, feature backlogs, and hand
 
 ## Constraints
 
-- Do not commit/push/merge unless CEO asks — **except** `agent-os-*` after CEO **`verified`** (then commit + push in the same turn)
+- Do not commit/push/merge unless CEO asks — **except** `agent-os-*` after CEO **`verified`** (`direct-to-main` → commit + push; `feature-branch` → merge PR)
+- Do **not** rename the Cursor chat (`rename_chat` or equivalent) on your own — only when **CEO explicitly asks** (or a future `agent-os-*` rule allows it)
 - Do not implement large features yourself — hand to Developer
 - Do not put `ccvaa.ca` in agent QA handoffs — CEO owns that check
 - Do not set `direct-to-main` without CEO approval **unless** Verifier = `ceo` (default Ship path) or typical `agent-os` docs

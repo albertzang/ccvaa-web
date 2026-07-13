@@ -15,7 +15,7 @@ PM should remind the CEO of the relevant checklist whenever an action is due.
 | Approve **Ship path: `direct-to-main`** | Explicit yes required — **or** implied when Verifier = `ceo` and Ship path stays the default `direct-to-main`, or for typical `agent-os` docs (`n/a`) |
 | Approve **kickoff** of Developer / QA / baseline | Until further automation is approved |
 | Approve **merge to `main`** (or direct push) | After Pass 1 (agent or your Preview check), or for approved direct-to-main |
-| Approve **process/OS changes** | Multi-agent protocol refinements; for `agent-os-*`, **`verified`** authorizes PM to mark completed **and commit + push** |
+| Approve **process/OS changes** | Multi-agent protocol refinements; for `agent-os-*`, **`verified`** authorizes PM to mark completed **and ship** (`direct-to-main` → commit + push; `feature-branch` → merge PR) |
 | **Vercel / Hover secrets & env** | e.g. `SMTP_PASS`, SMTP_*, `ADMIN_SESSION_SECRET`, `KV_REST_API_*` — never ask agents to store these in git |
 | **OTP readout** | **Single-Send** only: QA Sends once → you paste newest code → QA verifies once (`docs/protocols/QA_AUTH.md`). Do not Send yourself on the same env during the attempt. When **you** are Verifier, you run login yourself (no agent OTP loop) |
 | **Manual check of https://ccvaa.ca/** | Out of agent Dev/QA flow (DNS/cache) |
@@ -77,12 +77,15 @@ No agent `HANDOFF-QA-*` / `QA-*` files for this path. Do not mint a new work ID 
 
 Use for `agent-os-*` items (protocols, templates, skills — not product code Pass 1/2).
 
-- [ ] PM implements on `main` (typical Ship path `direct-to-main`)
+- [ ] Confirm **Ship path** with PM: usually `direct-to-main`; use `feature-branch` for multi-iteration OS work
+- [ ] PM implements (on `main` or the feature branch)
 - [ ] PM asks you to skim / approve
-- [ ] Reply **`verified`** → PM marks the item **`completed`**, then **commits and pushes to `main`** in the same turn (no separate “please commit” ask)
+- [ ] Reply **`verified`** → PM marks **`completed`**, then ships in the same turn:
+  - **`direct-to-main`:** commit + push `main`
+  - **`feature-branch`:** merge the PR + delete the feature branch
 - [ ] **Or** note issues → PM Iterates on the same `agent-os-*` ID until you say **`verified`**
 
-Saying **`verified`** on an `agent-os-*` item is standing authorization for that work ID’s commit + push.
+Saying **`verified`** on an `agent-os-*` item is standing authorization to ship that work ID (no separate “please commit/merge” ask).
 
 ---
 
@@ -203,11 +206,12 @@ you: report bug/task + Verifier ceo (or PM sets defaults)
 ### agent-os (Verifier = n/a)
 
 ```
-you: kick off / approve agent-os scope
-     → PM: docs/protocol changes on main
+you: kick off / approve agent-os scope (+ Ship path)
+     → PM: docs/protocol changes (main or feature branch)
      → PM: ask you to verify (repo skim)
      → you: "verified"
-     → PM: mark completed + commit + push (same turn)
+     → PM: mark completed + ship same turn
+        (direct-to-main → commit+push; feature-branch → merge PR)
 ```
 
 PM will prompt you at each gate with a one-line ask.

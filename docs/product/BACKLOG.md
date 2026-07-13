@@ -34,7 +34,7 @@
 |----------|-------------------|------------------------|-----------|
 | **`agent`** | `feature-branch` | `pass1+pass2` | Yes — Pass 1 Preview / Pass 2 Production per handoff |
 | **`ceo`** | `direct-to-main` | `pass2` | **No** — CEO verifies manually; no `HANDOFF-QA-*` / `QA-*` reports |
-| **`n/a`** | `direct-to-main` (typical) | `n/a` | **No** — used for **`agent-os`** (and other docs/process-only work). CEO reviews via chat / repo skim; say **`verified`** to complete when PM asks. On **`verified`** for `agent-os-*`, PM marks **`completed`**, then **commits and pushes** without a further ask (see [`CEO.md`](../protocols/CEO.md)) |
+| **`n/a`** | `direct-to-main` (typical; CEO may set `feature-branch`) | `n/a` | **No** — used for **`agent-os`** (and other docs/process-only work). CEO reviews via chat / repo skim; say **`verified`** to complete when PM asks. On **`verified`** for `agent-os-*`, PM marks **`completed`** and ships without a further ask: **`direct-to-main`** → commit + push; **`feature-branch`** → merge PR (see [`CEO.md`](../protocols/CEO.md)) |
 
 CEO may override Ship path and Verify passes when Verifier is `agent` or `ceo`. **Verifier = `ceo`** implies CEO owns verification and (for the default Ship path) approves `direct-to-main`.
 
@@ -79,7 +79,7 @@ Do **not** create parallel bug files. Dev may notice issues while coding; they t
 4. **Pick + kickoff** — CEO chooses ID → set `in-progress` → Dev handoff (include Verifier + Verify passes + Ship path)  
 5. **Conversation → backlog** — PM proposes/adds items as chats imply; keep statuses current  
 6. **CEO Verifier** — after Dev push: one-line ask for CEO to verify; **verified** → `completed`; issues → Iteration on same ID → Dev again  
-7. **`agent-os` verified** — CEO says **`verified`** → PM marks `completed` + **commit & push** (no second ask)  
+7. **`agent-os` verified** — CEO says **`verified`** → PM marks `completed` + ships per Ship path (no second ask)  
 
 Full checklists: [`docs/protocols/CEO.md`](../protocols/CEO.md), [`HANDOFF.md`](../protocols/HANDOFF.md).
 

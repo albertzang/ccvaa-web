@@ -158,7 +158,9 @@ PM proposes backlog items from chat when goals/bugs emerge; does not invent larg
 - [ ] Work ID is `agent-os-{NNNN}` (Verifier / Verify passes = `n/a`)
 - [ ] CEO replies **`verified`** after skim/approve
 - [ ] PM marks backlog **`completed`** (+ FEATURES.md / protocols as needed)
-- [ ] PM **commits and pushes to `main` in the same turn** — no second “please commit/push” ask
+- [ ] PM ships in the same turn per **Ship path** — no second “please commit/merge” ask:
+  - **`direct-to-main`:** commit + push `main`
+  - **`feature-branch`:** merge the PR + delete feature branch (local + remote)
 - [ ] Or CEO notes issues → Iteration on same `agent-os-*` ID until **`verified`**
 
 ## Definition of done (Developer, post-merge cleanup)
@@ -173,4 +175,4 @@ PM proposes backlog items from chat when goals/bugs emerge; does not invent larg
 - [ ] Backlog item status → `completed` (or `canceled` if dropped)
 - [ ] `FEATURES.md` updated if behavior changed
 - [ ] Links on backlog item to PR / reports as useful
-- [ ] **If `agent-os-*` and CEO said `verified`:** commit + push to `main` in the same turn (standing authorization)
+- [ ] **If `agent-os-*` and CEO said `verified`:** ship per Ship path in the same turn (standing authorization)
