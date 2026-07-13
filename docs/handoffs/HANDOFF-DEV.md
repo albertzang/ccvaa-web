@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-12  
 **Requested by:** CEO / PM  
-**Backlog work ID:** `admin-console-0011`  
+**Backlog work ID:** `admin-console-0012`  
 **Backlog link:** `docs/product/backlogs/admin-console-BACKLOG.md`  
 **Priority:** now  
 **Iteration:** `1`
@@ -15,29 +15,27 @@
 **Verify passes:** `pass2`  
 **Ship path:** `direct-to-main`
 
-**CEO approved direct-to-main?** yes (Verifier = `ceo` defaults)  
-
-**Reason for direct-to-main:** Small proxy CSS hide; CEO will verify on Production.
+**CEO approved direct-to-main?** yes (Verifier = `ceo` defaults)
 
 ## Goal
 
-Hide Hover’s pre-login help block inside the embedded mailbox iframe so it does not appear before the user is signed in.
+On the Hover login page inside the mail iframe, make **Go back to Hover.com** (`https://www.hover.com/`) open in a **new browser tab**, not navigate inside the iframe.
 
 ## Acceptance criteria
 
-- [ ] Proxied `/admin/mail` HTML injects CSS that hides `div#login-form > div.hover-login-help` (use `display:none!important` or equivalent, same style as `#header` hide)
-- [ ] Login form fields/controls remain usable while logged out
-- [ ] After mailbox login, no regression to mail chrome (do not hide unrelated logged-in UI)
-- [ ] Push to `main` when ready; notify PM so CEO can verify Production `/admin` Webmail (logged out)
+- [ ] Anchors to `https://www.hover.com/` (and `https://hover.com/` if used) get `target="_blank"` and `rel="noopener noreferrer"` in proxied HTML (rewrite and/or runtime fixer — mirror Help link treatment)
+- [ ] Click opens Hover marketing site in a new tab from logged-out `/admin` Webmail
+- [ ] Does not force unrelated in-app Roundcube links to `_blank`
+- [ ] Push `main`; notify PM for CEO Production verify
 
 ## Out of scope
 
-- Changing Hover’s help content or linking behavior after login
-- Broader login-form restyling
 - Agent QA handoffs
+- Changing the link URL/text
+- Broader iframe breakout policy beyond this marketing link
 
 ## Notes for Developer
 
-- Follow existing inject pattern: `HIDE_BLANK_HEADER` in `src/app/admin/mail/[[...path]]/route.ts`
-- Read `.cursor/skills/ccvaa-dev-memory/SKILL.md` for mail proxy pitfalls
-- Do **not** create `HANDOFF-QA-*` (Verifier = `ceo`)
+- See existing `rewriteHelpLinks` / `fixHelp` patterns and `PASSIVE_QUERY_LINK_FIXER` in `src/app/admin/mail/[[...path]]/route.ts`
+- `admin-console-0011` completed (`4718bf4`); this is a new work ID
+- `.cursor/skills/ccvaa-dev-memory/SKILL.md`

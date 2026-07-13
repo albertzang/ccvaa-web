@@ -119,7 +119,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 | 2026-07-10 | QA OTP: single-Send + CEO-in-the-loop protocol (`QA_AUTH.md`) to protect rate limits |
 | 2026-07-11 | OTP shared store via Marketplace Redis (`KV_REST_API_*`); `admin-console-0007` closed |
 | 2026-07-11 | Feature backlogs replace ROADMAP; work IDs `{feature-slug}-{NNNN}` |
-| 2026-07-12 | **agent-os-0006:** drop Baseline ID / Next baseline ID (fixed ephemeral baseline files + date only) |
+| 2026-07-12 | Hide Hover pre-login help block in mail iframe (`admin-console-0011`) |
 | 2026-07-12 | **agent-os-0005:** PM chat title `Product Manager`; ephemeral fixed-name handoffs/reports; backlog ID-desc + `closed` status; `ADMIN_EMAIL`/`ADMIN_PASS` for QA |
 | 2026-07-11 | **Verifier** `agent` \| `ceo` \| `n/a` + **Verify passes**; CEO may bypass agent QA; `agent-os` uses `n/a`; **`verified` on agent-os ⇒ ship per Ship path** |
 | 2026-07-11 | `/admin` page intro blurb removed (`admin-console-0008`) |

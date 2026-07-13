@@ -3,9 +3,41 @@
 **Feature:** Admin Console  
 **Slug:** `admin-console`  
 **Owner:** Product Manager  
-**Next ID:** `0012`  
+**Next ID:** `0013`  
 
 Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
+
+---
+
+## admin-console-0012 — “Go back to Hover.com” opens in new tab
+
+| Field | Value |
+|-------|--------|
+| **Type** | `bug` |
+| **Priority** | `now` |
+| **Status** | `in-progress` |
+| **Source** | `ceo` |
+| **Verifier** | `ceo` |
+| **Verify passes** | `pass2` |
+| **Ship path** | `direct-to-main` |
+
+### Description
+
+**Summary:** On the Hover mailbox login page inside `/admin` iframe, the **Go back to Hover.com** link points at `https://www.hover.com/` and fails when navigated inside the iframe. It should open in a **new browser tab**.
+
+**Environment:** Production — https://ccvaa-web.vercel.app/admin (Webmail, logged out)
+
+**Expected:** Clicking “Go back to Hover.com” opens `https://www.hover.com/` in a new tab (`target="_blank"` + `rel="noopener noreferrer"`).
+
+**Actual:** Link stays in-iframe (or otherwise broken in the embed).
+
+**Severity:** low
+
+**Fix approach:** Same family as Help → new tab — HTML rewrite and/or passive link fixer in `src/app/admin/mail/[[...path]]/route.ts` for `www.hover.com` (and plain `hover.com` if present) anchors.
+
+### Links
+
+- Related: Help new-tab rewrite in mail proxy; `admin-console-0011`
 
 ---
 
@@ -15,7 +47,7 @@ Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.m
 |-------|--------|
 | **Type** | `bug` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Source** | `ceo` |
 | **Verifier** | `ceo` |
 | **Verify passes** | `pass2` |
@@ -35,10 +67,11 @@ Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.m
 
 **Severity:** low
 
-**Fix approach:** Same pattern as blank `#header` hide — inject CSS via `/admin/mail` HTML proxy (`src/app/admin/mail/[[...path]]/route.ts`).
+**Fix:** Inject CSS via mail proxy (`HIDE_LOGIN_HELP`). Commit `4718bf4`. CEO verified 2026-07-12.
 
 ### Links
 
+- Commit: `4718bf4`
 - Related: `admin-console-0009` Iteration 3 (`#header` hide)
 
 ---
