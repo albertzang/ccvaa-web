@@ -2,32 +2,31 @@
 
 **Date:** 2026-07-12  
 **Backlog work ID:** `admin-console-0010`  
-**Iteration:** `8`  
+**Iteration:** `9`  
 **Branch / PR:** `feat/admin-console-0010-hover-auth` — PR #4  
 **Verifier:** `ceo` | **Verify passes:** `pass1`
 
-## Corrected symptom (CEO)
+## Goal
 
-When in-mailbox nav happens (Hover iframe task bar: Mail / Files / Calendar / Contacts):
+CEO verified Iteration 8 (auth blink fixed). Remaining:
 
-- **NOT** a full `/admin` page reload
-- The admin shell briefly blinks into a **logged-out** look: Members / Events / Financial / Log out **vanish for a blink**, then come back
+**White flash inside the mail iframe** on Hover task-bar navigation (Mail / Files / Calendar / Contacts). Native Hover feels **instant**; our embed shows a significant white blank while the next task document loads through the proxy.
 
-Buttons at issue = **inside Hover iframe**, not our React sidebar.
+## Approach
 
-## Root cause
+Roundcube task switch = full HTML navigation. Proxy adds latency → visible white unload.
 
-`AUTH_BRIDGE` on each iframe document load reports `authenticated:false` while Roundcube is still booting → `AdminPage` `setAuthenticated(false)` → sidebar auth items unmount → then true again = blink.
+**Preferred fix:** double-buffer / preload-then-swap so the current iframe stays painted until the next task document is ready, then swap (no white interstitial).
 
-## Fix (both sides)
+Options:
+- Parent `MailSection`: two stacked iframes; on `switch-task` (postMessage from inject, or detect), load next URL in hidden frame, on `load` promote it
+- Or inject in Roundcube: intercept `switch-task`, open hidden iframe sibling… harder inside one frame — parent coordination via `postMessage` is cleaner
 
-1. **`AdminPage.tsx`:** sticky auth — apply `true` immediately; demote to `false` only after debounce / consecutive false messages / session API confirm. Explicit logout clears immediately (no debounce).
-2. **`AUTH_BRIDGE` in mail `route.ts`:** no sync false on script parse; wait for DOM/rcmail; only post false when login form is clearly present; skip report on unload/pagehide.
-3. Keep Help, frame isolation, 0009 fixes.
+Keep sticky auth (Iter 8), Help, logout, 0009.
 
 ## Acceptance
 
-- [ ] Click Mail↔Files↔Calendar↔Contacts in Hover task bar: sidebar auth items (**Members / Events / Financial / Log out**) stay visible with **no blink**
-- [ ] Real logout (sidebar Log out or mail logout) still clears auth chrome
-- [ ] Login still unlocks auth chrome
+- [ ] Mail ↔ Files ↔ Calendar ↔ Contacts: **no significant white flash** inside mail panel (feels closer to native Hover)
+- [ ] Auth sidebar items still stable (no Iter 8 regression)
+- [ ] Help / logout / login still work
 - [ ] Lint/typecheck; push; Preview URL

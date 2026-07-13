@@ -70,18 +70,22 @@ Patches shipped; CEO still sees whole admin reload. Clarified: problem is **Hove
 
 Frame isolation may still help, but CEO clarified the symptom is **not** a full `/admin` reload.
 
-### Iteration 8 — Stop auth blink on in-iframe navigation (current)
+### Iteration 8 — Stop auth blink on in-iframe navigation (CEO verified 2026-07-12)
 
-**Corrected symptom (CEO):** When navigating **inside** the Hover iframe (task bar Mail/Files/Calendar/Contacts, etc.), the **admin shell does not unload**, but it briefly flashes a **logged-out** chrome state — Members / Events / Financial / **Log out** disappear for a blink, then return.
+Sticky auth + quieter AUTH_BRIDGE. Sidebar auth items no longer blink.
 
-**Root cause (likely):** On each Roundcube full document load, injected `AUTH_BRIDGE` runs early, `loggedIn()` returns **false** (rcmail/DOM not ready), `postMessage({authenticated:false})` → `AdminPage` immediately hides auth nav. Moments later bridge reports true → blink.
+### Iteration 9 — Instant in-iframe task switch (no white flash) (current)
 
-**Fix:**
-1. **Parent (`AdminPage`):** sticky session — accept `authenticated:true` immediately; ignore transient `false` from postMessage unless confirmed (debounce / require consecutive falses / confirm via `/api/admin/session`). Explicit Log out still clears immediately.
-2. **AUTH_BRIDGE:** do not report false on bare script parse; wait until DOM ready; only report false when login UI is clearly present; never report false on `pagehide`/`unload`.
-3. Optional: treat calendar/files/addressbook tasks as logged-in once `rcmail.env.task` is set.
+**Symptom (CEO):** Significant **white page blink inside the iframe** when navigating Hover task bar (Mail / Files / Calendar / Contacts). Native https://mail.hover.com feels like an **instant switch**.
 
-Do not regress real logout (mail logout + sidebar Log out).
+**Why (likely):** Roundcube `switch-task` does a **full document load**. Through our proxy that means: unload iframe → white empty document → Vercel function → fetch Hover → rewrite HTML → paint. Extra latency vs direct Hover makes the white flash obvious.
+
+**Fix direction (prefer UX over micro-optimizing proxy only):**
+1. **Preload-then-swap (recommended):** intercept task switches; load next task URL in a hidden buffer iframe (or second frame); when `load` fires, swap into view so the user never sees a blank white document
+2. And/or: keep previous iframe painted until replacement is ready (double-buffer in `MailSection` parent)
+3. Optional: reduce proxy TTFB (less rewrite work, cache static Roundcube assets) — secondary
+
+Must not regress: sticky auth (Iter 8), Help new-tab, logout, 0009 fixes.
 
 ### Links
 

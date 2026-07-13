@@ -302,9 +302,12 @@ try{
  *   onclick="return rcmail.command('switch-task', task, this, event)"
  * Steal those clicks + patch rcmail helpers so nav stays in the iframe.
  * Help stays a new-tab upstream URL. FRAME_PARENT_ISOLATION is the primary fix.
+ *
+ * Iteration 9: task switches ask the parent to preload-then-swap (double-buffer)
+ * so the current document stays painted until the next task HTML is ready.
  */
 const SWITCH_TASK_FRAME_PATCH = `<script>(function(){
-var P="/admin/mail",H="${HOVER_HELP_URL}";
+var P="/admin/mail",H="${HOVER_HELP_URL}",O=window.location.origin,S="ccvaa-admin-mail";
 function isHelp(u){return!u?!1:u===H||/\\/help\\//.test(u)||/help\\.html/.test(u)||/_task=help/.test(u);}
 function rw(u){
   if(typeof u!=="string"||!u||isHelp(u))return u;
@@ -328,6 +331,18 @@ function rw(u){
   return u;
 }
 function go(u){var n=rw(u);if(!n||isHelp(n))return;try{window.location.assign(n);}catch(e){window.location.href=n;}}
+function requestSwap(u){
+  var n=rw(u);if(!n||isHelp(n))return;
+  var rp=window.__ccvaaRealParent,href;
+  try{href=new URL(n,location.href).href;}catch(e){href=n;}
+  try{
+    if(rp&&rp!==window){
+      rp.postMessage({source:S,action:"preload-task",url:href},O);
+      return;
+    }
+  }catch(e){}
+  go(n);
+}
 function taskAnchor(a){
   if(!a||!a.getAttribute)return!1;
   var h=a.getAttribute("href")||"",oc=a.getAttribute("onclick")||"";
@@ -343,9 +358,9 @@ document.addEventListener("click",function(e){
   var h=a.getAttribute("href"),n=rw(h);
   e.preventDefault();e.stopPropagation();
   if(e.stopImmediatePropagation)e.stopImmediatePropagation();
-  if(a.getAttribute("target")==="_top"||a.getAttribute("target")==="_parent")a.setAttribute("target","_self");
+  if(a.getAttribute("target")==="_top"||a.getAttribute("target")=="_parent")a.setAttribute("target","_self");
   if(n&&n!==h)a.setAttribute("href",n);
-  go(a.getAttribute("href"));
+  requestSwap(a.getAttribute("href"));
 },true);
 function guardLoc(loc){
   if(!loc||loc.__ccvaaG)return;
@@ -376,7 +391,7 @@ function patchRcmail(){
       var url;
       try{url=rc.get_task_url(task);}catch(e){url=P+"?_task="+encodeURIComponent(task);}
       if(task==="mail"&&url.indexOf("_mbox=")<0)url+="&_mbox=INBOX";
-      go(url);
+      requestSwap(url);
     };
   }
   if(typeof rc.redirect==="function"){
@@ -399,7 +414,7 @@ function patchRcmail(){
     rc.command=function(command,props,obj,event,allow_disabled){
       if(command==="switch-task"&&props&&props!=="logout"&&props!=="help"){
         if(typeof rc.switch_task==="function")rc.switch_task(props);
-        else go(P+"?_task="+encodeURIComponent(props));
+        else requestSwap(P+"?_task="+encodeURIComponent(props));
         return!1;
       }
       return cmd(command,props,obj,event,allow_disabled);

@@ -101,7 +101,9 @@ export function AdminPage() {
       if (event.origin !== window.location.origin) return;
       const data = event.data as MailAuthMessage;
       if (!data || data.source !== ADMIN_MAIL_AUTH_MESSAGE_SOURCE) return;
-      applyAuth(Boolean(data.authenticated));
+      // Ignore non-auth bridge messages (e.g. preload-task from mail inject).
+      if (typeof data.authenticated !== "boolean") return;
+      applyAuth(data.authenticated);
     }
 
     window.addEventListener("focus", onFocus);
