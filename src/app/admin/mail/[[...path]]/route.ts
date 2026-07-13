@@ -279,16 +279,118 @@ const HASH_LINK_NAV_GUARD = `<script>(function(){document.addEventListener("clic
 const PASSIVE_QUERY_LINK_FIXER = `<script>(function(){var P="/admin/mail",H="${HOVER_HELP_URL}";function fixHelp(a){var h=a.getAttribute("href");if(!h)return;if(/\\/help\\/|help\\.html|_task=help/.test(h)){a.setAttribute("href",H);a.setAttribute("target","_blank");a.setAttribute("rel","noopener noreferrer");}}function fixTarget(a){if(a.getAttribute("href")===H)return;if(/\\/help\\/|help\\.html|_task=help/.test(a.getAttribute("href")||""))return;var t=a.getAttribute("target");if(t==="_top"||t==="_parent")a.setAttribute("target","_self");}function fixHref(a){var h=a.getAttribute("href");if(!h||h.charAt(0)==="#")return;fixHelp(a);if(a.getAttribute("href")===H)return;fixTarget(a);h=a.getAttribute("href");if(h.charAt(0)==="?"||h.indexOf("./?")===0)a.setAttribute("href",P+h.replace(/^\\.\\/?/,""));else if(h.indexOf(P+"/?")>=0)a.setAttribute("href",h.replace(/\\/admin\\/mail\\/\\?/g,P+"?"));else if((h==="/"||h.indexOf("/?")===0)&&h.indexOf(P)!==0)a.setAttribute("href",P+h.slice(1));else if(h.charAt(0)==="/"&&h.indexOf(P)!==0&&h.indexOf("//")!==0&&/_task=/.test(h))a.setAttribute("href",P+h.replace(/^\\//,""));}function fixForm(f){var a=f.getAttribute("action");if(a&&a.charAt(0)==="?")f.setAttribute("action",P+a);else if(a&&(a==="/"||a.indexOf("/?")===0)&&a.indexOf(P)!==0)f.setAttribute("action",P+a.slice(1));var t=f.getAttribute("target");if(t==="_top"||t==="_parent")f.setAttribute("target","_self");}function scan(r){if(!r.querySelectorAll)return;r.querySelectorAll("a[href]").forEach(fixHref);r.querySelectorAll("form[action]").forEach(fixForm);}scan(document);new MutationObserver(function(ms){ms.forEach(function(m){m.addedNodes.forEach(function(n){if(n.nodeType!==1)return;scan(n);if(n.matches){if(n.matches("a[href]"))fixHref(n);if(n.matches("form[action]"))fixForm(n);}});});}).observe(document.documentElement,{childList:true,subtree:true});})();</script>`;
 
 /**
- * Task-bar links (Mail / Files / Calendar / Contacts) sometimes target _top or
- * site-root /?_task=… — redirect those navigations to stay inside the iframe.
+ * Iteration 6: Calendar/Mail/Files/Contacts use
+ *   onclick="return rcmail.command('switch-task', task, this, event)"
+ * with an already-correct href="/admin/mail?_task=…". Roundcube's switch_task →
+ * redirect → location_href (or parent/top.location) navigates the admin shell.
+ * Always steal those clicks in capture phase and patch rcmail helpers so
+ * navigation stays on window (the iframe). Help stays a new-tab upstream URL.
  */
-const TASK_NAV_GUARD = `<script>(function(){var P="/admin/mail",H="${HOVER_HELP_URL}";function rw(h){if(!h||h===H||/\\/help\\//.test(h)||/_task=help/.test(h))return h;if(h==="/"||h==="")return P;if(h.charAt(0)==="?"||h.indexOf("./?")===0)return P+h.replace(/^\\.\\/?/,"");if(h.indexOf("/?")===0)return P+h.slice(1);if(h.charAt(0)==="/"&&h.indexOf(P)!==0&&h.indexOf("//")!==0&&/_task=/.test(h))return P+h.replace(/^\\//,"");return h;}function taskLink(a){if(!a)return false;var h=a.getAttribute("href")||"";if(!h||h.charAt(0)==="#"||h.indexOf("javascript:")===0)return false;if(/\\/help\\//.test(h)||/_task=help/.test(h))return false;return!!(a.closest("#taskmenu,#layout-menu")||/_task=/.test(h));}document.addEventListener("click",function(e){var el=e.target;if(!el||!el.closest)return;var a=el.closest("a[href]");if(!a||!taskLink(a))return;var h=a.getAttribute("href"),t=a.getAttribute("target"),n=rw(h),top=t==="_top"||t==="_parent";if(!top&&n===h)return;e.preventDefault();e.stopPropagation();if(top)a.setAttribute("target","_self");if(n!==h)a.setAttribute("href",n);window.location.assign(a.getAttribute("href"));},true);})();</script>`;
-
-/**
- * Roundcube occasionally assigns parent/top.location — keep that navigation in
- * the iframe so the /admin shell does not reload.
- */
-const FRAME_NAV_GUARD = `<script>(function(){var P="/admin/mail";function rw(u){if(typeof u!=="string")return u;if(u==="/"||u==="")return P;if(u.indexOf("/?")===0)return P+u.slice(1);if(u.charAt(0)==="/"&&u.indexOf(P)!==0&&u.indexOf("//")!==0&&/_task=/.test(u))return P+u.replace(/^\\//,"");return u;}function guard(loc,redirect){try{var d=Object.getOwnPropertyDescriptor(Object.getPrototypeOf(loc),"href");if(!d||!d.set||loc.__ccvaaG)return;Object.defineProperty(loc,"href",{configurable:true,enumerable:true,get:d.get,set:function(v){if(redirect&&window.parent!==window)window.location.href=rw(v);else d.set.call(this,rw(v));}});loc.__ccvaaG=1;}catch(x){}}function boot(){guard(window.location,false);if(window.parent!==window)guard(window.parent.location,true);if(window.top!==window&&window.top!==window.parent)guard(window.top.location,true);}boot();document.addEventListener("DOMContentLoaded",boot);})();</script>`;
+const SWITCH_TASK_FRAME_PATCH = `<script>(function(){
+var P="/admin/mail",H="${HOVER_HELP_URL}";
+function isHelp(u){return!u?!1:u===H||/\\/help\\//.test(u)||/help\\.html/.test(u)||/_task=help/.test(u);}
+function rw(u){
+  if(typeof u!=="string"||!u||isHelp(u))return u;
+  if(u==="/"||u==="")return P;
+  if(u.charAt(0)==="?"||u.indexOf("./?")===0)return P+u.replace(/^\\.\\/?/,"");
+  if(u.indexOf("/?")===0)return P+u.slice(1);
+  if(u.indexOf(P+"/?")===0)return P+"?"+u.slice((P+"/?").length);
+  if(u.indexOf(P)===0)return u;
+  if(u.indexOf("//")===0)return u;
+  if(u.indexOf("/admin?")===0)return P+u.slice(6);
+  if(u.indexOf("/admin/?")===0)return P+u.slice(7);
+  if(u==="/admin")return P;
+  if(u.charAt(0)==="/"&&/_task=/.test(u))return P+u.replace(/^\\//,"");
+  return u;
+}
+function go(u){var n=rw(u);if(!n||isHelp(n))return;try{window.location.assign(n);}catch(e){window.location.href=n;}}
+function taskAnchor(a){
+  if(!a||!a.getAttribute)return!1;
+  var h=a.getAttribute("href")||"",oc=a.getAttribute("onclick")||"";
+  if(!h||h.charAt(0)==="#"||h.indexOf("javascript:")===0)return!1;
+  if(isHelp(h))return!1;
+  if(oc.indexOf("switch-task")>=0)return!0;
+  if(a.closest&&a.closest("#taskmenu,#taskbar,.taskbar,#layout-menu,#topline"))return/_task=/.test(h);
+  return!1;
+}
+document.addEventListener("click",function(e){
+  var el=e.target;if(!el||!el.closest)return;
+  var a=el.closest("a[href]");if(!a||!taskAnchor(a))return;
+  var h=a.getAttribute("href"),n=rw(h);
+  e.preventDefault();e.stopPropagation();
+  if(e.stopImmediatePropagation)e.stopImmediatePropagation();
+  if(a.getAttribute("target")==="_top"||a.getAttribute("target")==="_parent")a.setAttribute("target","_self");
+  if(n&&n!==h)a.setAttribute("href",n);
+  go(a.getAttribute("href"));
+},true);
+function guardLoc(loc,toFrame){
+  if(!loc||loc.__ccvaaG)return;
+  try{
+    var proto=Object.getPrototypeOf(loc);
+    var d=Object.getOwnPropertyDescriptor(proto,"href")||Object.getOwnPropertyDescriptor(loc,"href");
+    if(d&&d.set){
+      Object.defineProperty(loc,"href",{
+        configurable:!0,enumerable:!0,
+        get:d.get?function(){return d.get.call(loc);}:function(){return String(loc);},
+        set:function(v){if(toFrame)go(v);else d.set.call(loc,rw(v));}
+      });
+    }
+    var as=loc.assign,rp=loc.replace;
+    if(typeof as==="function")loc.assign=function(v){if(toFrame)go(v);else as.call(loc,rw(v));};
+    if(typeof rp==="function")loc.replace=function(v){if(toFrame)go(v);else rp.call(loc,rw(v));};
+    loc.__ccvaaG=1;
+  }catch(x){}
+}
+function guardBreakouts(){
+  guardLoc(window.location,!1);
+  try{if(window.parent&&window.parent!==window)guardLoc(window.parent.location,!0);}catch(x){}
+  try{if(window.top&&window.top!==window)guardLoc(window.top.location,!0);}catch(x){}
+}
+function patchRcmail(){
+  var rc=window.rcmail;if(!rc||rc.__ccvaaTaskPatch)return!!rc;
+  rc.__ccvaaTaskPatch=1;
+  if(typeof rc.switch_task==="function"){
+    var st=rc.switch_task.bind(rc);
+    rc.switch_task=function(task){
+      if(!task||task==="logout")return st(task);
+      var url;
+      try{url=rc.get_task_url(task);}catch(e){url=P+"?_task="+encodeURIComponent(task);}
+      if(task==="mail"&&url.indexOf("_mbox=")<0)url+="&_mbox=INBOX";
+      go(url);
+    };
+  }
+  if(typeof rc.redirect==="function"){
+    rc.redirect=function(url,lock){
+      if(lock!==!1){try{rc.set_busy(!0,"loading");}catch(e){}}
+      if(typeof url!=="string"){try{url=rc.env.comm_path;}catch(e){url=P;}}
+      go(url);
+    };
+  }
+  if(typeof rc.location_href==="function"){
+    var lh=rc.location_href.bind(rc);
+    rc.location_href=function(url,target,frame,replace){
+      if(!target||target===window.parent||target===window.top)target=window;
+      if(typeof url==="string")url=rw(url);
+      return lh(url,target,frame,replace);
+    };
+  }
+  if(typeof rc.command==="function"){
+    var cmd=rc.command.bind(rc);
+    rc.command=function(command,props,obj,event,allow_disabled){
+      if(command==="switch-task"&&props&&props!=="logout"&&props!=="help"){
+        if(typeof rc.switch_task==="function")rc.switch_task(props);
+        else go(P+"?_task="+encodeURIComponent(props));
+        return!1;
+      }
+      return cmd(command,props,obj,event,allow_disabled);
+    };
+  }
+  return!0;
+}
+guardBreakouts();
+document.addEventListener("DOMContentLoaded",guardBreakouts);
+var n=0,t=setInterval(function(){if(patchRcmail()||++n>200)clearInterval(t);},25);
+})();</script>`;
 
 /**
  * Hover's logged-in Roundcube chrome leaves #header empty in the iframe
@@ -302,7 +404,7 @@ const HIDE_BLANK_HEADER = `<style id="ccvaa-hide-blank-header">#header{display:n
  */
 const AUTH_BRIDGE = `<script>(function(){var O=window.location.origin,S="ccvaa-admin-mail",last=null;function loggedIn(){try{if(window.rcmail&&rcmail.env){var t=rcmail.env.task;if(t&&t!=="login")return true;if(t==="login")return false;}}catch(e){}if(document.querySelector("#login-form,form[name=login],#login"))return false;if(document.querySelector("#mainscreen,#mailboxlist,#layout"))return true;return false;}function report(){var auth=loggedIn();if(last===auth)return;last=auth;try{parent.postMessage({source:S,authenticated:auth},O);}catch(e){}}report();document.addEventListener("DOMContentLoaded",report);window.addEventListener("load",report);setInterval(report,2000);})();</script>`;
 
-const HTML_HEAD_INJECT = `${HIDE_BLANK_HEADER}${HASH_LINK_NAV_GUARD}${FRAME_NAV_GUARD}${PASSIVE_QUERY_LINK_FIXER}${TASK_NAV_GUARD}${AUTH_BRIDGE}`;
+const HTML_HEAD_INJECT = `${HIDE_BLANK_HEADER}${HASH_LINK_NAV_GUARD}${SWITCH_TASK_FRAME_PATCH}${PASSIVE_QUERY_LINK_FIXER}${AUTH_BRIDGE}`;
 
 function injectBaseTag(html: string) {
   const baseTag = `<base href="${PROXY_PREFIX}/">`;
