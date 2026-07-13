@@ -52,7 +52,7 @@
 - Available on phone, tablet, and desktop (no device gate)
 
 ### Layout (left sidebar)
-- Dark ocean left sidebar (`ocean-950`) on `md+`; on small screens a top dark nav bar with horizontal scroll; cream main pane
+- Dark ocean nav (`ocean-950`): left sidebar on `md+`; on small screens brand + **collapsed menu toggle** (expands to full nav list); cream main pane
 - Brand mark (logo + “Visual Arts Association”) shared with public header via `BrandMark` — same logo size (`h-7` / `sm:h-8`), centered (no “Admin” label)
 - Nav order: **Webmail**, **Members**, **Events**, **Financial**
 - Members / Events / Financial require mailbox sign-in; **Log out** when authenticated
