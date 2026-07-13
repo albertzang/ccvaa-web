@@ -5,10 +5,6 @@ import { AdminScaffoldPanel } from "@/components/admin/AdminScaffoldSections";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { MailSection } from "@/components/admin/MailSection";
 import {
-  MobileUnsupportedMessage,
-  useIsUnsupportedMobile,
-} from "@/components/admin/MobileGate";
-import {
   ADMIN_MAIL_AUTH_MESSAGE_SOURCE,
   type AdminPanelId,
 } from "@/lib/admin/constants";
@@ -37,7 +33,6 @@ function isProtectedPanel(panel: AdminPanelId): panel is Exclude<AdminPanelId, "
 }
 
 export function AdminPage() {
-  const unsupported = useIsUnsupportedMobile();
   const [authenticated, setAuthenticated] = useState(false);
   const [ready, setReady] = useState(false);
   const [mailFrameKey, setMailFrameKey] = useState(0);
@@ -137,10 +132,6 @@ export function AdminPage() {
     setMailFrameKey((key) => key + 1);
   }, []);
 
-  if (unsupported) {
-    return <MobileUnsupportedMessage />;
-  }
-
   if (!ready) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-cream">
@@ -150,7 +141,7 @@ export function AdminPage() {
   }
 
   return (
-    <div className="flex h-screen bg-cream">
+    <div className="flex h-dvh flex-col bg-cream md:flex-row">
       <AdminSidebar
         activePanel={visiblePanel}
         authenticated={authenticated}

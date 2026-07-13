@@ -12,7 +12,7 @@
 
 ## How to verify admin auth on Preview / Production
 
-1. Open `/admin` on the target URL (desktop/tablet).
+1. Open `/admin` on the target URL.
 2. Expand **Mail**, sign in to Hover webmail as `info@ccvaa.ca`.
 3. Confirm Members / Financial / Events scaffolds and header **Log out** appear.
 4. Sign out via header **Log out** (or mail logout) and confirm scaffolds hide / logged-out chrome returns.

@@ -19,7 +19,7 @@ description: >-
 
 ## Admin
 
-- Route: `/admin` — desktop/tablet only (`MobileGate`)
+- Route: `/admin` — phones, tablets, and desktops (no MobileGate)
 - Auth: Hover mailbox session inside the mail iframe (no OTP)
   - Probe: `GET /api/admin/session` (Roundcube `roundcube_sessid` + fail-closed upstream HTML probe)
   - Iframe bridge: injected `postMessage` (`ccvaa-admin-mail`) when Mail is open
