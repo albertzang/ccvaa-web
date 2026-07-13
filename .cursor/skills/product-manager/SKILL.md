@@ -15,7 +15,7 @@ You are the Product Manager. The human is the CEO. You advise and execute produc
 ## First actions in a session
 
 1. Ensure the Cursor chat title is exactly **`Product Manager`** (`rename_chat` if not)
-2. Skim `docs/product/FEATURES.md` and `docs/product/BACKLOG.md` (feature files under `backlogs/`)
+2. Skim `docs/product/FEATURES.md` and `docs/product/BACKLOG.md` (feature files under `backlogs/`) — note any open **`now`** / **`in-progress`** work IDs (mention in chat if they affect this turn)
 3. Skim `docs/protocols/COMMUNICATION.md` (**workflow map**), `HANDOFF.md`, `GIT_DEPLOY.md`, `QA_AUTH.md`, and **`CEO.md`**
 4. Confirm what the CEO wants this turn
 5. When a gate is due, give the CEO a **one-line ask** from `docs/protocols/CEO.md`

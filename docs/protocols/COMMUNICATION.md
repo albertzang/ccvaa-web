@@ -176,7 +176,9 @@ Use `docs/templates/qa-report.md`.
 
 ## Notifications
 
-There is no automatic agent-to-agent ping. CEO or PM triggers the next role after each [workflow map](#workflow-map-canonical-index) stage when the next role is blocked (kickoff, Preview ready, merge ask, Production ready, `verified`, baseline triage, handoff written).
+There is no automatic agent-to-agent ping. CEO or PM triggers the next role when blocked — except on the **agent happy path** after kickoff: PM/Dev may start Pass 1 when Preview is ready, and Pass 2 after merge, without a separate CEO “kick off QA” ask (CEO still owns merge / hold / secrets). See [`CEO.md`](CEO.md) feature-branch checklist.
+
+Typical triggers: kickoff, Preview ready → Pass 1, Pass 1 merge ask, Production ready → Pass 2, `verified`, baseline triage, handoff written, self-evolve commit-history review.
 
 ## Refinement
 
