@@ -9,7 +9,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ## Guiding principles
 
 1. **Repo is the brain, chat is the scratchpad** — Durable truth lives in docs, backlogs, and protocols. Agents can be summarized or swapped without losing the product.
-2. **One decision-maker** — The CEO gates ship, secrets, and “done.” Agents advise and execute; they do not invent authority.
+2. **One decision-maker** — The CEO gates ship, secrets, and “done.” Agents advise and execute; they do not invent authority. The CEO may grant **bounded autonomy** (e.g. **self-evolve**: PM decides mid-loop OS edits; merge still CEO-only).
 3. **Clear roles, thin interfaces** — Product Manager, Developer, and QA each own a job. Handoffs are short, structured, and ephemeral when the work ends.
 4. **Defaults over debates** — Verifier, Ship path, and Verify passes have defaults so every ticket does not re-negotiate process.
 5. **Small loops, same ID** — Prefer Iteration on one work ID until verified. Avoid ID sprawl and versioned handoff/report files.
@@ -17,7 +17,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 7. **Least process that still prevents mistakes** — Protect secrets, `main`, and wrong-env testing; drop ceremony that does not change outcomes.
 8. **Observable “done”** — `completed` / `closed` / `verified` mean the same thing to every role, including what gets deleted vs kept.
 
-Operating docs live under [`docs/`](docs/README.md). Refine this OS via `agent-os-*` backlog items with CEO approval.
+Operating docs live under [`docs/`](docs/README.md). Refine this OS via `agent-os-*` backlog items — ordinary docs with CEO **`verified`**, or a CEO-kickoff **self-evolve** run (PM loop on a feature branch; CEO merges).
 
 **Workflow map:** [`docs/protocols/COMMUNICATION.md`](docs/protocols/COMMUNICATION.md) — Intake → Prioritize → Kickoff → Ship → Verify → Close (plus common lanes incl. **self-evolve**, what **`verified`** means, and rare overrides).
 

@@ -3,11 +3,33 @@
 **Feature:** Agent OS  
 **Slug:** `agent-os`  
 **Owner:** Product Manager  
-**Next ID:** `0009`  
+**Next ID:** `0010`  
 
 Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
 **Note:** All `agent-os-*` items use **Verifier = `n/a`**, **Verify passes = `n/a`**. Default **Ship path = `direct-to-main`**. Use **`feature-branch`** for **self-evolve** runs (required) and optional multi-iteration umbrellas.
+
+---
+
+## agent-os-0009 — Self-evolve run
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `in-progress` |
+| **Verifier** | `n/a` |
+| **Verify passes** | `n/a` |
+| **Ship path** | `feature-branch` |
+
+### Description
+
+CEO-kickoff **self-evolve** run on `chore/agent-os-0009-self-evolve`. PM evaluates OS vs Guiding principles, implements the most valuable improvements in a loop (no mid-loop CEO approval), then asks CEO to review commit history before merge.
+
+### Overall
+
+- Opened self-evolve run on `chore/agent-os-0009-self-evolve`
+- **Principles ↔ self-evolve:** Guiding principle #2 notes bounded CEO-granted autonomy; AGENTS refine line covers ordinary `verified` vs self-evolve merge gate; workflow-map Kickoff row formatting fixed
 
 ---
 

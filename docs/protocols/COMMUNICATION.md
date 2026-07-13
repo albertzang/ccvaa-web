@@ -16,7 +16,7 @@ Intake → Prioritize → Kickoff → Ship → Verify → Close
 |-------|----------------|---------------|
 | **Intake** | CEO bug/task / chat goal, or QA **Bugs found** → backlog item (`{feature-slug}-{NNNN}`) | [`BACKLOG.md`](../product/BACKLOG.md), [`CEO.md`](CEO.md) report checklist |
 | **Prioritize** | Backlog review: `now` / `next` / `later`, `closed`, Verifier | [`CEO.md`](CEO.md) backlog review |
-| Kickoff | CEO picks ID → `in-progress` + Dev handoff (or **self-evolve** → new `agent-os-*` + feature branch) | [`BACKLOG.md`](../product/BACKLOG.md), [`HANDOFF.md`](HANDOFF.md), [`CEO.md`](CEO.md) |
+| **Kickoff** | CEO picks ID → `in-progress` + Dev handoff (or **self-evolve** → new `agent-os-*` + feature branch) | [`BACKLOG.md`](../product/BACKLOG.md), [`HANDOFF.md`](HANDOFF.md), [`CEO.md`](CEO.md) |
 | **Ship** | Per **Ship path** + Verifier defaults | [`GIT_DEPLOY.md`](GIT_DEPLOY.md) |
 | **Verify** | Agent Pass 1/2, CEO smoke, baseline, or agent-os skim | [`GIT_DEPLOY.md`](GIT_DEPLOY.md), [`HANDOFF.md`](HANDOFF.md#gates-matrix-ready--done--verified), [`CEO.md`](CEO.md) |
 | **Close** | `completed` / `closed` → delete handoffs/reports; FEATURES if needed | [`HANDOFF.md`](HANDOFF.md) lifespan |
