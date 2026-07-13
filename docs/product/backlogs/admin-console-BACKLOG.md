@@ -3,9 +3,43 @@
 **Feature:** Admin Console  
 **Slug:** `admin-console`  
 **Owner:** Product Manager  
-**Next ID:** `0011`  
+**Next ID:** `0012`  
 
 Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
+
+---
+
+## admin-console-0011 — Hide Hover login-help on pre-login iframe
+
+| Field | Value |
+|-------|--------|
+| **Type** | `bug` |
+| **Priority** | `now` |
+| **Status** | `in-progress` |
+| **Source** | `ceo` |
+| **Verifier** | `ceo` |
+| **Verify passes** | `pass2` |
+| **Ship path** | `direct-to-main` |
+
+### Description
+
+**Summary:** In the embedded Hover mailbox iframe (logged out), hide the login-help block so it does not show before sign-in.
+
+**Environment:** Production — https://ccvaa-web.vercel.app/admin (Webmail, logged out)
+
+**Selector:** `div#login-form > div.hover-login-help`
+
+**Expected:** That help block is not visible while logged out (login form itself remains usable).
+
+**Actual:** The help block is visible on the pre-login Hover UI.
+
+**Severity:** low
+
+**Fix approach:** Same pattern as blank `#header` hide — inject CSS via `/admin/mail` HTML proxy (`src/app/admin/mail/[[...path]]/route.ts`).
+
+### Links
+
+- Related: `admin-console-0009` Iteration 3 (`#header` hide)
 
 ---
 
