@@ -31,6 +31,7 @@ CEO-kickoff **self-evolve** run on `chore/agent-os-0009-self-evolve`. PM evaluat
 - Opened self-evolve run on `chore/agent-os-0009-self-evolve`
 - **Principles ↔ self-evolve:** Guiding principle #2 notes bounded CEO-granted autonomy; AGENTS refine line covers ordinary `verified` vs self-evolve merge gate; workflow-map Kickoff row formatting fixed
 - **Least process / encode friction:** PM session start notes open `now`/`in-progress`; agent happy path — Pass 1/Pass 2 proceed without separate CEO “kick off QA” asks (merge still CEO)
+- **Baseline:** framed as Production QA mode (same env as Pass 2; no feature work ID); FEATURES changelog hygiene rule (~30-row fold)
 
 ---
 

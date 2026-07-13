@@ -121,30 +121,26 @@ PM handoff (Verifier: ceo)
 - Feature branch should already be deleted when Ship path was `feature-branch` (see cleanup below)
 - **CEO Verifier:** **`verified`** completes the item; issues → Iteration on same work ID
 
-### Baseline — Production audit without a preceding PR (QA)
+### Baseline — Production QA mode (no feature work ID)
 
-Use when work is **already on `main`** and never got Pass 1/2, or whenever CEO/PM wants a full regression against Production outside a normal ship.
+**Same environment as Pass 2** (https://ccvaa-web.vercel.app/). Difference: no open PR / no `{feature-slug}-{NNNN}` yet — audit already-on-`main` against FEATURES.md (or a subset), then PM promotes findings into backlog items.
 
 | | |
 |--|--|
 | **Who initiates** | PM (with CEO ask), or CEO |
 | **Pass value on handoff** | `baseline` |
-| **Environment** | https://ccvaa-web.vercel.app/ **required** |
+| **Environment** | Production **required** |
 | **Skip** | Preview / Pass 1 / merge / branch cleanup |
-| **Scope** | Usually full `docs/product/FEATURES.md` (or a listed subset) |
-| **Sign-off** | **baseline confirmed** / **issues found** (bugs → normal fix path) |
+| **Sign-off** | **baseline confirmed** / **issues found** |
 
 ```
-CEO/PM: baseline handoff (scope + Production URL)
-  → QA: full/focused checklist on https://ccvaa-web.vercel.app/
-  → QA report + bugs
-  → PM: triage fixes (new feature-branch or CEO direct-to-main)
-  → CEO (optional): manual ccvaa.ca check
+CEO/PM: baseline handoff
+  → QA: checklist on Production
+  → report + Bugs found
+  → PM: promote to feature backlogs (**Source:** `qa`)
 ```
 
-**When to use again:** pre-multi-agent backlog, post-incident regression, “we’re not sure Production matches FEATURES.md,” or any CEO-requested Production audit without an open PR.
-
-Do **not** fake a Pass 1 against Production or re-branch old work only to fit the happy path.
+Do **not** fake a Pass 1 against Production. Details remain in handoff templates / gates matrix.
 
 ## Feature branch cleanup (after merge)
 

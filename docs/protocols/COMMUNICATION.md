@@ -30,7 +30,7 @@ Intake → Prioritize → Kickoff → Ship → Verify → Close
 | **Tiny-fix** | `ceo` | `direct-to-main` | `pass2` | Trivial CSS/copy/proxy; abbreviated handoff |
 | **agent-os** | `n/a` | `direct-to-main` | `n/a` | Docs/process; `verified` **ships** |
 | **Self-evolve** | `n/a` | **`feature-branch`** (required) | CEO reviews commits | CEO kickoff; PM loops improve→commit; merge only with CEO approval |
-| **Baseline** | (no feature ID yet) | — | Production audit | FEATURES drift / regression; then promote findings |
+| **Baseline** | (no feature ID yet) | — | Production audit | Same env as Pass 2; no PR / no feature work ID — then promote findings |
 
 **Unusual overrides** (CEO must say so explicitly): see [Rare paths](#rare-paths-overrides) below.
 

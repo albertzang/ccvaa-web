@@ -27,7 +27,7 @@ Canonical detail: [`COMMUNICATION.md`](COMMUNICATION.md#what-ceo-verified-means)
 | Goals & priorities | What to build next; accept/reject PM advice; backlog priorities |
 | Choose **Verifier** | `agent` (default) or `ceo` (you verify; bypass agent QA) — see below |
 | Approve **Ship path: `direct-to-main`** | Explicit yes required — **or** implied when Verifier = `ceo` and Ship path stays the default `direct-to-main`, or for ordinary **`agent-os-*`** docs (`n/a`, default `direct-to-main`) |
-| Approve **kickoff** of Developer / QA / baseline / **self-evolve** | Until further automation is approved |
+| Approve **kickoff** of Developer / baseline / **self-evolve** | Product kickoff still required; agent **Pass 1/2** after kickoff do **not** need a second CEO “kick off QA” ask (see happy-path checklist) |
 | Approve **merge to `main`** (or direct push) | After Pass 1 (agent or your Preview check), approved direct-to-main, or **self-evolve** PR after commit-history review |
 | Approve **process/OS changes** | Multi-agent protocol refinements; for `agent-os-*`, **`verified`** (or explicit merge ask) authorizes PM to mark completed **and ship** per Ship path |
 | **Vercel / Hover secrets & env** | e.g. `ADMIN_EMAIL` / `ADMIN_PASS` in local `.env.local`, `VERCEL_AUTOMATION_BYPASS_SECRET`, any future Vercel secrets — never ask agents to store these in git |
