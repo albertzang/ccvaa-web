@@ -15,7 +15,7 @@ Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.m
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `ceo` |
 | **Verify passes** | `pass1` |
 | **Ship path** | `feature-branch` |
@@ -24,12 +24,12 @@ Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.m
 
 Replace OTP admin login with **Hover webmail iframe session** as the sole auth signal, prune the OTP stack, and ship a sidebar admin console with a polished embedded mailbox.
 
-**Verifier / ship:** feature branch + CEO Pass 1 on Preview only (skip Pass 2). Multiple iterations on this work ID (PR #4).
+**Verifier / ship:** feature branch + CEO Pass 1 on Preview only (skip Pass 2). Multiple iterations on this work ID (PR #4). CEO verified 2026-07-12.
 
 ### Accomplished (overall)
 
 - **Auth:** Admin logged in/out iff Hover mailbox in the iframe is logged in/out; OTP UI/APIs/libs/env deps removed; sticky auth so in-iframe nav does not flash logged-out chrome
-- **Layout:** Dark admin nav (sidebar on `md+`, top bar on phone) — Webmail → Members → Events → Financial + cream main panel; shared `BrandMark` with public homepage; no device gate
+- **Layout:** Dark admin nav (sidebar on `md+`; phone = brand + collapsed menu toggle) — Webmail → Members → Events → Financial + cream main panel; shared `BrandMark` with public homepage; no device gate
 - **Mail embed UX:** Help opens Hover docs in a new tab; task switches (Mail/Files/Calendar/Contacts) stay in-iframe with preload-then-swap (no white flash); Hover compose discard dialog preserved; prior proxy hardening retained (CSRF refresh, More/Mark, hide blank `#header`)
 - **Docs:** FEATURES.md / `.env.example` / OTP-centric notes updated for mail-session auth; mobile-gate references removed
 

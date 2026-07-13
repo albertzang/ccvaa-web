@@ -7,10 +7,8 @@
 
 ## Status
 
-**11 iterations** complete on this PR. Overall scope shipped — see backlog item summary (no per-iteration breakdown).
+CEO **verified** Pass 1 (2026-07-12). Backlog marked `completed`.
 
-Awaiting CEO Pass 1 on logo aspect ratio, then merge when CEO asks (skip Pass 2).
+**Next (CEO gate):** merge PR #4 → delete feature branch local+remote → **skip Pass 2**.
 
-## Preview
-
-https://ccvaa-web-git-feat-admin-console-0010-hover-auth-azang-projects.vercel.app/admin
+After merge, CEO may delete unused Vercel env (`ADMIN_SESSION_*`, `ADMIN_OTP_*`, `SMTP_*`, `KV_*` / Redis) if no longer needed.
