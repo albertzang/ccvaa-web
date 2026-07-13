@@ -10,4 +10,4 @@ Operating docs for the CCVAA multi-agent system.
 | `protocols/` | Communication, handoff, git/deploy, QA auth, Preview protection, **CEO** |
 | `templates/` | Copy-paste forms for handoffs, QA, backlog items |
 | `handoffs/` | Ephemeral Dev/QA handoffs (deleted when the work ID closes) |
-| `reports/` | Ephemeral QA reports + **Next baseline ID** |
+| `reports/` | Ephemeral QA reports |

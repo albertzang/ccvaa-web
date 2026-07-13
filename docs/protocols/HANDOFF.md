@@ -34,7 +34,7 @@ PM deletes these in the **same turn** as the status change (or baseline close). 
 **Verify passes:** `pass1+pass2` | `pass1` | `pass2`.  
 When **Verifier = `ceo`**, skip agent QA artifacts entirely; CEO verifies per [`CEO.md`](CEO.md). Defaults: Ship path `direct-to-main`, Verify passes `pass2`.
 
-**Baseline** (no feature backlog item yet): `HANDOFF-QA-baseline.md` / `QA-baseline.md`. Assign **Baseline ID** `{NNNN}` from **Next baseline ID** in `docs/reports/README.md` into the **file body**, then increment Next ID. Put the calendar date only in the **Date** field. After the report, PM promotes findings into backlog items (**Source:** `qa`), then **deletes** the baseline handoff + report (lifespan rule above).
+**Baseline** (no feature backlog item yet): `HANDOFF-QA-baseline.md` / `QA-baseline.md`. Put the calendar date in the **Date** field only. After the report, PM promotes findings into backlog items (**Source:** `qa`), then **deletes** the baseline handoff + report (lifespan rule above).
 
 Blank backlog ID on feature Dev/QA work → **block**.
 
@@ -66,7 +66,7 @@ See also `docs/protocols/GIT_DEPLOY.md` and `docs/protocols/CEO.md`.
 ### Baseline kickoff
 
 1. CEO: kick off baseline  
-2. PM: take **Next baseline ID** from `docs/reports/README.md` → Pass=`baseline` handoff `HANDOFF-QA-baseline.md` (Baseline ID + date in body only); increment Next ID; scope = FEATURES.md (full or subset)  
+2. PM: write Pass=`baseline` handoff `HANDOFF-QA-baseline.md` (date in body only); scope = FEATURES.md (full or subset)  
 3. QA: report on Production  
 4. PM: promote issues into feature backlogs (`task`/`bug`, **Source:** `qa`); CEO confirms priorities + Verifier  
 

@@ -3,11 +3,33 @@
 **Feature:** Agent OS  
 **Slug:** `agent-os`  
 **Owner:** Product Manager  
-**Next ID:** `0006`  
+**Next ID:** `0007`  
 
 Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
 **Note:** All `agent-os-*` items use **Verifier = `n/a`** and **Verify passes = `n/a`** (docs/process — not code Pass 1/2).
+
+---
+
+## agent-os-0006 — Drop baseline IDs
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `completed` |
+| **Verifier** | `n/a` |
+| **Verify passes** | `n/a` |
+| **Ship path** | `direct-to-main` |
+
+### Description
+
+Remove **Baseline ID** / **Next baseline ID** from the OS. Baseline uses the same fixed ephemeral paths as other QA artifacts (`HANDOFF-QA-baseline.md` / `QA-baseline.md`); date in the body is enough. No auto-increment counter.
+
+### Overall
+
+- Dropped Next baseline ID table from `docs/reports/README.md`
+- Templates / protocols / skills no longer assign or require Baseline ID
 
 ---
 
@@ -30,7 +52,7 @@ Umbrella for Agent OS doc/process refinements on **`chore/agent-os-0005-iter`**.
 
 - **PM chat title:** always exactly `Product Manager` (rename on session start / if it drifts; no work-ID or topic titles; restore after any CEO one-off rename unless CEO says otherwise)
 - **Handoff/report lifespan:** delete matching fixed files under `docs/handoffs/` + `docs/reports/` when the backlog item is `completed` / `closed` (or baseline triage closes); strip dead file Links; recover from git history if needed
-- **Handoff/report paths:** `docs/handoffs/` + `docs/reports/` with **fixed filenames** (no feature slug / backlog ID in the name; work ID in body only); **Next baseline ID** in `docs/reports/README.md`
+- **Handoff/report paths:** `docs/handoffs/` + `docs/reports/` with **fixed filenames** (no feature slug / backlog ID in the name; work ID in body only)
 - **Status values:** `canceled` → **`closed`**
 - **`.env.example`:** Preview bypass + `ADMIN_EMAIL` / `ADMIN_PASS` for QA Hover sign-in (not read by the app)
 - **agent-os ship paths:** `direct-to-main` → commit + push on `verified`; `feature-branch` → merge PR on `verified`

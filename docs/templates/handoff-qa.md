@@ -2,14 +2,13 @@
 
 **Date:**  
 **Pass:** `1` | `2` | `baseline`  
-**Baseline ID:** `{NNNN}` (baseline only — from `docs/reports/README.md` **Next baseline ID**; leave blank for Pass 1/2)  
 **Backlog work ID:** `{feature-slug}-{NNNN}` (**required** for Pass 1/2 feature work; `n/a` for baseline)  
 **Ship path that led here:** `feature-branch` | `direct-to-main` | `n/a` (baseline)  
 **Filled by:** Developer (Pass 1 Preview URL) / PM (baseline) / either (Pass 2)  
 
 **Save as:**  
 - Feature: `docs/handoffs/HANDOFF-QA-pass1.md` (or `HANDOFF-QA-pass2.md`)  
-- Baseline: `docs/handoffs/HANDOFF-QA-baseline.md` (Baseline ID + date in body only)  
+- Baseline: `docs/handoffs/HANDOFF-QA-baseline.md` (date in **Date** field only)  
 
 **Branch name:** (must include work ID; n/a for baseline or direct-to-main)  
 **PR link:** (n/a for baseline or direct-to-main)  

@@ -54,7 +54,7 @@ Treat process improvements (agents, templates, docs) as product work: propose �
 4. Set **Ship path** from Verifier defaults unless CEO overrides; `direct-to-main` needs CEO approval **or** Verifier = `ceo`
 5. **If Verifier = `agent`:** Preview → QA Pass 1 (if pass1) → CEO merge → cleanup → QA Pass 2 (if pass2)
 6. **If Verifier = `ceo`:** after Dev ships → one-line ask CEO to verify listed env(s); no `HANDOFF-QA-*`
-7. **Baseline:** CEO kickoff → assign next Baseline ID from `docs/reports/README.md` into `HANDOFF-QA-baseline.md` / `QA-baseline.md` bodies (date in body only; increment Next ID) → promote findings into backlogs
+7. **Baseline:** CEO kickoff → write `HANDOFF-QA-baseline.md` (date in body only) → promote findings into backlogs → delete baseline handoff/report
 8. Small doc/protocol updates: PM may execute; for `agent-os-*`, ship when CEO says **`verified`** (or earlier if CEO explicitly asks to commit/push/merge)
 9. Tell CEO which agent/chat to open next; remind CEO that `ccvaa.ca` is their manual check
 

@@ -64,7 +64,7 @@ List work items **by ID descending** (highest / newest first). When adding a new
 
 **Verifier = `ceo`:** no agent QA handoff/report files for that work ID.
 
-**Baseline** (no feature backlog item yet): `HANDOFF-QA-baseline.md` / `QA-baseline.md` — Baseline ID from `docs/reports/README.md` (**Next baseline ID**) goes in the **body** only; date only in file body. PM promotes findings into backlog items (`type: bug` or `task`, **Source:** `qa`).
+**Baseline** (no feature backlog item yet): `HANDOFF-QA-baseline.md` / `QA-baseline.md` — date only in file body. PM promotes findings into backlog items (`type: bug` or `task`, **Source:** `qa`).
 
 Blank backlog ID on feature Dev/QA work → **block**.
 

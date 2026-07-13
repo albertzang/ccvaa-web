@@ -2,7 +2,6 @@
 
 **Pass:** 1 (pre-merge) | 2 (post-merge) | baseline  
 **Backlog work ID:** `{feature-slug}-{NNNN}` | `n/a` (baseline)  
-**Baseline ID:** `{NNNN}` | `n/a` (Pass 1/2)  
 **Environment(s) + exact URLs:**  
 **Branch / PR / commit:** (n/a for baseline unless noted)  
 **Date:**  
