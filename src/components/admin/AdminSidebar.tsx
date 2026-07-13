@@ -23,18 +23,14 @@ export function AdminSidebar({
   );
 
   return (
-    <aside className="flex w-56 shrink-0 flex-col border-r border-ocean-100 bg-cream">
-      <div className="border-b border-ocean-100 px-4 py-5">
-        <Link href="/" className="group flex flex-col items-start gap-1">
+    <aside className="flex w-56 shrink-0 flex-col border-r border-ocean-800 bg-ocean-950 text-cream">
+      <div className="border-b border-ocean-800 px-3 py-5">
+        <Link href="/" className="group flex w-full flex-col items-start gap-1">
           <CoastToCoastLogo
             priority
-            onLight
-            className="h-7 w-auto max-w-full object-contain transition-opacity group-hover:opacity-90"
+            className="h-auto w-full object-contain transition-opacity group-hover:opacity-90"
           />
-          <span className="text-xs text-ocean-600">
-            {siteConfig.navSubtitle}
-            <span className="text-ocean-400"> · Admin</span>
-          </span>
+          <span className="text-xs text-ocean-200">{siteConfig.navSubtitle}</span>
         </Link>
       </div>
 
@@ -50,8 +46,8 @@ export function AdminSidebar({
                   aria-current={isActive ? "page" : undefined}
                   className={`w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors ${
                     isActive
-                      ? "bg-ocean-100 text-ocean-900"
-                      : "text-ocean-700 hover:bg-ocean-50 hover:text-ocean-900"
+                      ? "bg-ocean-800 text-cream"
+                      : "text-ocean-200 hover:bg-ocean-900 hover:text-cream"
                   }`}
                 >
                   {item.label}
@@ -63,11 +59,11 @@ export function AdminSidebar({
       </nav>
 
       {authenticated && (
-        <div className="border-t border-ocean-100 px-3 py-4">
+        <div className="border-t border-ocean-800 px-3 py-4">
           <button
             type="button"
             onClick={onLogout}
-            className="w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium text-ocean-600 transition-colors hover:bg-ocean-50 hover:text-ocean-900"
+            className="w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium text-ocean-300 transition-colors hover:bg-ocean-900 hover:text-cream"
           >
             Log out
           </button>
