@@ -17,25 +17,25 @@ Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `n/a` |
 | **Verify passes** | `n/a` |
 | **Ship path** | `feature-branch` |
 
 ### Description
 
-Umbrella for Agent OS doc/process refinements on **`chore/agent-os-0005-iter`**. Stay on the feature branch until CEO says **`verified`**, then merge the PR and delete the branch (do not push each change to `main`). Keep **one rolling overall description** below — do **not** append Iteration subsections for each tweak on this work ID.
+Umbrella for Agent OS doc/process refinements on **`chore/agent-os-0005-iter`**. CEO verified 2026-07-12 → merge PR + delete branch.
 
-**On `verified`:** mark `completed` → merge PR → delete feature branch (local + remote).
-
-### Overall (branch so far)
+### Overall
 
 - **PM chat title:** always exactly `Product Manager` (rename on session start / if it drifts; no work-ID or topic titles; restore after any CEO one-off rename unless CEO says otherwise)
 - **Handoff/report lifespan:** delete matching fixed files under `docs/handoffs/` + `docs/reports/` when the backlog item is `completed` / `closed` (or baseline triage closes); strip dead file Links; recover from git history if needed
 - **Handoff/report paths:** `docs/handoffs/` + `docs/reports/` with **fixed filenames** (no feature slug / backlog ID in the name; work ID in body only); **Next baseline ID** in `docs/reports/README.md`
+- **Status values:** `canceled` → **`closed`**
 - **`.env.example`:** Preview bypass + `ADMIN_EMAIL` / `ADMIN_PASS` for QA Hover sign-in (not read by the app)
 - **agent-os ship paths:** `direct-to-main` → commit + push on `verified`; `feature-branch` → merge PR on `verified`
 - **Backlog file order:** items listed by work ID **descending** (newest first)
+- **Housekeeping:** closed obsolete OTP-era items `admin-console-0004` / `0005`
 
 ---
 
