@@ -112,7 +112,7 @@ Newest first preferred. Keep rows **one line** each. When the table grows past ~
 
 | When | What |
 |------|------|
-| 2026-07-12 | **agent-os-0009** self-evolve (in progress): principles↔self-evolve; agent QA gate trim; baseline = Production QA mode; changelog hygiene |
+| 2026-07-12 | **agent-os-0009** self-evolve: principles↔self-evolve; agent QA gate trim; baseline = Production QA mode; changelog hygiene (PR #6) |
 | 2026-07 | Public site, board/purposes UX, branding/logos, favicon |
 | 2026-07-10 | `/admin` OTP + Hover mail proxy + scaffolds; multi-agent OS bootstrapped |
 | 2026-07-10 | Encoded feature-branch → Preview QA → merge → Production QA (`ccvaa-web.vercel.app`); `ccvaa.ca` CEO-manual only |

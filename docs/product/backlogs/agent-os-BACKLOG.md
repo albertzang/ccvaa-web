@@ -17,14 +17,14 @@ Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `n/a` |
 | **Verify passes** | `n/a` |
 | **Ship path** | `feature-branch` |
 
 ### Description
 
-CEO-kickoff **self-evolve** run on `chore/agent-os-0009-self-evolve`. PM evaluates OS vs Guiding principles, implements the most valuable improvements in a loop (no mid-loop CEO approval), then asks CEO to review commit history before merge.
+CEO-kickoff **self-evolve** run on `chore/agent-os-0009-self-evolve`. PM evaluates OS vs Guiding principles, implements the most valuable improvements in a loop (no mid-loop CEO approval), then asks CEO to review commit history before merge. CEO **verified** 2026-07-12 → merge PR.
 
 ### Overall
 
@@ -32,7 +32,7 @@ CEO-kickoff **self-evolve** run on `chore/agent-os-0009-self-evolve`. PM evaluat
 - **Principles ↔ self-evolve:** Guiding principle #2 notes bounded CEO-granted autonomy; AGENTS refine line covers ordinary `verified` vs self-evolve merge gate; workflow-map Kickoff row formatting fixed
 - **Least process / encode friction:** PM session start notes open `now`/`in-progress`; agent happy path — Pass 1/Pass 2 proceed without separate CEO “kick off QA” asks (merge still CEO)
 - **Baseline:** framed as Production QA mode (same env as Pass 2; no feature work ID); FEATURES changelog hygiene rule (~30-row fold)
-- **Loop stopped:** further polish judged insignificant; awaiting CEO commit-history review / merge
+- **Loop stopped:** further polish judged insignificant; CEO **verified** → merge
 
 ---
 
