@@ -18,7 +18,7 @@ Intake → Prioritize → Kickoff → Ship → Verify → Close
 | **Prioritize** | Backlog review: `now` / `next` / `later`, `closed`, Verifier | [`CEO.md`](CEO.md) backlog review |
 | **Kickoff** | CEO picks ID → `in-progress` + `HANDOFF-DEV.md` (tiny-fix abbrev OK) | [`HANDOFF.md`](HANDOFF.md), [`CEO.md`](CEO.md) kickoff |
 | **Ship** | Per **Ship path** + Verifier defaults | [`GIT_DEPLOY.md`](GIT_DEPLOY.md) |
-| **Verify** | Agent Pass 1/2, CEO smoke, baseline, or agent-os skim | [`GIT_DEPLOY.md`](GIT_DEPLOY.md), [`HANDOFF.md`](HANDOFF.md), [`CEO.md`](CEO.md) |
+| **Verify** | Agent Pass 1/2, CEO smoke, baseline, or agent-os skim | [`GIT_DEPLOY.md`](GIT_DEPLOY.md), [`HANDOFF.md`](HANDOFF.md#gates-matrix-ready--done--verified), [`CEO.md`](CEO.md) |
 | **Close** | `completed` / `closed` → delete handoffs/reports; FEATURES if needed | [`HANDOFF.md`](HANDOFF.md) lifespan |
 
 ### Common lanes (use defaults unless CEO overrides)

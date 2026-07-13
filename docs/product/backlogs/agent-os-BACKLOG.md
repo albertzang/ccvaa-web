@@ -36,6 +36,7 @@ CEO-led refinement of the multi-agent OS (principles → concrete doc/protocol c
 - **Workflow map:** canonical index in `COMMUNICATION.md` (Intake → Prioritize → Kickoff → Ship → Verify → Close); CEO.md stays checklists-only
 - **`verified` table:** product CEO Verifier completes but does not auto-ship; `agent-os-*` completes and ships same turn
 - **Rare paths:** soft-narrowed (`agent`+`direct-to-main`, ceo+feature-branch, partial Verify passes) — CEO must override explicitly
+- **Gates matrix:** collapsed ready/done/verified lists in `HANDOFF.md` into one role×gate table
 
 ---
 

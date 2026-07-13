@@ -1,6 +1,6 @@
 # Handoff protocol
 
-**Workflow map:** [`COMMUNICATION.md`](COMMUNICATION.md) (stages, common lanes, what **`verified`** means, rare overrides). This file owns **artifact paths, lifespan, handoff triggers, and definitions of ready/done/verified**.
+**Workflow map:** [`COMMUNICATION.md`](COMMUNICATION.md) (stages, common lanes, what **`verified`** means, rare overrides). This file owns **artifact paths, lifespan, handoff triggers, and the gates matrix** (ready / done / verified).
 
 ## Work ID (required for feature work)
 
@@ -115,97 +115,20 @@ Developer still blocks on blank work ID and still must not invent `direct-to-mai
 4. Dev implements; PM asks CEO to verify again  
 5. Repeat until CEO says **`verified`** → `completed` + FEATURES.md if needed  
 
-## Definition of ready (for Developer)
+## Gates matrix (ready / done / verified)
 
-- [ ] **Backlog work ID** present (`{feature-slug}-{NNNN}`) — required for product work
-- [ ] **Verifier** and **Verify passes** present (or apply defaults from `BACKLOG.md`)
-- [ ] **Ship path** set: apply Verifier defaults if blank (`agent` → `feature-branch`; `ceo` / `n/a` → `direct-to-main`)
-- [ ] Problem and success criteria written (from backlog description + handoff)
-- [ ] Out of scope listed — **except** tiny-fix abbreviated handoffs (Acceptance alone is enough)
-- [ ] Environment / secrets implications noted when relevant (incl. Preview vs Production)
-- [ ] FEATURES.md section referenced or marked “new” — **except** tiny-fix when unchanged
-- [ ] If `direct-to-main` without CEO approval and Verifier ≠ `ceo` / `n/a` → **block**
-- [ ] If backlog ID blank on feature work → **block** and ask PM
+One place for “what must be true” at each gate. Workflow index: [`COMMUNICATION.md`](COMMUNICATION.md). What CEO **`verified`** means (complete vs ship): [`COMMUNICATION.md`](COMMUNICATION.md#what-ceo-verified-means).
 
-## Definition of done (for Developer → next verify step)
+| Role | Gate | Must be true |
+|------|------|----------------|
+| **Dev** | **Ready** (start work) | Work ID on handoff; Verifier / Verify passes / Ship path set (or Verifier defaults); Acceptance written (tiny-fix: Acceptance alone OK); blank ID or `agent`+`direct-to-main` without CEO approval → **block** |
+| **Dev** | **Done → next verify** | Scope done; lint/typecheck clean; commit/push/PR/merge only as asked. **agent+pass1:** PR + Preview URL in `HANDOFF-QA-pass1.md`. **ceo+pass1:** Preview/PR to PM (no agent QA file). **agent+pass2 / post-merge:** Pass 2 handoff ready. **ceo+pass2:** Production live; tell PM CEO can verify |
+| **Dev** | **Done → post-merge cleanup** | PR merged when asked; local + remote feature branch **deleted**; next verify cue ready (agent Pass 2 or CEO) |
+| **QA** | **Pass 1 verified** | Only if Verifier=`agent` + pass1; checklist on **Preview URL from handoff** (Dev optional); work ID in report body; missing Preview → **block**; **Bugs found** listed; sign-off **merge** / **hold** / **retest**; flag FEATURES drift |
+| **QA** | **Pass 2 verified** | Only if Verifier=`agent` + pass2; Production smoke on https://ccvaa-web.vercel.app/; work ID in report; **Bugs found** if needed; sign-off **ship confirmed** / **hotfix**; fail → Iteration + **new** branch from `main` (not revived merged branch); do **not** block on `ccvaa.ca` |
+| **QA** | **Baseline verified** | Production audit (no Preview / no feature work ID); **Bugs found** + **baseline confirmed** / **issues found**; PM promotes (**Source:** `qa`); do **not** block on `ccvaa.ca` |
+| **CEO** | **Product verified** (Verifier=`ceo`) | Smoked Verify-passes env(s); reply **`verified`** → PM marks `completed` (**no** auto-push/merge); or note issues → Iteration same ID; no agent QA files; `ccvaa.ca` optional/separate |
+| **CEO** | **agent-os verified** | Skim/approve `agent-os-*`; reply **`verified`** → PM marks `completed` **and ships** same turn (`direct-to-main` → commit+push; `feature-branch` → merge+delete branch); or Iteration same ID |
+| **PM** | **Close done** | Status `completed` / `closed`; FEATURES updated if behavior changed; delete matching `docs/handoffs` + `docs/reports`; strip dead file Links; on `agent-os-*` + **`verified`**, ship per Ship path in the same turn |
 
-- [ ] Code complete for agreed scope on the Ship path named with work ID
-- [ ] Lint/typecheck (and build if relevant) pass
-- [ ] **Verifier = `agent` + pass1:** PR open; exact Preview URL in QA Pass 1 handoff
-- [ ] **Verifier = `ceo` + pass1:** Preview URL (or PR) given to PM for CEO — **no** agent QA file
-- [ ] **Verifier = `agent` + pass2 only / post-merge:** Pass 2 handoff ready on Production
-- [ ] **Verifier = `ceo` + pass2:** Production deploy live; tell PM CEO can verify — **no** agent QA file
-- [ ] Commit/push/PR/merge only as CEO/PM asked
-
-## Definition of verified — Pass 1 (QA → PM, before merge)
-
-- [ ] Checklist run on **Preview URL from handoff** (required) and **Dev** if requested
-- [ ] Work ID recorded on report filename / body
-- [ ] If Preview URL missing → blocked; asked Developer/PM (do not invent URL)
-- [ ] New defects listed under **Bugs found** (repro + Preview URL); PM will promote to backlog
-- [ ] Explicit recommendation: **merge** / **hold** / **retest**
-- [ ] FEATURES.md accuracy flagged if docs drift
-- [ ] Only when **Verifier = `agent`** and Verify passes includes `pass1`
-
-## Definition of verified — Baseline (QA → PM, no PR)
-
-- [ ] Checklist run on https://ccvaa-web.vercel.app/ for handoff scope (often full FEATURES.md)
-- [ ] No Pass 1 / Preview required
-- [ ] New defects listed under **Bugs found** (repro + Production URL)
-- [ ] Explicit recommendation: **baseline confirmed** / **issues found**
-- [ ] FEATURES.md drift flagged
-- [ ] Do **not** block on https://ccvaa.ca/
-- [ ] PM will promote findings to backlog (**Source:** `qa`) — QA does not invent work IDs
-
-## Definition of verified — Pass 2 (QA → PM, after merge)
-
-- [ ] Production smoke on https://ccvaa-web.vercel.app/ (change-focused)
-- [ ] Work ID on report
-- [ ] Regressions listed under **Bugs found** if needed
-- [ ] Explicit recommendation: **ship confirmed** / **rollback or hotfix**
-- [ ] Do **not** block on https://ccvaa.ca/ (CEO manual only)
-- [ ] If fail: expect Iteration / **new** fix branch from `main` (or CEO `direct-to-main`) — not the old feature branch
-- [ ] Only when **Verifier = `agent`** and Verify passes includes `pass2`
-
-## What CEO **`verified`** means
-
-Canonical table: [`COMMUNICATION.md`](COMMUNICATION.md#what-ceo-verified-means).
-
-| Context | Completes? | Ships? |
-|---------|------------|--------|
-| Verifier = `ceo` (product) | Yes → `completed` | **No** auto-push/merge |
-| `agent-os-*` | Yes → `completed` | **Yes** same turn per Ship path |
-| Issues instead | No — Iteration same ID | No |
-
-## Definition of verified — CEO Verifier (CEO → PM)
-
-- [ ] CEO smoked the env(s) listed in Verify passes (Preview and/or https://ccvaa-web.vercel.app/)
-- [ ] CEO replies **`verified`** → PM marks backlog `completed` (+ FEATURES.md if needed)
-- [ ] Or CEO notes issues → PM Iteration on same work ID; status stays `in-progress`
-- [ ] No agent QA report required
-- [ ] Do **not** require agents to use https://ccvaa.ca/ (CEO may check it separately)
-- [ ] Does **not** by itself authorize commit/push for product code — CEO still approves push/merge per Ship path (unless already pushed and this is Production verify only)
-
-## Definition of verified — agent-os (CEO → PM)
-
-- [ ] Work ID is `agent-os-{NNNN}` (Verifier / Verify passes = `n/a`)
-- [ ] CEO replies **`verified`** after skim/approve
-- [ ] PM marks backlog **`completed`** (+ FEATURES.md / protocols as needed)
-- [ ] PM ships in the same turn per **Ship path** — no second “please commit/merge” ask:
-  - **`direct-to-main`:** commit + push `main`
-  - **`feature-branch`:** merge the PR + delete feature branch (local + remote)
-- [ ] Or CEO notes issues → Iteration on same `agent-os-*` ID until **`verified`**
-
-## Definition of done (Developer, post-merge cleanup)
-
-- [ ] PR merged to `main` when CEO/PM asked
-- [ ] Local feature branch deleted
-- [ ] Remote feature branch deleted (`git push origin --delete …` or GitHub UI + prune)
-- [ ] Next verify step ready (agent Pass 2 handoff **or** CEO verify cue); work ID in handoff/report **bodies** when agent QA applies
-
-## Definition of done (PM, after ship confirmed / CEO verified)
-
-- [ ] Backlog item status → `completed` (or `closed` if dropped)
-- [ ] `FEATURES.md` updated if behavior changed
-- [ ] **Delete** matching fixed handoff/report files under `docs/handoffs/` + `docs/reports/` (same turn); strip dead file Links from the backlog item — keep PR/commit links if useful
-- [ ] **If `agent-os-*` and CEO said `verified`:** ship per Ship path in the same turn (standing authorization)
+**Always Iteration on the same work ID** when verify fails or CEO notes issues; Ship path decides branch vs `main` (see [`GIT_DEPLOY.md`](GIT_DEPLOY.md)).
