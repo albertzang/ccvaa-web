@@ -421,9 +421,11 @@ const HIDE_BLANK_HEADER = `<style id="ccvaa-hide-blank-header">#header{display:n
 /**
  * Report mailbox login state to the real parent /admin page.
  * Uses __ccvaaRealParent because FRAME_PARENT_ISOLATION redefines window.parent.
- * Fail closed in the parent if messages stop; parent also polls /api/admin/session.
+ * Do not post false while Roundcube is still booting (unknown); only false when
+ * login UI / task is clear. Skip reports during unload/pagehide (task-bar nav).
+ * Parent sticky-auth + /api/admin/session poll remain the fail-closed backstop.
  */
-const AUTH_BRIDGE = `<script>(function(){var O=window.location.origin,S="ccvaa-admin-mail",last=null,realParent=window.__ccvaaRealParent;function loggedIn(){try{if(window.rcmail&&rcmail.env){var t=rcmail.env.task;if(t&&t!=="login")return true;if(t==="login")return false;}}catch(e){}if(document.querySelector("#login-form,form[name=login],#login"))return false;if(document.querySelector("#mainscreen,#mailboxlist,#layout"))return true;return false;}function report(){var auth=loggedIn();if(last===auth)return;last=auth;try{if(realParent&&realParent!==window)realParent.postMessage({source:S,authenticated:auth},O);}catch(e){}}report();document.addEventListener("DOMContentLoaded",report);window.addEventListener("load",report);setInterval(report,2000);})();</script>`;
+const AUTH_BRIDGE = `<script>(function(){var O=window.location.origin,S="ccvaa-admin-mail",last=null,unloading=!1,realParent=window.__ccvaaRealParent;function authState(){try{if(window.rcmail&&rcmail.env){var t=rcmail.env.task;if(t&&t!=="login")return!0;if(t==="login")return!1;}}catch(e){}if(document.querySelector("#login-form,form[name=login],#login"))return!1;if(document.querySelector("#mainscreen,#mailboxlist,#layout"))return!0;return null;}function report(){if(unloading)return;var auth=authState();if(auth===null||last===auth)return;last=auth;try{if(realParent&&realParent!==window)realParent.postMessage({source:S,authenticated:auth},O);}catch(e){}}function markUnload(){unloading=!0;}window.addEventListener("pagehide",markUnload);window.addEventListener("beforeunload",markUnload);document.addEventListener("DOMContentLoaded",report);window.addEventListener("load",report);setTimeout(report,0);setInterval(report,1500);})();</script>`;
 
 const HTML_HEAD_INJECT = `${FRAME_PARENT_ISOLATION}${HIDE_BLANK_HEADER}${HASH_LINK_NAV_GUARD}${SWITCH_TASK_FRAME_PATCH}${PASSIVE_QUERY_LINK_FIXER}${AUTH_BRIDGE}`;
 

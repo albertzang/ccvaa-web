@@ -46,15 +46,42 @@ Change admin console auth so **logging into / out of Hover webmail inside the `/
 
 Pass 1 on Preview (PR #4). Mail iframe session drives admin auth; OTP removed.
 
-### Iteration 2 — Sidebar layout + panel switching (current)
+### Iteration 2 — Sidebar layout + panel switching (CEO verified 2026-07-12)
 
-**Summary:** Replace stacked scroll layout with **left sidebar nav** (full viewport height) and **right main panel** (fills remaining width/height). Clicking sidebar items switches the right-side content (Mail, Members, Financial, Events). Remove hash-anchor / collapsible Mail pattern.
+Full-height left sidebar + right main panel; one section at a time. PR #4.
 
-**Expected UX:**
-- Sidebar: Mail always; Members / Financial / Events when authenticated; Log out at bottom (or coherent placement)
-- Main panel: one section visible at a time; Mail iframe uses available height (not short collapsible strip)
-- Coastal theme; desktop/tablet only gate unchanged
-- Do not regress Iteration 1 auth or `admin-console-0009` mail proxy fixes
+### Iteration 3 — Nav labels, strip chrome, keep mail iframe stable (CEO partially verified 2026-07-12)
+
+Sidebar Webmail/Members/Events/Financial, no login banner/titles, iframe kept mounted. **Remaining:** in-iframe navigation still **blinks** (full document flash) vs native Hover.
+
+### Iteration 4 — Smooth in-mail nav + Help in new tab (CEO partially verified 2026-07-12)
+
+Help button works (new tab → Hover help URL). In-iframe nav still problematic.
+
+### Iteration 5 — Task bar must not reload admin shell (attempted; CEO not verified)
+
+Target stripping / task-nav guards shipped (`162d523`). CEO reports **whole admin page still reloads** on task switch.
+
+### Iteration 6 — Fix `rcmail.command('switch-task')` breakout (CEO: still broken)
+
+Patches shipped; CEO still sees whole admin reload. Clarified: problem is **Hover iframe task bar**, not our sidebar.
+
+### Iteration 7 — Frame isolation (CEO corrected diagnosis)
+
+Frame isolation may still help, but CEO clarified the symptom is **not** a full `/admin` reload.
+
+### Iteration 8 — Stop auth blink on in-iframe navigation (current)
+
+**Corrected symptom (CEO):** When navigating **inside** the Hover iframe (task bar Mail/Files/Calendar/Contacts, etc.), the **admin shell does not unload**, but it briefly flashes a **logged-out** chrome state — Members / Events / Financial / **Log out** disappear for a blink, then return.
+
+**Root cause (likely):** On each Roundcube full document load, injected `AUTH_BRIDGE` runs early, `loggedIn()` returns **false** (rcmail/DOM not ready), `postMessage({authenticated:false})` → `AdminPage` immediately hides auth nav. Moments later bridge reports true → blink.
+
+**Fix:**
+1. **Parent (`AdminPage`):** sticky session — accept `authenticated:true` immediately; ignore transient `false` from postMessage unless confirmed (debounce / require consecutive falses / confirm via `/api/admin/session`). Explicit Log out still clears immediately.
+2. **AUTH_BRIDGE:** do not report false on bare script parse; wait until DOM ready; only report false when login UI is clearly present; never report false on `pagehide`/`unload`.
+3. Optional: treat calendar/files/addressbook tasks as logged-in once `rcmail.env.task` is set.
+
+Do not regress real logout (mail logout + sidebar Log out).
 
 ### Links
 

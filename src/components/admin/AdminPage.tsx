@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AdminScaffoldPanel } from "@/components/admin/AdminScaffoldSections";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { MailSection } from "@/components/admin/MailSection";
@@ -14,6 +14,8 @@ import {
 } from "@/lib/admin/constants";
 
 const SESSION_POLL_MS = 8_000;
+/** Ignore transient iframe-boot `authenticated:false` while Roundcube remounts. */
+const AUTH_FALSE_DEBOUNCE_MS = 600;
 
 type MailAuthMessage = {
   source?: string;
@@ -40,16 +42,51 @@ export function AdminPage() {
   const [ready, setReady] = useState(false);
   const [mailFrameKey, setMailFrameKey] = useState(0);
   const [activePanel, setActivePanel] = useState<AdminPanelId>("mail");
+  /** Sticky mirror so explicit logout can clear immediately (no debounce). */
+  const stickyAuthRef = useRef(false);
+  const falseDebounceRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function loadSession() {
-      const next = await fetchMailAuthenticated();
-      if (!cancelled) {
-        setAuthenticated(next);
-        setReady(true);
+    function clearFalseDebounce() {
+      if (falseDebounceRef.current !== undefined) {
+        window.clearTimeout(falseDebounceRef.current);
+        falseDebounceRef.current = undefined;
       }
+    }
+
+    /** Sticky auth: promote to true immediately; demote to false only after debounce + confirm. */
+    function applyAuth(next: boolean) {
+      if (cancelled) return;
+      if (next) {
+        clearFalseDebounce();
+        stickyAuthRef.current = true;
+        setAuthenticated(true);
+        setReady(true);
+        return;
+      }
+      setReady(true);
+      if (!stickyAuthRef.current) {
+        setAuthenticated(false);
+        return;
+      }
+      // Stay logged-in until debounce confirms session is still false
+      clearFalseDebounce();
+      falseDebounceRef.current = window.setTimeout(() => {
+        void (async () => {
+          const confirmed = await fetchMailAuthenticated();
+          if (cancelled) return;
+          if (!confirmed) {
+            stickyAuthRef.current = false;
+            setAuthenticated(false);
+          }
+        })();
+      }, AUTH_FALSE_DEBOUNCE_MS);
+    }
+
+    async function loadSession() {
+      applyAuth(await fetchMailAuthenticated());
     }
 
     void loadSession();
@@ -59,36 +96,40 @@ export function AdminPage() {
     const onFocus = () => {
       void loadSession();
     };
-    window.addEventListener("focus", onFocus);
-    return () => {
-      cancelled = true;
-      window.clearInterval(timer);
-      window.removeEventListener("focus", onFocus);
-    };
-  }, []);
 
-  useEffect(() => {
     function onMessage(event: MessageEvent) {
       if (event.origin !== window.location.origin) return;
       const data = event.data as MailAuthMessage;
       if (!data || data.source !== ADMIN_MAIL_AUTH_MESSAGE_SOURCE) return;
-      const next = Boolean(data.authenticated);
-      setAuthenticated((prev) => (prev === next ? prev : next));
-      setReady(true);
+      applyAuth(Boolean(data.authenticated));
     }
+
+    window.addEventListener("focus", onFocus);
     window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
+    return () => {
+      cancelled = true;
+      clearFalseDebounce();
+      window.clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("message", onMessage);
+    };
   }, []);
 
   const visiblePanel =
     !authenticated && isProtectedPanel(activePanel) ? "mail" : activePanel;
 
   const handleLogout = useCallback(async () => {
+    if (falseDebounceRef.current !== undefined) {
+      window.clearTimeout(falseDebounceRef.current);
+      falseDebounceRef.current = undefined;
+    }
+    stickyAuthRef.current = false;
     try {
       await fetch("/api/admin/logout", { method: "POST" });
     } catch {
       // Still clear local chrome + remount iframe
     }
+    // Explicit logout: clear auth chrome immediately (no sticky debounce)
     setAuthenticated(false);
     setActivePanel("mail");
     setMailFrameKey((key) => key + 1);
