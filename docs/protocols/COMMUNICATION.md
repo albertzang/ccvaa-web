@@ -85,6 +85,7 @@ Use `docs/templates/qa-report.md`.
 - Always include environment URL + repro steps
 - Do **not** create files under `docs/qa/bugs/`
 - Do **not** invent work for items with Verifier = `ceo` (those never get agent QA handoffs)
+- Handoffs/reports are ephemeral: PM deletes them when the backlog item is **`completed`** / **`canceled`** (or baseline triage closes) — see `HANDOFF.md`
 
 ## Notifications
 

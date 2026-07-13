@@ -1,5 +1,7 @@
 # Backlog item (copy into a feature backlog file)
 
+**Place in file:** Insert new items at the **top** of the feature backlog (ID descending — newest first). See `docs/product/BACKLOG.md`.
+
 **ID:** `{feature-slug}-{NNNN}` (e.g. `admin-console-0001`)  
 **Title:**  
 **Type:** `task` | `bug`  

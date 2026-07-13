@@ -24,16 +24,16 @@ Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
 ### Description
 
-Umbrella for Agent OS doc/process refinements shipped on a feature branch with Iterations until CEO says **`verified`**, then merge the PR (not push each iteration to `main`).
+Umbrella for Agent OS doc/process refinements on **`chore/agent-os-0005-iter`**. Stay on the feature branch until CEO says **`verified`**, then merge the PR and delete the branch (do not push each change to `main`). Keep **one rolling overall description** below — do **not** append Iteration subsections for each tweak on this work ID.
 
-**Branch:** `chore/agent-os-0005-iter`  
-**On `verified`:** mark `completed` → merge PR → delete feature branch (local + remote). Standing commit+push-to-`main` from `agent-os-0004` applies only when Ship path is `direct-to-main`.
+**On `verified`:** mark `completed` → merge PR → delete feature branch (local + remote).
 
-### Iteration 1 — PM must not rename the chat
+### Overall (branch so far)
 
-Product Manager must **not** rename the Cursor chat (no `rename_chat` / equivalent) on their own initiative. Leave the title alone for the whole session, including after topic changes or backlog kickoffs.
-
-**Exception:** CEO may explicitly ask PM to rename the chat.
+- **PM chat title:** always exactly `Product Manager` (rename on session start / if it drifts; no work-ID or topic titles; restore after any CEO one-off rename unless CEO says otherwise)
+- **Handoff/report lifespan:** delete `docs/qa` handoffs + reports when the matching backlog item is `completed` / `canceled` (or baseline triage closes); strip dead file Links; recover from git history if needed
+- **agent-os ship paths:** `direct-to-main` → commit + push on `verified`; `feature-branch` → merge PR on `verified`
+- **Backlog file order:** items listed by work ID **descending** (newest first)
 
 ---
 
@@ -59,26 +59,23 @@ CEO verified 2026-07-11.
 ### Iteration 2 — agent-os verified ⇒ ship
 
 On CEO **`verified`** for any `agent-os-*` item, PM marks `completed` and ships in the same turn (no second ask). Default Ship path was `direct-to-main` (commit + push). **`agent-os-0005`** adds `feature-branch` (merge PR). Encoded in `CEO.md`, `HANDOFF.md`, `BACKLOG.md`, PM skill.
+
 ---
 
-## agent-os-0001 — Feature backlog OS (replace ROADMAP)
+## agent-os-0003 — Optional long-lived staging branch/domain
 
 | Field | Value |
 |-------|--------|
 | **Type** | `task` |
-| **Priority** | `now` |
-| **Status** | `completed` |
+| **Priority** | `later` |
+| **Status** | `not-started` |
 | **Verifier** | `n/a` |
 | **Verify passes** | `n/a` |
-| **Ship path** | `direct-to-main` |
+| **Ship path** | `tbd` |
 
 ### Description
 
-Replace flat `ROADMAP.md` with feature backlogs (`public-homepage`, `admin-console`, `agent-os`), work IDs `{feature-slug}-{NNNN}`, and PM workflows (baseline, bug report, review, kickoff, conversation→backlog). Docs/protocol only.
-
-### Links
-
-- [`../BACKLOG.md`](../BACKLOG.md)
+If Preview-per-PR is not enough, add a long-lived `staging` branch + dedicated domain. Until then Preview = staging (`docs/protocols/GIT_DEPLOY.md`).
 
 ---
 
@@ -99,17 +96,21 @@ Optional CI or scheduled smoke against Preview/Production deploy (beyond current
 
 ---
 
-## agent-os-0003 — Optional long-lived staging branch/domain
+## agent-os-0001 — Feature backlog OS (replace ROADMAP)
 
 | Field | Value |
 |-------|--------|
 | **Type** | `task` |
-| **Priority** | `later` |
-| **Status** | `not-started` |
+| **Priority** | `now` |
+| **Status** | `completed` |
 | **Verifier** | `n/a` |
 | **Verify passes** | `n/a` |
-| **Ship path** | `tbd` |
+| **Ship path** | `direct-to-main` |
 
 ### Description
 
-If Preview-per-PR is not enough, add a long-lived `staging` branch + dedicated domain. Until then Preview = staging (`docs/protocols/GIT_DEPLOY.md`).
+Replace flat `ROADMAP.md` with feature backlogs (`public-homepage`, `admin-console`, `agent-os`), work IDs `{feature-slug}-{NNNN}`, and PM workflows (baseline, bug report, review, kickoff, conversation→backlog). Docs/protocol only.
+
+### Links
+
+- [`../BACKLOG.md`](../BACKLOG.md)

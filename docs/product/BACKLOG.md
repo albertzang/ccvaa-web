@@ -44,6 +44,10 @@ CEO may override Ship path and Verify passes when Verifier is `agent` or `ceo`. 
 
 Copy shape from [`docs/templates/backlog-item.md`](../templates/backlog-item.md).
 
+## Item order in feature backlog files
+
+List work items **by ID descending** (highest / newest first). When adding a new item, insert it **immediately after the file header** (above older IDs). Do not sort by priority or status in the file — priority lives in the item fields; PM **list/review** answers can filter/sort in chat.
+
 ## Naming (handoffs, branches, reports)
 
 | Artifact | Pattern |
@@ -55,6 +59,8 @@ Copy shape from [`docs/templates/backlog-item.md`](../templates/backlog-item.md)
 | PR title | Include `{feature-slug}-{NNNN}` |
 
 **Retest / Iteration:** overwrite the same `…-passN.md` / `HANDOFF-DEV-…` path. Never create `-prior`, `-v2`, or `-attemptN` siblings — earlier content lives in git history.
+
+**Close:** when the backlog item is **`completed`** or **`canceled`**, PM deletes that work ID’s handoff and report files under `docs/qa/` (same turn). See [`HANDOFF.md`](../protocols/HANDOFF.md) lifespan.
 
 **Verifier = `ceo`:** no agent QA handoff/report files for that work ID.
 
@@ -79,7 +85,8 @@ Do **not** create parallel bug files. Dev may notice issues while coding; they t
 4. **Pick + kickoff** — CEO chooses ID → set `in-progress` → Dev handoff (include Verifier + Verify passes + Ship path)  
 5. **Conversation → backlog** — PM proposes/adds items as chats imply; keep statuses current  
 6. **CEO Verifier** — after Dev push: one-line ask for CEO to verify; **verified** → `completed`; issues → Iteration on same ID → Dev again  
-7. **`agent-os` verified** — CEO says **`verified`** → PM marks `completed` + ships per Ship path (no second ask)  
+7. **`agent-os` verified** — CEO says **`verified`** → PM marks `completed` + ships per Ship path (no second ask); delete any handoffs for that ID if present  
+8. **Close cleanup** — on `completed` / `canceled`, delete that work ID’s `docs/qa` handoffs + reports (git history retains them)  
 
 Full checklists: [`docs/protocols/CEO.md`](../protocols/CEO.md), [`HANDOFF.md`](../protocols/HANDOFF.md).
 
@@ -87,4 +94,5 @@ Full checklists: [`docs/protocols/CEO.md`](../protocols/CEO.md), [`HANDOFF.md`](
 
 1. Open the feature backlog file  
 2. Use **Next ID** in the header (zero-padded four digits)  
-3. After adding the item, increment **Next ID**  
+3. Insert the new item **at the top** of the item list (ID descending order)  
+4. After adding the item, increment **Next ID**  
