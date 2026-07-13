@@ -52,7 +52,8 @@
 - `robots: noindex` on admin page
 
 ### Layout (left sidebar)
-- Dark ocean left sidebar (`ocean-950`) with on-dark CCVAA logo (full nav-column width, original aspect ratio) + `navSubtitle` only (no “Admin” label); cream main pane
+- Dark ocean left sidebar (`ocean-950`); cream main pane
+- Brand mark (logo + “Visual Arts Association”) shared with public header via `BrandMark` — same logo size (`h-7` / `sm:h-8`), centered in sidebar (no “Admin” label)
 - Nav order: **Webmail**, **Members**, **Events**, **Financial**
 - Members / Events / Financial require mailbox sign-in; **Log out** appears at sidebar bottom when authenticated
 - Main pane shows the active panel (Webmail embed or scaffold placeholders)

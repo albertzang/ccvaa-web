@@ -1,9 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { CoastToCoastLogo } from "@/components/CoastToCoastLogo";
+import { BrandMark } from "@/components/BrandMark";
 import { adminSidebarItems, type AdminPanelId } from "@/lib/admin/constants";
-import { siteConfig } from "@/lib/site";
 
 type AdminSidebarProps = {
   activePanel: AdminPanelId;
@@ -25,13 +23,12 @@ export function AdminSidebar({
   return (
     <aside className="flex w-56 shrink-0 flex-col border-r border-ocean-800 bg-ocean-950 text-cream">
       <div className="border-b border-ocean-800 px-3 py-5">
-        <Link href="/" className="group flex w-full flex-col items-start gap-1">
-          <CoastToCoastLogo
-            priority
-            className="h-auto w-full object-contain transition-opacity group-hover:opacity-90"
-          />
-          <span className="text-xs text-ocean-200">{siteConfig.navSubtitle}</span>
-        </Link>
+        <BrandMark
+          priority
+          align="center"
+          className="w-full"
+          subtitleClassName="text-ocean-200"
+        />
       </div>
 
       <nav aria-label="Admin navigation" className="flex flex-1 flex-col px-3 py-4">
