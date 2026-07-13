@@ -16,6 +16,9 @@ type BrandMarkProps = {
 
 /**
  * Logo + “Visual Arts Association” block used on the public site and admin console.
+ * Logo size is shared via BRAND_LOGO_CLASSNAME so both surfaces stay in sync.
+ * `align="center"` centers the whole group in its parent; logo+subtitle stay
+ * start-aligned to each other (same as the public header).
  */
 export function BrandMark({
   priority = false,
@@ -28,8 +31,8 @@ export function BrandMark({
     <Link
       href="/"
       className={[
-        "group flex flex-col gap-1",
-        align === "center" ? "items-center text-center" : "items-start",
+        "group flex w-fit flex-col items-start gap-1",
+        align === "center" ? "mx-auto" : "",
         className,
       ]
         .filter(Boolean)

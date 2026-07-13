@@ -26,7 +26,6 @@ export function AdminSidebar({
         <BrandMark
           priority
           align="center"
-          className="w-full"
           subtitleClassName="text-ocean-200"
         />
       </div>
