@@ -21,9 +21,9 @@
 | Public homepage | | |
 | Board / Purposes | | |
 | Contact | | |
-| Admin mobile gate | | |
+| Admin layout (incl. phone) | | |
 | Admin mail | | |
-| Admin OTP | | |
+| Admin auth (mail session) | | |
 | Admin scaffolds | | |
 
 ## Bugs found

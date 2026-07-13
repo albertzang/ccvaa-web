@@ -58,7 +58,7 @@ Do not use `ccvaa-web.vercel.app` as the feature Preview. Do not ask QA to verif
 
 - Preserve coastal brand and existing UI patterns
 - Do not weaken admin auth or expose secrets
-- Keep admin phone gate and mail proxy behavior intact unless the handoff says otherwise
+- Preserve mail proxy behavior unless the handoff says otherwise
 - Run `npm run lint` and `npm run typecheck` before claiming done
 
 ## After coding
@@ -75,4 +75,4 @@ Do not use `ccvaa-web.vercel.app` as the feature Preview. Do not ask QA to verif
 - No secrets in logs or git
 - Document known fragilities near the code or in FEATURES.md
 - Prefer typed boundaries and explicit error messages for admin APIs
-- Remember Preview vs Production env vars for OTP/mail
+- Remember Preview vs Production differences for mail proxy / Deployment Protection

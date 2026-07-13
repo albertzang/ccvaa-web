@@ -3,9 +3,45 @@
 **Feature:** Admin Console  
 **Slug:** `admin-console`  
 **Owner:** Product Manager  
-**Next ID:** `0010`  
+**Next ID:** `0011`  
 
 Canonical work IDs: `admin-console-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
+
+---
+
+## admin-console-0010 — Auth = Hover mailbox iframe session (prune OTP)
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `completed` |
+| **Verifier** | `ceo` |
+| **Verify passes** | `pass1` |
+| **Ship path** | `feature-branch` |
+
+### Description
+
+Replace OTP admin login with **Hover webmail iframe session** as the sole auth signal, prune the OTP stack, and ship a sidebar admin console with a polished embedded mailbox.
+
+**Verifier / ship:** feature branch + CEO Pass 1 on Preview only (skip Pass 2). Multiple iterations on this work ID (PR #4). CEO verified 2026-07-12.
+
+### Accomplished (overall)
+
+- **Auth:** Admin logged in/out iff Hover mailbox in the iframe is logged in/out; OTP UI/APIs/libs/env deps removed; sticky auth so in-iframe nav does not flash logged-out chrome
+- **Layout:** Dark admin nav (sidebar on `md+`; phone = brand + collapsed menu toggle) — Webmail → Members → Events → Financial + cream main panel; shared `BrandMark` with public homepage; no device gate
+- **Mail embed UX:** Help opens Hover docs in a new tab; task switches (Mail/Files/Calendar/Contacts) stay in-iframe with preload-then-swap (no white flash); Hover compose discard dialog preserved; prior proxy hardening retained (CSRF refresh, More/Mark, hide blank `#header`)
+- **Docs:** FEATURES.md / `.env.example` / OTP-centric notes updated for mail-session auth; mobile-gate references removed
+
+**Security:** Admin privilege = whoever can sign into `info@ccvaa.ca` via embedded webmail (same inbox OTP previously used).
+
+**Out of scope:** Real Members/Events/Financial CRUD; replacing Hover.
+
+### Links
+
+- Dev: `docs/qa/handoffs/HANDOFF-DEV-admin-console-0010.md`
+- PR: https://github.com/albertzang/ccvaa-web/pull/4
+- Preview: https://ccvaa-web-git-feat-admin-console-0010-hover-auth-azang-projects.vercel.app/admin
 
 ---
 
@@ -78,7 +114,7 @@ CEO verified 2026-07-11 on https://ccvaa-web.vercel.app/admin. Commit: `e38d35b`
 
 ### Description
 
-Replace the Members “coming soon” scaffold with a real auth-gated members list. Scope TBD with CEO (fields, CRUD vs read-only). Must remain behind admin OTP session.
+Replace the Members “coming soon” scaffold with a real auth-gated members list. Scope TBD with CEO (fields, CRUD vs read-only). Must remain behind admin mail-session auth.
 
 ### Links
 
@@ -162,7 +198,7 @@ Ops/checklist: confirm Vercel **Preview** has the same admin-critical env as Pro
 
 ### Description
 
-Throwaway mailbox for QA OTP (Preview-first `ADMIN_OTP_EMAIL` + Vercel-only secrets). Replace or supplement CEO-in-the-loop readout. Single-Send discipline still applies. See `docs/protocols/QA_AUTH.md`.
+**Obsolete after admin-console-0010** (OTP removed; admin auth = Hover mailbox session). Keep only if CEO revives a dedicated QA mailbox for a different purpose.
 
 ### Links
 

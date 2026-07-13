@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
-import { CoastToCoastLogo } from "@/components/CoastToCoastLogo";
-import { navigation, siteConfig } from "@/lib/site";
+import { BrandMark } from "@/components/BrandMark";
+import { navigation } from "@/lib/site";
 
 export function Header() {
   const [overHero, setOverHero] = useState(true);
@@ -30,20 +29,15 @@ export function Header() {
       }`}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link href="/" className="group flex flex-col gap-1">
-          <CoastToCoastLogo
-            priority
-            onLight={!overHero}
-            className="h-7 w-auto sm:h-8"
-          />
-          <span
-            className={`text-xs transition-colors ${
-              overHero ? "text-ocean-200" : "text-ocean-600"
-            }`}
-          >
-            {siteConfig.navSubtitle}
-          </span>
-        </Link>
+        <BrandMark
+          priority
+          onLight={!overHero}
+          subtitleClassName={
+            overHero
+              ? "text-ocean-200 transition-colors"
+              : "text-ocean-600 transition-colors"
+          }
+        />
 
         <nav aria-label="Main navigation">
           <ul className="flex items-center gap-1 sm:gap-2">

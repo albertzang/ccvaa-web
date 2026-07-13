@@ -8,8 +8,7 @@ alwaysApply: false
 
 - App Router under `src/app/`; shared content in `src/lib/site.ts`
 - Prefer Server Components; add `"use client"` only when needed
-- Admin is desktop/tablet only (`MobileGate`); keep `robots: noindex` on admin
-- Admin mail assets go through `/admin/mail` proxy — do not iframe Hover directly
+- Admin: keep `robots: noindex`; mail via `/admin/mail` proxy (do not iframe Hover directly)
 - OTP/session logic lives under `src/app/api/admin/` and related lib helpers
 - Before new Next APIs: check `node_modules/next/dist/docs/`
 - Edge/request interception: `src/proxy.ts`, not deprecated `middleware.ts`

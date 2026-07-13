@@ -10,7 +10,7 @@
 
 - **Legal / contact:** Coast to Coast Visual Arts Association, 4 – 8800 Hazelbridge Way, Richmond, BC V6X 0S3, `info@ccvaa.ca`
 - **Public site:** marketing homepage
-- **Private admin:** `/admin` console (desktop/tablet only)
+- **Private admin:** `/admin` console
 
 ---
 
@@ -48,32 +48,33 @@
 ## Admin (`/admin`)
 
 ### Access control
-- **Desktop / tablet only** — phones see “Desktop or tablet required”
 - `robots: noindex` on admin page
+- Available on phone, tablet, and desktop (no device gate)
 
-### Header
-- Same cream/scrolled visual language as public site
-- Nav: Mail; Login (when logged out); Members / Financial / Events + Log out (when logged in)
+### Layout (left sidebar)
+- Dark ocean nav (`ocean-950`): left sidebar on `md+`; on small screens brand + **collapsed menu toggle** (expands to full nav list); cream main pane
+- Brand mark (logo + “Visual Arts Association”) shared with public header via `BrandMark` — same logo size (`h-7` / `sm:h-8`), centered (no “Admin” label)
+- Nav order: **Webmail**, **Members**, **Events**, **Financial**
+- Members / Events / Financial require mailbox sign-in; **Log out** when authenticated
+- Main pane shows the active panel (Webmail embed or scaffold placeholders)
 
-### Mail (always available on admin, no OTP required)
-- Collapsible section embedding Hover webmail via **same-origin proxy** `/admin/mail`
+### Webmail (sign-in surface + always available)
+- Full-pane Hover webmail via **same-origin proxy** `/admin/mail` (iframe embed)
 - Proxy rewrites Roundcube paths/assets/cookies so iframe works (Hover blocks direct iframe via `X-Frame-Options`)
-- Proxy also: forwards `X-Roundcube-Request` (refresh CSRF); avoids trailing-slash AJAX redirects; blocks hash-only toolbar navigations under `<base href>`; hides blank `#header` chrome after login
+- Proxy also: forwards `X-Roundcube-Request` (refresh CSRF); avoids trailing-slash AJAX redirects; blocks hash-only toolbar navigations under `<base href>`; hides blank `#header` chrome after login; injects same-origin auth `postMessage` bridge; preload-then-swap for task switches; compose discard dialog preserved
 - Known fragility: third-party Roundcube reverse proxy; watch for session/cookie/browser differences
 
-### Admin login (OTP)
-- 6-digit OTP emailed to `info@ccvaa.ca` (or `ADMIN_OTP_EMAIL`)
-- UI cooldown + server rate limits (1/min, 5/hour send; 5 attempts/code; IP verify limits)
-- OTP hashed (SHA-256), ~10 min TTL; session signed httpOnly cookie ~12h
-- After success: login section hidden; scaffold sections shown
-- Env: see `.env.example` (`ADMIN_SESSION_SECRET`, SMTP_*, `ADMIN_OTP_DEV_MODE`)
-- Local: `.env.local` (gitignored). Production: Vercel Environment Variables + redeploy
-- **QA OTP (current):** single-Send + CEO-in-the-loop — `docs/protocols/QA_AUTH.md` (no standing agent mailbox access; do not spam Send). Dedicated test inbox = `admin-console-0005` on backlog.
+### Admin auth (Hover mailbox session)
+- Admin console is authenticated **iff** the Hover mailbox session inside the mail iframe is logged in
+- Detection: Roundcube session cookie + fail-closed upstream probe (`/api/admin/session`); iframe bridge `postMessage` for near-realtime updates when Webmail is open
+- Sidebar **Log out** clears proxied Roundcube cookies and remounts the mail iframe (same effect as signing out of mail)
+- No OTP UI/APIs; no `ADMIN_SESSION_SECRET` / SMTP / Redis required for admin login (see `.env.example`)
+- Security model: whoever can sign into `info@ccvaa.ca` via embedded webmail has admin chrome access
 
 ### Post-auth scaffolds (placeholders only)
 - **Members** — coming soon
-- **Financial dashboard** — coming soon
-- **Events & posts** — coming soon (future CRUD)
+- **Events** — coming soon (future CRUD)
+- **Financial** — coming soon
 
 ---
 
@@ -87,16 +88,15 @@
 | Preview | Per-branch/PR Vercel URL (pre-merge QA target) |
 | DNS / email | Hover |
 | CI | lint, typecheck, build (GitHub Actions) |
-| Package | `nodemailer` for OTP SMTP; `@upstash/redis` for shared OTP/rate-limit store |
+| Package | Next.js / React only for admin auth (mail session); no OTP/SMTP/Redis deps |
 | Ship path | Feature branch → QA Preview → merge → cleanup → QA on `ccvaa-web.vercel.app` (Verifier = `agent`). **Verifier = `ceo`:** CEO verifies (defaults: `direct-to-main` + Production pass2). Work IDs `{feature-slug}-{NNNN}` — [`BACKLOG.md`](BACKLOG.md). **Baseline** pass = Production audit with no PR. See `docs/protocols/GIT_DEPLOY.md`. CEO may manually check `ccvaa.ca`. |
 
 ### Important technical notes for Developer
 - Next.js 16: prefer `proxy.ts` over deprecated `middleware.ts`
 - Read `node_modules/next/dist/docs/` before novel Next APIs
-- OTP challenges + rate-limit buckets use **Upstash Redis** when `KV_REST_API_URL` + `KV_REST_API_TOKEN` are set (shared across Vercel instances). In-memory fallback for local `next dev` only
 - Never commit `.env.local` or secrets
 - Default: feature branch + PR with backlog work ID `{feature-slug}-{NNNN}`; merge/push `main` only when CEO explicitly asks
-- Admin OTP/mail on Preview needs Vercel **Preview** environment variables
+- Admin mail proxy on Preview needs network reachability to `mail.hover.com` (no OTP/SMTP/Redis Preview env required for login)
 
 ---
 
@@ -122,3 +122,5 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 | 2026-07-11 | **Verifier** `agent` \| `ceo` \| `n/a` + **Verify passes**; CEO may bypass agent QA; `agent-os` uses `n/a`; **`verified` on agent-os ⇒ commit + push** |
 | 2026-07-11 | `/admin` page intro blurb removed (`admin-console-0008`) |
 | 2026-07-12 | Embedded Hover mail iframe fixes (`admin-console-0009`): refresh 403, More/Mark reload, hide blank `#header` |
+| 2026-07-12 | Admin auth = Hover mailbox iframe session; OTP pruned; dark sidebar console + mail embed UX; mobile gate removed (`admin-console-0010`, PR #4) |
+| 2026-07-12 | Admin sidebar dark theme + logo width match nav column; drop “· Admin” (`admin-console-0010` Iteration 12, PR #4) |

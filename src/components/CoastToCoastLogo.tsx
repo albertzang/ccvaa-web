@@ -22,7 +22,7 @@ export function CoastToCoastLogo({
       height={logo.height}
       priority={priority}
       unoptimized
-      className={className}
+      className={["object-contain", className].filter(Boolean).join(" ")}
     />
   );
 }

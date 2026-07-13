@@ -36,7 +36,7 @@ Implement scoped work from Product Manager handoffs with minimal, high-quality d
 
 - `proxy.ts` not deprecated `middleware.ts`
 - Never commit `.env.local` or secrets
-- Preserve admin mobile gate and mail proxy unless handoff says otherwise
+- Preserve mail proxy unless handoff says otherwise
 - Never invent `direct-to-main` because a change “looks small”
 - Never leave merged feature branches on origin; never fix Pass 2 on the old merged branch
 - Do not write agent QA handoffs when Verifier = `ceo`

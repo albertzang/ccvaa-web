@@ -1,7 +1,7 @@
 ---
 name: ccvaa-dev-memory
 description: >-
-  Institutional memory for CCVAA development — admin OTP, Hover mail proxy,
+  Institutional memory for CCVAA development — admin mail-session auth, Hover mail proxy,
   branding, env, and known pitfalls. Use when implementing or debugging
   ccvaa-web admin, auth, mail, or public site branding.
 ---
@@ -19,16 +19,17 @@ description: >-
 
 ## Admin
 
-- Route: `/admin` — desktop/tablet only (`MobileGate`)
+- Route: `/admin` — phones, tablets, and desktops (no MobileGate)
+- Auth: Hover mailbox session inside the mail iframe (no OTP)
+  - Probe: `GET /api/admin/session` (Roundcube `roundcube_sessid` + fail-closed upstream HTML probe)
+  - Iframe bridge: injected `postMessage` (`ccvaa-admin-mail`) when Mail is open
+  - Logout: `POST /api/admin/logout` clears proxied Roundcube cookies + remounts iframe
 - Mail: iframe via same-origin proxy `/admin/mail` (`src/app/admin/mail/[[...path]]/route.ts` + `src/proxy.ts`)
   - Hover sets `X-Frame-Options: sameorigin` — direct iframe fails
   - Do not follow redirects server-side blindly; filter/normalize cookies; asset paths (`/skins`, `/program`, etc.) must rewrite
-- OTP: 6-digit to `info@ccvaa.ca`; hashed; httpOnly session cookie
-  - APIs under `src/app/api/admin/`
-  - OTP + rate limits use Upstash Redis when `KV_REST_API_URL`/`KV_REST_API_TOKEN` are set (required on Vercel); in-memory fallback for local only
+  - Keep CSRF header, hash-link guard, hide `#header` (admin-console-0009)
 - Scaffolds only: Members, Financial, Events
-- Env: `.env.example`; local `.env.local`; production Vercel env + redeploy
-  - `ADMIN_OTP_DEV_MODE=false` for real SMTP; Hover SMTP `mail.hover.com:465` SSL
+- Env: `.env.example` — Preview bypass only for admin; no SMTP/OTP/Redis required for login
 
 ## Ops
 

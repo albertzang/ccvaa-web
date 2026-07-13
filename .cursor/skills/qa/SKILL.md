@@ -53,19 +53,16 @@ Always record the **exact** URL tested (you may omit the bypass query from the w
 - [ ] Favicon present
 
 ### Admin (`/admin`)
-- [ ] Phone-width: blocked message; desktop: console loads
-- [ ] Mail section opens; iframe loads webmail UI (or clear error)
-- [ ] OTP request: cooldown / success messaging (do not paste codes into git)
-- [ ] After login: Members / Financial / Events scaffolds + Log out (if login possible)
+- [ ] Console loads on phone and desktop viewports
+- [ ] Webmail panel: iframe loads webmail UI (or clear error)
+- [ ] After mailbox login: Members / Events / Financial + Log out
 - [ ] Log out returns to logged-out admin chrome (if logged in)
 
 ### Notes
 - Pass 2 is usually smoke + change-focused; **baseline** is usually a fuller FEATURES.md audit
-- Admin OTP on Preview needs Vercel Preview env vars
 - **Preview protection:** `.env.local` bypass — `docs/protocols/PREVIEW_PROTECTION.md`
-- **Full admin login:** **single-Send OTP** + CEO-in-the-loop (`docs/protocols/QA_AUTH.md`) — one Send → wait for CEO code → one verify. Never spam Send (1/min, 5/hour/IP). Skip wrong-code/lockout drills in the same pass unless handoff requires them and quota allows.
-- Never store mailbox passwords or OTP codes in repo/reports
-- If CEO unavailable for readout: mark full login as blocked (not automatic product fail); still test request UI carefully (prefer ≤1 Send)
+- Admin auth is Hover mailbox session (no OTP) — `docs/protocols/QA_AUTH.md` if legacy OTP notes remain
+- Never store mailbox passwords in repo/reports
 - Mail proxy can be browser-sensitive — note Chrome vs others if relevant
 
 ## FEATURES.md drift
