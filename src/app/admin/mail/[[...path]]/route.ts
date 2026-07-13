@@ -468,6 +468,12 @@ var n=0,t=setInterval(function(){if(patchRcmail()||++n>200)clearInterval(t);},25
 const HIDE_BLANK_HEADER = `<style id="ccvaa-hide-blank-header">#header{display:none!important}</style>`;
 
 /**
+ * Hover's pre-login form includes a help block that is noise in the admin iframe.
+ * Scoped to #login-form so logged-in mail chrome is unaffected.
+ */
+const HIDE_LOGIN_HELP = `<style id="ccvaa-hide-login-help">div#login-form > div.hover-login-help{display:none!important}</style>`;
+
+/**
  * Report mailbox login state to the real parent /admin page.
  * Uses __ccvaaRealParent because FRAME_PARENT_ISOLATION redefines window.parent.
  * Do not post false while Roundcube is still booting (unknown); only false when
@@ -476,7 +482,7 @@ const HIDE_BLANK_HEADER = `<style id="ccvaa-hide-blank-header">#header{display:n
  */
 const AUTH_BRIDGE = `<script>(function(){var O=window.location.origin,S="ccvaa-admin-mail",last=null,unloading=!1,realParent=window.__ccvaaRealParent;function authState(){try{if(window.rcmail&&rcmail.env){var t=rcmail.env.task;if(t&&t!=="login")return!0;if(t==="login")return!1;}}catch(e){}if(document.querySelector("#login-form,form[name=login],#login"))return!1;if(document.querySelector("#mainscreen,#mailboxlist,#layout"))return!0;return null;}function report(){if(unloading)return;var auth=authState();if(auth===null||last===auth)return;last=auth;try{if(realParent&&realParent!==window)realParent.postMessage({source:S,authenticated:auth},O);}catch(e){}}function markUnload(){unloading=!0;}window.addEventListener("pagehide",markUnload);window.addEventListener("beforeunload",markUnload);document.addEventListener("DOMContentLoaded",report);window.addEventListener("load",report);setTimeout(report,0);setInterval(report,1500);})();</script>`;
 
-const HTML_HEAD_INJECT = `${FRAME_PARENT_ISOLATION}${HIDE_BLANK_HEADER}${HASH_LINK_NAV_GUARD}${SWITCH_TASK_FRAME_PATCH}${PASSIVE_QUERY_LINK_FIXER}${AUTH_BRIDGE}`;
+const HTML_HEAD_INJECT = `${FRAME_PARENT_ISOLATION}${HIDE_BLANK_HEADER}${HIDE_LOGIN_HELP}${HASH_LINK_NAV_GUARD}${SWITCH_TASK_FRAME_PATCH}${PASSIVE_QUERY_LINK_FIXER}${AUTH_BRIDGE}`;
 
 function injectBaseTag(html: string) {
   const baseTag = `<base href="${PROXY_PREFIX}/">`;
