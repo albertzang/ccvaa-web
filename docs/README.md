@@ -2,6 +2,8 @@
 
 Operating docs for the CCVAA multi-agent system.
 
+**OS entry + guiding principles:** [`../AGENTS.md`](../AGENTS.md)
+
 | Path | Purpose |
 |------|---------|
 | `product/FEATURES.md` | Living feature inventory (PM owns) |

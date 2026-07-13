@@ -2,7 +2,7 @@
 
 ## Principle
 
-Agents do **not** share live chat memory. The **repo + CEO** are the bus.
+Agents do **not** share live chat memory. The **repo + CEO** are the bus. See guiding principles in [`AGENTS.md`](../../AGENTS.md).
 
 ## Who talks to whom
 

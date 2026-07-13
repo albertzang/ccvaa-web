@@ -3,11 +3,32 @@
 **Feature:** Agent OS  
 **Slug:** `agent-os`  
 **Owner:** Product Manager  
-**Next ID:** `0007`  
+**Next ID:** `0008`  
 
 Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
 **Note:** All `agent-os-*` items use **Verifier = `n/a`** and **Verify passes = `n/a`** (docs/process — not code Pass 1/2).
+
+---
+
+## agent-os-0007 — Refine Agent OS (CEO-led)
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `in-progress` |
+| **Verifier** | `n/a` |
+| **Verify passes** | `n/a` |
+| **Ship path** | `tbd` |
+
+### Description
+
+CEO-led refinement of the multi-agent OS (principles → concrete doc/protocol changes). Do not invent large process changes until CEO directs them. Ship path TBD (`direct-to-main` or `feature-branch`).
+
+### Overall
+
+- Guiding principles encoded in `AGENTS.md` (repo-as-brain, CEO as decision-maker, thin roles, defaults, same-ID loops, encode friction, least process, observable done)
 
 ---
 

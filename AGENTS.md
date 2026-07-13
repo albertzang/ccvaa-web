@@ -6,6 +6,19 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
+## Guiding principles
+
+1. **Repo is the brain, chat is the scratchpad** — Durable truth lives in docs, backlogs, and protocols. Agents can be summarized or swapped without losing the product.
+2. **One decision-maker** — The CEO gates ship, secrets, and “done.” Agents advise and execute; they do not invent authority.
+3. **Clear roles, thin interfaces** — Product Manager, Developer, and QA each own a job. Handoffs are short, structured, and ephemeral when the work ends.
+4. **Defaults over debates** — Verifier, Ship path, and Verify passes have defaults so every ticket does not re-negotiate process.
+5. **Small loops, same ID** — Prefer Iteration on one work ID until verified. Avoid ID sprawl and versioned handoff/report files.
+6. **Encode friction once** — When something hurts twice, turn it into a rule, skill, or protocol — then stop re-explaining it in chat.
+7. **Least process that still prevents mistakes** — Protect secrets, `main`, and wrong-env testing; drop ceremony that does not change outcomes.
+8. **Observable “done”** — `completed` / `closed` / `verified` mean the same thing to every role, including what gets deleted vs kept.
+
+Operating docs live under [`docs/`](docs/README.md). Refine this OS via `agent-os-*` backlog items with CEO approval.
+
 ## Multi-agent roles
 
 This repo uses a **3-agent system**. The human CEO primarily talks to the **Product Manager** (advisor + product owner). Developer and QA are specialists invoked via separate chats, `@` rules/skills, or Task subagents.
@@ -15,11 +28,7 @@ This repo uses a **3-agent system**. The human CEO primarily talks to the **Prod
 | **Product Manager** | Primary CEO chat; `.cursor/agents/product-manager.md` | Priorities, advice, handoffs, FEATURES/backlogs; **guides CEO gates** (`docs/protocols/CEO.md`) |
 | **Developer** | Dev chat or agent `developer` | Feature branches, PRs, implementation (merge when asked) |
 | **QA** | QA chat or agent `qa` | Pass 1 (Preview), Pass 2 (post-merge), or **baseline** when **Verifier = `agent`**; skipped when Verifier = `ceo` (CEO verifies) |
-| **CEO (human)** | This chat via PM | Approvals, secrets, OTP readout, `ccvaa.ca`, kickoffs, optional **Verifier** — `docs/protocols/CEO.md` |
-
-### First-pass bootstrap (done)
-
-Rules, skills, agents, protocols, templates, and `docs/product/FEATURES.md` were seeded so the PM successor can refine the OS over time with CEO approval.
+| **CEO (human)** | This chat via PM | Approvals, secrets, admin mailbox credentials, `ccvaa.ca`, kickoffs, optional **Verifier** — `docs/protocols/CEO.md` |
 
 ### How to start a role chat
 
@@ -57,6 +66,6 @@ Full rules: `docs/protocols/GIT_DEPLOY.md`.
 
 - Next.js 16 App Router, React 19, Tailwind 4, TypeScript
 - Deploy: Vercel (GitHub → Production on `main`; Preview per branch/PR)
-- Email: Hover (`info@ccvaa.ca`), SMTP for admin OTP
-- Admin auth: 6-digit OTP + signed httpOnly cookie
-- Secrets: `.env.local` (local), Vercel env vars (Production / Preview) — never commit secrets
+- Email / webmail: Hover (`info@ccvaa.ca`) via same-origin `/admin/mail` proxy
+- Admin auth: Hover mailbox session inside the admin iframe (no OTP)
+- Secrets: `.env.local` (local; incl. `ADMIN_EMAIL` / `ADMIN_PASS` for QA sign-in, Preview bypass) — never commit secrets
