@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AdminScaffoldPanel } from "@/components/admin/AdminScaffoldSections";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { MailSection } from "@/components/admin/MailSection";
+import { MembersSection } from "@/components/admin/MembersSection";
 import {
   ADMIN_MAIL_AUTH_MESSAGE_SOURCE,
   type AdminPanelId,
@@ -155,10 +156,7 @@ export function AdminPage() {
         />
         {authenticated && (
           <>
-            <AdminScaffoldPanel
-              panelId="members"
-              hidden={visiblePanel !== "members"}
-            />
+            <MembersSection hidden={visiblePanel !== "members"} />
             <AdminScaffoldPanel
               panelId="events"
               hidden={visiblePanel !== "events"}

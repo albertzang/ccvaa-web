@@ -69,7 +69,7 @@
 - Brand mark (logo + “Visual Arts Association”) shared with public header via `BrandMark` — same logo size (`h-7` / `sm:h-8`), centered
 - Nav order: **Webmail**, **Members**, **Events**, **Financial**
 - Members / Events / Financial require mailbox sign-in; **Log out** when authenticated
-- Main pane shows the active panel (Webmail embed or scaffold placeholders)
+- Main pane shows the active panel (Webmail embed, Members roster, or scaffold placeholders)
 
 ### Webmail
 - Full-pane Hover webmail via same-origin proxy `/admin/mail` (iframe; Hover blocks direct embed via `X-Frame-Options`)
@@ -82,8 +82,14 @@
 - Sidebar **Log out** clears proxied Roundcube cookies and remounts the mail iframe
 - Privilege = anyone who can sign into `info@ccvaa.ca` via embedded webmail
 
+### Members roster
+- Mail-session gated roster at **Members** (same Hover login as Webmail)
+- List / search by name or email; **plan** and **newsletter** filters are separate axes
+- Table shows plan, membership status, newsletter flag; **Annual** rows show anniversary date and next renewal
+- Edit (modal + confirm) and delete (confirm dialog); mutations validated with Zod; API routes under `/api/admin/members`
+- Fail closed when `DATABASE_URL` is missing or Neon schema is unmigrated (503) — UI shows error state
+
 ### Post-auth scaffolds (placeholders only)
-- **Members** — coming soon ([`members` backlog](backlogs/members-BACKLOG.md); roster = `members-0008`)
 - **Events** — coming soon
 - **Financial** — coming soon
 
