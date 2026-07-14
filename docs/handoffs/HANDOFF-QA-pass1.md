@@ -12,7 +12,7 @@
 
 **Branch name:** `feat/members`  
 **PR link:** https://github.com/albertzang/ccvaa-web/pull/8  
-**Commit:** `d6b6786`  
+**Commit:** `72676c7`  
 **Preview URL:** https://ccvaa-web-git-feat-members-azang-projects.vercel.app  
 **Preview protection:** QA reads `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local` (do **not** paste the secret here). See `docs/protocols/PREVIEW_PROTECTION.md`.  
 **Production URL:** https://ccvaa-web.vercel.app/ (Pass **2** only — not for this pass)
