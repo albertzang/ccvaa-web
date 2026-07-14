@@ -343,7 +343,7 @@ Logged-out `#membership` Join UI + Stripe Checkout (test on Dev/Preview). Flow: 
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `not-started` |
+| **Status** | `in-progress` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -366,6 +366,7 @@ Contact `#contact` owns the **Newsletter** axis: subscribe (double opt-in via Re
 ### Links
 
 - Depends on: `members-0001`, `members-0002`
+- Handoff: `docs/handoffs/HANDOFF-DEV.md` (Iteration 1)
 
 ---
 
@@ -392,10 +393,13 @@ Resend send path; shared confirm + OTP helpers (DB challenges, expiry, rate limi
 
 **Out of scope:** Public forms; Stripe; admin roster; full ESP API.
 
+### Overall
+
+- Pass 1 (2026-07-14): **continue epic** — health fail-closed; live OTP blocked pending secrets (`DATABASE_URL`, `RESEND_*`, optional Mailosaur). Report: `docs/reports/QA-pass1.md`
+
 ### Links
 
 - Depends on: `members-0001`
-- Handoff: `docs/handoffs/HANDOFF-DEV.md` (Iteration 1)
 
 ---
 
