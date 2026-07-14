@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-14  
 **Pass:** `1`  
-**Backlog work ID:** `members-0006`  
+**Backlog work ID:** `members-0007`  
 **Ship path that led here:** `feature-branch`  
 **Epic branch:** `feat/members`  
 **Merge gate:** `epic`  
@@ -12,7 +12,7 @@
 
 **Branch name:** `feat/members`  
 **PR link:** https://github.com/albertzang/ccvaa-web/pull/8  
-**Commit:** tip of `feat/members` after members-0006 push  
+**Commit:** tip of `feat/members` after members-0007 push  
 **Preview URL:** https://ccvaa-web-git-feat-members-azang-projects.vercel.app  
 **Preview protection:** QA reads `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local`. Browser Pass 1: both bypass query **and** `x-vercel-set-bypass-cookie=true`. See `docs/protocols/PREVIEW_PROTECTION.md`.  
 **Production URL:** https://ccvaa-web.vercel.app/ (Pass **2** only)
@@ -23,25 +23,23 @@
 
 ## What changed
 
-Logged-in `#membership` profile replaces the signed-in stub: name edit; email change with OTP re-verify on the new address; Annual read-only anniversary / next renewal; light member perks placeholder. Join + login remain when logged out (`members-0004` / `0005`). No newsletter UI here.
+Hero **Subscribe** + **Join** CTAs now show live dual-axis counters beneath each button: confirmed newsletter subscribers (Subscribe → `#contact`) and active paid members (Join → `#membership`). Labels keep the mailing list separate from paid membership. Counts stub to zero when the members DB is unavailable.
 
 ## Focus checklist
 
-- [ ] Signed-in member sees profile (not Join/login forms) in `#membership`
-- [ ] Name save updates display name; session persists after refresh
-- [ ] Email change: send code to new address → verify → email updates (if DB + Resend available)
-- [ ] Annual seed member shows anniversary + next renewal; Founding/Lifetime omit renewal fields
-- [ ] Perks placeholder visible; no newsletter controls in `#membership`
-- [ ] Fail-closed 503/401 when `DATABASE_URL` / session / Resend missing (document blocked live paths)
-- [ ] Logout still works; member cookie does not open `/admin`
+- [ ] Hero shows **Subscribe** (coral) linking to `#contact` and **Join** (outline) linking to `#membership`
+- [ ] Subscribe counter labeled “Newsletter subscribers”; Join counter labeled “Paid members”
+- [ ] Counters do not imply newsletter is a membership plan
+- [ ] With `DATABASE_URL` + migrated Neon: counts reflect seeded/live data (newsletter `on`; paid `membership_status = active`)
+- [ ] Without DB (or unset `DATABASE_URL`): homepage loads; both counters show `0`
+- [ ] Hero stays brand-first — no forms or extra chrome in the viewport
 - [ ] Lint + typecheck clean on branch
 - [ ] Sign-off **continue epic** — **do not merge**
 
 ## Known risks
 
-- Live profile + email OTP need Neon migrate+seed on Preview plus `DATABASE_URL`, `RESEND_*`, `MEMBER_SESSION_SECRET`
-- OTP capture needs Resend logs / Mailosaur / real inbox; seed `@ccvaa-seed.test` may be uncapturable without Mailosaur
-- Stripe Join live may still be missing (out of scope for this ticket)
+- Live non-zero counts need Preview `DATABASE_URL` + migrate/seed; Dev without DB should show zeros
+- Prior epic tickets (`members-0004`–`0006`) unchanged; regression spot-check Join/profile if time permits
 
 ## Report back with
 

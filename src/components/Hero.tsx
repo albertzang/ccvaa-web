@@ -1,7 +1,29 @@
 import Image from "next/image";
-import { heroContent } from "@/lib/site";
+import { getHeroCounts } from "@/lib/members/hero-counts";
+import { heroContent, siteConfig } from "@/lib/site";
 
-export function Hero() {
+const countFormatter = new Intl.NumberFormat(siteConfig.locale);
+
+function HeroCounter({
+  value,
+  label,
+}: {
+  value: number;
+  label: string;
+}) {
+  return (
+    <p className="mt-2 text-xs leading-snug text-ocean-100/80">
+      <span className="font-semibold tabular-nums lining-nums text-ocean-50">
+        {countFormatter.format(value)}
+      </span>{" "}
+      <span>{label}</span>
+    </p>
+  );
+}
+
+export async function Hero() {
+  const counts = await getHeroCounts();
+
   return (
     <section
       id="hero"
@@ -39,19 +61,31 @@ export function Hero() {
           {heroContent.subheadline}
         </p>
 
-        <div className="mt-8 flex flex-wrap gap-3">
-          <a
-            href="#contact"
-            className="inline-flex rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-dark"
-          >
-            {heroContent.subscribeLabel}
-          </a>
-          <a
-            href="#membership"
-            className="inline-flex rounded-full border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
-          >
-            {heroContent.joinLabel}
-          </a>
+        <div className="mt-8 flex flex-wrap gap-6 sm:gap-8">
+          <div>
+            <a
+              href="#contact"
+              className="inline-flex rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-dark"
+            >
+              {heroContent.subscribeLabel}
+            </a>
+            <HeroCounter
+              value={counts.newsletterSubscribers}
+              label={heroContent.newsletterCountLabel}
+            />
+          </div>
+          <div>
+            <a
+              href="#membership"
+              className="inline-flex rounded-full border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+            >
+              {heroContent.joinLabel}
+            </a>
+            <HeroCounter
+              value={counts.paidMembers}
+              label={heroContent.paidMembersCountLabel}
+            />
+          </div>
         </div>
       </div>
     </section>

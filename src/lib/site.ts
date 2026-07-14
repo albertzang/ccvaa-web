@@ -49,6 +49,8 @@ export const heroContent = {
     "We bring artists, educators, and communities together to create, learn, and share the power of visual expression.",
   subscribeLabel: "Subscribe",
   joinLabel: "Join",
+  newsletterCountLabel: "Newsletter subscribers",
+  paidMembersCountLabel: "Paid members",
 } as const;
 
 export const aboutContent = {

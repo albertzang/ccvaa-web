@@ -28,8 +28,10 @@
 - Full-bleed coastal hero image (`hero-background.webp`)
 - Eyebrow, headline, subheadline from `src/lib/site.ts`
 - Text is non-selectable
-- **Subscribe** button anchors to `#contact` (newsletter)
-- **Join** button anchors to `#membership` (Join panel). Live counters: `members-0007`
+- **Subscribe** button anchors to `#contact` (newsletter); live count of confirmed newsletter subscribers (`newsletter_status = on`)
+- **Join** button anchors to `#membership` (Join panel); live count of active paid members (`membership_status = active`)
+- Dual-axis counter labels (“Newsletter subscribers” / “Paid members”) — never conflates mailing list with membership plans
+- Counts stub to `0` when `DATABASE_URL` / members DB unavailable; homepage still loads (`members-0007`)
 
 ### Membership (`#membership`)
 - After Hero, before About
