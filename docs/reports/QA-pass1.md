@@ -2,10 +2,10 @@
 
 **Pass:** 1 (pre-merge)  
 **Backlog work ID:** `members-0003`  
-**Environment(s) + exact URLs:** Preview https://ccvaa-web-git-feat-members-azang-projects.vercel.app (Deployment Protection bypass used via `.env.local`; bypass query omitted from URL)  
-**Branch / PR / commit:** `feat/members` · PR https://github.com/albertzang/ccvaa-web/pull/8 · Preview tip at report time `3841026` (fail-closed fix `8fb76ba`)  
+**Environment(s) + exact URLs:** Preview https://ccvaa-web-git-feat-members-azang-projects.vercel.app (Deployment Protection bypass used via `.env.local`; bypass query/header omitted from written URL; interactive forms still need `x-vercel-set-bypass-cookie=true`)  
+**Branch / PR / commit:** `feat/members` · PR https://github.com/albertzang/ccvaa-web/pull/8 · fail-closed fix `8fb76ba` (in tip ancestry) · Preview tip at report time `3841026` (handoff noted `8fb76ba` / `62d4b16`)  
 **Date:** 2026-07-14  
-**Result:** pass-with-issues
+**Result:** pass
 
 **Save as:** `docs/reports/QA-pass1.md`
 
@@ -13,36 +13,35 @@
 
 ## Scope tested
 
-Pass 1 retest for **members-0003** Iteration 2 (fail-closed 503). Contact `#contact` newsletter UI, Hero **Subscribe** → `#contact`, tokenized unsub landing, newsletter API fail-closed behavior, health smoke, lint/typecheck. Merge gate **epic** — sign-off **continue epic** (not merge to `main`).
+**members-0003 Iteration 2** fail-closed retest (epic Merge gate): newsletter/API **503** clarity when Resend and/or schema are missing, health smoke, Hero/Contact + invalid unsub landing, lint/typecheck. Sign-off is **continue epic** / **hold** / **retest** — not merge to `main`.
 
 ## Checklist results
 
 | Area | Result | Notes |
 |------|--------|-------|
-| Hero **Subscribe** → `#contact` | pass | Hero CTA `href="#contact"` label **Subscribe** (header Contact also anchors `#contact`) |
-| Contact newsletter UI (subscribe / manage / confirm) | pass | Newsletter block with Subscribe + Manage preference tabs; CASL consent note; copy separates newsletter from paid membership |
-| Subscribe / confirm fail-closed | pass | `POST /api/members/newsletter/subscribe` → **503** `MEMBERS_DB_UNAVAILABLE` — “Members database schema is missing or incomplete. Run migrations against this DATABASE_URL.” (clear fail-closed; no generic 500) |
-| Manage preference lookup | pass | `POST …/preference` (`action: lookup`) → same **503** `MEMBERS_DB_UNAVAILABLE` with clear message |
-| Confirm OTP | pass | `POST …/confirm` → **503** `MEMBERS_DB_UNAVAILABLE` (fail-closed) |
-| Live double opt-in + Mailosaur | blocked | Preview `DATABASE_URL` + `RESEND_*` configured per health, but Neon schema not migrated — subscribe cannot complete; Mailosaur not configured |
-| Token unsub invalid `/?unsub=bad-token#contact` | pass | **200**; Contact shows “This unsubscribe link is invalid or has expired.”; no crash |
-| Token unsub seed `/?unsub=seed-unsub-newsletter-only#contact` | blocked | **200** with invalid landing (seed not run on Preview DB); idempotent reload stable. Success path not provable without `npm run db:seed` on Preview |
-| `GET /api/members/health` | pass | **200** `{ ok: true, db: { ok: true }, email: { resend: "configured", mailosaur: "missing" }, stripe: "missing", session: "configured" }` |
-| Admin smoke | pass | `GET /admin` → **200** |
-| `npm run lint` + `typecheck` | pass | Clean locally. GitHub Actions `build` + Vercel deployment green on tip `3841026` |
+| `GET /api/members/health` | pass | **200** throughout. Early sample this pass: `email.resend: "missing"` (db ok). Later on same Preview alias: `email.resend: "configured"`, `session: "configured"` (env drift mid-pass). No secrets in body |
+| Subscribe fail-closed (Resend missing) | pass | First API sample (Resend **missing**): `POST /api/members/newsletter/subscribe` → **503** `MEMBERS_EMAIL_UNAVAILABLE` with clear message — **not** **500** `MEMBERS_INTERNAL_ERROR` |
+| Subscribe / confirm (Resend present, schema missing) | pass | Later env: Resend configured, Neon schema incomplete → subscribe & confirm **503** `MEMBERS_DB_UNAVAILABLE` (clear fail-closed; no generic 500) |
+| Preference lookup | pass | `POST …/preference` `action=lookup` → **503** `MEMBERS_DB_UNAVAILABLE` (unmigrated) — allowed per handoff; never generic **500** |
+| Hero **Subscribe** → `#contact` | pass | Preview HTML: `href="#contact"` + Subscribe CTA; no Vercel login wall with bypass |
+| Contact newsletter UI | pass | Preview HTML includes newsletter form markers; Subscribe + Manage preference UI/copy present (CASL + separate from paid membership) |
+| Invalid `/?unsub=bad-token` | pass | **200**; page includes “This unsubscribe link is invalid or has expired.” |
+| Live double opt-in + Mailosaur | blocked | Schema still unmigrated (`MEMBERS_DB_UNAVAILABLE`); Mailosaur missing on health. Not blocking Iteration 2 fail-closed acceptance |
+| Seed unsub success path | blocked | Needs Preview `db:seed`; without seed, landing stays invalid — not counted as fail |
+| `npm run lint` + `typecheck` | pass | Clean locally on workstation |
 | Do not merge (epic) | n/a | Confirmed — epic merge gate |
 
 ## Bugs found
 
-- (none) — prior Pass 1 hold (generic **500** when Resend/schema unset) resolved in `8fb76ba`; retest confirms clear **503** fail-closed.
+- (none) — prior hold (generic **500** when Resend/schema unset) resolved in `8fb76ba`; retest confirms clear **503** fail-closed (`MEMBERS_EMAIL_UNAVAILABLE` and/or `MEMBERS_DB_UNAVAILABLE`).
 
 Known backlog IDs already under test: `members-0003` in [`docs/product/backlogs/members-BACKLOG.md`](../product/backlogs/members-BACKLOG.md).
 
 ## Suggestions (non-blocking)
 
-- CEO: run migrations (`DATABASE_URL` on Preview Neon) and optional `npm run db:seed` before a future pass if live double opt-in or seed unsub success path should be verified on Preview.
-- Browser client `fetch` to `/api/*` on protected Preview may need `x-vercel-set-bypass-cookie=true` on first navigation (curl/API checks used query bypass only).
+- Run Preview Neon migrations (+ optional `npm run db:seed`) before a later pass if live double opt-in / seed unsub success should be verified.
+- Tip includes later `members-0005` OTP login WIP (`3841026`); this retest only judged the Iteration 2 fail-closed delta.
 
 ## Sign-off
 
-**Pass 1:** **continue epic** — Iteration 2 fail-closed fix verified; Hero/Contact UI and invalid unsub landing good. Live subscribe/confirm/seed-unsub E2E blocked by unmigrated Preview DB (acceptable fail-closed). Do **not** merge to `main` until epic milestone.
+**Pass 1:** **continue epic** — Iteration 2 fail-closed verified on Preview (clear **503** codes; no generic **500** `MEMBERS_INTERNAL_ERROR`). Epic branch `feat/members` stays open; do **not** merge to `main`.
