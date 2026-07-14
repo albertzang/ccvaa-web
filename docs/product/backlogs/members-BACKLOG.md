@@ -279,7 +279,7 @@ Logged-in face of `#membership` (same slot as Join). Profile: name; email change
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `not-started` |
+| **Status** | `in-progress` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -301,6 +301,7 @@ Homepage SPA login wall for `#membership`: 6-digit OTP (Resend) → httpOnly ses
 
 - Depends on: `members-0001`, `members-0002` (seeded or real members for QA; Join `0004` not required to start)
 - FEATURES.md: Members → Login
+- Handoff: `docs/handoffs/HANDOFF-DEV.md` (Iteration 1)
 
 ---
 
@@ -330,11 +331,15 @@ Logged-out `#membership` Join UI + Stripe Checkout (test on Dev/Preview). Flow: 
 
 **Out of scope:** Monthly plans; Customer Portal; live keys (`0009`); logged-in chrome (`0006`).
 
+### Overall
+
+- Pass 1 (2026-07-14): **continue epic** — Join UI + fail-closed without Stripe; live Checkout/OTP blocked pending Resend + Stripe test secrets + migrate. Report: `docs/reports/QA-pass1.md`
+
 ### Links
 
 - Depends on: `members-0001`, `members-0002`
 - Shares slot with: `members-0006`
-- Handoff: `docs/handoffs/HANDOFF-DEV.md` (Iteration 1)
+- PR: https://github.com/albertzang/ccvaa-web/pull/8
 
 ---
 
