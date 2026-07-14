@@ -1,11 +1,11 @@
 # QA report
 
 **Pass:** 1 (pre-merge)  
-**Backlog work ID:** `members-0005`  
+**Backlog work ID:** `members-0006`  
 **Environment(s) + exact URLs:** Preview https://ccvaa-web-git-feat-members-azang-projects.vercel.app (Deployment Protection bypass via `.env.local`; both `x-vercel-protection-bypass` + `x-vercel-set-bypass-cookie=true`; bypass value omitted from report). API checks used header `x-vercel-protection-bypass`.  
-**Branch / PR / commit:** `feat/members` · PR https://github.com/albertzang/ccvaa-web/pull/8 · tip at report writing `1be7eef` (Part A hold commit); reconfirm tip on push  
+**Branch / PR / commit:** `feat/members` · PR https://github.com/albertzang/ccvaa-web/pull/8 · `af5df0b`  
 **Date:** 2026-07-14  
-**Result:** fail
+**Result:** pass-with-issues
 
 **Save as:** `docs/reports/QA-pass1.md`
 
@@ -13,47 +13,43 @@
 
 ## Scope tested
 
-Part B — `members-0005` member OTP login on epic Preview (after Part A `members-0003` **hold** for schema). Confirmed past Vercel auth wall. Health, login start/verify/session/logout APIs, `#membership` UI markers, admin isolation, fail paths. Live OTP E2E blocked: login **start** itself returns schema **503** (not merely uncapturable OTP). Merge gate **epic** — **continue epic** / **hold** / **retest** (not merge to `main`).
+`members-0006` — logged-in `#membership` profile (name edit, email OTP change, Annual renewal fields, perks placeholder; no newsletter UI in profile slot). Epic Preview after `af5df0b`. Merge gate **epic** — sign-off **continue epic** (not merge to `main`).
 
-**Part A context:** Same Preview same session — newsletter subscribe/preference also **503** schema missing; report previously overwritten+pushed as `members-0003` hold (`1be7eef`).
+Live logged-in profile / name / email OTP / Annual anniversary E2E **blocked** on this Preview: member login **start** still returns **503** `MEMBERS_DB_UNAVAILABLE` (shared Neon schema-not-migrated issue from `members-0003` / `members-0005` QA). Verified logged-out UI smoke, fail-closed APIs (401/503), and SSR markers. Cursor browser MCP tabs unavailable; UI via bypassed HTML fetch + API probes.
 
 ## Checklist results
 
 | Area | Result | Notes |
 |------|--------|-------|
-| Preview protection bypass | pass | Both query params; site title CCVAA; not Vercel login wall |
-| `GET /api/members/health` | pass | **200** `db.ok`, `resend: configured`, `session: configured`, `stripe: missing`, `mailosaur: missing` |
-| `#membership` Member sign-in + Join (logged out) | pass | SSR HTML: “Member sign-in”, “Send login code”, “Join CCVAA”, `#membership`. Stripe Join unavailable expected (`stripe: missing`) |
-| Seeded active member OTP (start → verify → stub) | fail / blocked | `POST /api/members/login/start` `annual@ccvaa-seed.test` → **503** `MEMBERS_DB_UNAVAILABLE` (“Failed to look up member for login.”). Verify with seed `123456` → **503** schema incomplete. No Resend OTP accepted; Mailosaur missing |
-| Newsletter-only / non-member not-eligible | blocked | `newsletter-only@ccvaa-seed.test` start → **503** schema (cannot observe `MEMBERS_LOGIN_NOT_ELIGIBLE`) |
-| Fail paths / validation | pass | Invalid email start → **400** `MEMBERS_VALIDATION_ERROR`. Schema failures return **503** (not generic 500) |
-| `GET /api/members/login/session` | pass | **200** `authenticated: false`, `grantsAdmin: false` |
-| `POST /api/members/login/logout` | pass | **200** idempotent “Signed out of membership.”; `grantsAdmin: false` |
-| Member cookie does not open `/admin` | pass | No member session obtainable; session always `grantsAdmin: false`; `/admin` is Hover mail-session chrome only |
-| `npm run lint` + `typecheck` | pass | Clean (ran with Part A) |
+| Preview protection bypass | pass | Both query params; CCVAA homepage loads; not Vercel login wall |
+| `#membership` logged-out UI | pass | SSR: “Member sign-in”, “Send login code”, “Join CCVAA”; no `member-profile-name`, “Your membership” title, or “Member perks” (profile-only markers absent when logged out) |
+| `#membership` logged-in profile UI | blocked | Cannot obtain member session — `POST /api/members/login/start` `annual@ccvaa-seed.test` → **503** schema. Code review: `MemberProfileForm` renders name/email/perks/logout; `MembershipPanel` swaps login/join for profile when `authenticated` |
+| Name save + session persist | blocked | `PATCH /api/members/profile/name` without session → **401** `MEMBERS_SESSION_INVALID` (fail-closed). Live save/refresh not testable without login |
+| Email change OTP flow | blocked | `POST /api/members/profile/email/start` / `verify` without session → **401**. Resend configured on Preview (`health`); cannot exercise send/verify E2E |
+| Annual anniversary / next renewal | blocked | Seed `annual@ccvaa-seed.test` login **503**; cannot confirm read-only Annual fields or Founding/Lifetime omission live |
+| Perks placeholder | blocked (code ok) | `MemberProfileForm` includes dashed perks card (“Member perks” copy in `site.ts`); not in logged-out SSR |
+| No newsletter UI in `#membership` profile slot | pass | Logged-out SSR: no `newsletter-email` id (`NewsletterForm` lives in `#contact` only). Membership copy mentions newsletter stays in Contact — not a control. Join newsletter opt-in not in SSR chunk (client-only when Join shown). Profile component has no newsletter controls |
+| Fail-closed APIs | pass | Unauthenticated profile/name/email → **401**. Invalid login email → **400** `MEMBERS_VALIDATION_ERROR`. Health without DB would **503**; Preview health **200** `db.ok`, `resend: configured`, `session: configured`, `stripe: missing` |
+| Logout | pass | `POST /api/members/login/logout` → **200** “Signed out of membership.”, `grantsAdmin: false`. `GET /api/members/login/session` → **200** `authenticated: false` |
+| Member cookie does not open `/admin` | pass | No member session obtainable; session API always `grantsAdmin: false`; `/admin` returns **200** Hover mail-session chrome (no member grant) |
+| `npm run lint` + `typecheck` | pass | Clean on `feat/members` @ `af5df0b` |
 | Do not merge (epic) | n/a | Confirmed |
 
 ## Bugs found
 
-List new defects for PM triage (do **not** invent work IDs). Include severity + short repro.  
-PM promotes each to a backlog `bug` (**Source:** `qa`).
+- (none new for `members-0006`)
 
-1. **Preview Neon schema incomplete blocks member login start** — **severity: high** (same root cause as Part A newsletter)  
-   - **URL:** https://ccvaa-web-git-feat-members-azang-projects.vercel.app  
-   - **Repro:** Bypass protection → health **200** with `session: configured` + `resend: configured` → `POST /api/members/login/start` `{"email":"annual@ccvaa-seed.test"}` → **503** `MEMBERS_DB_UNAVAILABLE`. Verify similarly fails with migrate message.  
-   - **Expected:** After migrate + seed, start accepts and sends OTP (or clear not-eligible for newsletter-only).  
-
-Known backlog IDs: `members-0005` (and shared Preview schema issue from `members-0003` Part A).
+**Shared infrastructure blocker (known):** Preview `DATABASE_URL` connects (`GET /api/members/health` **200** `db.ok`) but members tables appear unmigrated — login **start** and profile E2E fail **503**. Previously reported in `members-0005` Pass 1 QA; PM/CEO: run migrate + seed on Preview Neon, then retest login + profile flows.
 
 ## Suggestions (non-blocking)
 
-- Migrate + seed the Preview `DATABASE_URL`, then retest login start (Resend) and preferential OTP capture via Resend logs / Mailosaur.
-- Cursor browser MCP tabs unavailable this session; UI via bypassed HTML fetch.
+- After Preview migrate + seed, retest: login as `annual@ccvaa-seed.test` → profile shows anniversary/next renewal; Founding/Lifetime omit renewal; name save survives refresh; email change OTP via Resend logs.
+- Prefer Mailosaur on Preview for repeatable OTP capture.
 
 ## FEATURES.md drift
 
-None for login copy. PM: health `db.ok` does not imply members tables migrated.
+None observed for profile copy/structure. PM note: health `db.ok` does not imply members schema migrated.
 
 ## Sign-off
 
-**Pass 1:** **hold** — `#membership` UI + session/logout + validation look good, but login **start** is not accepted on this Preview (schema missing). Epic stays open; do **not** merge to `main`. Retest after Preview migrate (+ seed).
+**Pass 1:** **continue epic** — `members-0006` profile implementation and fail-closed behavior look correct; logged-in E2E blocked by shared Preview schema gap (not a regression in this ticket). Epic stays open; do **not** merge to `main`. Retest profile E2E after Preview migrate + seed.
