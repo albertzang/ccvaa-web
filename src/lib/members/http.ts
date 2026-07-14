@@ -4,6 +4,10 @@ import { ZodError } from "zod";
 import { MembersDbError } from "@/lib/members/errors";
 import { MembersEnvError } from "@/lib/members/env";
 import {
+  isMembersJoinError,
+  MembersJoinError,
+} from "@/lib/members/join";
+import {
   isMembersNewsletterError,
   MembersNewsletterError,
 } from "@/lib/members/newsletter";
@@ -71,6 +75,19 @@ export function handleMembersApiError(error: unknown) {
   ) {
     const status =
       error.code === "MEMBERS_NEWSLETTER_ALREADY_SUBSCRIBED" ? 409 : 400;
+    return membersApiError(error.code, error.message, status);
+  }
+
+  if (error instanceof MembersJoinError || isMembersJoinError(error)) {
+    const status =
+      error.code === "MEMBERS_ALREADY_MEMBER"
+        ? 409
+        : error.code === "MEMBERS_FOUNDING_FULL" ||
+            error.code === "MEMBERS_JOIN_PLAN_UNAVAILABLE"
+          ? 409
+          : error.code === "MEMBERS_JOIN_UNAVAILABLE"
+            ? 503
+            : 502;
     return membersApiError(error.code, error.message, status);
   }
 

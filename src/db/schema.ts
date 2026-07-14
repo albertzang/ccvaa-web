@@ -119,9 +119,23 @@ export const unsubTokens = pgTable(
   (table) => [index("unsub_tokens_member_id_idx").on(table.memberId)],
 );
 
+/**
+ * Stripe webhook idempotency — `event.id` primary key so retries are no-ops.
+ * Insert-first (ON CONFLICT DO NOTHING); only the winner processes side effects.
+ */
+export const stripeWebhookEvents = pgTable("stripe_webhook_events", {
+  id: text("id").primaryKey(),
+  type: text("type").notNull(),
+  processedAt: timestamp("processed_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export type Member = typeof members.$inferSelect;
 export type NewMember = typeof members.$inferInsert;
 export type OtpChallenge = typeof otpChallenges.$inferSelect;
 export type NewOtpChallenge = typeof otpChallenges.$inferInsert;
 export type UnsubToken = typeof unsubTokens.$inferSelect;
 export type NewUnsubToken = typeof unsubTokens.$inferInsert;
+export type StripeWebhookEvent = typeof stripeWebhookEvents.$inferSelect;
+export type NewStripeWebhookEvent = typeof stripeWebhookEvents.$inferInsert;

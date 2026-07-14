@@ -39,12 +39,18 @@ export function Hero() {
           {heroContent.subheadline}
         </p>
 
-        <div className="mt-8">
+        <div className="mt-8 flex flex-wrap gap-3">
           <a
             href="#contact"
             className="inline-flex rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-dark"
           >
             {heroContent.subscribeLabel}
+          </a>
+          <a
+            href="#membership"
+            className="inline-flex rounded-full border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+          >
+            {heroContent.joinLabel}
           </a>
         </div>
       </div>

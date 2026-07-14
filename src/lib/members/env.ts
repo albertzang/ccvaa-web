@@ -12,8 +12,12 @@
  * Preview QA inbox (members-0002+ — optional; see docs/members/mailosaur-qa.md):
  * - `MAILOSAUR_API_KEY`, `MAILOSAUR_SERVER_ID`
  *
- * Future tickets (placeholders in `.env.example` only — not read at runtime here):
- * - Stripe test/live keys, ESP
+ * Stripe Join (members-0004+):
+ * - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, Price IDs, founding cap + fee cents
+ * - See `src/lib/members/stripe-env.ts`
+ *
+ * ESP (stubs until members-0009):
+ * - `ESP_API_KEY`, `ESP_LIST_ID`
  */
 
 export type MembersRuntimeEnv = "development" | "preview" | "production" | "test";

@@ -22,19 +22,20 @@
 - Fixed overlay header; style switches when scrolling past hero
 - Brush wordmark logos: `logo-ondark.png` (hero) / `logo-onlight.png` (scrolled)
 - Subtitle: “Visual Arts Association”
-- Nav anchors: About (`#about`), Contact (`#contact`); **planned:** Membership (`#membership`) as needed
+- Nav anchors: Membership (`#membership`), About (`#about`), Contact (`#contact`)
 
 ### Hero
 - Full-bleed coastal hero image (`hero-background.webp`)
 - Eyebrow, headline, subheadline from `src/lib/site.ts`
 - Text is non-selectable
 - **Subscribe** button anchors to `#contact` (newsletter)
-- **Planned:** **Join** button with live counters; anchor to `#membership` (Join / profile panel) — see Members backlog
+- **Join** button anchors to `#membership` (Join panel). Live counters: `members-0007`
 
-### Membership (`#membership`) — planned
+### Membership (`#membership`)
 - After Hero, before About
-- Plans: **Founding** (capped, lifetime) → then **Lifetime** (higher one-time fee); **Annual** always offered (stores renewal date)
-- Logged out → **Join**; logged-in → **profile** (email OTP). Perks later (`members-0012`). Newsletter stays in Contact. Hero **Join** anchors here.
+- Plans: **Founding** (capped one-time) while seats remain → then **Lifetime** (one-time, fee always > Founding); **Annual** always offered (stores `membership_anniversary` + `next_renewal_at` from Stripe)
+- Logged out → **Join** (name, email, optional newsletter opt-in → email OTP → Stripe Checkout → webhook activates; return `/?joined=1#membership`). Logged-in profile: `members-0006`. Newsletter stays in Contact.
+- APIs: `GET /api/members/join/plans`, `POST /api/members/join/{start,verify}`, `POST /api/members/webhooks/stripe` (idempotent). Fail closed without Stripe/`DATABASE_URL`. Race-safe Founding seat claim.
 
 ### About (`#about`)
 - Intro paragraphs
@@ -102,9 +103,11 @@
 **Stack:** Neon + Drizzle + Zod · Stripe · Resend · ESP · Mailosaur. Admin roster (`0008`); Resend/ESP new-tab links (`0010`); later: in-admin blast, member perks, impersonation.  
 **Standing:** No Resend/ESP iframes; member auth = email OTP (no OAuth/passwords); homepage SPA anchors over separate marketing routes.
 
-**Platform (members-0001, epic `feat/members`):** Drizzle schema on Neon — orthogonal `newsletter_status` vs `membership_plan`; OTP challenges; unsub tokens. Annual plans use `membership_anniversary` + `next_renewal_at` (null for Founding/Lifetime). Shared Zod in `src/lib/members/zod/`. `GET /api/members/health` fails closed (503) without `DATABASE_URL`. Migrate/seed: `npm run db:migrate`, `npm run db:seed` (seeds non-Production only). Schema notes: [`docs/members/schema.md`](../members/schema.md). Env: `DATABASE_URL` in `.env.example`; Stripe/Mailosaur placeholders for later tickets.
+**Platform (members-0001, epic `feat/members`):** Drizzle schema on Neon — orthogonal `newsletter_status` vs `membership_plan`; OTP challenges; unsub tokens; `stripe_webhook_events` for Join idempotency. Annual plans use `membership_anniversary` + `next_renewal_at` (null for Founding/Lifetime). Shared Zod in `src/lib/members/zod/`. `GET /api/members/health` fails closed (503) without `DATABASE_URL` (Stripe/Resend status informational). Migrate/seed: `npm run db:migrate`, `npm run db:seed` (seeds non-Production only). Schema notes: [`docs/members/schema.md`](../members/schema.md).
 
 **Newsletter (members-0003, epic `feat/members`):** Contact `#contact` UI + `POST /api/members/newsletter/*` routes. Double opt-in via Resend OTP; pending does not count toward subscriber count. Manage preference for newsletter-only and paid members. Token unsub `/?unsub=<token>#contact` (idempotent; membership unchanged). ESP sync stub in `src/lib/members/esp.ts` — footer URL: [`docs/members/esp.md`](../members/esp.md). Requires `DATABASE_URL` + `RESEND_*` for live subscribe; fails closed without them.
+
+**Join / Stripe (members-0004, epic `feat/members`):** `#membership` Join UI + Stripe Checkout (test keys on Dev/Preview). Flow: name/email/newsletter opt-in → `email_verify` OTP → Checkout → `checkout.session.completed` webhook activates membership. Pre-cap Founding+Annual; post-cap Lifetime+Annual. Env: `STRIPE_*`, `MEMBERSHIP_FOUNDING_CAP`, fee cents (Lifetime > Founding enforced). Webhook: `POST /api/members/webhooks/stripe`. Live keys: `members-0009`.
 
 ---
 
@@ -142,6 +145,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-14 | **members-0004** (epic `feat/members`): `#membership` Join UI + Stripe Checkout (test); Founding seat cap; webhook activation; Hero Join → `#membership` |
 | 2026-07-14 | **members-0003** (epic `feat/members`): Contact newsletter — double opt-in, manage preference, token unsub landing; Hero Subscribe → `#contact`; ESP stub + docs |
 | 2026-07-14 | **agent-os-0013:** CEO talks only to PM; PM invokes Dev/QA (no CEO Dev/QA chats) |
 | 2026-07-14 | **agent-os-0012** self-evolve: epic status/close/Pass 1 notes; thin-rule defaults; Members epic pre-wire |

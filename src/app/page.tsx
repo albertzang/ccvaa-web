@@ -6,6 +6,7 @@ import {
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
+import { MembershipSection } from "@/components/MembershipSection";
 import {
   isMembersNewsletterError,
   redeemUnsubToken,
@@ -44,17 +45,25 @@ async function resolveUnsubLanding(
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ unsub?: string | string[] }>;
+  searchParams: Promise<{
+    unsub?: string | string[];
+    joined?: string | string[];
+  }>;
 }) {
   const params = await searchParams;
   const rawToken = Array.isArray(params.unsub) ? params.unsub[0] : params.unsub;
   const unsubLanding = await resolveUnsubLanding(rawToken);
+  const joinedRaw = Array.isArray(params.joined)
+    ? params.joined[0]
+    : params.joined;
+  const joinedLanding = joinedRaw === "1";
 
   return (
     <>
       <Header />
       <main>
         <Hero />
+        <MembershipSection joinedLanding={joinedLanding} />
         <AboutSection />
         <ContactSection unsubLanding={unsubLanding} />
       </main>

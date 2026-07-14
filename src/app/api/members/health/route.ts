@@ -8,15 +8,17 @@ import {
   MembersEnvError,
 } from "@/lib/members/env";
 import { isResendConfigured } from "@/lib/members/resend";
+import { isStripeJoinConfigured } from "@/lib/members/stripe-env";
 
 /**
- * Platform health for Members — DB + transactional email config.
+ * Platform health for Members — DB + transactional email + Stripe Join config.
  * Returns 503 when DATABASE_URL is missing or Neon is unreachable (fail closed).
- * Resend/Mailosaur status is informational only (does not affect HTTP status).
+ * Resend/Mailosaur/Stripe status is informational only (does not affect HTTP status).
  */
 export async function GET() {
   const resendConfigured = isResendConfigured();
   const mailosaurConfigured = isMailosaurConfigured();
+  const stripeConfigured = isStripeJoinConfigured();
 
   if (!getDatabaseUrl()) {
     return NextResponse.json(
@@ -30,6 +32,7 @@ export async function GET() {
           resend: resendConfigured ? "configured" : "missing",
           mailosaur: mailosaurConfigured ? "configured" : "missing",
         },
+        stripe: stripeConfigured ? "configured" : "missing",
       },
       { status: 503 },
     );
@@ -45,6 +48,7 @@ export async function GET() {
         resend: resendConfigured ? "configured" : "missing",
         mailosaur: mailosaurConfigured ? "configured" : "missing",
       },
+      stripe: stripeConfigured ? "configured" : "missing",
     });
   } catch (error) {
     const message =
@@ -69,8 +73,10 @@ export async function GET() {
           resend: resendConfigured ? "configured" : "missing",
           mailosaur: mailosaurConfigured ? "configured" : "missing",
         },
+        stripe: stripeConfigured ? "configured" : "missing",
       },
       { status: 503 },
     );
   }
 }
+

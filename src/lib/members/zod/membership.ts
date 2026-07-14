@@ -39,14 +39,32 @@ export const membershipRecordSchema = z.object({
 
 export type MembershipRecord = z.infer<typeof membershipRecordSchema>;
 
+export const joinPlanIdSchema = z.enum(["founding", "lifetime", "annual"]);
+
+export type JoinPlanId = z.infer<typeof joinPlanIdSchema>;
+
 export const joinMembershipInputSchema = z.object({
   email: z.string().trim().email().max(320),
   name: z.string().trim().min(1).max(200),
-  plan: z.enum(["founding", "lifetime", "annual"]),
-  newsletterOptIn: z.boolean().optional(),
+  plan: joinPlanIdSchema,
+  newsletterOptIn: z.boolean().optional().default(false),
 });
 
 export type JoinMembershipInput = z.infer<typeof joinMembershipInputSchema>;
+
+/** Join verify — same identity fields plus email_verify OTP code. */
+export const joinMembershipVerifyInputSchema = joinMembershipInputSchema.extend(
+  {
+    code: z
+      .string()
+      .trim()
+      .regex(/^\d{6}$/, "OTP must be a 6-digit code"),
+  },
+);
+
+export type JoinMembershipVerifyInput = z.infer<
+  typeof joinMembershipVerifyInputSchema
+>;
 
 /** Validates that non-annual plans do not carry renewal dates. */
 export function assertAnnualRenewalConsistency(

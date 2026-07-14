@@ -9,10 +9,11 @@ Neon + Drizzle schema for the Members platform. Newsletter and membership are **
 | `members` | Person identity; newsletter + membership axes |
 | `otp_challenges` | DB-backed OTP for login / email verify / newsletter confirm |
 | `unsub_tokens` | Tokenized newsletter unsubscribe (`/?unsub=<token>#contact`) |
+| `stripe_webhook_events` | Idempotent Stripe webhook processing (`event.id` PK) |
 
 ## Annual renewal fields
 
-For **`membership_plan = annual`** only (populated from Stripe in later tickets):
+For **`membership_plan = annual`** only (populated from Stripe Checkout / subscription on Join — `members-0004`):
 
 | Column | Type | Meaning |
 |--------|------|---------|
@@ -37,7 +38,13 @@ npm run db:seed   # non-Production only
 
 ## Env
 
-See `.env.example` — `DATABASE_URL` (Neon), `RESEND_API_KEY` + `RESEND_FROM_EMAIL` (transactional OTP), optional Mailosaur for Preview QA (`docs/members/mailosaur-qa.md`).
+See `.env.example` — `DATABASE_URL` (Neon), `RESEND_API_KEY` + `RESEND_FROM_EMAIL` (transactional OTP), Stripe Join (`STRIPE_*`, founding cap + fee cents), optional Mailosaur for Preview QA (`docs/members/mailosaur-qa.md`).
+
+## Stripe Join webhook
+
+- Endpoint: `POST /api/members/webhooks/stripe`
+- Dedupe: insert into `stripe_webhook_events` on `event.id` before side effects
+- Activates membership on `checkout.session.completed`; Founding seat claim is race-safe (cap check in SQL)
 
 ## OTP challenges
 

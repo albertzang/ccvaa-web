@@ -37,6 +37,7 @@ export const organization = {
 } as const;
 
 export const navigation = [
+  { label: "Membership", href: "#membership" },
   { label: "About", href: "#about" },
   { label: "Contact", href: "#contact" },
 ] as const;
@@ -47,6 +48,7 @@ export const heroContent = {
   subheadline:
     "We bring artists, educators, and communities together to create, learn, and share the power of visual expression.",
   subscribeLabel: "Subscribe",
+  joinLabel: "Join",
 } as const;
 
 export const aboutContent = {
@@ -143,6 +145,28 @@ export const contactContent = {
     "Interested in partnering, volunteering, or learning more about our programs? We would love to hear from you.",
   emailLabel: "Email",
   addressLabel: "Mailing address",
+} as const;
+
+export const membershipContent = {
+  title: "Membership",
+  description:
+    "Join CCVAA as a paid member. Newsletter signup stays in Contact — this section is for Founding, Lifetime, and Annual membership only.",
+  joinTitle: "Join CCVAA",
+  joinDescription:
+    "Verify your email, then complete payment with Stripe Checkout. You return here when finished.",
+  namePlaceholder: "Your name",
+  emailPlaceholder: "you@example.com",
+  codePlaceholder: "6-digit code",
+  verifyEmailLabel: "Verify email",
+  verifyHint:
+    "Enter the 6-digit code we emailed you. We will open Stripe Checkout next.",
+  checkoutLabel: "Continue to checkout",
+  newsletterOptInLabel:
+    "Also send me the CCVAA newsletter (optional — confirm separately after payment)",
+  consentNote:
+    "Paid membership is separate from the newsletter mailing list. You can change newsletter preference anytime in Contact.",
+  joinedSuccess:
+    "Thanks for joining. Your membership activates when Stripe confirms payment — you can sign in here once member login ships.",
 } as const;
 
 export const newsletterContent = {
