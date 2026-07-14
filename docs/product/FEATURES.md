@@ -101,6 +101,8 @@
 **Stack:** Neon + Drizzle + Zod · Stripe · Resend · ESP · Mailosaur. Admin roster (`0008`); Resend/ESP new-tab links (`0010`); later: in-admin blast, member perks, impersonation.  
 **Standing:** No Resend/ESP iframes; member auth = email OTP (no OAuth/passwords); homepage SPA anchors over separate marketing routes.
 
+**Platform (members-0001, epic `feat/members`):** Drizzle schema on Neon — orthogonal `newsletter_status` vs `membership_plan`; OTP challenges; unsub tokens. Annual plans use `membership_anniversary` + `next_renewal_at` (null for Founding/Lifetime). Shared Zod in `src/lib/members/zod/`. `GET /api/members/health` fails closed (503) without `DATABASE_URL`. Migrate/seed: `npm run db:migrate`, `npm run db:seed` (seeds non-Production only). Schema notes: [`docs/members/schema.md`](../members/schema.md). Env: `DATABASE_URL` in `.env.example`; Stripe/Mailosaur placeholders for later tickets.
+
 ---
 
 ## Infra & ops
@@ -113,7 +115,7 @@
 | Preview | Per-branch/PR Vercel URL (pre-merge QA target) |
 | DNS / email | Hover |
 | CI | lint, typecheck, build (GitHub Actions) |
-| Stack | Next.js App Router, React, Tailwind; admin auth = Hover mail-session |
+| Stack | Next.js App Router, React, Tailwind; admin auth = Hover mail-session; Members DB = Neon + Drizzle (`DATABASE_URL`) |
 | Ship path | Feature branch → QA Preview → merge → cleanup → QA on `ccvaa-web.vercel.app` (Verifier = `agent`). **Epic/milestone (opt-in):** shared branch; Pass 1 per ticket; merge only on **merge milestone**. **Verifier = `ceo`:** CEO verifies (defaults: `direct-to-main` + Production pass2). Work IDs `{feature-slug}-{NNNN}` — [`BACKLOG.md`](BACKLOG.md). **Baseline** pass = Production audit with no PR. See `docs/protocols/GIT_DEPLOY.md`. CEO may manually check `ccvaa.ca`. |
 
 ### Important technical notes for Developer
@@ -137,6 +139,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-14 | **agent-os-0013:** CEO talks only to PM; PM invokes Dev/QA (no CEO Dev/QA chats) |
 | 2026-07-14 | **agent-os-0012** self-evolve: epic status/close/Pass 1 notes; thin-rule defaults; Members epic pre-wire |
 | 2026-07-14 | Guiding principle #9: living docs = current state (prune leftovers with every OS change) |
 | 2026-07-14 | Agent OS docs prune: align thin rules/`n/a`/epic; drop obsolete FEAT- template; fix `tbd` Ship paths |
