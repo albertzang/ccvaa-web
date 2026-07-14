@@ -404,7 +404,7 @@ Resend send path; shared confirm + OTP helpers (DB challenges, expiry, rate limi
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `not-started` |
+| **Status** | `in-progress` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -425,3 +425,4 @@ Neon + Drizzle schema for **newsletter** and **membership** (orthogonal), OTP/ch
 ### Links
 
 - FEATURES.md: Infra; Members (planned)
+- Handoff: `docs/handoffs/HANDOFF-DEV.md` (Iteration 1)
