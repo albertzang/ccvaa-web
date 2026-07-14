@@ -137,6 +137,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-14 | **agent-os-0012** self-evolve: epic status/close/Pass 1 notes; thin-rule defaults; Members epic pre-wire |
 | 2026-07-14 | Guiding principle #9: living docs = current state (prune leftovers with every OS change) |
 | 2026-07-14 | Agent OS docs prune: align thin rules/`n/a`/epic; drop obsolete FEAT- template; fix `tbd` Ship paths |
 | 2026-07-13 | **agent-os-0011:** epic/milestone ship lane (shared branch; merge on milestone) |

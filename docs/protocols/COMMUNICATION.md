@@ -125,7 +125,7 @@ Git/deploy: [`GIT_DEPLOY.md`](GIT_DEPLOY.md). Handoff mechanics: [`HANDOFF.md`](
 - PM sets **Verifier** / **Verify passes** / Ship path from CEO intent (prefer [common lanes](#common-lanes-use-defaults-unless-ceo-overrides))
 - PM advises (tradeoffs, sequencing, risk), proposes acceptance criteria, and **reminds CEO** when a gate is due
 - PM does **not** implement large code changes; delegates to Developer
-- PM does **not** merge to `main` or set Vercel secrets without CEO ask
+- PM does **not** merge to `main` or set Vercel secrets without CEO ask — **except** `agent-os-*` after CEO **`verified`** (`direct-to-main` → commit+push; `feature-branch` → merge PR same turn)
 - PM may make small doc/protocol updates directly (push still when CEO asks — except `agent-os-*` after **`verified`**)
 
 ## Product Manager → Developer

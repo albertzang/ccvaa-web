@@ -20,11 +20,11 @@
 **Production URL:** https://ccvaa-web.vercel.app/ (Pass **2** and **baseline**)  
 
 **Post-merge cleanup (Pass 2 only):**  
-- [ ] Feature branch deleted **locally**  
-- [ ] Feature branch deleted **on origin** (or n/a for `direct-to-main`)  
+- [ ] Feature/epic branch deleted **locally**  
+- [ ] Feature/epic branch deleted **on origin** (or n/a for `direct-to-main`)  
 Cleanup happens **right after merge**, before Pass 2 testing — see `docs/protocols/GIT_DEPLOY.md`.  
 **Baseline:** cleanup n/a (no feature branch for this pass).
-
+**Epic milestone:** one cleanup after **merge milestone** (not after each ticket Pass 1).
 **Out of scope for QA:** https://ccvaa.ca/ — CEO manual only (DNS/cache). Do not test or block on it.
 
 ## How QA gets the Preview URL (Pass 1 only)

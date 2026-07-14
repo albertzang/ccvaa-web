@@ -73,7 +73,7 @@ Set on the backlog item and Dev handoff. See [`docs/product/BACKLOG.md`](../prod
 
 **Verify passes** may be `pass1+pass2`, `pass1` (Preview only), or `pass2` (Production only). Preview = pre-merge staging. **`agent-os-*` items always use Verifier / Verify passes = `n/a`**, and Ship path defaults to **`direct-to-main`** (do not leave `tbd`).
 
-**Prefer common lanes** (happy path / CEO Verifier / tiny-fix / agent-os / **self-evolve** / baseline): [`COMMUNICATION.md`](COMMUNICATION.md). **Rare overrides** (e.g. `agent` + `direct-to-main`, agent `pass1`-only) need explicit CEO wording — do not invent them.
+**Prefer common lanes** (see [`COMMUNICATION.md`](COMMUNICATION.md) — happy path / epic-milestone / CEO Verifier / tiny-fix / agent-os / **self-evolve** / baseline). **Rare overrides** (e.g. `agent` + `direct-to-main`, agent `pass1`-only) need explicit CEO wording — do not invent them.
 
 **CEO Verifier:** after Dev ships to the listed env(s), PM asks CEO to verify. CEO says **`verified`** → backlog `completed` (**does not** auto-push product code). Issues → **Iteration** on the **same** work ID. On **`agent-os-*`**, **`verified`** also ships (`direct-to-main` → push; **self-evolve** / `feature-branch` → merge). Table: [`COMMUNICATION.md`](COMMUNICATION.md#what-ceo-verified-means). Details: `docs/protocols/CEO.md`.
 
@@ -107,13 +107,14 @@ Use when several work IDs must ship together (e.g. Members platform + public UI)
 
 1. **CEO/PM declares** the epic at kickoff of the first ticket (set **Epic branch** + **Merge gate: `epic`** on participating items).
 2. **Developer** creates `Epic branch` once from latest `main`, opens **one** PR, reuses that branch/PR for every work ID in the milestone. Branch naming may omit per-ticket `NNNN` when on an epic (`feat/{feature-slug}` or `feat/{feature-slug}-m{N}`).
-3. **Pass 1** still runs **per ticket** (Verifier = `agent` + pass1) against the **same Preview URL** (updated as commits land). Pass 1 **pass** ≠ merge when Merge gate is `epic`.
+3. **Pass 1** still runs **per ticket** (Verifier = `agent` + pass1) against the **same Preview URL** (updated as commits land). Pass 1 **pass** ≠ merge when Merge gate is `epic`. After **continue epic**, PM records a one-line Pass 1 note on that backlog item (**Overall** or Notes) before the next ticket overwrites fixed `HANDOFF-QA-pass1.md` / `QA-pass1.md`.
 4. **Do not merge** until CEO/PM says **merge milestone** (list work IDs). Prefer a short milestone Pass 1 recheck on Preview if the last ticket’s Pass 1 is stale.
-5. **After milestone merge:** delete Epic branch local + remote; run **Pass 2** (if required) — prefer **one** Pass 2 handoff listing all milestone work IDs on the same Production deploy.
-6. **Next milestone:** cut a **new** epic branch from latest `main` (do not revive the deleted branch).
-7. **Pass 1 fail** on a ticket: fix on the **same** Epic branch / PR; retest Preview.
-8. **Pass 2 fail** after milestone merge: new `fix/…` branch from `main` (same as ordinary lane) — Iteration on the failing work ID(s).
-9. Items **without** Epic branch keep the default **per-item merge** lane unchanged.
+5. **Status:** Merge gate `epic` tickets stay **`in-progress` until milestone Pass 2** (or `closed`). Do **not** mark `completed` after ticket Pass 1 alone.
+6. **After milestone merge:** delete Epic branch local + remote; run **Pass 2** (if required) — prefer **one** Pass 2 handoff listing all milestone work IDs on the same Production deploy. Then mark participating items `completed` and delete handoffs/reports once (milestone close).
+7. **Next milestone:** cut a **new** epic branch from latest `main` (do not revive the deleted branch).
+8. **Pass 1 fail** on a ticket: fix on the **same** Epic branch / PR; retest Preview.
+9. **Pass 2 fail** after milestone merge: new `fix/…` branch from `main` (same as ordinary lane) — Iteration on the failing work ID(s).
+10. Items **without** Epic branch keep the default **per-item merge** lane unchanged.
 
 ```
 Epic kickoff (CEO/PM)

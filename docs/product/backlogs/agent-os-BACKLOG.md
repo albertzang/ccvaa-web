@@ -3,11 +3,40 @@
 **Feature:** Agent OS  
 **Slug:** `agent-os`  
 **Owner:** Product Manager  
-**Next ID:** `0012`  
+**Next ID:** `0013`  
 
 Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
 **Note:** All `agent-os-*` items use **Verifier = `n/a`**, **Verify passes = `n/a`**. Default **Ship path = `direct-to-main`**. Use **`feature-branch`** only when (1) **self-evolve** (required) or (2) CEO explicitly asks for an umbrella PR / commit-history review before merge. Do **not** set `feature-branch` merely because the OS change is large or multi-file — ordinary protocol/skill/doc encoding stays `direct-to-main`.
+
+---
+
+## agent-os-0012 — Self-evolve (2026-07-14)
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `in-progress` |
+| **Verifier** | `n/a` |
+| **Verify passes** | `n/a` |
+| **Ship path** | `feature-branch` |
+
+### Description
+
+CEO-kickoff **self-evolve** on `chore/agent-os-0012-self-evolve`. Evaluate OS vs Guiding principles; improve + prune (principle #9); commit loop; CEO reviews commit history before merge.
+
+### Overall
+
+- Opened self-evolve on `chore/agent-os-0012-self-evolve`
+- **Epic status/close/Pass 1 notes:** Merge gate `epic` stays `in-progress` until milestone Pass 2; record Pass 1 on backlog before overwriting fixed QA paths; delete handoffs at milestone close (`GIT_DEPLOY`, `HANDOFF`, `BACKLOG`, PM skill/rule)
+- **Thin rules:** shared hard constraints respect Verifier ship defaults + self-evolve mid-loop commits; PM rule self-evolve + #9 prune
+- **Members pre-wire:** `feat/members` + Merge gate `epic` on `0001`–`0008` and `0010`
+- **Prune:** GIT_DEPLOY common-lanes list includes epic; COMMUNICATION merge exception for agent-os `verified`; CEO “continue epic” only; handoff-qa feature/epic cleanup; ccvaa-dev-memory Ops
+
+### Links
+
+- Branch: `chore/agent-os-0012-self-evolve`
 
 ---
 

@@ -35,7 +35,7 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 4. Admin roster — `0008`
 5. Then `next`: `0010` links → `0009` go-live (CEO); `later`: `0011`–`0013`
 
-**Ship lane:** Prefer **epic / milestone** (`Epic branch` e.g. `feat/members`, **Merge gate `epic`**) so half-built platform work does not land on `main` per ticket. Declare at first Members kickoff. See [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in) / `agent-os-0011`.
+**Ship lane:** Default for Verifier=`agent` tickets in the first Members milestone: **Epic branch `feat/members`**, **Merge gate `epic`** (fields set on `0001`–`0008` and `0010`). `members-0009` (CEO go-live) stays outside that gate. See [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
 
 ---
 
@@ -131,6 +131,8 @@ Compose/trigger a newsletter blast from `/admin` via ESP and/or Resend APIs agai
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
+| **Epic branch** | `feat/members` |
+| **Merge gate** | `epic` |
 
 ### Description
 
@@ -187,6 +189,8 @@ Harden ESP preference sync. CEO sets live fees/cap/Price IDs + Resend/Stripe/ESP
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
+| **Epic branch** | `feat/members` |
+| **Merge gate** | `epic` |
 
 ### Description
 
@@ -217,6 +221,8 @@ Replace Members scaffold with roster gated by Hover mail-session. Filter/search 
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
+| **Epic branch** | `feat/members` |
+| **Merge gate** | `epic` |
 
 ### Description
 
@@ -245,6 +251,8 @@ Hero **Subscribe** + **Join** with live counters (anchors only): Subscribe → `
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
+| **Epic branch** | `feat/members` |
+| **Merge gate** | `epic` |
 
 ### Description
 
@@ -275,6 +283,8 @@ Logged-in face of `#membership` (same slot as Join). Profile: name; email change
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
+| **Epic branch** | `feat/members` |
+| **Merge gate** | `epic` |
 
 ### Description
 
@@ -304,6 +314,8 @@ Homepage SPA login wall for `#membership`: 6-digit OTP (Resend) → httpOnly ses
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
+| **Epic branch** | `feat/members` |
+| **Merge gate** | `epic` |
 
 ### Description
 
@@ -335,6 +347,8 @@ Logged-out `#membership` Join UI + Stripe Checkout (test on Dev/Preview). Flow: 
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
+| **Epic branch** | `feat/members` |
+| **Merge gate** | `epic` |
 
 ### Description
 
@@ -365,6 +379,8 @@ Contact `#contact` owns the **Newsletter** axis: subscribe (double opt-in via Re
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
+| **Epic branch** | `feat/members` |
+| **Merge gate** | `epic` |
 
 ### Description
 
@@ -392,6 +408,8 @@ Resend send path; shared confirm + OTP helpers (DB challenges, expiry, rate limi
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
+| **Epic branch** | `feat/members` |
+| **Merge gate** | `epic` |
 
 ### Description
 
