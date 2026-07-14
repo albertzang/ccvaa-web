@@ -2,69 +2,79 @@
 
 **Date:** 2026-07-14  
 **Pass:** `1`  
-**Backlog work ID:** `members-0005`  
+**Backlog work ID:** `members-0003` (then `members-0005` same Preview — see Part B)  
 **Ship path that led here:** `feature-branch`  
 **Epic branch:** `feat/members`  
 **Merge gate:** `epic`  
-**Filled by:** Developer  
+**Filled by:** Product Manager  
 
 **Save as:** `docs/handoffs/HANDOFF-QA-pass1.md`
 
 **Branch name:** `feat/members`  
 **PR link:** https://github.com/albertzang/ccvaa-web/pull/8  
-**Commit:** `442efbb`  
+**Commit:** tip of `feat/members` (expect ≥ `31ca4cc`)  
 **Preview URL:** https://ccvaa-web-git-feat-members-azang-projects.vercel.app  
 **Preview protection:** QA reads `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local` (do **not** paste the secret here). See `docs/protocols/PREVIEW_PROTECTION.md`.  
 **Production URL:** https://ccvaa-web.vercel.app/ (Pass **2** only — not for this pass)
 
 **Post-merge cleanup (Pass 2 only):** n/a until **merge milestone**
 
-**Out of scope for QA:** https://ccvaa.ca/ — CEO manual only. OAuth/passwords; admin auth; Join redesign; full profile UI (`members-0006`).
+**Out of scope for QA:** https://ccvaa.ca/ — CEO manual only.
 
-## What changed
+## Environments to test this pass
 
-`#membership` member email OTP login wall: send 6-digit code (Resend, `purpose=login`) → verify → httpOnly signed cookie `ccvaa_member_session` (7-day TTL) + logout. Active paid members only. Logged-out view shows **Member sign-in** above **Join**. Logged-in stub shows email/plan + Sign out (profile chrome is `0006`). Session **never** grants `/admin`. Fail closed without `DATABASE_URL` / `RESEND_*` / `MEMBER_SESSION_SECRET`.
+- [ ] Dev — http://localhost:3000/ (optional)
+- [ ] Preview — https://ccvaa-web-git-feat-members-azang-projects.vercel.app (required)
+- [ ] Production — n/a for this pass
 
-APIs: `POST /api/members/login/start`, `POST /api/members/login/verify`, `POST /api/members/login/logout`, `GET /api/members/login/session`.
+## Preview env notes (CEO confirmed)
 
-## Focus checklist
+`GET /api/members/health` now: `db.ok: true`, `email.resend: "configured"`, `session: "configured"`. Schema migrated + seed applied. Stripe still missing (Join live Checkout out of scope for this pass).
 
-- [ ] Homepage `#membership`: login form + Join when logged out
-- [ ] Without `DATABASE_URL` / `RESEND_*` / `MEMBER_SESSION_SECRET`: login start/verify fail closed (503 / clear message)
-- [ ] With secrets + seeded (or real) active member: start → email OTP → verify → signed-in stub (plan + email)
-- [ ] Logout clears member session; Join/login return; `/admin` still Hover-only (member cookie does not open admin)
-- [ ] Non-member / newsletter-only email: not eligible (404-style clear message)
-- [ ] OTP rate limits / expiry behave (15 min TTL; 3 sends/hour; 5 verify attempts) — light spot-check OK
-- [ ] `npm run lint` + `npm run typecheck` clean (CI on PR)
-- [ ] **Do not merge** (epic merge gate)
+Browser forms need bypass **cookie** (`x-vercel-set-bypass-cookie=true`).
 
-## Known risks / flaky areas
+---
 
-- Live OTP requires Preview: `DATABASE_URL`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, **`MEMBER_SESSION_SECRET`** (new).
-- Seeded emails (`founding@` / `lifetime@` / `annual@ccvaa-seed.test`) need `npm run db:seed` on Preview Neon. Seed login OTP `123456` for annual is optional/dev-only and may be superseded by a fresh start.
-- Mailosaur optional for capturing login OTP — `docs/members/mailosaur-qa.md`.
-- Open Preview with protection bypass **and** `x-vercel-set-bypass-cookie=true` so client `fetch` keeps the bypass cookie.
-- Join paths still need Stripe secrets if testing Join alongside login.
+## Part A — `members-0003` (Iteration 2 retest + live Resend)
 
-## Preview env notes (Pass 1)
+### What changed
 
-CEO/PM set in Vercel **Preview** (and `.env.local` for Dev):
+Fail-closed 503 when Resend missing (Iteration 2) plus **live** newsletter paths now that Resend + DB are on Preview.
 
-| Var | Purpose |
-|-----|---------|
-| `DATABASE_URL` | Neon |
-| `RESEND_API_KEY` / `RESEND_FROM_EMAIL` | Login OTP send |
-| `MEMBER_SESSION_SECRET` | HMAC for httpOnly member session cookie |
-| Mailosaur (optional) | Capture `login` purpose OTP |
+### Focus checklist
 
-Deployment Protection bypass — `VERCEL_AUTOMATION_BYPASS_SECRET` in `.env.local`.
+- [ ] Health: resend configured (sanity)
+- [ ] `POST …/newsletter/subscribe` with valid email → success path (OTP sent via Resend), not 500/503
+- [ ] Confirm OTP flow if capturable (Inbox / Resend dashboard logs / Mailosaur if configured); else note blocked with evidence of send accepted
+- [ ] Preference `lookup` for known/seed email returns clear result (not generic 500)
+- [ ] Hero Subscribe → `#contact`; invalid `/?unsub=bad-token#contact` still invalid/expired
+- [ ] Spot-check: if you temporarily cannot prove fail-closed without unsetting env, rely on prior Iteration 2 fix evidence + live path green
+- [ ] Lint/typecheck clean if feasible
+- [ ] Sign-off Part A: **continue epic** / **hold** / **retest** — **do not merge**
 
-## Production / baseline / Pass 2 auth notes
+Write Part A into `docs/reports/QA-pass1.md` first (work ID `members-0003`), commit/push, then continue Part B.
 
-- Admin auth = Hover mailbox login in Mail iframe — see `docs/protocols/QA_AUTH.md`
-- Member session ≠ admin session
-- QA reads `ADMIN_EMAIL` / `ADMIN_PASS` from `.env.local` — **do not** paste into handoffs or reports
+---
+
+## Part B — `members-0005` (OTP login)
+
+After Part A is signed **continue epic**, overwrite report for **`members-0005`** (or append a clearly separated Part B section then overwrite per template with work ID `members-0005` — prefer overwrite with full 0005 report after 0003 continue epic is recorded in backlog by noting in Overall).
+
+### Focus checklist
+
+- [ ] `#membership` Member sign-in + Join when logged out
+- [ ] Seeded active member (`*@ccvaa-seed.test` or documented seed): start → OTP email → verify → signed-in stub (email/plan)
+- [ ] Logout clears session; `/admin` still not opened by member cookie
+- [ ] Newsletter-only / non-member: clear not-eligible
+- [ ] Fail-closed spot-check not required to unset secrets; health already shows configured
+- [ ] Sign-off: **continue epic** / **hold** / **retest** — **do not merge**
+
+### Known risks
+
+- OTP capture: Resend dashboard / CEO inbox if seed email is real domain; seed `@ccvaa-seed.test` may need Mailosaur or Resend logs — document blocked if uncapturable
+- Stripe Join live still blocked (`stripe: "missing"`)
 
 ## Report back with
 
-`docs/reports/QA-pass1.md` — Pass 1 result for **continue epic** (do **not** merge to `main`).
+`docs/templates/qa-report.md` → overwrite `docs/reports/QA-pass1.md`  
+Epic sign-off only (**continue epic** / **hold** / **retest**). Commit + push on `feat/members`. Never commit secrets.
