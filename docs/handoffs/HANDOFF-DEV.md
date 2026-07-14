@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-14  
 **Requested by:** CEO / PM  
-**Backlog work ID:** `members-0007`  
+**Backlog work ID:** `members-0008`  
 **Backlog link:** `docs/product/backlogs/members-BACKLOG.md`  
 **Priority:** now  
 **Iteration:** `1`
@@ -19,25 +19,31 @@
 
 ## Goal
 
-Hero **Subscribe** + **Join** with live counters (anchors only): Subscribe → `#contact`; Join → `#membership`. Counts: newsletter subscribers = confirmed newsletter-on; members = active paid. Stub zeros OK if DB unavailable; never imply newsletter is a membership plan.
+Replace Admin **Members** scaffold with a real roster gated by Hover **mail-session** (same as existing `/admin`). Filter/search by **plan** and **newsletter-on** as separate axes. Update/delete with confirmation. Show plan, status, newsletter flag, Annual anniversary/next renewal. Zod on mutations. No impersonation.
 
 ## Acceptance criteria
 
-- [ ] Hero shows Subscribe + Join CTAs with correct anchors
-- [ ] Counters present and labeled for the two axes without conflating them
-- [ ] Fail closed / stub zeros when DB missing — page still loads
-- [ ] FEATURES.md Hero updated
-- [ ] Lint + typecheck; on `feat/members` / PR #8; Pass 1 handoff updated; **do not merge**
+- [ ] List / search / filter (plan + newsletter as separate concerns)
+- [ ] Confirm UX for update/delete; Zod on payloads
+- [ ] Annual anniversary / next renewal visible when applicable
+- [ ] Mail-session gated (unauthenticated visitors cannot mutate)
+- [ ] FEATURES.md Admin → Members updated
+- [ ] Lint + typecheck; on `feat/members` / PR #8; Pass 1 handoff ready; **do not merge**
 
 ## Out of scope
 
-Forms in hero; Checkout; Contact form implementation; profile; merge to `main`.
+Impersonation (`members-0013`); Events/Financial; public CTAs; merge to `main`.
 
 ## Technical hints
 
-- Reuse existing hero in homepage; counts may use APIs/helpers from `0003`/`0001`
-- Coastal brand; first viewport stays brand-first (don’t overload hero with extra chrome)
-- Notify PM if blocked
+- Admin chrome: mail-session probe / existing Members nav entry
+- Load ccvaa-dev-memory for admin/auth patterns
+- Fail closed without DB; Preview may still have Neon branch migrate gap — still ship UI + APIs
+- Notify **PM** if blocked on secrets (do not ping CEO)
+
+## Design / UX constraints
+
+Match existing admin console patterns (dark sidebar). Keep roster usable; avoid decorative card clutter.
 
 ## Git / deploy
 

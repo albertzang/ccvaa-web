@@ -185,7 +185,7 @@ Harden ESP preference sync. CEO sets live fees/cap/Price IDs + Resend/Stripe/ESP
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `not-started` |
+| **Status** | `in-progress` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -208,6 +208,7 @@ Replace Members scaffold with roster gated by Hover mail-session. Filter/search 
 
 - Depends on: `members-0001`
 - FEATURES.md: Admin → Members
+- Handoff: `docs/handoffs/HANDOFF-DEV.md` (Iteration 1)
 
 ---
 
@@ -235,10 +236,14 @@ Hero **Subscribe** + **Join** with live counters (anchors only): Subscribe → `
 
 **Out of scope:** Forms in hero; Checkout (`0004`); Contact form (`0003`); profile (`0006`).
 
+### Overall
+
+- Pass 1 (2026-07-14): **continue epic** — Hero CTAs + dual-axis counters (0s without seeded Preview Neon). Report: `docs/reports/QA-pass1.md` (`70874a2`)
+
 ### Links
 
 - Depends on: counts from `0003` / `0004` (stubs OK)
-- Handoff: `docs/handoffs/HANDOFF-DEV.md` (Iteration 1)
+- PR: https://github.com/albertzang/ccvaa-web/pull/8
 
 ---
 
@@ -306,6 +311,7 @@ Homepage SPA login wall for `#membership`: 6-digit OTP (Resend) → httpOnly ses
 ### Overall
 
 - Pass 1 (2026-07-14): **continue epic** — sign-in UI + session/logout/admin isolation OK; live OTP E2E blocked (Preview Neon unmigrated / no Mailosaur). Report: `docs/reports/QA-pass1.md` (`0f0bada`)
+- Pass 1 hold (2026-07-14, Dev probe): health **200** `db.ok` but login/newsletter **503** `MEMBERS_DB_UNAVAILABLE` (schema missing). Local `.env.local` + `vercel env pull --environment=preview` hit the **same** Neon parent (`ep-shiny-smoke-a6pt9h7u…`, tables+seed present). Hypothesized empty **Neon Preview branch** (deploy-time `DATABASE_URL` inject ≠ env pull). CEO: migrate+seed that Preview branch (or add migrate to Preview build).
 
 ### Links
 
@@ -384,6 +390,7 @@ Contact `#contact` owns the **Newsletter** axis: subscribe (double opt-in via Re
 - Pass 1 (2026-07-14, early): UI checks ok while DB missing — **continue epic** (stale once `DATABASE_URL` landed).
 - Pass 1 (2026-07-14): **hold** — Resend missing / unmigrated → generic **500** (Iteration 2).
 - Iteration 2 Pass 1 (2026-07-14): **continue epic** — clear **503** fail-closed (`MEMBERS_EMAIL_UNAVAILABLE` / `MEMBERS_DB_UNAVAILABLE`); live double opt-in still blocked until Neon migrate+seed on Preview. Report: `docs/reports/QA-pass1.md` (`d0f360b` / tip).
+- Pass 1 hold (2026-07-14, Dev probe): same as `members-0005` — subscribe **503** schema message while health `db.ok`; parent Neon already migrated/seeded; Preview likely on unmigrated Neon branch. Fix = migrate+seed Preview branch (not re-run against `.env.local` alone).
 
 ### Links
 
