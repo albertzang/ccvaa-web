@@ -375,7 +375,7 @@ Contact `#contact` owns the **Newsletter** axis: subscribe (double opt-in via Re
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `not-started` |
+| **Status** | `in-progress` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -395,6 +395,7 @@ Resend send path; shared confirm + OTP helpers (DB challenges, expiry, rate limi
 ### Links
 
 - Depends on: `members-0001`
+- Handoff: `docs/handoffs/HANDOFF-DEV.md` (Iteration 1)
 
 ---
 
@@ -422,7 +423,11 @@ Neon + Drizzle schema for **newsletter** and **membership** (orthogonal), OTP/ch
 
 **Out of scope:** Public UI; Stripe Checkout; Resend copy; admin UI.
 
+### Overall
+
+- Pass 1 (2026-07-14): **continue epic** — Preview health fail-closed 503 without `DATABASE_URL`; CI green; migrate/seed not exercised (no local/Preview `DATABASE_URL` yet). Report: `docs/reports/QA-pass1.md`
+
 ### Links
 
 - FEATURES.md: Infra; Members (planned)
-- Handoff: `docs/handoffs/HANDOFF-DEV.md` (Iteration 1)
+- PR: https://github.com/albertzang/ccvaa-web/pull/8
