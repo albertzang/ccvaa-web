@@ -2,10 +2,10 @@
 
 **Date:** 2026-07-14  
 **Requested by:** CEO / PM  
-**Backlog work ID:** `members-0003`  
+**Backlog work ID:** `members-0006`  
 **Backlog link:** `docs/product/backlogs/members-BACKLOG.md`  
 **Priority:** now  
-**Iteration:** `2`
+**Iteration:** `1`
 
 **Save as:** `docs/handoffs/HANDOFF-DEV.md`
 
@@ -17,38 +17,45 @@
 **Epic branch:** `feat/members`  
 **Merge gate:** `epic`
 
+**CEO approved direct-to-main?** n/a  
+
 ## Goal
 
-**Delta only:** Newsletter APIs must fail closed with clear **503** when Resend (or other required env) is missing — not generic **500** `MEMBERS_INTERNAL_ERROR`.
+Logged-in face of `#membership` (same slot as Join/`members-0004`): profile showing name; email change requires re-verify OTP; Annual shows read-only anniversary / next renewal; light placeholder for future perks (`members-0012`). **No newsletter UI** here (that stays on `#contact`).
 
-QA repro (Preview with `DATABASE_URL` set, `RESEND_*` missing):
-- `POST /api/members/newsletter/subscribe` → currently 500; expect 503 + clear code/message
-- `POST /api/members/newsletter/preference` (`lookup`) → same
+## User value
 
-Also harden: if schema missing (unmigrated Neon), return clear 503 rather than unhandled 500.
+Paid members see and manage their membership identity after OTP login (`members-0005`).
 
 ## Acceptance criteria
 
-- [ ] Subscribe / confirm / preference map `MembersEnvError` / Resend-not-configured to **503** with stable codes (not blank “Something went wrong”)
-- [ ] Preference `lookup` without Resend should not require send — if it 500s for env reasons, fix mapping; DB-only lookup should work with just `DATABASE_URL` if no email send is needed
-- [ ] Quick check join OTP routes share same error helper so 0004/0005 don’t regress the same way
-- [ ] Lint + typecheck; push on `feat/members`; overwrite `HANDOFF-QA-pass1.md` for **members-0003** Iteration 2 retest
-- [ ] **Do not merge**
+- [ ] Paid session shows profile in `#membership` (perks area = light stub/placeholder OK)
+- [ ] Name edit; email change requires OTP re-verify before identity update
+- [ ] Annual renewal / anniversary dates when applicable (Founding/Lifetime: null/ignored)
+- [ ] Zod on profile updates; FEATURES.md `#membership` updated
+- [ ] Fail closed without DB/session; lint + typecheck clean
+- [ ] On `feat/members` / PR #8; Pass 1 handoff updated; **do not merge**
 
 ## Out of scope
 
-Setting CEO secrets; full double opt-in with Mailosaur; merge to main; pausing unrelated `members-0005` work except pull/rebase onto this fix.
+Billing portal; Join Checkout (`0004`); newsletter (`0003`); real perks catalog (`0012`); merge to `main`.
 
 ## Technical hints
 
-- Routes under `src/app/api/members/newsletter/*`; shared error mapper if present
-- Health already reports `email.resend: "missing"` — API responses should align
-- After fix: QA will retest Pass 1 (continue epic expected)
+- Depends on session from `members-0005`; Join UI from `0004` when logged out
+- Homepage `#membership` slot — switch Join ↔ profile by session
+- Reuse Resend/OTP helpers for email re-verify
+- Notify **PM** if blocked on secrets (Preview still may lack migrate/seed)
+- Related FEATURES: Members → `#membership` profile
 
-## Git / deploy
+## Design / UX constraints
 
-Reuse `feat/members` / PR #8. PM authorizes commit/push. Pull tip first (`b90116a`+). If `members-0005` WIP lands mid-flight, rebase/merge carefully — this Iteration is small and priority.
+Match coastal theme; one job for `#membership` when logged in (profile). No newsletter chrome here.
+
+## Git / deploy expectations
+
+Reuse **`feat/members`** + PR #8. **PM authorizes** commit/push; **do not merge**. Overwrite `HANDOFF-QA-pass1.md` when ready.
 
 ## Done means
 
-503 fail-closed verified on Preview without Resend; Pass 1 handoff ready for retest; **PR not merged**
+Acceptance + lint/typecheck; Pass 1 handoff ready; PR not merged

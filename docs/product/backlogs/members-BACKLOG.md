@@ -247,7 +247,7 @@ Hero **Subscribe** + **Join** with live counters (anchors only): Subscribe → `
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `not-started` |
+| **Status** | `in-progress` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -270,6 +270,7 @@ Logged-in face of `#membership` (same slot as Join). Profile: name; email change
 
 - Depends on: `members-0005`
 - Shares slot with: `members-0004`
+- Handoff: `docs/handoffs/HANDOFF-DEV.md` (Iteration 1)
 
 ---
 
@@ -297,11 +298,15 @@ Homepage SPA login wall for `#membership`: 6-digit OTP (Resend) → httpOnly ses
 
 **Out of scope:** OAuth; passwords; admin auth; join/subscribe forms.
 
+### Overall
+
+- Pass 1 (2026-07-14): **continue epic** — sign-in UI + session/logout/admin isolation OK; live OTP E2E blocked (Preview Neon unmigrated / no Mailosaur). Report: `docs/reports/QA-pass1.md` (`0f0bada`)
+
 ### Links
 
 - Depends on: `members-0001`, `members-0002` (seeded or real members for QA; Join `0004` not required to start)
 - FEATURES.md: Members → Login
-- Handoff: `docs/handoffs/HANDOFF-DEV.md` (Iteration 1)
+- PR: https://github.com/albertzang/ccvaa-web/pull/8
 
 ---
 
