@@ -30,6 +30,8 @@ Handoffs and QA reports are **ephemeral working docs** for an open work ID (or o
 
 PM deletes these in the **same turn** as the status change (or baseline close). Recover prior text from **git history** if needed. Do not leave backlog **Links** pointing at deleted paths — keep PR / commit links only.
 
+**Epic / milestone:** while Merge gate is `epic`, do **not** delete handoffs/reports after a single ticket’s Pass 1 — keep until **milestone close** (Pass 2 or CEO marks all listed IDs `completed`/`closed`). Record each ticket’s Pass 1 outcome on the backlog item before overwriting fixed QA paths.
+
 Status change + handoff/report deletion may land in the **same commit** as other doc updates for that close — no separate “please commit cleanup” ask when CEO already authorized the ship (`verified`, merge ask, or explicit commit ask).
 
 **Bugs** live only as backlog items (`type: bug`, **Source:** `ceo` | `qa`). No parallel bugs directory.
@@ -82,8 +84,9 @@ Stages **Intake → Prioritize → Kickoff → Ship → Verify → Close** are i
 1. CEO describes bug/goal (or PM proposes from chat) → PM creates backlog item (`type: bug` with **Source:** `ceo`, or `task`)  
 2. Set **Verifier** / **Verify passes** / Ship path — prefer [common lanes](COMMUNICATION.md#common-lanes-use-defaults-unless-ceo-overrides)  
 3. On kickoff: status `in-progress` → Dev handoff with work ID + Verifier fields  
-4. **If Verifier = `agent`:** Pass 1/2 per Verify passes → `completed` + FEATURES.md if needed  
-5. **If Verifier = `ceo`:** after Dev ships → ask CEO to verify → **`verified`** completes backlog (**does not** auto-push); issues → Iteration on same ID  
+4. **If Verifier = `agent` + Merge gate `item`:** Pass 1/2 per Verify passes → `completed` + FEATURES.md if needed  
+5. **If Verifier = `agent` + Merge gate `epic`:** Pass 1 → **continue epic**; stay `in-progress` until milestone Pass 2 → then `completed` + FEATURES; delete handoffs/reports at milestone close  
+6. **If Verifier = `ceo`:** after Dev ships → ask CEO to verify → **`verified`** completes backlog (**does not** auto-push); issues → Iteration on same ID  
 
 ### QA finds a bug during a pass
 
@@ -147,7 +150,7 @@ One place for “what must be true” at each gate. Workflow index: [`COMMUNICAT
 | **QA** | **Baseline verified** | Production audit (no Preview / no feature work ID); **Bugs found** + **baseline confirmed** / **issues found**; PM promotes (**Source:** `qa`); do **not** block on `ccvaa.ca` |
 | **CEO** | **Product verified** (Verifier=`ceo`) | Smoked Verify-passes env(s); reply **`verified`** → PM marks `completed` (**no** auto-push/merge); or note issues → Iteration same ID; no agent QA files; `ccvaa.ca` optional/separate |
 | **CEO** | **agent-os verified** | Skim/approve `agent-os-*`; reply **`verified`** → PM marks `completed` **and ships** same turn (`direct-to-main` → commit+push; `feature-branch` / **self-evolve** → merge+delete branch); or Iteration same ID |
-| **PM** | **Self-evolve loop** | After CEO kickoff: new `agent-os-*` + feature branch; evaluate→improve→commit without mid-loop CEO asks; stop when no/insignificant improvements; then ask CEO to review commits before merge |
+| **PM** | **Self-evolve loop** | After CEO kickoff: new `agent-os-*` + feature branch; evaluate→improve→**prune**→commit (Guiding principle #9) without mid-loop CEO asks; stop when no/insignificant improvements; then ask CEO to review commits before merge |
 | **PM** | **Close done** | Status `completed` / `closed`; FEATURES updated if behavior changed; delete matching `docs/handoffs` + `docs/reports`; strip dead file Links; on `agent-os-*` + **`verified`**, ship per Ship path in the same turn |
 
 **Always Iteration on the same work ID** when verify fails or CEO notes issues; Ship path decides branch vs `main` (see [`GIT_DEPLOY.md`](GIT_DEPLOY.md)).

@@ -54,7 +54,7 @@ CEO may override Ship path and Verify passes when Verifier is `agent` or `ceo`. 
 
 **Self-evolve:** CEO kickoff → PM creates a new `agent-os-*` + feature branch and loops improve→commit without mid-loop CEO asks; merge only with CEO approval. See [`COMMUNICATION.md`](../protocols/COMMUNICATION.md#self-evolve-ceo-kickoff-os-improve-loop).
 
-**Epic / milestone:** CEO/PM sets **Epic branch** + **Merge gate `epic`** on participating items; merge once per milestone. See [`GIT_DEPLOY.md`](../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
+**Epic / milestone:** CEO/PM sets **Epic branch** + **Merge gate `epic`** on participating items; merge once per milestone. Tickets stay `in-progress` until milestone Pass 2; delete handoffs/reports at milestone close. Record Pass 1 notes on the backlog item before overwriting fixed QA paths. See [`GIT_DEPLOY.md`](../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
 
 **CEO Verifier loop** (Verifier = `ceo` only): stay `in-progress` until CEO says **verified** → `completed`. If CEO finds issues, append an **Iteration** on the same backlog item, overwrite the Dev handoff, and kick Dev again — do not invent a new work ID unless scope is deliberately split. **`verified`** on product code does **not** auto-push — see [`COMMUNICATION.md`](../protocols/COMMUNICATION.md). Details: [`CEO.md`](../protocols/CEO.md).
 
@@ -76,7 +76,7 @@ List work items **by ID descending** (highest / newest first). When adding a new
 
 **Retest / Iteration:** overwrite the same fixed path. Never create `-prior`, `-v2`, or `-attemptN` siblings — earlier content lives in git history.
 
-**Close:** when the backlog item is **`completed`** or **`closed`**, PM deletes the matching fixed handoff/report files under `docs/handoffs/` and `docs/reports/` (same turn). See [`HANDOFF.md`](../protocols/HANDOFF.md) lifespan.
+**Close:** when the backlog item is **`completed`** or **`closed`**, PM deletes the matching fixed handoff/report files under `docs/handoffs/` and `docs/reports/` (same turn). **Merge gate `epic`:** delete at **milestone close**, not after each ticket Pass 1. See [`HANDOFF.md`](../protocols/HANDOFF.md) lifespan.
 
 **Verifier = `ceo`:** no agent QA handoff/report files for that work ID.
 

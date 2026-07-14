@@ -199,7 +199,7 @@ Use when PM sets **Epic branch** (e.g. `feat/members`) and **Merge gate `epic`**
 
 | QA sign-off | CEO action |
 |-------------|------------|
-| **continue epic** (or **pass**) | Do **not** merge; PM kicks next epic ticket on the same branch when ready |
+| **continue epic** | Do **not** merge; PM kicks next epic ticket on the same branch when ready |
 | **hold** / **retest** | Wait; fixes on the same Epic branch |
 | **fail** | Do not merge; PM opens Iteration on same work ID (still on Epic branch) |
 

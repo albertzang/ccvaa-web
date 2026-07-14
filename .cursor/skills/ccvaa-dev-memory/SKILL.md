@@ -36,7 +36,7 @@ description: >-
 - Production (agent QA): https://ccvaa-web.vercel.app/
 - Public domain (CEO manual only): https://ccvaa.ca/
 - GitHub: auto-deploy from `main` on Vercel
-- Push/merge `main` only when CEO asks; default is feature branch + Preview
+- Push/merge `main` only when CEO asks (product Dev). Default for Verifier=`agent` is feature branch + Preview; Verifier=`ceo`/`n/a` often `direct-to-main`
 - Preview URL: from Vercel/GitHub PR (not `ccvaa-web.vercel.app`)
 - See `docs/protocols/GIT_DEPLOY.md`
 

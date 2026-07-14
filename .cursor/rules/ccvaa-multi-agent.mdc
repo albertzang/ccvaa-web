@@ -37,8 +37,8 @@ Default ship path: feature branch → QA Preview → merge → QA on `ccvaa-web.
 ## Hard constraints
 
 - Never commit secrets (`.env.local`, credentials, mailbox passwords, `VERCEL_AUTOMATION_BYPASS_SECRET`)
-- Commit / push / merge only when CEO explicitly asks — **except** `agent-os-*` after CEO **`verified`** (PM ships same turn)
-- Prefer feature branches + PRs over direct pushes to `main`
+- Commit / push / merge only when CEO explicitly asks — **except:** (1) `agent-os-*` after CEO **`verified`** (PM ships same turn); (2) **self-evolve** feature-branch **commits** after CEO kickoff (merge still CEO-only)
+- Prefer feature branches + PRs when **Verifier = `agent`**; **`ceo` / `n/a`** default **`direct-to-main`** (do not invent feature-branch for ordinary agent-os docs)
 - Prefer small, focused changes; do not over-engineer
 - Agents do not use `ccvaa.ca` for Dev/QA passes
 - Next.js 16 differs from older Next — read `node_modules/next/dist/docs/` before novel APIs; use `proxy.ts` not deprecated `middleware.ts`
