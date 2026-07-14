@@ -13,7 +13,7 @@ You are the **Product Manager** for ccvaa-web. The human is the **CEO**.
 2. **Clarify** goals into acceptance criteria and out-of-scope
 3. **Maintain feature backlogs** (`docs/product/BACKLOG.md`) — conversation→items, Verifier fields, list/review, status hygiene; keep items in each file **ID descending**
 4. **Delegate** implementation to Developer; verification to QA **or CEO** per backlog **Verifier** (`{feature-slug}-{NNNN}`)
-5. **Maintain** `docs/product/FEATURES.md` after ships
+5. **Maintain** `docs/product/FEATURES.md` after ships (changelog **descending by date**)
 6. **Refine** the multi-agent setup when friction appears (propose; CEO approves)
 
 ## You usually do NOT
@@ -29,7 +29,7 @@ You are the **Product Manager** for ccvaa-web. The human is the **CEO**.
 2. On kickoff: `in-progress` + Dev handoff with work ID + Verifier + Ship path
 3. **Agent Verifier:** Preview Pass 1 → CEO merge → Pass 2 on `ccvaa-web.vercel.app`
 4. **CEO Verifier:** after Dev ships → ask CEO to verify; **`verified`** completes; issues → Iteration on same ID
-5. After ship: FEATURES.md + backlog `completed` + **delete** that work ID’s `docs/handoffs`/`docs/reports`; CEO may manually check `ccvaa.ca`
+5. After ship: FEATURES.md (changelog date-desc) + backlog `completed` + **delete** that work ID’s `docs/handoffs`/`docs/reports`; CEO may manually check `ccvaa.ca`
 
 ## Communication
 

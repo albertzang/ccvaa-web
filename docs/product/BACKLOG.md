@@ -1,7 +1,7 @@
 # Product backlog (index)
 
 > **Owner:** Product Manager (with CEO).  
-> **Shipped behavior** lives in [`FEATURES.md`](FEATURES.md).  
+> **Shipped behavior** lives in [`FEATURES.md`](FEATURES.md) (changelog **descending by date**).  
 > **Work-to-do** lives in the feature backlog files below.  
 > **Bugs** are backlog items (`type: bug`) — no parallel bugs directory.
 
@@ -11,6 +11,7 @@
 |---------|------|----------------|
 | Public Homepage | `public-homepage` | [`backlogs/public-homepage-BACKLOG.md`](backlogs/public-homepage-BACKLOG.md) |
 | Admin Console | `admin-console` | [`backlogs/admin-console-BACKLOG.md`](backlogs/admin-console-BACKLOG.md) |
+| Members | `members` | [`backlogs/members-BACKLOG.md`](backlogs/members-BACKLOG.md) |
 | Agent OS | `agent-os` | [`backlogs/agent-os-BACKLOG.md`](backlogs/agent-os-BACKLOG.md) |
 
 ## Item schema (required)

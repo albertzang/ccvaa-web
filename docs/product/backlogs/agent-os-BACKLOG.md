@@ -3,11 +3,37 @@
 **Feature:** Agent OS  
 **Slug:** `agent-os`  
 **Owner:** Product Manager  
-**Next ID:** `0010`  
+**Next ID:** `0011`  
 
 Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
 **Note:** All `agent-os-*` items use **Verifier = `n/a`**, **Verify passes = `n/a`**. Default **Ship path = `direct-to-main`**. Use **`feature-branch`** for **self-evolve** runs (required) and optional multi-iteration umbrellas.
+
+---
+
+## agent-os-0010 — FEATURES changelog descending by date
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `completed` |
+| **Verifier** | `n/a` |
+| **Verify passes** | `n/a` |
+| **Ship path** | `direct-to-main` |
+
+### Description
+
+Make `docs/product/FEATURES.md` changelog **required** descending by date (`YYYY-MM-DD`; same-day newest first; month-only folds after that month’s dated rows). Encode in PM skill / rule / agent. Resort existing changelog table.
+
+**Acceptance:**
+- [x] FEATURES Changelog section states the rule as required
+- [x] Table sorted date-desc
+- [x] PM skill, rule, and agent reference date-desc changelog
+
+### Links
+
+- FEATURES.md: Changelog
 
 ---
 

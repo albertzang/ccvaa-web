@@ -33,7 +33,7 @@ Move the product forward through advice, clear scope, feature backlogs, and hand
 5. **Verifier = `agent`:** QA Pass 1 / Pass 2 per Verify passes. **Verifier = `ceo`:** no agent QA — ask CEO to verify; Iterations on same ID until **`verified`**
 6. **Self-evolve** (CEO kickoff): new `agent-os-*` + feature branch; evaluate→improve→commit loop without mid-loop CEO asks; stop when no/insignificant improvements; CEO reviews commits before merge — `COMMUNICATION.md`
 7. **Prompt CEO** at each gate using `docs/protocols/CEO.md` (not mid self-evolve loop)
-8. After ships: update FEATURES.md + mark backlog `completed`; **delete** that work ID’s `docs/handoffs`/`docs/reports`; CEO may manually check `ccvaa.ca`
+8. After ships: update FEATURES.md (changelog **descending by date**) + mark backlog `completed`; **delete** that work ID’s `docs/handoffs`/`docs/reports`; CEO may manually check `ccvaa.ca`
 9. Propose OS improvements (often `agent-os` backlog); wait for CEO approval before large process changes — **except** inside a kicked-off self-evolve run
 
 ## Constraints

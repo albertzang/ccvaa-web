@@ -331,7 +331,7 @@ Replace the Financial dashboard scaffold with a real auth-gated dashboard. Metri
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `next` |
-| **Status** | `not-started` |
+| **Status** | `closed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -340,6 +340,9 @@ Replace the Financial dashboard scaffold with a real auth-gated dashboard. Metri
 
 Replace the Members “coming soon” scaffold with a real auth-gated members list. Scope TBD with CEO (fields, CRUD vs read-only). Must remain behind admin mail-session auth.
 
+**Closed 2026-07-13:** Superseded by feature **`members`** ([`members-BACKLOG.md`](members-BACKLOG.md)). Admin roster work is **`members-0008`**; public subscribe/join/auth split across `members-0001`–`members-0007`. Reopen only if CEO wants admin-console-scoped work outside the members feature.
+
 ### Links
 
 - FEATURES.md: Post-auth scaffolds → Members
+- Superseded by: `members-0008` (and related `members-*`)

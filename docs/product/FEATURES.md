@@ -1,7 +1,7 @@
 # CCVAA Web — Feature Inventory
 
 > **Owner:** Product Manager agent  
-> **Updated:** 2026-07-11  
+> **Updated:** 2026-07-13  
 > Keep this document current whenever features ship or change. Work-to-do: [`BACKLOG.md`](BACKLOG.md).
 
 ## Product summary
@@ -16,24 +16,33 @@
 
 ## Public site (`/`)
 
+**Page order (top → bottom):** Nav → Hero → Membership (`#membership`) → About (`#about`) → Contact (`#contact`) → Footer.
+
 ### Header / nav
 - Fixed overlay header; style switches when scrolling past hero
 - Brush wordmark logos: `logo-ondark.png` (hero) / `logo-onlight.png` (scrolled)
 - Subtitle: “Visual Arts Association”
-- Nav: About (`#about`), Contact (`#contact`)
+- Nav anchors: About (`#about`), Contact (`#contact`); **planned:** Membership (`#membership`) as needed
 
 ### Hero
 - Full-bleed coastal hero image (`hero-background.webp`)
 - Eyebrow, headline, subheadline from `src/lib/site.ts`
-- Text is non-selectable; no CTA buttons in hero
+- Text is non-selectable
+- **Planned:** **Subscribe** + **Join** buttons with live counters; anchors to `#contact` (newsletter) and `#membership` (Join / profile panel) — see Members backlog
 
-### About
+### Membership (`#membership`) — planned
+- After Hero, before About
+- Plans: **Founding** (capped, lifetime) → then **Lifetime** (higher one-time fee); **Annual** always offered (stores renewal date)
+- Logged out → **Join**; logged-in → **profile** (email OTP). Perks later (`members-0012`). Newsletter stays in Contact. Hero **Join** anchors here.
+
+### About (`#about`)
 - Intro paragraphs
 - **Our Board** (collapsible section): group photo placeholder stays visible; member cards show name/role always; section expand reveals all portraits + bio placeholders together (Zhong Liu / President, Yaqi Jing / VP, Albert Zang / Secretary; 1:1 portraits)
 - **Our Purposes** (collapsible): 10 purpose cards; titles always visible; descriptions toggle together
 
-### Contact
+### Contact (`#contact`)
 - Email + mailing address card
+- **Planned:** Newsletter subscribe / manage (orthogonal to paid membership); ESP unsubscribe → Contact by anchor + token — see [`backlogs/members-BACKLOG.md`](backlogs/members-BACKLOG.md). Hero **Subscribe** anchors here.
 
 ### Footer
 - Org name, tagline, copyright (no duplicate contact block)
@@ -49,32 +58,48 @@
 
 ### Access control
 - `robots: noindex` on admin page
-- Available on phone, tablet, and desktop (no device gate)
+- Available on phone, tablet, and desktop
 
 ### Layout (left sidebar)
 - Dark ocean nav (`ocean-950`): left sidebar on `md+`; on small screens brand + **collapsed menu toggle** (expands to full nav list); cream main pane
-- Brand mark (logo + “Visual Arts Association”) shared with public header via `BrandMark` — same logo size (`h-7` / `sm:h-8`), centered (no “Admin” label)
+- Brand mark (logo + “Visual Arts Association”) shared with public header via `BrandMark` — same logo size (`h-7` / `sm:h-8`), centered
 - Nav order: **Webmail**, **Members**, **Events**, **Financial**
 - Members / Events / Financial require mailbox sign-in; **Log out** when authenticated
 - Main pane shows the active panel (Webmail embed or scaffold placeholders)
 
-### Webmail (sign-in surface + always available)
-- Full-pane Hover webmail via **same-origin proxy** `/admin/mail` (iframe embed)
-- Proxy rewrites Roundcube paths/assets/cookies so iframe works (Hover blocks direct iframe via `X-Frame-Options`)
-- Proxy also: forwards `X-Roundcube-Request` (refresh CSRF); avoids trailing-slash AJAX redirects; blocks hash-only toolbar navigations under `<base href>`; hides blank `#header` chrome after login; injects same-origin auth `postMessage` bridge; preload-then-swap for task switches; compose discard dialog preserved
-- Known fragility: third-party Roundcube reverse proxy; watch for session/cookie/browser differences
+### Webmail
+- Full-pane Hover webmail via same-origin proxy `/admin/mail` (iframe; Hover blocks direct embed via `X-Frame-Options`)
+- Proxy handles Roundcube paths/cookies/CSRF, auth `postMessage` bridge, task switches, and minor chrome fixes
+- Known fragility: third-party Roundcube reverse proxy (session/cookie/browser differences)
 
 ### Admin auth (Hover mailbox session)
-- Admin console is authenticated **iff** the Hover mailbox session inside the mail iframe is logged in
-- Detection: Roundcube session cookie + fail-closed upstream probe (`/api/admin/session`); iframe bridge `postMessage` for near-realtime updates when Webmail is open
-- Sidebar **Log out** clears proxied Roundcube cookies and remounts the mail iframe (same effect as signing out of mail)
-- No OTP UI/APIs; no `ADMIN_SESSION_SECRET` / SMTP / Redis required for admin login (see `.env.example`)
-- Security model: whoever can sign into `info@ccvaa.ca` via embedded webmail has admin chrome access
+- Admin chrome is authenticated **iff** the Hover mailbox session in the mail iframe is logged in
+- Detection: Roundcube session cookie + fail-closed upstream probe (`/api/admin/session`); iframe `postMessage` while Webmail is open
+- Sidebar **Log out** clears proxied Roundcube cookies and remounts the mail iframe
+- Privilege = anyone who can sign into `info@ccvaa.ca` via embedded webmail
 
 ### Post-auth scaffolds (placeholders only)
-- **Members** — coming soon
-- **Events** — coming soon (future CRUD)
+- **Members** — coming soon ([`members` backlog](backlogs/members-BACKLOG.md); roster = `members-0008`)
+- **Events** — coming soon
 - **Financial** — coming soon
+
+---
+
+## Members (planned)
+
+> Work IDs: [`backlogs/members-BACKLOG.md`](backlogs/members-BACKLOG.md). Shipped behavior lands in Public / Admin sections above as items complete.
+
+**Two orthogonal axes:** Newsletter (Contact `#contact`) ⊥ Membership (Founding / Lifetime / Annual on `#membership`). A paid member may or may not be on the newsletter.
+
+| | Newsletter | Membership |
+|--|------------|------------|
+| **Meaning** | Mailing-list opt-in | Paid association (Stripe) |
+| **UI** | Contact; ESP unsub → `#contact` + token | `#membership`: Join ↔ profile (login wall; perks later) |
+| **Count** | Anyone with newsletter on | Active paid plans |
+
+**Hero:** Subscribe / Join + counters → `#contact` / `#membership` (anchors).  
+**Stack:** Neon + Drizzle + Zod · Stripe · Resend · ESP · Mailosaur. Admin roster (`0008`); Resend/ESP new-tab links (`0010`); later: in-admin blast, member perks, impersonation.  
+**Standing:** No Resend/ESP iframes; member auth = email OTP (no OAuth/passwords); homepage SPA anchors over separate marketing routes.
 
 ---
 
@@ -88,7 +113,7 @@
 | Preview | Per-branch/PR Vercel URL (pre-merge QA target) |
 | DNS / email | Hover |
 | CI | lint, typecheck, build (GitHub Actions) |
-| Package | Next.js / React only for admin auth (mail session); no OTP/SMTP/Redis deps |
+| Stack | Next.js App Router, React, Tailwind; admin auth = Hover mail-session |
 | Ship path | Feature branch → QA Preview → merge → cleanup → QA on `ccvaa-web.vercel.app` (Verifier = `agent`). **Verifier = `ceo`:** CEO verifies (defaults: `direct-to-main` + Production pass2). Work IDs `{feature-slug}-{NNNN}` — [`BACKLOG.md`](BACKLOG.md). **Baseline** pass = Production audit with no PR. See `docs/protocols/GIT_DEPLOY.md`. CEO may manually check `ccvaa.ca`. |
 
 ### Important technical notes for Developer
@@ -96,7 +121,7 @@
 - Read `node_modules/next/dist/docs/` before novel Next APIs
 - Never commit `.env.local` or secrets
 - Default: feature branch + PR with backlog work ID `{feature-slug}-{NNNN}`; merge/push `main` only when CEO explicitly asks
-- Admin mail proxy on Preview needs network reachability to `mail.hover.com` (no OTP/SMTP/Redis Preview env required for login)
+- Admin mail proxy on Preview needs network reachability to `mail.hover.com`
 
 ---
 
@@ -108,27 +133,32 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 ## Changelog (high level)
 
-Newest first preferred. Keep rows **one line** each. When the table grows past ~30 rows, PM may fold older entries into a single monthly summary row (history remains in git).
+**Order (required):** rows **descending by date** (`YYYY-MM-DD`). Same-day rows: newest event first. Month-only folds (`YYYY-MM`) sit **after** all dated rows in that month. Keep rows **one line** each. When the table grows past ~30 rows, PM may fold older entries into a single monthly summary row (history remains in git). New entries always go at the **top** of their date group (usually the top of the table).
 
 | When | What |
 |------|------|
+| 2026-07-13 | Members backlog final review: build-order waves; ESP stubs; dep/hygiene consistency |
+| 2026-07-13 | FEATURES prune: drop obsolete admin OTP/SMTP/Redis negatives; tighten Admin/Infra current-state copy |
+| 2026-07-13 | Members backlog + FEATURES: newsletter ⊥ membership; homepage Nav→Hero→Membership→About→Contact→Footer |
+| 2026-07-13 | **agent-os-0010:** FEATURES changelog must be descending by date (OS rule + table resort) |
+| 2026-07-13 | **Members** feature backlog opened (`members-0001`+); `admin-console-0001` closed as superseded |
 | 2026-07-12 | **agent-os-0009** self-evolve: principles↔self-evolve; agent QA gate trim; baseline = Production QA mode; changelog hygiene (PR #6) |
-| 2026-07 | Public site, board/purposes UX, branding/logos, favicon |
+| 2026-07-12 | “Go back to Hover.com” opens in a new tab from mail iframe (`admin-console-0012`) |
+| 2026-07-12 | Hide Hover pre-login help block in mail iframe (`admin-console-0011`) |
+| 2026-07-12 | **agent-os-0008:** OS **self-evolve** workflow (CEO kickoff; PM loop on feature branch; CEO merge gate) |
+| 2026-07-12 | **agent-os-0007:** Guiding principles; stale-doc sweep; role titles; ship/tiny-fix defaults; workflow map + `verified` table + rare paths; HANDOFF gates matrix |
+| 2026-07-12 | **agent-os-0005:** PM chat title `Product Manager`; ephemeral fixed-name handoffs/reports; backlog ID-desc + `closed` status; `ADMIN_EMAIL`/`ADMIN_PASS` for QA |
+| 2026-07-12 | Embedded Hover mail iframe fixes (`admin-console-0009`): refresh 403, More/Mark reload, hide blank `#header` |
+| 2026-07-12 | Admin auth = Hover mailbox iframe session; OTP pruned; dark sidebar console + mail embed UX; mobile gate removed (`admin-console-0010`, PR #4) |
+| 2026-07-12 | Admin sidebar dark theme + logo width match nav column; drop “· Admin” (`admin-console-0010` Iteration 12, PR #4) |
+| 2026-07-11 | **Verifier** `agent` \| `ceo` \| `n/a` + **Verify passes**; CEO may bypass agent QA; `agent-os` uses `n/a`; **`verified` on agent-os ⇒ ship per Ship path** |
+| 2026-07-11 | OTP shared store via Marketplace Redis (`KV_REST_API_*`); `admin-console-0007` closed |
+| 2026-07-11 | Feature backlogs replace ROADMAP; work IDs `{feature-slug}-{NNNN}` |
+| 2026-07-11 | `/admin` page intro blurb removed (`admin-console-0008`) |
 | 2026-07-10 | `/admin` OTP + Hover mail proxy + scaffolds; multi-agent OS bootstrapped |
 | 2026-07-10 | Encoded feature-branch → Preview QA → merge → Production QA (`ccvaa-web.vercel.app`); `ccvaa.ca` CEO-manual only |
 | 2026-07-10 | Ship path field: CEO owns `direct-to-main` approval; Developer follows handoff literally |
 | 2026-07-10 | Post-merge: delete feature branch local+remote before Pass 2; Pass 2 fixes = new branch from main |
 | 2026-07-10 | Added standard **baseline** QA pass (Production audit, no PR) |
 | 2026-07-10 | QA OTP: single-Send + CEO-in-the-loop protocol (`QA_AUTH.md`) to protect rate limits |
-| 2026-07-11 | OTP shared store via Marketplace Redis (`KV_REST_API_*`); `admin-console-0007` closed |
-| 2026-07-11 | Feature backlogs replace ROADMAP; work IDs `{feature-slug}-{NNNN}` |
-| 2026-07-12 | **agent-os-0008:** OS **self-evolve** workflow (CEO kickoff; PM loop on feature branch; CEO merge gate) |
-| 2026-07-12 | **agent-os-0007:** Guiding principles; stale-doc sweep; role titles; ship/tiny-fix defaults; workflow map + `verified` table + rare paths; HANDOFF gates matrix |
-| 2026-07-12 | “Go back to Hover.com” opens in a new tab from mail iframe (`admin-console-0012`) |
-| 2026-07-12 | Hide Hover pre-login help block in mail iframe (`admin-console-0011`) |
-| 2026-07-12 | **agent-os-0005:** PM chat title `Product Manager`; ephemeral fixed-name handoffs/reports; backlog ID-desc + `closed` status; `ADMIN_EMAIL`/`ADMIN_PASS` for QA |
-| 2026-07-11 | **Verifier** `agent` \| `ceo` \| `n/a` + **Verify passes**; CEO may bypass agent QA; `agent-os` uses `n/a`; **`verified` on agent-os ⇒ ship per Ship path** |
-| 2026-07-11 | `/admin` page intro blurb removed (`admin-console-0008`) |
-| 2026-07-12 | Embedded Hover mail iframe fixes (`admin-console-0009`): refresh 403, More/Mark reload, hide blank `#header` |
-| 2026-07-12 | Admin auth = Hover mailbox iframe session; OTP pruned; dark sidebar console + mail embed UX; mobile gate removed (`admin-console-0010`, PR #4) |
-| 2026-07-12 | Admin sidebar dark theme + logo width match nav column; drop “· Admin” (`admin-console-0010` Iteration 12, PR #4) |
+| 2026-07 | Public site, board/purposes UX, branding/logos, favicon |

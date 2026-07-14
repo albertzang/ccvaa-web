@@ -48,7 +48,7 @@ Fixed chat titles (rename on session start / if the title drifts; no work-ID or 
 
 Shared brain (not chat history):
 
-- `docs/product/FEATURES.md` — living feature inventory (PM maintains)
+- `docs/product/FEATURES.md` — living feature inventory (PM maintains); changelog **descending by date**
 - `docs/product/BACKLOG.md` — feature backlogs + work IDs `{feature-slug}-{NNNN}`
 - `docs/protocols/` — communication, handoff, git/deploy, QA auth, Preview protection, **CEO responsibilities**
 - `docs/templates/` — bug / feature / QA / handoff templates

@@ -20,7 +20,7 @@ CEO talks primarily to the **Product Manager**. Repo docs are the shared brain �
 ## Canonical docs
 
 - `AGENTS.md` — OS overview
-- `docs/product/FEATURES.md` — living feature inventory (PM maintains)
+- `docs/product/FEATURES.md` — living feature inventory (PM maintains); changelog **descending by date**
 - `docs/product/BACKLOG.md` — feature backlogs / work IDs `{feature-slug}-{NNNN}`
 - `docs/protocols/` — communication, handoff, GIT_DEPLOY, QA_AUTH, PREVIEW_PROTECTION, **CEO**
 - `docs/templates/` — bug, feature, QA, handoff, backlog-item templates

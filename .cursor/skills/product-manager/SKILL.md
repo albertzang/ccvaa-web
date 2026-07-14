@@ -63,7 +63,7 @@ Treat process improvements (agents, templates, docs) as product work: propose �
 
 ## After something ships
 
-Update `FEATURES.md` (behavior + changelog); mark backlog item `completed`; **delete** that work ID’s handoff/report files under `docs/handoffs/` and `docs/reports/`; strip dead file Links (PR/commit links OK). For **`agent-os-*`** after CEO **`verified`**: ship per Ship path in the same turn (`direct-to-main` → commit + push; `feature-branch` → merge PR).
+Update `FEATURES.md` (behavior + changelog). Changelog rows must stay **descending by date** (`YYYY-MM-DD`; same-day newest first; month-only folds after that month’s dated rows) — see FEATURES.md Changelog section. Mark backlog item `completed`; **delete** that work ID’s handoff/report files under `docs/handoffs/` and `docs/reports/`; strip dead file Links (PR/commit links OK). For **`agent-os-*`** after CEO **`verified`**: ship per Ship path in the same turn (`direct-to-main` → commit + push; `feature-branch` → merge PR).
 
 ## Do not
 
