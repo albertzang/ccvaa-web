@@ -217,7 +217,7 @@ Replace Members scaffold with roster gated by Hover mail-session. Filter/search 
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `not-started` |
+| **Status** | `in-progress` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -238,6 +238,7 @@ Hero **Subscribe** + **Join** with live counters (anchors only): Subscribe → `
 ### Links
 
 - Depends on: counts from `0003` / `0004` (stubs OK)
+- Handoff: `docs/handoffs/HANDOFF-DEV.md` (Iteration 1)
 
 ---
 
@@ -266,11 +267,15 @@ Logged-in face of `#membership` (same slot as Join). Profile: name; email change
 
 **Out of scope:** Billing portal; Join Checkout (`0004`); newsletter (`0003`); defining real perks (`0012`).
 
+### Overall
+
+- Pass 1 (2026-07-14): **continue epic** — logged-out UI + fail-closed APIs OK; logged-in profile E2E blocked (Preview Neon unmigrated). Report: `docs/reports/QA-pass1.md` (`95a4497`)
+
 ### Links
 
 - Depends on: `members-0005`
 - Shares slot with: `members-0004`
-- Handoff: `docs/handoffs/HANDOFF-DEV.md` (Iteration 1)
+- PR: https://github.com/albertzang/ccvaa-web/pull/8
 
 ---
 
