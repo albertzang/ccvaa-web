@@ -81,7 +81,7 @@ Prefer the common lanes. These are **allowed only when CEO explicitly overrides*
 | Verifier=`agent` + Ship path=`direct-to-main` | Agent QA without a Preview is awkward for pass1 | Keep `feature-branch`, or switch Verifier to `ceo` |
 | Verifier=`ceo` + Ship path=`feature-branch` | CEO wants Preview before merge | OK as override; not the default story |
 | Verify passes=`pass1` or `pass2` alone (agent) | Skips half the safety net | Default `pass1+pass2`; use alone only for scoped exceptions |
-| `agent-os` + `feature-branch` | Extra PR ceremony vs default docs path | Default `direct-to-main` for ordinary OS docs; **required** for **self-evolve** runs (and optional multi-iteration umbrellas) |
+| `agent-os` + `feature-branch` | Extra PR ceremony vs default docs path | Default `direct-to-main` for ordinary OS docs; **required** for **self-evolve**; otherwise only if **CEO asks** for umbrella PR |
 
 Developer still **blocks** inventing `direct-to-main` when Verifier=`agent` without CEO approval on the handoff.
 

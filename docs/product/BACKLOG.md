@@ -39,7 +39,7 @@
 
 CEO may override Ship path and Verify passes when Verifier is `agent` or `ceo`. **Verifier = `ceo`** implies CEO owns verification and (for the default Ship path) approves `direct-to-main`. Prefer **common lanes** in [`COMMUNICATION.md`](../protocols/COMMUNICATION.md) (happy path / CEO Verifier / tiny-fix / agent-os / baseline).
 
-**Do not** set Verifier / Verify passes to `agent` or `ceo` on **`agent-os-*`** items — always **`n/a`**. **Ship path for `agent-os-*`:** default **`direct-to-main`**; use **`feature-branch`** for **self-evolve** runs (required) and optional multi-iteration umbrellas. Never leave Ship path as `tbd`.
+**Do not** set Verifier / Verify passes to `agent` or `ceo` on **`agent-os-*`** items — always **`n/a`**. **Ship path for `agent-os-*`:** default **`direct-to-main`**; use **`feature-branch`** only for **self-evolve** (required) or when **CEO explicitly** asks for an umbrella PR / commit-history review before merge. Do not pick `feature-branch` just because an OS docs change is large. Never leave Ship path as `tbd`.
 
 ### Rare paths (CEO must override explicitly)
 
@@ -48,7 +48,7 @@ CEO may override Ship path and Verify passes when Verifier is `agent` or `ceo`. 
 | `agent` + `direct-to-main` | `agent` + `feature-branch`, or Verifier `ceo` |
 | `ceo` + `feature-branch` | OK when CEO wants Preview; not the default |
 | Agent Verify passes = `pass1` or `pass2` alone | Default `pass1+pass2` unless CEO scopes an exception |
-| Ordinary `agent-os` docs on `feature-branch` | Default `direct-to-main` unless umbrella or **self-evolve** |
+| Ordinary `agent-os` docs on `feature-branch` | Default `direct-to-main` unless **self-evolve** or CEO asks for umbrella PR |
 
 **Self-evolve:** CEO kickoff → PM creates a new `agent-os-*` + feature branch and loops improve→commit without mid-loop CEO asks; merge only with CEO approval. See [`COMMUNICATION.md`](../protocols/COMMUNICATION.md#self-evolve-ceo-kickoff-os-improve-loop).
 

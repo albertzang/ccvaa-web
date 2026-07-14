@@ -92,7 +92,7 @@ No agent `HANDOFF-QA-*` / `QA-*` files for this path. Do not mint a new work ID 
 
 Use for ordinary `agent-os-*` items (protocols, templates, skills — not product code Pass 1/2). **Not** the self-evolve loop — see below.
 
-- [ ] Ship path defaults to **`direct-to-main`** (PM should not leave `tbd`); use `feature-branch` for multi-iteration umbrellas or **self-evolve**
+- [ ] Ship path defaults to **`direct-to-main`** (PM should not leave `tbd`); use `feature-branch` for **self-evolve**, or when you explicitly want an umbrella PR before merge
 - [ ] PM implements (on `main` or the feature branch)
 - [ ] PM asks you to skim / approve
 - [ ] Reply **`verified`** → PM marks **`completed`**, then ships in the same turn:

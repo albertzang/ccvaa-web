@@ -3,11 +3,53 @@
 **Feature:** Agent OS  
 **Slug:** `agent-os`  
 **Owner:** Product Manager  
-**Next ID:** `0011`  
+**Next ID:** `0012`  
 
 Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
-**Note:** All `agent-os-*` items use **Verifier = `n/a`**, **Verify passes = `n/a`**. Default **Ship path = `direct-to-main`**. Use **`feature-branch`** for **self-evolve** runs (required) and optional multi-iteration umbrellas.
+**Note:** All `agent-os-*` items use **Verifier = `n/a`**, **Verify passes = `n/a`**. Default **Ship path = `direct-to-main`**. Use **`feature-branch`** only when (1) **self-evolve** (required) or (2) CEO explicitly asks for an umbrella PR / commit-history review before merge. Do **not** set `feature-branch` merely because the OS change is large or multi-file — ordinary protocol/skill/doc encoding stays `direct-to-main`.
+
+---
+
+## agent-os-0011 — Long-lived epic branch + milestone merge
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `not-started` |
+| **Verifier** | `n/a` |
+| **Verify passes** | `n/a` |
+| **Ship path** | `direct-to-main` |
+
+### Description
+
+**Problem:** Today every backlog item on Ship path `feature-branch` is expected to merge to `main` after its own Pass 1 (then Pass 2). That fits small ships. Large features (e.g. **Members**) need several tickets on one long-lived branch and only merge when a **milestone** is ready — otherwise `main` gets half-built platforms (DB without UI, stubs, broken public flows).
+
+**Goal:** Upgrade the Agent OS so PM/Dev/QA can run an **epic / milestone** lane:
+
+1. One long-lived branch (e.g. `feat/members` or `feat/{feature-slug}-{milestone}`) for N work IDs
+2. Kickoff / Dev / Preview QA per **ticket** still works (Pass 1 against that branch’s Preview)
+3. **Merge to `main`** only when PM/CEO declares the **milestone** complete (aggregate Pass 1 / CEO gate) — not after every ticket
+4. After milestone merge: delete epic branch; Pass 2 on Production; later tickets start a **new** epic branch (or continue a named follow-on milestone branch cut from latest `main`)
+5. Default per-item merge path remains for ordinary tickets; epic/milestone is opt-in and CEO/PM-declared
+
+**Encode in:** `GIT_DEPLOY.md`, `COMMUNICATION.md` (workflow map + lanes), `HANDOFF.md` / gates matrix, `BACKLOG.md` (+ template — e.g. optional **Milestone** / **Epic branch** fields), PM + Dev + QA skills/rules/agents, `CEO.md` merge ask wording. Align with Members kickoff sequencing after this OS lands (or document interim exception if Members starts first).
+
+**Acceptance:**
+- [ ] Protocols document both lanes: **per-item merge** (default) vs **epic/milestone merge**
+- [ ] Clear rules: when to open epic branch, how work IDs share it, when Pass 1 runs, when merge is allowed, branch cleanup, Pass 2 / fix policy
+- [ ] Backlog schema supports declaring Milestone / epic branch (or equivalent) without breaking existing items
+- [ ] Handoffs show epic branch + Preview URL + whether this ticket merges or not
+- [ ] FEATURES / AGENTS / skills mention the lane; changelog row
+- [ ] CEO **verified** → commit + push `main` (Ship path `direct-to-main`)
+
+**Out of scope:** Implementing Members code; inventing a permanent staging env beyond Vercel Preview; changing Verifier defaults for tiny tickets.
+
+### Links
+
+- Motivated by: Members initiate plan (`members-0001`+)
+- Touches: `docs/protocols/GIT_DEPLOY.md`, `COMMUNICATION.md`, `HANDOFF.md`, `CEO.md`, `docs/product/BACKLOG.md`
 
 ---
 

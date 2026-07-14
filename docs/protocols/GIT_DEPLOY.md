@@ -69,7 +69,7 @@ Set on the backlog item and Dev handoff. See [`docs/product/BACKLOG.md`](../prod
 |----------|-------------------|------------------------|--------------|
 | **`agent`** | `feature-branch` | `pass1+pass2` | QA agent (`HANDOFF-QA-*` / `QA-*`) |
 | **`ceo`** | `direct-to-main` | `pass2` | CEO manually — **no** agent QA files |
-| **`n/a`** | **`direct-to-main`** (default for `agent-os-*`; CEO may set `feature-branch` for multi-iteration umbrellas) | `n/a` | **No** — **`agent-os`** / docs-process only; CEO reviews via chat |
+| **`n/a`** | **`direct-to-main`** (default for `agent-os-*`; `feature-branch` only for **self-evolve** or CEO-explicit umbrella PR) | `n/a` | **No** — **`agent-os`** / docs-process only; CEO reviews via chat |
 
 **Verify passes** may be `pass1+pass2`, `pass1` (Preview only), or `pass2` (Production only). Preview = pre-merge staging. **`agent-os-*` items always use Verifier / Verify passes = `n/a`**, and Ship path defaults to **`direct-to-main`** (do not leave `tbd`).
 
