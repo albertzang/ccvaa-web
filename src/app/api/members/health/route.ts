@@ -2,13 +2,22 @@ import { NextResponse } from "next/server";
 
 import { pingMembersDb } from "@/db/client";
 import { MembersDbError } from "@/lib/members/errors";
-import { getDatabaseUrl, MembersEnvError } from "@/lib/members/env";
+import {
+  getDatabaseUrl,
+  isMailosaurConfigured,
+  MembersEnvError,
+} from "@/lib/members/env";
+import { isResendConfigured } from "@/lib/members/resend";
 
 /**
- * Platform health for Members DB — no public UI in members-0001.
+ * Platform health for Members — DB + transactional email config.
  * Returns 503 when DATABASE_URL is missing or Neon is unreachable (fail closed).
+ * Resend/Mailosaur status is informational only (does not affect HTTP status).
  */
 export async function GET() {
+  const resendConfigured = isResendConfigured();
+  const mailosaurConfigured = isMailosaurConfigured();
+
   if (!getDatabaseUrl()) {
     return NextResponse.json(
       {
@@ -16,6 +25,11 @@ export async function GET() {
         code: "MEMBERS_ENV_MISSING",
         message:
           "DATABASE_URL is not configured. Members platform is unavailable.",
+        db: { ok: false, code: "MEMBERS_ENV_MISSING" },
+        email: {
+          resend: resendConfigured ? "configured" : "missing",
+          mailosaur: mailosaurConfigured ? "configured" : "missing",
+        },
       },
       { status: 503 },
     );
@@ -23,7 +37,15 @@ export async function GET() {
 
   try {
     await pingMembersDb();
-    return NextResponse.json({ ok: true, service: "members-db" });
+    return NextResponse.json({
+      ok: true,
+      service: "members-platform",
+      db: { ok: true },
+      email: {
+        resend: resendConfigured ? "configured" : "missing",
+        mailosaur: mailosaurConfigured ? "configured" : "missing",
+      },
+    });
   } catch (error) {
     const message =
       error instanceof MembersEnvError || error instanceof MembersDbError
@@ -37,6 +59,18 @@ export async function GET() {
           ? error.code
           : "MEMBERS_DB_UNAVAILABLE";
 
-    return NextResponse.json({ ok: false, code, message }, { status: 503 });
+    return NextResponse.json(
+      {
+        ok: false,
+        code,
+        message,
+        db: { ok: false, code },
+        email: {
+          resend: resendConfigured ? "configured" : "missing",
+          mailosaur: mailosaurConfigured ? "configured" : "missing",
+        },
+      },
+      { status: 503 },
+    );
   }
 }

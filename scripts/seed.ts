@@ -1,10 +1,10 @@
-import { createHash } from "node:crypto";
 import { config } from "dotenv";
 import { eq } from "drizzle-orm";
 import { resolve } from "node:path";
 
 import { getMembersDb } from "@/db/client";
 import { members, otpChallenges, unsubTokens } from "@/db/schema";
+import { hashOtpCode } from "@/lib/members/crypto";
 import { canRunMembersSeeds, getMembersRuntimeEnv } from "@/lib/members/env";
 
 config({ path: resolve(process.cwd(), ".env.local") });
@@ -20,10 +20,6 @@ const SEED_EMAILS = {
   lifetime: "lifetime@ccvaa-seed.test",
   annual: "annual@ccvaa-seed.test",
 } as const;
-
-function hashOtp(code: string): string {
-  return createHash("sha256").update(code).digest("hex");
-}
 
 async function upsertMember(
   email: string,
@@ -106,7 +102,7 @@ async function main() {
   await db.insert(otpChallenges).values({
     email: SEED_EMAILS.annual,
     purpose: "login",
-    codeHash: hashOtp("123456"),
+    codeHash: hashOtpCode("123456"),
     expiresAt: new Date(Date.now() + 15 * 60 * 1000),
   });
 

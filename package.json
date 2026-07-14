@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts",
-    "db:seed": "tsx scripts/seed.ts"
+    "db:seed": "tsx scripts/seed.ts",
+    "members:send-otp-test": "tsx scripts/members-send-otp-test.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
@@ -18,6 +19,7 @@
     "next": "16.2.10",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "resend": "^4.8.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

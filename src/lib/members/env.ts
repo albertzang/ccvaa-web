@@ -6,8 +6,14 @@
  * - Vercel Preview: Preview env vars (Neon branch recommended)
  * - Vercel Production: Production env vars (Neon main branch)
  *
+ * Transactional email (members-0002+):
+ * - `RESEND_API_KEY`, `RESEND_FROM_EMAIL` — required to send OTP / confirm emails
+ *
+ * Preview QA inbox (members-0002+ — optional; see docs/members/mailosaur-qa.md):
+ * - `MAILOSAUR_API_KEY`, `MAILOSAUR_SERVER_ID`
+ *
  * Future tickets (placeholders in `.env.example` only — not read at runtime here):
- * - Stripe test/live keys, Resend, Mailosaur, ESP
+ * - Stripe test/live keys, ESP
  */
 
 export type MembersRuntimeEnv = "development" | "preview" | "production" | "test";
@@ -56,4 +62,18 @@ export class MembersEnvError extends Error {
     super(message);
     this.name = "MembersEnvError";
   }
+}
+
+export function getMailosaurApiKey(): string | undefined {
+  const key = process.env.MAILOSAUR_API_KEY?.trim();
+  return key || undefined;
+}
+
+export function getMailosaurServerId(): string | undefined {
+  const id = process.env.MAILOSAUR_SERVER_ID?.trim();
+  return id || undefined;
+}
+
+export function isMailosaurConfigured(): boolean {
+  return Boolean(getMailosaurApiKey() && getMailosaurServerId());
 }

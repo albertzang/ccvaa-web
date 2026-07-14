@@ -37,4 +37,14 @@ npm run db:seed   # non-Production only
 
 ## Env
 
-See `.env.example` — `DATABASE_URL` (Neon). Preview/Production use Vercel env vars.
+See `.env.example` — `DATABASE_URL` (Neon), `RESEND_API_KEY` + `RESEND_FROM_EMAIL` (transactional OTP), optional Mailosaur for Preview QA (`docs/members/mailosaur-qa.md`).
+
+## OTP challenges
+
+| Constant | Value |
+|----------|-------|
+| TTL | 15 minutes |
+| Rate limit | 3 challenges / email + purpose / hour |
+| Max verify attempts | 5 per challenge |
+
+Helpers live in `src/lib/members/otp-challenges.ts` and `src/lib/members/confirm.ts`.
