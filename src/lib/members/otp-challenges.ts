@@ -3,7 +3,10 @@ import { and, desc, eq, gt, isNull, sql } from "drizzle-orm";
 import { getMembersDb } from "@/db/client";
 import { otpChallenges } from "@/db/schema";
 import { generateOtpCode, hashOtpCode } from "@/lib/members/crypto";
-import { MembersDbError } from "@/lib/members/errors";
+import {
+  MembersDbError,
+  withMembersDbError,
+} from "@/lib/members/errors";
 import {
   OTP_MAX_CHALLENGES_PER_WINDOW,
   OTP_MAX_VERIFY_ATTEMPTS,
@@ -64,21 +67,23 @@ async function countRecentChallenges(
   email: string,
   purpose: OtpPurpose,
 ): Promise<number> {
-  const db = getMembersDb();
-  const windowStart = new Date(Date.now() - OTP_RATE_LIMIT_WINDOW_MS);
+  return withMembersDbError(async () => {
+    const db = getMembersDb();
+    const windowStart = new Date(Date.now() - OTP_RATE_LIMIT_WINDOW_MS);
 
-  const rows = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(otpChallenges)
-    .where(
-      and(
-        eq(otpChallenges.email, email),
-        eq(otpChallenges.purpose, purpose),
-        gt(otpChallenges.createdAt, windowStart),
-      ),
-    );
+    const rows = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(otpChallenges)
+      .where(
+        and(
+          eq(otpChallenges.email, email),
+          eq(otpChallenges.purpose, purpose),
+          gt(otpChallenges.createdAt, windowStart),
+        ),
+      );
 
-  return rows[0]?.count ?? 0;
+    return rows[0]?.count ?? 0;
+  }, "Failed to check OTP rate limit.");
 }
 
 /**
@@ -109,8 +114,8 @@ export async function createOtpChallenge(input: {
     expiresAt,
   });
 
-  const db = getMembersDb();
-  try {
+  return withMembersDbError(async () => {
+    const db = getMembersDb();
     const inserted = await db
       .insert(otpChallenges)
       .values({
@@ -134,12 +139,7 @@ export async function createOtpChallenge(input: {
       code,
       expiresAt: row.expiresAt,
     };
-  } catch (error) {
-    if (error instanceof MembersRateLimitError) {
-      throw error;
-    }
-    throw new MembersDbError("Failed to create OTP challenge.", { cause: error });
-  }
+  }, "Failed to create OTP challenge.");
 }
 
 /**
@@ -153,22 +153,24 @@ export async function verifyOtpChallenge(
   const email = parsed.email.trim().toLowerCase();
   const now = new Date();
 
-  const db = getMembersDb();
-  const rows = await db
-    .select()
-    .from(otpChallenges)
-    .where(
-      and(
-        eq(otpChallenges.email, email),
-        eq(otpChallenges.purpose, parsed.purpose),
-        isNull(otpChallenges.consumedAt),
-        gt(otpChallenges.expiresAt, now),
-      ),
-    )
-    .orderBy(desc(otpChallenges.createdAt))
-    .limit(1);
+  const challenge = await withMembersDbError(async () => {
+    const db = getMembersDb();
+    const rows = await db
+      .select()
+      .from(otpChallenges)
+      .where(
+        and(
+          eq(otpChallenges.email, email),
+          eq(otpChallenges.purpose, parsed.purpose),
+          isNull(otpChallenges.consumedAt),
+          gt(otpChallenges.expiresAt, now),
+        ),
+      )
+      .orderBy(desc(otpChallenges.createdAt))
+      .limit(1);
+    return rows[0] ?? null;
+  }, "Failed to look up OTP challenge.");
 
-  const challenge = rows[0];
   if (!challenge) {
     throw new MembersOtpError(
       "MEMBERS_OTP_NOT_FOUND",
@@ -185,10 +187,13 @@ export async function verifyOtpChallenge(
 
   const codeHash = hashOtpCode(parsed.code);
   if (codeHash !== challenge.codeHash) {
-    await db
-      .update(otpChallenges)
-      .set({ attemptCount: challenge.attemptCount + 1 })
-      .where(eq(otpChallenges.id, challenge.id));
+    await withMembersDbError(async () => {
+      const db = getMembersDb();
+      await db
+        .update(otpChallenges)
+        .set({ attemptCount: challenge.attemptCount + 1 })
+        .where(eq(otpChallenges.id, challenge.id));
+    }, "Failed to record OTP attempt.");
 
     throw new MembersOtpError(
       "MEMBERS_OTP_INVALID",
@@ -196,10 +201,13 @@ export async function verifyOtpChallenge(
     );
   }
 
-  await db
-    .update(otpChallenges)
-    .set({ consumedAt: now })
-    .where(eq(otpChallenges.id, challenge.id));
+  await withMembersDbError(async () => {
+    const db = getMembersDb();
+    await db
+      .update(otpChallenges)
+      .set({ consumedAt: now })
+      .where(eq(otpChallenges.id, challenge.id));
+  }, "Failed to consume OTP challenge.");
 
   return {
     challengeId: challenge.id,

@@ -8,7 +8,10 @@ import {
   sendNewsletterConfirmOtp,
   verifyDeliveredOtp,
 } from "@/lib/members/confirm";
-import { MembersDbError } from "@/lib/members/errors";
+import {
+  MembersDbError,
+  withMembersDbError,
+} from "@/lib/members/errors";
 import { syncNewsletterToEsp } from "@/lib/members/esp";
 import { requireDatabaseUrl } from "@/lib/members/env";
 import {
@@ -97,26 +100,30 @@ function getAppOrigin(requestUrl?: string): string {
 }
 
 export async function countActiveFoundingMembers(): Promise<number> {
-  const db = getMembersDb();
-  const rows = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(members)
-    .where(
-      and(
-        eq(members.membershipPlan, "founding"),
-        eq(members.membershipStatus, "active"),
-      ),
-    );
-  return rows[0]?.count ?? 0;
+  return withMembersDbError(async () => {
+    const db = getMembersDb();
+    const rows = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(members)
+      .where(
+        and(
+          eq(members.membershipPlan, "founding"),
+          eq(members.membershipStatus, "active"),
+        ),
+      );
+    return rows[0]?.count ?? 0;
+  }, "Failed to count founding members.");
 }
 
 export async function countActivePaidMembers(): Promise<number> {
-  const db = getMembersDb();
-  const rows = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(members)
-    .where(eq(members.membershipStatus, "active"));
-  return rows[0]?.count ?? 0;
+  return withMembersDbError(async () => {
+    const db = getMembersDb();
+    const rows = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(members)
+      .where(eq(members.membershipStatus, "active"));
+    return rows[0]?.count ?? 0;
+  }, "Failed to count paid members.");
 }
 
 function buildPlanOffers(

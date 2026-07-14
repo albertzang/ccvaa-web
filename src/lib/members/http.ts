@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 
-import { MembersDbError } from "@/lib/members/errors";
+import {
+  isMembersDbError,
+  isMembersSchemaUnavailableError,
+  MembersDbError,
+  wrapMembersDbError,
+} from "@/lib/members/errors";
 import { MembersEnvError } from "@/lib/members/env";
 import {
   isMembersJoinError,
@@ -23,6 +28,39 @@ type MembersApiErrorBody = {
   message: string;
 };
 
+type CodedError = Error & { code: string };
+
+function getCodedError(error: unknown): CodedError | null {
+  if (
+    typeof error !== "object" ||
+    error === null ||
+    !("code" in error) ||
+    typeof (error as { code: unknown }).code !== "string" ||
+    !("message" in error) ||
+    typeof (error as { message: unknown }).message !== "string"
+  ) {
+    return null;
+  }
+  return error as CodedError;
+}
+
+function isMembersEnvError(error: unknown): error is MembersEnvError {
+  return (
+    error instanceof MembersEnvError ||
+    (getCodedError(error)?.code === "MEMBERS_ENV_MISSING" &&
+      (error as { name?: unknown }).name === "MembersEnvError")
+  );
+}
+
+function isMembersEmailError(error: unknown): error is MembersEmailError {
+  const code = getCodedError(error)?.code;
+  return (
+    error instanceof MembersEmailError ||
+    code === "MEMBERS_EMAIL_UNAVAILABLE" ||
+    code === "MEMBERS_EMAIL_SEND_FAILED"
+  );
+}
+
 export function membersApiSuccess<T extends Record<string, unknown>>(
   data: T,
   status = 200,
@@ -39,24 +77,32 @@ export function membersApiError(
   return NextResponse.json(body, { status });
 }
 
+/**
+ * Maps members API failures to stable JSON + status.
+ * Env / email / DB / unmigrated schema → fail closed with 503 (not generic 500).
+ */
 export function handleMembersApiError(error: unknown) {
   if (error instanceof ZodError) {
     const message = error.issues[0]?.message ?? "Invalid request.";
     return membersApiError("MEMBERS_VALIDATION_ERROR", message, 400);
   }
 
-  if (error instanceof MembersEnvError) {
-    return membersApiError(error.code, error.message, 503);
+  if (isMembersEnvError(error)) {
+    return membersApiError("MEMBERS_ENV_MISSING", error.message, 503);
   }
 
-  if (error instanceof MembersDbError) {
-    return membersApiError(error.code, error.message, 503);
+  if (isMembersDbError(error) || error instanceof MembersDbError) {
+    return membersApiError("MEMBERS_DB_UNAVAILABLE", error.message, 503);
   }
 
-  if (error instanceof MembersEmailError) {
-    const status =
-      error.code === "MEMBERS_EMAIL_UNAVAILABLE" ? 503 : 502;
-    return membersApiError(error.code, error.message, status);
+  if (isMembersEmailError(error)) {
+    const coded = getCodedError(error);
+    const code =
+      coded?.code === "MEMBERS_EMAIL_SEND_FAILED"
+        ? "MEMBERS_EMAIL_SEND_FAILED"
+        : "MEMBERS_EMAIL_UNAVAILABLE";
+    const status = code === "MEMBERS_EMAIL_UNAVAILABLE" ? 503 : 502;
+    return membersApiError(code, error.message, status);
   }
 
   if (error instanceof MembersRateLimitError) {
@@ -89,6 +135,26 @@ export function handleMembersApiError(error: unknown) {
             ? 503
             : 502;
     return membersApiError(error.code, error.message, status);
+  }
+
+  // Duck-type login / session codes (members-0005 may land alongside this helper).
+  const coded = getCodedError(error);
+  if (coded?.code === "MEMBERS_LOGIN_NOT_ELIGIBLE") {
+    return membersApiError(coded.code, coded.message, 404);
+  }
+  if (coded?.code === "MEMBERS_LOGIN_UNAVAILABLE") {
+    return membersApiError(coded.code, coded.message, 503);
+  }
+  if (
+    coded?.code === "MEMBERS_SESSION_INVALID" ||
+    coded?.code === "MEMBERS_SESSION_EXPIRED"
+  ) {
+    return membersApiError(coded.code, coded.message, 401);
+  }
+
+  if (isMembersSchemaUnavailableError(error)) {
+    const wrapped = wrapMembersDbError(error);
+    return membersApiError(wrapped.code, wrapped.message, 503);
   }
 
   console.error("Unhandled members API error:", error);

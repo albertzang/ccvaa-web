@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-14  
 **Pass:** `1`  
-**Backlog work ID:** `members-0004`  
+**Backlog work ID:** `members-0005`  
 **Ship path that led here:** `feature-branch`  
 **Epic branch:** `feat/members`  
 **Merge gate:** `epic`  
@@ -12,40 +12,39 @@
 
 **Branch name:** `feat/members`  
 **PR link:** https://github.com/albertzang/ccvaa-web/pull/8  
-**Commit:** `b6a3322`  
+**Commit:** _(latest after push — use branch HEAD)_  
 **Preview URL:** https://ccvaa-web-git-feat-members-azang-projects.vercel.app  
 **Preview protection:** QA reads `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local` (do **not** paste the secret here). See `docs/protocols/PREVIEW_PROTECTION.md`.  
 **Production URL:** https://ccvaa-web.vercel.app/ (Pass **2** only — not for this pass)
 
 **Post-merge cleanup (Pass 2 only):** n/a until **merge milestone**
 
-**Out of scope for QA:** https://ccvaa.ca/ — CEO manual only.
+**Out of scope for QA:** https://ccvaa.ca/ — CEO manual only. OAuth/passwords; admin auth; Join redesign; full profile UI (`members-0006`).
 
 ## What changed
 
-Logged-out `#membership` Join UI + Stripe Checkout (test mode): name, email, optional newsletter opt-in → email verify OTP → Checkout → webhook activates membership; return `/?joined=1#membership`. Pre-cap: Founding + Annual; post-cap: Lifetime + Annual. Race-safe Founding seat claim; Lifetime fee must be > Founding (env validation). Hero **Join** + nav Membership anchor. APIs: `GET /api/members/join/plans`, `POST /api/members/join/start`, `POST /api/members/join/verify`, `POST /api/members/webhooks/stripe` (idempotent). Migration `0001_stripe_webhooks`.
+`#membership` member email OTP login wall: send 6-digit code (Resend, `purpose=login`) → verify → httpOnly signed cookie `ccvaa_member_session` (7-day TTL) + logout. Active paid members only. Logged-out view shows **Member sign-in** above **Join**. Logged-in stub shows email/plan + Sign out (profile chrome is `0006`). Session **never** grants `/admin`. Fail closed without `DATABASE_URL` / `RESEND_*` / `MEMBER_SESSION_SECRET`.
+
+APIs: `POST /api/members/login/start`, `POST /api/members/login/verify`, `POST /api/members/login/logout`, `GET /api/members/login/session`.
 
 ## Focus checklist
 
-- [ ] Homepage order: Hero → `#membership` → About → Contact
-- [ ] Hero **Join** and nav **Membership** scroll to `#membership`
-- [ ] Without Stripe/`DATABASE_URL`: Join plans fail closed (clear unavailable message / 503 APIs)
-- [ ] With secrets: plans load; Founding+Annual pre-cap (or Lifetime+Annual if cap full)
-- [ ] Join start → 6-digit email verify → redirects to Stripe Checkout
-- [ ] After test payment: return to `/?joined=1#membership`; webhook sets membership active (check DB or roster later)
-- [ ] Annual: `membership_anniversary` / `next_renewal_at` set from Stripe subscription
-- [ ] Optional newsletter checkbox stored; after pay → newsletter pending + confirm email path (best-effort)
-- [ ] Webhook endpoint reachable (Stripe test CLI or Dashboard) at `/api/members/webhooks/stripe`; duplicate events no-op
+- [ ] Homepage `#membership`: login form + Join when logged out
+- [ ] Without `DATABASE_URL` / `RESEND_*` / `MEMBER_SESSION_SECRET`: login start/verify fail closed (503 / clear message)
+- [ ] With secrets + seeded (or real) active member: start → email OTP → verify → signed-in stub (plan + email)
+- [ ] Logout clears member session; Join/login return; `/admin` still Hover-only (member cookie does not open admin)
+- [ ] Non-member / newsletter-only email: not eligible (404-style clear message)
+- [ ] OTP rate limits / expiry behave (15 min TTL; 3 sends/hour; 5 verify attempts) — light spot-check OK
 - [ ] `npm run lint` + `npm run typecheck` clean (CI on PR)
 - [ ] **Do not merge** (epic merge gate)
 
 ## Known risks / flaky areas
 
-- Live Join requires Preview env: `DATABASE_URL`, `RESEND_*`, full Stripe test set (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, three Price IDs, `MEMBERSHIP_FOUNDING_CAP`, three fee cent vars with Lifetime > Founding).
-- Webhook must target this Preview URL (or `stripe listen --forward-to`). Without webhook secret/events, Checkout succeeds but membership does not activate.
-- Run `npm run db:migrate` on Preview Neon to apply `stripe_webhook_events` before webhook QA.
-- Founding seat race: if two checkouts finish past cap, loser is refunded / not activated.
-- Member login / profile (`members-0005`/`0006`) not in this ticket — Join success copy notes that.
+- Live OTP requires Preview: `DATABASE_URL`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, **`MEMBER_SESSION_SECRET`** (new).
+- Seeded emails (`founding@` / `lifetime@` / `annual@ccvaa-seed.test`) need `npm run db:seed` on Preview Neon. Seed login OTP `123456` for annual is optional/dev-only and may be superseded by a fresh start.
+- Mailosaur optional for capturing login OTP — `docs/members/mailosaur-qa.md`.
+- Open Preview with protection bypass **and** `x-vercel-set-bypass-cookie=true` so client `fetch` keeps the bypass cookie.
+- Join paths still need Stripe secrets if testing Join alongside login.
 
 ## Preview env notes (Pass 1)
 
@@ -53,20 +52,17 @@ CEO/PM set in Vercel **Preview** (and `.env.local` for Dev):
 
 | Var | Purpose |
 |-----|---------|
-| `DATABASE_URL` | Neon (migrate required for webhook table) |
-| `RESEND_API_KEY` / `RESEND_FROM_EMAIL` | Email verify OTP |
-| `STRIPE_SECRET_KEY` | Test secret |
-| `STRIPE_WEBHOOK_SECRET` | Signing secret for Preview webhook |
-| `STRIPE_PRICE_FOUNDING` / `LIFETIME` / `ANNUAL` | Price IDs |
-| `MEMBERSHIP_FOUNDING_CAP` | Integer seat cap |
-| `MEMBERSHIP_FOUNDING_FEE_CENTS` / `LIFETIME` / `ANNUAL` | Display + Lifetime > Founding check |
-| Mailosaur (optional) | Capture `email_verify` OTP — `docs/members/mailosaur-qa.md` |
+| `DATABASE_URL` | Neon |
+| `RESEND_API_KEY` / `RESEND_FROM_EMAIL` | Login OTP send |
+| `MEMBER_SESSION_SECRET` | HMAC for httpOnly member session cookie |
+| Mailosaur (optional) | Capture `login` purpose OTP |
 
 Deployment Protection bypass — `VERCEL_AUTOMATION_BYPASS_SECRET` in `.env.local`.
 
 ## Production / baseline / Pass 2 auth notes
 
 - Admin auth = Hover mailbox login in Mail iframe — see `docs/protocols/QA_AUTH.md`
+- Member session ≠ admin session
 - QA reads `ADMIN_EMAIL` / `ADMIN_PASS` from `.env.local` — **do not** paste into handoffs or reports
 
 ## Report back with

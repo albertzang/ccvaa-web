@@ -7,8 +7,15 @@ import {
   verifyNewsletterConfirmOtp,
 } from "@/lib/members/confirm";
 import { generateUnsubToken } from "@/lib/members/crypto";
-import { MembersDbError } from "@/lib/members/errors";
+import {
+  MembersDbError,
+  withMembersDbError,
+} from "@/lib/members/errors";
 import { syncNewsletterToEsp } from "@/lib/members/esp";
+import {
+  isResendConfigured,
+  MembersEmailError,
+} from "@/lib/members/resend";
 import {
   newsletterConfirmInputSchema,
   newsletterLookupInputSchema,
@@ -46,68 +53,74 @@ export type UnsubTokenRedeemResult = {
 };
 
 async function findMemberByEmail(email: string) {
-  const db = getMembersDb();
-  const rows = await db
-    .select()
-    .from(members)
-    .where(eq(members.email, email))
-    .limit(1);
-  return rows[0] ?? null;
+  return withMembersDbError(async () => {
+    const db = getMembersDb();
+    const rows = await db
+      .select()
+      .from(members)
+      .where(eq(members.email, email))
+      .limit(1);
+    return rows[0] ?? null;
+  }, "Failed to look up newsletter preference.");
 }
 
 async function upsertMemberForNewsletter(
   email: string,
   name?: string,
 ): Promise<string> {
-  const db = getMembersDb();
-  const existing = await findMemberByEmail(email);
+  return withMembersDbError(async () => {
+    const db = getMembersDb();
+    const existing = await findMemberByEmail(email);
 
-  if (existing) {
-    await db
-      .update(members)
-      .set({
-        name: name ?? existing.name,
+    if (existing) {
+      await db
+        .update(members)
+        .set({
+          name: name ?? existing.name,
+          newsletterStatus: "pending",
+          newsletterConfirmedAt: null,
+          updatedAt: new Date(),
+        })
+        .where(eq(members.id, existing.id));
+      return existing.id;
+    }
+
+    const inserted = await db
+      .insert(members)
+      .values({
+        email,
+        name: name ?? null,
         newsletterStatus: "pending",
-        newsletterConfirmedAt: null,
-        updatedAt: new Date(),
       })
-      .where(eq(members.id, existing.id));
-    return existing.id;
-  }
+      .returning({ id: members.id });
 
-  const inserted = await db
-    .insert(members)
-    .values({
-      email,
-      name: name ?? null,
-      newsletterStatus: "pending",
-    })
-    .returning({ id: members.id });
-
-  const row = inserted[0];
-  if (!row) {
-    throw new MembersDbError("Failed to create member record for newsletter.");
-  }
-  return row.id;
+    const row = inserted[0];
+    if (!row) {
+      throw new MembersDbError("Failed to create member record for newsletter.");
+    }
+    return row.id;
+  }, "Failed to update newsletter subscription.");
 }
 
 async function ensureUnsubToken(memberId: string): Promise<string> {
-  const db = getMembersDb();
-  const existing = await db
-    .select({ token: unsubTokens.token })
-    .from(unsubTokens)
-    .where(
-      and(eq(unsubTokens.memberId, memberId), isNull(unsubTokens.usedAt)),
-    )
-    .limit(1);
+  return withMembersDbError(async () => {
+    const db = getMembersDb();
+    const existing = await db
+      .select({ token: unsubTokens.token })
+      .from(unsubTokens)
+      .where(
+        and(eq(unsubTokens.memberId, memberId), isNull(unsubTokens.usedAt)),
+      )
+      .limit(1);
 
-  if (existing[0]) {
-    return existing[0].token;
-  }
+    if (existing[0]) {
+      return existing[0].token;
+    }
 
-  const token = generateUnsubToken();
-  await db.insert(unsubTokens).values({ memberId, token });
-  return token;
+    const token = generateUnsubToken();
+    await db.insert(unsubTokens).values({ memberId, token });
+    return token;
+  }, "Failed to create newsletter unsubscribe token.");
 }
 
 function toNewsletterPreference(
@@ -124,12 +137,14 @@ function toNewsletterPreference(
 
 /** Counts confirmed newsletter subscribers (`status = on`). Pending does not count. */
 export async function countNewsletterSubscribers(): Promise<number> {
-  const db = getMembersDb();
-  const rows = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(members)
-    .where(eq(members.newsletterStatus, "on"));
-  return rows[0]?.count ?? 0;
+  return withMembersDbError(async () => {
+    const db = getMembersDb();
+    const rows = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(members)
+      .where(eq(members.newsletterStatus, "on"));
+    return rows[0]?.count ?? 0;
+  }, "Failed to count newsletter subscribers.");
 }
 
 /** Starts double opt-in: upserts member as pending and sends confirm OTP via Resend. */
@@ -138,6 +153,14 @@ export async function subscribeToNewsletter(
 ): Promise<NewsletterSubscribeResult> {
   const parsed = newsletterSubscribeInputSchema.parse(input);
   const email = parsed.email.trim().toLowerCase();
+
+  // Fail closed before DB writes when Resend is missing (clear 503 via http mapper).
+  if (!isResendConfigured()) {
+    throw new MembersEmailError(
+      "MEMBERS_EMAIL_UNAVAILABLE",
+      "RESEND_API_KEY / RESEND_FROM_EMAIL are not configured. Newsletter subscribe is unavailable.",
+    );
+  }
 
   const member = await findMemberByEmail(email);
   if (member?.newsletterStatus === "on") {
@@ -173,15 +196,17 @@ export async function confirmNewsletterSubscription(
   }
 
   const now = new Date();
-  const db = getMembersDb();
-  await db
-    .update(members)
-    .set({
-      newsletterStatus: "on",
-      newsletterConfirmedAt: now,
-      updatedAt: now,
-    })
-    .where(eq(members.id, member.id));
+  await withMembersDbError(async () => {
+    const db = getMembersDb();
+    await db
+      .update(members)
+      .set({
+        newsletterStatus: "on",
+        newsletterConfirmedAt: now,
+        updatedAt: now,
+      })
+      .where(eq(members.id, member.id));
+  }, "Failed to confirm newsletter subscription.");
 
   await ensureUnsubToken(member.id);
   await syncNewsletterToEsp({ email, status: "on" });
@@ -236,14 +261,16 @@ export async function unsubscribeFromNewsletter(
   }
 
   const now = new Date();
-  const db = getMembersDb();
-  await db
-    .update(members)
-    .set({
-      newsletterStatus: "off",
-      updatedAt: now,
-    })
-    .where(eq(members.id, member.id));
+  await withMembersDbError(async () => {
+    const db = getMembersDb();
+    await db
+      .update(members)
+      .set({
+        newsletterStatus: "off",
+        updatedAt: now,
+      })
+      .where(eq(members.id, member.id));
+  }, "Failed to unsubscribe from newsletter.");
 
   await syncNewsletterToEsp({ email, status: "off" });
 
@@ -264,24 +291,26 @@ export async function redeemUnsubToken(
   input: unknown,
 ): Promise<UnsubTokenRedeemResult> {
   const parsed = unsubTokenRedeemInputSchema.parse(input);
-  const db = getMembersDb();
 
-  const tokenRows = await db
-    .select({
-      tokenId: unsubTokens.id,
-      usedAt: unsubTokens.usedAt,
-      memberId: unsubTokens.memberId,
-      email: members.email,
-      newsletterStatus: members.newsletterStatus,
-      membershipPlan: members.membershipPlan,
-      membershipStatus: members.membershipStatus,
-    })
-    .from(unsubTokens)
-    .innerJoin(members, eq(unsubTokens.memberId, members.id))
-    .where(eq(unsubTokens.token, parsed.token))
-    .limit(1);
+  const row = await withMembersDbError(async () => {
+    const db = getMembersDb();
+    const tokenRows = await db
+      .select({
+        tokenId: unsubTokens.id,
+        usedAt: unsubTokens.usedAt,
+        memberId: unsubTokens.memberId,
+        email: members.email,
+        newsletterStatus: members.newsletterStatus,
+        membershipPlan: members.membershipPlan,
+        membershipStatus: members.membershipStatus,
+      })
+      .from(unsubTokens)
+      .innerJoin(members, eq(unsubTokens.memberId, members.id))
+      .where(eq(unsubTokens.token, parsed.token))
+      .limit(1);
+    return tokenRows[0] ?? null;
+  }, "Failed to redeem newsletter unsubscribe token.");
 
-  const row = tokenRows[0];
   if (!row) {
     throw new MembersNewsletterError(
       "MEMBERS_UNSUB_INVALID",
@@ -293,18 +322,24 @@ export async function redeemUnsubToken(
   const now = new Date();
 
   if (!alreadyOff) {
-    await db
-      .update(members)
-      .set({ newsletterStatus: "off", updatedAt: now })
-      .where(eq(members.id, row.memberId));
+    await withMembersDbError(async () => {
+      const db = getMembersDb();
+      await db
+        .update(members)
+        .set({ newsletterStatus: "off", updatedAt: now })
+        .where(eq(members.id, row.memberId));
+    }, "Failed to unsubscribe via token.");
     await syncNewsletterToEsp({ email: row.email, status: "off" });
   }
 
   if (!row.usedAt) {
-    await db
-      .update(unsubTokens)
-      .set({ usedAt: now })
-      .where(eq(unsubTokens.id, row.tokenId));
+    await withMembersDbError(async () => {
+      const db = getMembersDb();
+      await db
+        .update(unsubTokens)
+        .set({ usedAt: now })
+        .where(eq(unsubTokens.id, row.tokenId));
+    }, "Failed to mark unsubscribe token used.");
   }
 
   return {
