@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-14  
 **Requested by:** CEO / PM  
-**Backlog work ID:** `members-0003`  
+**Backlog work ID:** `members-0004`  
 **Backlog link:** `docs/product/backlogs/members-BACKLOG.md`  
 **Priority:** now  
 **Iteration:** `1`
@@ -21,46 +21,43 @@
 
 ## Goal
 
-Contact `#contact` owns the **Newsletter** axis: subscribe (double opt-in via Resend), manage preference (including paid members), and tokenized unsubscribe landing (`/?unsub=<token>#contact`). Unsub must **never** cancel membership. ESP sync stubs OK until provider chosen. Hero Subscribe should anchor to `#contact`.
+Logged-out `#membership` Join UI + Stripe Checkout (test keys on Dev/Preview). Flow: name, email, optional newsletter opt-in → email verify (reuse `members-0002` OTP) → Checkout → webhook activates membership; return to `/`. Pre-cap: Founding + Annual; post-cap: Lifetime + Annual. Race-safe Founding seat cap; Lifetime fee always > Founding. Annual anniversary / nextRenewalAt from Stripe. Zod on join payloads. Idempotent webhooks.
 
 ## User value
 
-Public can join/leave the mailing list without conflating newsletter with paid membership.
+Public can pay to join CCVAA membership without landing half-built checkout on `main` (epic lane).
 
 ## Acceptance criteria
 
-- [ ] Contact UI for newsletter-only people and paid members’ preference
-- [ ] Double opt-in via Resend/OTP helpers; unconfirmed do not count toward subscriber count; ESP sync stub or real if env present
-- [ ] Unsub token → `/#contact` (or `/?unsub=<token>#contact`); idempotent; membership unchanged; ESP footer URL documented
-- [ ] CASL-friendly copy; does not treat newsletter as a membership plan
-- [ ] FEATURES.md Contact → Newsletter updated
-- [ ] Lint + typecheck clean; on `feat/members`; Pass 1 handoff updated; **do not merge**
+- [ ] `#membership` Join UI when logged out; hero **Join** anchors here (add Join CTA if missing)
+- [ ] Plan rules + Founding seat cap + Lifetime fee > Founding validation
+- [ ] Verify → Checkout → webhook; return to `/`; anniversary fields for Annual
+- [ ] Optional newsletter opt-in stored; env placeholders for fees / Price IDs / cap in `.env.example` + FEATURES
+- [ ] Fail closed without Stripe/`DATABASE_URL` where applicable
+- [ ] Lint + typecheck clean; push on `feat/members`; Pass 1 handoff updated
+- [ ] **Do not merge**
 
 ## Out of scope
 
-Join Checkout (`members-0004`); `#membership` profile (`members-0006`); merge to `main`.
+Monthly plans; Customer Portal; live Production keys (`members-0009`); logged-in profile chrome (`members-0006`).
 
 ## Technical hints
 
-- Reuse `members-0001` schema + `members-0002` confirm/OTP/Resend helpers
-- Match existing Contact section patterns in homepage (`src/lib/site.ts`, page components)
-- Homepage order: Nav → Hero → `#membership` → About → Contact → Footer (Membership slot may still be stub/placeholder until 0004)
-- Fail closed without DB/Resend where required; stub ESP with clear “not configured” behavior
-- Product model: Newsletter ⊥ Membership
-- Notify **PM** if blocked on secrets (do not ping CEO)
+- Reuse: `src/lib/members/*`, newsletter opt-in, OTP helpers from `0002`, Contact patterns from `0003`
+- Homepage order: Nav → Hero → **`#membership`** → About → Contact → Footer (add Membership section if not present)
+- Stripe test mode webhooks via Vercel Preview URL — document required env for CEO/PM
+- Secrets ask via **PM** only: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, Price IDs, Founding cap, fees; still need `DATABASE_URL` / Resend for verify step
 
 ## Design / UX constraints
 
-Match coastal theme; minimal scope; no card-heavy clutter in Contact. Brand-first page patterns already on site.
+Match coastal theme; minimal Join UI; no card-heavy hero clutter; `#membership` is post-hero section.
 
 ## Git / deploy expectations
 
-### Epic lane
-
-- Reuse **`feat/members`** + PR #8
-- **PM authorizes** commit + push; **do not merge**
+- Reuse **`feat/members`** + PR #8  
+- PM authorizes commit/push; **do not merge**  
 - Overwrite `docs/handoffs/HANDOFF-QA-pass1.md` when ready
 
 ## Done means
 
-Acceptance + lint/typecheck; Pass 1 handoff ready; PR not merged
+Acceptance met on epic Preview; Pass 1 handoff ready; **PR not merged**

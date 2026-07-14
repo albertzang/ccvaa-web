@@ -310,7 +310,7 @@ Homepage SPA login wall for `#membership`: 6-digit OTP (Resend) → httpOnly ses
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `not-started` |
+| **Status** | `in-progress` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -334,6 +334,7 @@ Logged-out `#membership` Join UI + Stripe Checkout (test on Dev/Preview). Flow: 
 
 - Depends on: `members-0001`, `members-0002`
 - Shares slot with: `members-0006`
+- Handoff: `docs/handoffs/HANDOFF-DEV.md` (Iteration 1)
 
 ---
 
@@ -363,10 +364,14 @@ Contact `#contact` owns the **Newsletter** axis: subscribe (double opt-in via Re
 
 **Out of scope:** Join Checkout (`0004`); `#membership` profile (`0006`).
 
+### Overall
+
+- Pass 1 (2026-07-14): **continue epic** — Subscribe/#contact UI on Preview; subscribe API + health fail-closed without env; invalid unsub token landing OK; live double opt-in blocked pending secrets. Report: `docs/reports/QA-pass1.md`
+
 ### Links
 
 - Depends on: `members-0001`, `members-0002`
-- Handoff: `docs/handoffs/HANDOFF-DEV.md` (Iteration 1)
+- PR: https://github.com/albertzang/ccvaa-web/pull/8
 
 ---
 

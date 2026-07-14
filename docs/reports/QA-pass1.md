@@ -1,44 +1,47 @@
 # QA report
 
 **Pass:** 1 (pre-merge)  
-**Backlog work ID:** `members-0002`  
-**Environment(s) + exact URLs:** Preview https://ccvaa-web-git-feat-members-azang-projects.vercel.app (Deployment Protection bypass used via `.env.local`; bypass query omitted from URL)  
-**Branch / PR / commit:** `feat/members` · PR https://github.com/albertzang/ccvaa-web/pull/8 · `659db03`  
+**Backlog work ID:** `members-0003`  
+**Environment(s) + exact URLs:** Preview https://ccvaa-web-git-feat-members-azang-projects.vercel.app (bypass used; secret not recorded)  
+**Branch / PR / commit:** `feat/members` / PR #8 / tip at Pass 1  
 **Date:** 2026-07-14  
 **Result:** pass
 
 **Save as:** `docs/reports/QA-pass1.md`
 
-**Retest:** overwrite this same path. Do not create `-prior` / `-v2` / `-attemptN` files.
-
 ## Scope tested
 
-Resend transactional send path + shared confirm/OTP helpers (DB challenges, 15-minute expiry, rate limits). Mailosaur documented for Preview QA. No public forms or admin UI. Merge gate **epic** — sign-off is **continue epic**, not merge to `main`.
+Contact newsletter axis on Members epic Preview: hero Subscribe → `#contact`, newsletter UI presence, fail-closed APIs without env, invalid unsub token landing, regression smoke, lint/typecheck.
 
 ## Checklist results
 
 | Area | Result | Notes |
 |------|--------|-------|
-| `GET /api/members/health` (Preview) | pass | **503** with `email.resend: "missing"`, `email.mailosaur: "missing"`, `code: "MEMBERS_ENV_MISSING"` — no secrets in JSON body |
-| `npm run members:send-otp-test` fail-closed (local) | pass | Exits **1** with clear message: `DATABASE_URL is not configured...` (no `DATABASE_URL` / Resend keys in local `.env.local`) |
-| Live OTP send + Mailosaur verify | blocked | Preview env lacks `DATABASE_URL`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`; local `.env.local` also lacks these + Mailosaur vars. Full round-trip deferred per handoff — not a defect for this pass |
-| Rate limits documented | pass | `docs/members/mailosaur-qa.md`: 3 challenges/email/purpose/hour, 5 verify attempts/challenge, 15-minute TTL; matches `src/lib/members/otp-config.ts` |
-| `npm run lint` + `typecheck` | pass | Clean locally; GitHub Actions **build** pass on PR #8 |
-| No public UI / Stripe / admin roster | pass | Only `/api/members/health` route added; no new public pages or admin roster changes |
-| Admin mail-session smoke (optional) | pass | `GET /admin` → **200** on Preview (layout loads; mailbox login not exercised) |
-| Public homepage (regression) | pass | `GET /` → **200** on Preview |
+| Public homepage | pass | **200**; hero **Subscribe** → `#contact` |
+| Board / Purposes | pass | Still present |
+| Contact | pass | Newsletter form mounted; bad `?unsub=` → `unsubLanding.kind=invalid` |
+| Admin layout (incl. phone) | pass | `/admin` **200** |
+| Admin mail | n/a | Not re-tested in depth |
+| Admin auth (mail session) | n/a | |
+| Admin scaffolds | n/a | |
+
+| Focus | Result | Notes |
+|-------|--------|-------|
+| Health fail-closed | pass | **503** `MEMBERS_ENV_MISSING`; Resend/Mailosaur `"missing"` |
+| Subscribe API fail-closed | pass | POST `/api/members/newsletter/subscribe` → **503** without `DATABASE_URL` |
+| Live double opt-in / seed unsub | blocked | Needs Preview `DATABASE_URL` + Resend (+ seed) — expected |
+| lint + typecheck | pass | Clean locally |
 
 ## Bugs found
 
 - (none)
 
-Known backlog IDs already under test: `members-0002` in [`docs/product/backlogs/members-BACKLOG.md`](../product/backlogs/members-BACKLOG.md).
+Known backlog IDs under test: `members-0003` (epic with `members-0001`/`0002`).
 
 ## Suggestions (non-blocking)
 
-- CEO: set `DATABASE_URL`, `RESEND_API_KEY`, and `RESEND_FROM_EMAIL` in Vercel **Preview** when live send tests on Preview are needed for later members tickets.
-- QA workstation: add Neon + Resend test keys + Mailosaur vars to `.env.local` to exercise `members:send-otp-test` send/verify flow locally on a future pass.
+CEO should still set Preview `DATABASE_URL` / `RESEND_*` for live newsletter + OTP retest before merge milestone.
 
 ## Sign-off
 
-**Pass 1:** **continue epic** — members-0002 Resend/OTP helpers and fail-closed behavior match spec on Preview. Live OTP round-trip blocked by missing Preview/local secrets (expected). Epic branch `feat/members` remains open; do **not** merge to `main` on this pass.
+**Pass 1:** **continue epic** (do not merge to `main`)
