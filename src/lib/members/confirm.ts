@@ -61,6 +61,17 @@ export async function sendLoginOtp(email: string): Promise<DeliverOtpResult> {
   return deliverOtp({ email, purpose: "login" });
 }
 
+/** Verifies member login OTP after send. */
+export async function verifyLoginOtp(
+  input: Pick<OtpVerifyInput, "email" | "code">,
+): Promise<VerifyOtpChallengeResult> {
+  return verifyDeliveredOtp({
+    email: input.email,
+    purpose: "login",
+    code: input.code,
+  });
+}
+
 /** Email re-verification during join or profile update — used by members-0004/0006+. */
 export async function sendEmailVerifyOtp(
   email: string,

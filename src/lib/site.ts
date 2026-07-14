@@ -150,10 +150,23 @@ export const contactContent = {
 export const membershipContent = {
   title: "Membership",
   description:
-    "Join CCVAA as a paid member. Newsletter signup stays in Contact — this section is for Founding, Lifetime, and Annual membership only.",
+    "Join CCVAA as a paid member, or sign in with email if you already belong. Newsletter signup stays in Contact.",
+  loginTitle: "Member sign-in",
+  loginDescription:
+    "Enter the email on your membership. We will send a 6-digit code — no password.",
+  loginSendLabel: "Send login code",
+  loginVerifyLabel: "Sign in",
+  loginVerifyHint:
+    "Enter the 6-digit code we emailed you to open your membership session.",
+  signedInTitle: "You are signed in",
+  signedInDescription:
+    "Full member profile chrome ships next. For now you can confirm your plan and sign out.",
+  signedInAdminNote:
+    "This membership session does not grant access to /admin.",
+  logoutLabel: "Sign out",
   joinTitle: "Join CCVAA",
   joinDescription:
-    "Verify your email, then complete payment with Stripe Checkout. You return here when finished.",
+    "New members: verify your email, then complete payment with Stripe Checkout. You return here when finished.",
   namePlaceholder: "Your name",
   emailPlaceholder: "you@example.com",
   codePlaceholder: "6-digit code",
@@ -166,7 +179,7 @@ export const membershipContent = {
   consentNote:
     "Paid membership is separate from the newsletter mailing list. You can change newsletter preference anytime in Contact.",
   joinedSuccess:
-    "Thanks for joining. Your membership activates when Stripe confirms payment — you can sign in here once member login ships.",
+    "Thanks for joining. Your membership activates when Stripe confirms payment — then sign in above with your email.",
 } as const;
 
 export const newsletterContent = {

@@ -9,6 +9,11 @@
  * Transactional email (members-0002+):
  * - `RESEND_API_KEY`, `RESEND_FROM_EMAIL` — required to send OTP / confirm emails
  *
+ * Member login session (members-0005+):
+ * - `MEMBER_SESSION_SECRET` — HMAC secret for httpOnly `ccvaa_member_session` cookie
+ * - Session never grants `/admin` (Hover mailbox auth only)
+ * - See `src/lib/members/session.ts` / `session-config.ts`
+ *
  * Preview QA inbox (members-0002+ — optional; see docs/members/mailosaur-qa.md):
  * - `MAILOSAUR_API_KEY`, `MAILOSAUR_SERVER_ID`
  *

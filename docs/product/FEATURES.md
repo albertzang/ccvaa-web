@@ -34,7 +34,7 @@
 ### Membership (`#membership`)
 - After Hero, before About
 - Plans: **Founding** (capped one-time) while seats remain → then **Lifetime** (one-time, fee always > Founding); **Annual** always offered (stores `membership_anniversary` + `next_renewal_at` from Stripe)
-- Logged out → **Join** (name, email, optional newsletter opt-in → email OTP → Stripe Checkout → webhook activates; return `/?joined=1#membership`). Logged-in profile: `members-0006`. Newsletter stays in Contact.
+- Logged out → **Join** (name, email, optional newsletter opt-in → email OTP → Stripe Checkout → webhook activates; return `/?joined=1#membership`) **or Member sign-in** (6-digit login OTP → httpOnly session). Logged-in stub shows plan + logout; full profile chrome: `members-0006`. Newsletter stays in Contact.
 - APIs: `GET /api/members/join/plans`, `POST /api/members/join/{start,verify}`, `POST /api/members/webhooks/stripe` (idempotent). Fail closed without Stripe/`DATABASE_URL`. Race-safe Founding seat claim.
 
 ### About (`#about`)
@@ -109,6 +109,8 @@
 
 **Join / Stripe (members-0004, epic `feat/members`):** `#membership` Join UI + Stripe Checkout (test keys on Dev/Preview). Flow: name/email/newsletter opt-in → `email_verify` OTP → Checkout → `checkout.session.completed` webhook activates membership. Pre-cap Founding+Annual; post-cap Lifetime+Annual. Env: `STRIPE_*`, `MEMBERSHIP_FOUNDING_CAP`, fee cents (Lifetime > Founding enforced). Webhook: `POST /api/members/webhooks/stripe`. Live keys: `members-0009`.
 
+**Member auth (members-0005, epic `feat/members`):** `#membership` login wall — email → 6-digit OTP (`purpose=login` via Resend) → httpOnly signed cookie `ccvaa_member_session` (7-day TTL). Logout clears cookie only (does not touch Hover admin). Active paid members only (`membership_status=active`, plan ≠ none). APIs: `POST /api/members/login/{start,verify,logout}`, `GET /api/members/login/session`. Zod on payloads; OTP rate limits/expiry in `otp-config` / [`docs/members/schema.md`](../members/schema.md). Requires `DATABASE_URL` + `RESEND_*` + `MEMBER_SESSION_SECRET`; fails closed without them. **Never grants `/admin`.** Full profile UI: `members-0006`.
+
 ---
 
 ## Infra & ops
@@ -145,6 +147,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-14 | **members-0005** (epic `feat/members`): `#membership` email OTP login → httpOnly member session + logout; never grants `/admin` |
 | 2026-07-14 | **members-0004** (epic `feat/members`): `#membership` Join UI + Stripe Checkout (test); Founding seat cap; webhook activation; Hero Join → `#membership` |
 | 2026-07-14 | **members-0003** (epic `feat/members`): Contact newsletter — double opt-in, manage preference, token unsub landing; Hero Subscribe → `#contact`; ESP stub + docs |
 | 2026-07-14 | **agent-os-0013:** CEO talks only to PM; PM invokes Dev/QA (no CEO Dev/QA chats) |

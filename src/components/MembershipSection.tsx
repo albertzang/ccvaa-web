@@ -1,5 +1,10 @@
-import { JoinForm, type JoinPlansProps } from "@/components/JoinForm";
+import { MembershipPanel, type MemberSessionSummary } from "@/components/MembershipPanel";
+import { type JoinPlansProps } from "@/components/JoinForm";
 import { getJoinPlans } from "@/lib/members/join";
+import {
+  readMemberSession,
+  toPublicMemberSession,
+} from "@/lib/members/session";
 import { membershipContent } from "@/lib/site";
 
 type MembershipSectionProps = {
@@ -33,10 +38,21 @@ async function loadPlansForJoin(): Promise<
   }
 }
 
+async function loadInitialSession(): Promise<MemberSessionSummary | null> {
+  const payload = await readMemberSession();
+  if (!payload) {
+    return null;
+  }
+  return toPublicMemberSession(payload);
+}
+
 export async function MembershipSection({
   joinedLanding,
 }: MembershipSectionProps) {
-  const plansResult = await loadPlansForJoin();
+  const [plansResult, initialSession] = await Promise.all([
+    loadPlansForJoin(),
+    loadInitialSession(),
+  ]);
 
   return (
     <section
@@ -51,8 +67,9 @@ export async function MembershipSection({
           <p className="mt-4 text-base leading-relaxed text-ocean-600">
             {membershipContent.description}
           </p>
-          <JoinForm
+          <MembershipPanel
             joinedLanding={joinedLanding}
+            initialSession={initialSession}
             initialPlans={plansResult.ok ? plansResult.data : null}
             initialPlansError={plansResult.ok ? null : plansResult.message}
           />

@@ -13,6 +13,10 @@ import {
   MembersJoinError,
 } from "@/lib/members/join";
 import {
+  isMembersLoginError,
+  MembersLoginError,
+} from "@/lib/members/login";
+import {
   isMembersNewsletterError,
   MembersNewsletterError,
 } from "@/lib/members/newsletter";
@@ -21,6 +25,7 @@ import {
   MembersRateLimitError,
 } from "@/lib/members/otp-challenges";
 import { MembersEmailError } from "@/lib/members/resend";
+import { MembersSessionError } from "@/lib/members/session";
 
 type MembersApiErrorBody = {
   ok: false;
@@ -137,19 +142,17 @@ export function handleMembersApiError(error: unknown) {
     return membersApiError(error.code, error.message, status);
   }
 
-  // Duck-type login / session codes (members-0005 may land alongside this helper).
-  const coded = getCodedError(error);
-  if (coded?.code === "MEMBERS_LOGIN_NOT_ELIGIBLE") {
-    return membersApiError(coded.code, coded.message, 404);
-  }
-  if (coded?.code === "MEMBERS_LOGIN_UNAVAILABLE") {
-    return membersApiError(coded.code, coded.message, 503);
-  }
   if (
-    coded?.code === "MEMBERS_SESSION_INVALID" ||
-    coded?.code === "MEMBERS_SESSION_EXPIRED"
+    error instanceof MembersLoginError ||
+    isMembersLoginError(error)
   ) {
-    return membersApiError(coded.code, coded.message, 401);
+    const status =
+      error.code === "MEMBERS_LOGIN_NOT_ELIGIBLE" ? 404 : 503;
+    return membersApiError(error.code, error.message, status);
+  }
+
+  if (error instanceof MembersSessionError) {
+    return membersApiError(error.code, error.message, 401);
   }
 
   if (isMembersSchemaUnavailableError(error)) {
