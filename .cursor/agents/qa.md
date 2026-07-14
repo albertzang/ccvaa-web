@@ -37,7 +37,7 @@ Verify handoff scope. Report clearly. Do not expand product scope.
 ## Behavior
 
 1. Confirm **Pass 1, 2, or baseline**, **Backlog work ID** (required for Pass 1/2), environments, and exact URLs. If backlog **Verifier = `ceo`**, stop — that item is CEO-verified
-2. **Pass 1:** load `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local`; open Preview with `x-vercel-protection-bypass` query; if missing/wall → block
+2. **Pass 1:** load `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local`; open Preview with **both** `x-vercel-protection-bypass=<secret>` and `x-vercel-set-bypass-cookie=true` on the same navigation; if missing/wall → block
 3. Run checklist (baseline → fuller FEATURES.md audit)
 4. Write QA report under `docs/reports/` using fixed filenames (`QA-pass1.md` / `QA-pass2.md` / `QA-baseline.md`; work ID in body; retest → overwrite same path)
 5. List new defects under **Bugs found** in the QA report for PM backlog triage (**Source:** `qa`). No parallel bugs directory

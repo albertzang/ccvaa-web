@@ -3,11 +3,42 @@
 **Feature:** Agent OS  
 **Slug:** `agent-os`  
 **Owner:** Product Manager  
-**Next ID:** `0013`  
+**Next ID:** `0015`  
 
 Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
 **Note:** All `agent-os-*` items use **Verifier = `n/a`**, **Verify passes = `n/a`**. Default **Ship path = `direct-to-main`**. Use **`feature-branch`** only when (1) **self-evolve** (required) or (2) CEO explicitly asks for an umbrella PR / commit-history review before merge. Do **not** set `feature-branch` merely because the OS change is large or multi-file — ordinary protocol/skill/doc encoding stays `direct-to-main`.
+
+---
+
+## agent-os-0014 — Preview bypass requires set-bypass-cookie for browser
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `completed` |
+| **Verifier** | `n/a` |
+| **Verify passes** | `n/a` |
+| **Ship path** | `feature-branch` |
+
+### Description
+
+Encode Preview Deployment Protection for **browser Pass 1**: navigate with **both** `x-vercel-protection-bypass=<secret>` and `x-vercel-set-bypass-cookie=true` on the same request so same-origin client `fetch` / forms keep the bypass session. Query-only is insufficient for interactive browser QA; curl/API may keep using header or query alone.
+
+**Acceptance:**
+- [x] Living docs (`PREVIEW_PROTECTION`, QA skill/rule/agent, incomplete GIT_DEPLOY / handoff-qa mentions) require both params for browser Pass 1
+- [x] Backlog item completed + Next ID bumped
+- [x] FEATURES changelog
+- [x] Commit + push on `feat/members` (CEO: ship on current branch / Members epic PR; do not merge to main)
+
+**Note:** `agent-os-0013` appears in FEATURES changelog only (not this backlog file) — ID gap left as-is; this item is `0014`.
+
+**Out of scope:** Members product code; overwriting mid-pass QA reports; committing secrets.
+
+### Links
+
+- Branch: `feat/members` (Members epic PR)
 
 ---
 

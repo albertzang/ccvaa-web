@@ -16,7 +16,7 @@
 **PR link:** (n/a for baseline or direct-to-main)  
 **Commit:** (optional for baseline — note `main` tip if known)  
 **Preview URL:** (Pass **1** only — **required**; paste exact URL from Vercel / GitHub PR — do not reconstruct)  
-**Preview protection:** QA reads `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local` (do **not** paste the secret here). See `docs/protocols/PREVIEW_PROTECTION.md`.  
+**Preview protection:** QA reads `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local` (do **not** paste the secret here). Browser Pass 1: both bypass query **and** `x-vercel-set-bypass-cookie=true`. See `docs/protocols/PREVIEW_PROTECTION.md`.  
 **Production URL:** https://ccvaa-web.vercel.app/ (Pass **2** and **baseline**)  
 
 **Post-merge cleanup (Pass 2 only):**  
@@ -34,7 +34,8 @@ Cleanup happens **right after merge**, before Pass 2 testing — see `docs/proto
 3. Developer pastes that URL into **Preview URL** above.
 4. QA tests **only** that pasted URL. If blank on Pass 1 → block and ask Developer/PM.
 5. **Protection bypass:** Before navigating, QA loads `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local` and opens  
-   `<Preview URL>?x-vercel-protection-bypass=<secret>` (or `&…` if query already present).  
+   `<Preview URL>?x-vercel-protection-bypass=<secret>&x-vercel-set-bypass-cookie=true`  
+   (or `&…` for both params if a query already present). Query-only (no set-bypass-cookie) is insufficient for interactive browser forms / same-origin `fetch`.  
    If the secret is empty/missing → **block** and ask CEO to fill `.env.local`. Never write the secret into this handoff or the QA report.  
    Details: `docs/protocols/PREVIEW_PROTECTION.md`.
 

@@ -14,7 +14,7 @@
 **PR link:** https://github.com/albertzang/ccvaa-web/pull/8  
 **Commit:** tip of `feat/members`  
 **Preview URL:** https://ccvaa-web-git-feat-members-azang-projects.vercel.app  
-**Preview protection:** QA reads `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local`. Browser forms may need `x-vercel-set-bypass-cookie=true`. See `docs/protocols/PREVIEW_PROTECTION.md`.  
+**Preview protection:** QA reads `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local`. Browser Pass 1: both bypass query **and** `x-vercel-set-bypass-cookie=true`. See `docs/protocols/PREVIEW_PROTECTION.md`.  
 **Production URL:** https://ccvaa-web.vercel.app/ (Pass **2** only)
 
 **Post-merge cleanup (Pass 2 only):** n/a until **merge milestone**
