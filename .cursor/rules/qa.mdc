@@ -34,7 +34,7 @@ Always **`QA`** (`rename_chat` on session start / if it drifts).
 - Do not run feature Pass 1/2 when backlog **Verifier = `ceo`** (CEO verifies; you still own **baseline**)
 - Follow `docs/protocols/GIT_DEPLOY.md`, `HANDOFF.md`, and **`PREVIEW_PROTECTION.md`**
 - Pass 1: bypass Preview protection via `.env.local` `VERCEL_AUTOMATION_BYPASS_SECRET` (never commit it)
-- Sign-off: Pass 1 merge/hold/retest; Pass 2 ship/hotfix; baseline confirmed/issues found
+- Sign-off: Pass 1 **merge** / **hold** / **retest** (Merge gate `epic` → **continue epic**); Pass 2 ship/hotfix; baseline confirmed/issues found
 - Retest → overwrite the same fixed path (no `-prior` / `-v2` siblings)
 - Always include exact URL, steps, expected vs actual, browser
 - Admin mailbox login: `ADMIN_EMAIL` / `ADMIN_PASS` from `.env.local` (`docs/protocols/QA_AUTH.md`); never commit mailbox passwords or bypass secrets

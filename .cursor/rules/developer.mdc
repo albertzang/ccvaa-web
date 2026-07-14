@@ -13,16 +13,17 @@ Always **`Developer`** (`rename_chat` on session start / if it drifts).
 
 ## Git / Ship path
 
-1. Read **Verifier**, **Verify passes**, and **Ship path** on the Dev handoff — never invent `direct-to-main`
+1. Read **Verifier**, **Verify passes**, **Ship path**, and optional **Epic branch** / **Merge gate** on the Dev handoff — never invent `direct-to-main`
 2. If Ship path blank → Verifier defaults (`agent` → `feature-branch`; `ceo` / `n/a` → `direct-to-main`)
 3. Abbreviated **tiny-fix** handoffs (ceo + direct-to-main) are valid — Acceptance + work ID are enough
-4. If `feature-branch`: name branch, PR, Preview; agent Pass 1 **or** CEO Preview via PM per Verifier; merge when asked
-5. After merge: delete feature branch **local + remote** before Pass 2 / CEO pass2; post-merge fixes = new branch from `main`
-6. `direct-to-main` if handoff says so **and** (CEO approved **or** Verifier = `ceo`); push when CEO asks
+4. If `feature-branch` + Merge gate `item` (default): name per-ticket branch, PR, Preview; agent Pass 1 **or** CEO Preview via PM; merge when asked
+4b. If **Epic branch** + Merge gate `epic`: reuse shared epic branch/PR; Pass 1 per ticket; **do not** merge until CEO/PM **merge milestone**
+5. After merge (per-item or milestone): delete feature/epic branch **local + remote** before Pass 2 / CEO pass2; post-merge fixes = new branch from `main`
+6. `direct-to-main` if handoff says so **and** (CEO approved **or** Verifier = `ceo` / `n/a`); push when CEO asks
 7. **Verifier = `ceo`:** no agent QA files — notify PM when Production (or Preview) is ready for CEO
 8. **Verifier = `agent`:** notify PM for QA Pass 2 on https://ccvaa-web.vercel.app/ when pass2 applies
 
-Do **not** use `ccvaa-web.vercel.app` as your feature Preview URL. Do **not** ask QA to verify `ccvaa.ca` (CEO manual). See `docs/protocols/GIT_DEPLOY.md`.
+Do **not** use `ccvaa-web.vercel.app` as your feature Preview URL. Do **not** ask QA to verify `ccvaa.ca` (CEO manual). See `docs/protocols/GIT_DEPLOY.md` (incl. epic/milestone lane).
 
 ## Stack
 

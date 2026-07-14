@@ -25,7 +25,8 @@ Intake → Prioritize → Kickoff → Ship → Verify → Close
 
 | Lane | Verifier | Ship path | Verify | When |
 |------|----------|-----------|--------|------|
-| **Happy path** | `agent` | `feature-branch` | `pass1+pass2` | Normal product/code |
+| **Happy path** | `agent` | `feature-branch` | `pass1+pass2` | Normal product/code — **merge after each item’s Pass 1** |
+| **Epic / milestone** | `agent` | `feature-branch` + **Epic branch** + **Merge gate `epic`** | `pass1+pass2` (Pass 2 after **milestone** merge) | Large features; merge only when CEO/PM says **merge milestone** — [`GIT_DEPLOY.md`](GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in) |
 | **CEO Verifier** | `ceo` | `direct-to-main` | `pass2` | CEO self-verifies; no agent QA |
 | **Tiny-fix** | `ceo` | `direct-to-main` | `pass2` | Trivial CSS/copy/proxy; abbreviated handoff |
 | **agent-os** | `n/a` | `direct-to-main` | `n/a` | Docs/process; `verified` **ships** |
@@ -43,8 +44,9 @@ CEO: kick off self-evolve
   → PM: create new agent-os-{NNNN} (Ship path feature-branch) + branch chore/agent-os-{NNNN}-self-evolve
   → loop until stop:
        1. Evaluate OS vs Guiding principles (AGENTS.md); pick most valuable improvement
+          — include spotting leftovers / contradictions vs current state (principle #9)
           — stop if none, or remaining ideas are insignificant
-       2. Implement; commit on the feature branch; update backlog Overall
+       2. Implement; **prune** stale competing copy in the same change; commit on the feature branch; update backlog Overall
        3. back to 1
   → PM: push branch + open PR; ask CEO to review commit history
   → CEO: approve merge (or note changes) → PM merges + deletes branch + marks completed
@@ -57,6 +59,7 @@ CEO: kick off self-evolve
 | **Backlog** | One **new** `agent-os-*` item per run; Verifier/`Verify passes` = `n/a`; Ship path = **`feature-branch`** |
 | **Branch** | `chore/agent-os-{NNNN}-self-evolve` (work ID required) |
 | **Stop** | No valuable opportunity left, **or** PM judges further changes insignificant |
+| **Prune** | Required with each improvement (Guiding principle #9) — living docs must match current state before the next loop |
 | **Out of scope** | Product code, secrets, Verifier=`agent`/`ceo` product lanes — docs/process OS only |
 
 Mechanics: [`CEO.md`](CEO.md) self-evolve checklists · [`HANDOFF.md`](HANDOFF.md) · PM skill.
@@ -67,7 +70,7 @@ Mechanics: [`CEO.md`](CEO.md) self-evolve checklists · [`HANDOFF.md`](HANDOFF.m
 |---------|--------------------|------------------------|
 | **Verifier = `ceo`** (product code) | Yes → `completed` | **No** — push/merge already happened (or still needs a separate CEO push/merge ask per Ship path) |
 | **`agent-os-*`** + `direct-to-main` | Yes → `completed` | **Yes** — same turn: commit + push `main` |
-| **`agent-os-*` self-evolve** (`feature-branch`) | Yes → `completed` | **Yes** — same turn: **merge PR** + delete branch (after CEO reviewed commit history) |
+| **`agent-os-*`** + `feature-branch` (self-evolve or CEO-explicit umbrella) | Yes → `completed` | **Yes** — same turn: **merge PR** + delete branch (after CEO reviewed commit history) |
 | Issues / hold instead | No — stay `in-progress` | No — PM Iterates on the **same** work ID (self-evolve: more loop commits, or address CEO notes) |
 
 Full checklists: [`CEO.md`](CEO.md). Definitions: [`HANDOFF.md`](HANDOFF.md).
@@ -104,7 +107,7 @@ CEO  ←→  Product Manager (primary)
 
 ```
 Developer  →  ship per Ship path + Verifier
-QA Pass 1  →  (Verifier = agent + pass1) Dev optional + Preview → merge recommendation
+QA Pass 1  →  (Verifier = agent + pass1) Dev optional + Preview → merge recommendation *(epic Merge gate → continue epic)*
 CEO verify →  (Verifier = ceo) Preview and/or Production per Verify passes
 Developer  →  merge / push when CEO/PM asks
 QA Pass 2  →  (Verifier = agent + pass2) Production smoke → ship confirmation
@@ -129,9 +132,10 @@ Git/deploy: [`GIT_DEPLOY.md`](GIT_DEPLOY.md). Handoff mechanics: [`HANDOFF.md`](
 
 Use `docs/templates/handoff-dev.md`. Save as `docs/handoffs/HANDOFF-DEV.md` (overwrite on Iterations). Include:
 - **Backlog work ID** (required) — blank → Developer **blocks**
-- **Verifier:** `agent` | `ceo`
-- **Verify passes:** `pass1+pass2` | `pass1` | `pass2`
+- **Verifier:** `agent` | `ceo` | `n/a`
+- **Verify passes:** `pass1+pass2` | `pass1` | `pass2` | `n/a`
 - **Ship path:** `feature-branch` | `direct-to-main` (apply Verifier defaults if blank)
+- **Epic branch** / **Merge gate** (optional — epic/milestone lane)
 - Goal / user value (from backlog description); Iteration delta if rework
 - Acceptance criteria (testable)
 - Out of scope
@@ -147,6 +151,7 @@ Developer follows Verifier + Ship path literally. Never invent `direct-to-main` 
 **Only when Verifier = `agent`.** Use `docs/templates/handoff-qa.md`. Save as `docs/handoffs/HANDOFF-QA-pass1.md` (or `HANDOFF-QA-pass2.md`). Include:
 - **Backlog work ID** (required for Pass 1/2 feature work)
 - **Pass:** `1` | `2` | `baseline`
+- **Merge gate** / **Epic branch** when epic lane (Pass 1 → **continue epic** instead of merge)
 - Environments: Dev / **Preview URL** (Pass 1) / Production `https://ccvaa-web.vercel.app/` (Pass 2 and baseline)
 - What changed (branch, PR, commit) — or for baseline: scope from FEATURES.md
 - Checklist focus
@@ -178,7 +183,7 @@ Use `docs/templates/qa-report.md`.
 
 There is no automatic agent-to-agent ping. CEO or PM triggers the next role when blocked — except on the **agent happy path** after kickoff: PM/Dev may start Pass 1 when Preview is ready, and Pass 2 after merge, without a separate CEO “kick off QA” ask (CEO still owns merge / hold / secrets). See [`CEO.md`](CEO.md) feature-branch checklist.
 
-Typical triggers: kickoff, Preview ready → Pass 1, Pass 1 merge ask, Production ready → Pass 2, `verified`, baseline triage, handoff written, self-evolve commit-history review.
+Typical triggers: kickoff, Preview ready → Pass 1, Pass 1 merge ask (or **continue epic** / **merge milestone**), Production ready → Pass 2, `verified`, baseline triage, handoff written, self-evolve commit-history review.
 
 ## Refinement
 

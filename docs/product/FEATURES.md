@@ -1,7 +1,7 @@
 # CCVAA Web — Feature Inventory
 
 > **Owner:** Product Manager agent  
-> **Updated:** 2026-07-13  
+> **Updated:** 2026-07-14  
 > Keep this document current whenever features ship or change. Work-to-do: [`BACKLOG.md`](BACKLOG.md).
 
 ## Product summary
@@ -114,13 +114,13 @@
 | DNS / email | Hover |
 | CI | lint, typecheck, build (GitHub Actions) |
 | Stack | Next.js App Router, React, Tailwind; admin auth = Hover mail-session |
-| Ship path | Feature branch → QA Preview → merge → cleanup → QA on `ccvaa-web.vercel.app` (Verifier = `agent`). **Verifier = `ceo`:** CEO verifies (defaults: `direct-to-main` + Production pass2). Work IDs `{feature-slug}-{NNNN}` — [`BACKLOG.md`](BACKLOG.md). **Baseline** pass = Production audit with no PR. See `docs/protocols/GIT_DEPLOY.md`. CEO may manually check `ccvaa.ca`. |
+| Ship path | Feature branch → QA Preview → merge → cleanup → QA on `ccvaa-web.vercel.app` (Verifier = `agent`). **Epic/milestone (opt-in):** shared branch; Pass 1 per ticket; merge only on **merge milestone**. **Verifier = `ceo`:** CEO verifies (defaults: `direct-to-main` + Production pass2). Work IDs `{feature-slug}-{NNNN}` — [`BACKLOG.md`](BACKLOG.md). **Baseline** pass = Production audit with no PR. See `docs/protocols/GIT_DEPLOY.md`. CEO may manually check `ccvaa.ca`. |
 
 ### Important technical notes for Developer
 - Next.js 16: prefer `proxy.ts` over deprecated `middleware.ts`
 - Read `node_modules/next/dist/docs/` before novel Next APIs
 - Never commit `.env.local` or secrets
-- Default: feature branch + PR with backlog work ID `{feature-slug}-{NNNN}`; merge/push `main` only when CEO explicitly asks
+- Default: feature branch + PR with backlog work ID `{feature-slug}-{NNNN}`; merge/push `main` only when CEO asks (product Dev). **agent-os** after **`verified`:** PM ships same turn.
 - Admin mail proxy on Preview needs network reachability to `mail.hover.com`
 
 ---
@@ -137,6 +137,9 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-14 | Guiding principle #9: living docs = current state (prune leftovers with every OS change) |
+| 2026-07-14 | Agent OS docs prune: align thin rules/`n/a`/epic; drop obsolete FEAT- template; fix `tbd` Ship paths |
+| 2026-07-13 | **agent-os-0011:** epic/milestone ship lane (shared branch; merge on milestone) |
 | 2026-07-13 | Members backlog final review: build-order waves; ESP stubs; dep/hygiene consistency |
 | 2026-07-13 | FEATURES prune: drop obsolete admin OTP/SMTP/Redis negatives; tighten Admin/Infra current-state copy |
 | 2026-07-13 | Members backlog + FEATURES: newsletter ⊥ membership; homepage Nav→Hero→Membership→About→Contact→Footer |

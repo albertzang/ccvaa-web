@@ -45,12 +45,12 @@ Deleting a Git feature branch / closing a PR does **not** immediately remove Pre
 
 | Item | Owner | Notes |
 |------|-------|--------|
-| **Feature branch name** | **Developer** | Created when starting work. Convention: `feat/{feature-slug}-{NNNN}-short-slug` or `fix/{feature-slug}-{NNNN}-…` (backlog work ID required). PM may *suggest* a name in the Dev handoff; Developer creates it. |
+| **Feature branch name** | **Developer** | Created when starting work. **Per-item:** `feat/{feature-slug}-{NNNN}-short-slug`. **Epic lane:** reuse handoff **Epic branch** (e.g. `feat/members`). PM may suggest; Developer creates. |
 | **PR** | **Developer** | Opened against `main` after the branch has commits. |
 | **Preview URL** | **Vercel** (generated) → **Developer records it** | Appears on the GitHub PR (Vercel bot / deployment checks) or Vercel dashboard. Typical shape: `https://ccvaa-web-git-<branch-slug>-<team>.vercel.app` — do **not** reconstruct by hand. |
 | **Preview protection bypass** | **CEO** sets secret in Vercel + `.env.local`; **QA** reads local env | See `docs/protocols/PREVIEW_PROTECTION.md`. Never commit the secret. |
 | **Pass 1 handoff to QA** | **Developer** (PM may copy) | Must paste the **exact** Preview URL into `docs/templates/handoff-qa.md`. |
-| **Feature branch cleanup** | **Developer** | Delete local + remote **immediately after merge**, before Pass 2. |
+| **Feature branch cleanup** | **Developer** | Delete local + remote **immediately after merge** (per-item **or** epic milestone merge), before Pass 2. |
 | **Pass 2 bugfix** | **Developer** | New branch from latest `main` (or CEO-approved `direct-to-main`) — not the old feature branch. |
 
 ```
@@ -90,6 +90,41 @@ PM handoff
     → PM: update FEATURES.md
     → CEO (optional): manual check of https://ccvaa.ca/ outside this protocol
 ```
+
+**Default merge timing:** one backlog item → one merge to `main` after that item’s Pass 1. For large features that must not land half-built, use the **epic/milestone** lane below.
+
+## Epic / milestone ship lane (opt-in)
+
+Use when several work IDs must ship together (e.g. Members platform + public UI) so `main` never gets an incomplete slice.
+
+| Field (backlog + Dev handoff) | Values | Meaning |
+|-------------------------------|--------|---------|
+| **Ship path** | `feature-branch` | Still required (Preview exists) |
+| **Epic branch** | e.g. `feat/members` or `feat/members-m1` | Shared long-lived branch + one open PR |
+| **Merge gate** | `item` (default) \| `epic` | `item` = merge after this ticket’s Pass 1; `epic` = **do not** merge yet — keep committing on Epic branch |
+
+### Rules
+
+1. **CEO/PM declares** the epic at kickoff of the first ticket (set **Epic branch** + **Merge gate: `epic`** on participating items).
+2. **Developer** creates `Epic branch` once from latest `main`, opens **one** PR, reuses that branch/PR for every work ID in the milestone. Branch naming may omit per-ticket `NNNN` when on an epic (`feat/{feature-slug}` or `feat/{feature-slug}-m{N}`).
+3. **Pass 1** still runs **per ticket** (Verifier = `agent` + pass1) against the **same Preview URL** (updated as commits land). Pass 1 **pass** ≠ merge when Merge gate is `epic`.
+4. **Do not merge** until CEO/PM says **merge milestone** (list work IDs). Prefer a short milestone Pass 1 recheck on Preview if the last ticket’s Pass 1 is stale.
+5. **After milestone merge:** delete Epic branch local + remote; run **Pass 2** (if required) — prefer **one** Pass 2 handoff listing all milestone work IDs on the same Production deploy.
+6. **Next milestone:** cut a **new** epic branch from latest `main` (do not revive the deleted branch).
+7. **Pass 1 fail** on a ticket: fix on the **same** Epic branch / PR; retest Preview.
+8. **Pass 2 fail** after milestone merge: new `fix/…` branch from `main` (same as ordinary lane) — Iteration on the failing work ID(s).
+9. Items **without** Epic branch keep the default **per-item merge** lane unchanged.
+
+```
+Epic kickoff (CEO/PM)
+  → Dev: feat/{slug}[+mN] + PR; tickets with Merge gate=epic share it
+  → per ticket: implement → Pass 1 on shared Preview (no merge)
+  → CEO/PM: merge milestone (IDs listed)
+  → Dev: merge PR → delete epic branch
+  → Pass 2 once for the milestone (if Verify passes need pass2)
+```
+
+Mechanics also: [`COMMUNICATION.md`](COMMUNICATION.md) · [`HANDOFF.md`](HANDOFF.md) · [`CEO.md`](CEO.md) · [`BACKLOG.md`](../product/BACKLOG.md).
 
 ## CEO Verifier flow (typical defaults: direct-to-main + pass2)
 
@@ -195,17 +230,18 @@ Every Dev handoff must set **Ship path** (or inherit Verifier defaults). Develop
 
 | Change type | Executes | Notes |
 |-------------|----------|--------|
-| Small **doc / protocol / agent-OS** updates | **PM** | Already in PM remit; push only when CEO asks |
+| Small **doc / protocol / agent-OS** updates | **PM** | Push when CEO asks **or** on `agent-os-*` **`verified`** (same turn) |
 | **Hotfix / code** on `main` (incl. CEO Verifier items) | **Developer** | Handoff says `direct-to-main` **and** (CEO approved **or** Verifier = `ceo`) |
 | User-facing / auth / mail with **Verifier = `agent`** | Prefer **`feature-branch`** | Agent QA needs Preview for pass1; `agent` + `direct-to-main` is a **rare** override |
 
 ### How Developer knows
 
 1. Open `docs/templates/handoff-dev.md`
-2. Read **Verifier**, **Verify passes**, **Ship path**
-3. If Ship path missing/blank → apply Verifier defaults (`agent` → `feature-branch`; `ceo` → `direct-to-main`)
-4. If `direct-to-main` but CEO approval is not stated **and** Verifier ≠ `ceo` → **block** and ask PM/CEO (do not push)
+2. Read **Verifier**, **Verify passes**, **Ship path** (+ **Epic branch** / **Merge gate** if set)
+3. If Ship path missing/blank → apply Verifier defaults (`agent` → `feature-branch`; `ceo` / `n/a` → `direct-to-main`)
+4. If `direct-to-main` but CEO approval is not stated **and** Verifier is neither `ceo` nor `n/a` → **block** and ask PM/CEO (do not push)
 5. If Verifier = `ceo` → **do not** write agent QA handoffs; notify PM when the verify env is ready
+6. If Verifier = `n/a` → docs/process only (typically PM-owned); no Pass 1/2
 
 ### Shortened flow when `direct-to-main` (code)
 
@@ -225,23 +261,27 @@ Pure docs/protocol updates by PM: usually **no QA** unless CEO asks.
 
 | Do | Don't |
 |----|--------|
-| Follow **Verifier** + **Ship path** from the handoff | Invent `direct-to-main` because the change “looks small” |
+| Follow **Verifier** + **Ship path** (+ **Epic branch** / **Merge gate** if set) from the handoff | Invent `direct-to-main` because the change “looks small” |
 | Create and name the feature branch from latest `main` when Ship path is `feature-branch` | Push product work straight to `main` without CEO-approved / Verifier=`ceo` `direct-to-main` |
+| On **Merge gate = `epic`:** keep one PR; **do not** merge after ticket Pass 1 | Merge an epic ticket early “because Pass 1 passed” |
+| On **Merge gate = `item`** (default): open/merge as usual after Pass 1 | Leave random long-lived branches without an Epic declaration |
 | Open a PR; wait for CI + Preview deploy when on feature-branch | Merge before Preview verify when Verify passes includes `pass1` (unless CEO waives) |
 | Paste the exact Preview URL into the agent QA handoff **or** give it to PM for CEO | Invent the Preview URL from the branch name |
 | Skip agent QA files when Verifier = `ceo` | Write `HANDOFF-QA-*` for CEO Verifier items |
 | Use `ccvaa-web.vercel.app` only for Pass 2 / CEO pass2 | Use `ccvaa-web.vercel.app` as the feature Preview URL |
-| Merge / push `main` only when CEO/PM asks | Force-push `main` or skip hooks |
-| Delete feature branch local + remote **right after merge** | Wait for Pass 2 before cleanup; revive merged branch for Pass 2 fixes |
+| Merge / push `main` only when CEO/PM asks (incl. **merge milestone**) | Force-push `main` or skip hooks |
+| Delete feature/epic branch local + remote **right after merge** | Wait for Pass 2 before cleanup; revive merged branch for Pass 2 fixes |
 | Pass 2 / CEO-verify fixes: Iteration same ID; **new** branch from `main` if prior was merged | Keep committing on the old merged feature branch |
 | Point Pass 2 at `ccvaa-web.vercel.app` | Ask QA agent to verify `ccvaa.ca` |
 
 ## Branch naming (Developer)
 
-Include the backlog work ID. Examples:
+Include the backlog work ID on **per-item** branches. Examples:
 
 - `feat/admin-console-0001-members-list`
 - `fix/admin-console-0004-preview-env`
+
+**Epic lane:** `feat/{feature-slug}` or `feat/{feature-slug}-m{N}` (shared; ticket IDs live in commits/PR/handoffs, not necessarily the branch name).
 
 Pure Agent OS / docs chores may use `chore/agent-os-0001-…`.  
 See `docs/product/BACKLOG.md`. Blank work ID on product work → block.
@@ -254,4 +294,4 @@ Preview deployments use Vercel **Preview** environment variables. Admin login us
 
 ## Optional later: true staging
 
-A long-lived `staging` branch + dedicated domain can be added later if Preview-per-PR is not enough. Until then, **Preview = staging**.
+A long-lived `staging` branch + dedicated domain can be added later if Preview-per-PR is not enough — tracked as [`agent-os-0003`](../product/backlogs/agent-os-BACKLOG.md#agent-os-0003--optional-long-lived-staging-branchdomain). Until then, **Preview = staging**.

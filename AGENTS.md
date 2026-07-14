@@ -16,6 +16,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 6. **Encode friction once** — When something hurts twice, turn it into a rule, skill, or protocol — then stop re-explaining it in chat.
 7. **Least process that still prevents mistakes** — Protect secrets, `main`, and wrong-env testing; drop ceremony that does not change outcomes.
 8. **Observable “done”** — `completed` / `closed` / `verified` mean the same thing to every role, including what gets deleted vs kept.
+9. **Living docs = current state** — Protocols, skills, rules, and templates describe *now*, not how we used to work. After every meaningful OS change (including each self-evolve improvement), prune contradictions, obsolete files, stale defaults, and leftover notes. History belongs in FEATURES changelog and completed-backlog Overall — never as competing instructions in living docs.
 
 Operating docs live under [`docs/`](docs/README.md). Refine this OS via `agent-os-*` backlog items — ordinary docs with CEO **`verified`**, or a CEO-kickoff **self-evolve** run (PM loop on a feature branch; CEO merges).
 
@@ -51,7 +52,7 @@ Shared brain (not chat history):
 - `docs/product/FEATURES.md` — living feature inventory (PM maintains); changelog **descending by date**
 - `docs/product/BACKLOG.md` — feature backlogs + work IDs `{feature-slug}-{NNNN}`
 - `docs/protocols/` — communication, handoff, git/deploy, QA auth, Preview protection, **CEO responsibilities**
-- `docs/templates/` — bug / feature / QA / handoff templates
+- `docs/templates/` — backlog-item, handoff, QA report templates
 - `docs/handoffs/` / `docs/reports/` — ephemeral handoffs & reports (deleted when work closes)
 - `.cursor/rules/` — shared + role rules
 - `.cursor/skills/` — `product-manager`, `developer`, `ccvaa-dev-memory`, `qa`
@@ -68,8 +69,9 @@ Shared brain (not chat history):
 **CEO-only (out of agent flow):** https://ccvaa.ca/ — public domain; CEO handles manual testing (DNS/cache). Agents do not use it for Pass 1/2/baseline.
 
 **Default ship path (Verifier = `agent`):** feature branch → QA on Dev (optional) + Preview (required) → merge to `main` → delete feature branch → QA Production smoke on `ccvaa-web.vercel.app`.  
+**Epic / milestone (opt-in):** shared long-lived branch; Pass 1 per ticket; merge only when CEO/PM says **merge milestone** — see `docs/protocols/GIT_DEPLOY.md`.
 **Verifier = `ceo`:** defaults to `direct-to-main` + CEO Production verify (`pass2`); no agent QA.  
-**Baseline:** PM/CEO may request a Production-only audit with no PR (`Pass: baseline`). 
+**Baseline:** PM/CEO may request a Production-only audit with no PR (`Pass: baseline`).  
 Full rules: `docs/protocols/GIT_DEPLOY.md`.
 
 ## Stack (quick)

@@ -17,32 +17,27 @@ Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `not-started` |
+| **Status** | `completed` |
 | **Verifier** | `n/a` |
 | **Verify passes** | `n/a` |
 | **Ship path** | `direct-to-main` |
 
 ### Description
 
-**Problem:** Today every backlog item on Ship path `feature-branch` is expected to merge to `main` after its own Pass 1 (then Pass 2). That fits small ships. Large features (e.g. **Members**) need several tickets on one long-lived branch and only merge when a **milestone** is ready — otherwise `main` gets half-built platforms (DB without UI, stubs, broken public flows).
+Encode an **epic / milestone** ship lane so large features (e.g. Members) can share one long-lived branch and merge only when a milestone is ready — while leaving the default per-item merge path unchanged.
 
-**Goal:** Upgrade the Agent OS so PM/Dev/QA can run an **epic / milestone** lane:
+**Lane rules (current):** Epic branch + Merge gate `epic`; Pass 1 per ticket (**continue epic**); CEO/PM **merge milestone**; delete epic branch; one Pass 2. Canonical: [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
 
-1. One long-lived branch (e.g. `feat/members` or `feat/{feature-slug}-{milestone}`) for N work IDs
-2. Kickoff / Dev / Preview QA per **ticket** still works (Pass 1 against that branch’s Preview)
-3. **Merge to `main`** only when PM/CEO declares the **milestone** complete (aggregate Pass 1 / CEO gate) — not after every ticket
-4. After milestone merge: delete epic branch; Pass 2 on Production; later tickets start a **new** epic branch (or continue a named follow-on milestone branch cut from latest `main`)
-5. Default per-item merge path remains for ordinary tickets; epic/milestone is opt-in and CEO/PM-declared
-
-**Encode in:** `GIT_DEPLOY.md`, `COMMUNICATION.md` (workflow map + lanes), `HANDOFF.md` / gates matrix, `BACKLOG.md` (+ template — e.g. optional **Milestone** / **Epic branch** fields), PM + Dev + QA skills/rules/agents, `CEO.md` merge ask wording. Align with Members kickoff sequencing after this OS lands (or document interim exception if Members starts first).
+Also encodes Guiding principle **#9 Living docs = current state** (self-evolve and ordinary `agent-os` encoding must prune leftovers so living docs do not retain superseded instructions).
 
 **Acceptance:**
-- [ ] Protocols document both lanes: **per-item merge** (default) vs **epic/milestone merge**
-- [ ] Clear rules: when to open epic branch, how work IDs share it, when Pass 1 runs, when merge is allowed, branch cleanup, Pass 2 / fix policy
-- [ ] Backlog schema supports declaring Milestone / epic branch (or equivalent) without breaking existing items
-- [ ] Handoffs show epic branch + Preview URL + whether this ticket merges or not
-- [ ] FEATURES / AGENTS / skills mention the lane; changelog row
-- [ ] CEO **verified** → commit + push `main` (Ship path `direct-to-main`)
+- [x] Protocols document both lanes: **per-item merge** (default) vs **epic/milestone merge**
+- [x] Clear rules: when to open epic branch, how work IDs share it, when Pass 1 runs, when merge is allowed, branch cleanup, Pass 2 / fix policy
+- [x] Backlog schema supports declaring Epic branch / Merge gate without breaking existing items
+- [x] Handoffs show epic branch + Preview URL + whether this ticket merges or not
+- [x] FEATURES / AGENTS / skills mention the lane; changelog row
+- [x] Guiding principle #9 + self-evolve/PM wiring for prune-to-current
+- [x] CEO **verified** → commit + push `main` (Ship path `direct-to-main`)
 
 **Out of scope:** Implementing Members code; inventing a permanent staging env beyond Vercel Preview; changing Verifier defaults for tiny tickets.
 
@@ -153,7 +148,7 @@ CEO-led refinement of the multi-agent OS (principles → concrete doc/protocol c
 - Guiding principles encoded in `AGENTS.md` (repo-as-brain, CEO as decision-maker, thin roles, defaults, same-ID loops, encode friction, least process, observable done)
 - **Stale-doc sweep:** removed OTP-era copy from CEO/COMMUNICATION/QA_AUTH/PREVIEW_PROTECTION, handoff-qa template, and Dev/QA/PM rules·agents·skills; left historical backlog + FEATURES changelog rows intact
 - **Role chat titles:** `Product Manager` / `Developer` / `QA` (fixed; rename on session start)
-- **agent-os Ship path default:** `direct-to-main` (no `tbd`); `feature-branch` only for multi-iteration umbrellas
+- **agent-os Ship path default:** `direct-to-main` (no `tbd`); `feature-branch` only for **self-evolve** (required) or CEO-explicit umbrella PR
 - **Tiny-fix fast path:** trivial CEO-verified CSS/copy/proxy tweaks may use abbreviated Dev handoff (see `HANDOFF.md`)
 - **Workflow map:** canonical index in `COMMUNICATION.md` (Intake → Prioritize → Kickoff → Ship → Verify → Close); CEO.md stays checklists-only
 - **`verified` table:** product CEO Verifier completes but does not auto-ship; `agent-os-*` completes and ships same turn
@@ -246,7 +241,7 @@ On CEO **`verified`** for any `agent-os-*` item, PM marks `completed` and ships 
 | **Status** | `not-started` |
 | **Verifier** | `n/a` |
 | **Verify passes** | `n/a` |
-| **Ship path** | `tbd` |
+| **Ship path** | `direct-to-main` |
 
 ### Description
 
@@ -263,7 +258,7 @@ If Preview-per-PR is not enough, add a long-lived `staging` branch + dedicated d
 | **Status** | `not-started` |
 | **Verifier** | `n/a` |
 | **Verify passes** | `n/a` |
-| **Ship path** | `tbd` |
+| **Ship path** | `direct-to-main` |
 
 ### Description
 

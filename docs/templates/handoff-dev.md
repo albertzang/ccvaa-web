@@ -18,7 +18,9 @@ When **Verifier = `ceo`**, **Ship path = `direct-to-main`**, **Verify passes = `
 
 **Verifier:** `agent` (default) | `ceo` | `n/a`  
 **Verify passes:** `pass1+pass2` | `pass1` | `pass2` | `n/a`  
-**Ship path:** `feature-branch` | `direct-to-main`
+**Ship path:** `feature-branch` | `direct-to-main`  
+**Epic branch:** _(optional)_ e.g. `feat/members` — leave blank for happy path  
+**Merge gate:** `item` (default) | `epic`
 
 ### Defaults (if blank on backlog / handoff)
 
@@ -32,6 +34,7 @@ When **Verifier = `ceo`**, **Ship path = `direct-to-main`**, **Verify passes = `
 - **Verifier = `ceo`:** **do not** write agent QA handoffs. After Dev ships to the target env, PM asks CEO to verify. CEO says **verified** to **complete** the backlog item (**does not** auto-push); issues → Iteration on the **same** work ID.  
 - **Verifier = `n/a`:** docs/process (`agent-os`); no Pass 1/2. Ship path defaults to `direct-to-main`. CEO **`verified`** completes **and ships** (see COMMUNICATION `verified` table).  
 - **`direct-to-main`** requires CEO approval (stated here, or implied when Verifier = `ceo` / `n/a` and Ship path is `direct-to-main`).  
+- **Epic / milestone:** when **Epic branch** is set and **Merge gate = `epic`**, share that branch; Pass 1 per ticket; **do not merge** until CEO/PM **merge milestone**. Details: [`GIT_DEPLOY.md`](../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).  
 - If Ship path blank/ambiguous → apply Verifier defaults above (not always `feature-branch`).  
 - See `docs/protocols/GIT_DEPLOY.md`, `CEO.md`, and workflow map in `COMMUNICATION.md`.
 
@@ -65,7 +68,7 @@ Match existing coastal theme; prefer minimal scope.
 
 ## Git / deploy expectations
 
-### If Ship path = `feature-branch`
+### If Ship path = `feature-branch` (happy path — Merge gate `item` or blank)
 
 - **You (Developer) own the feature branch name** — must include the work ID: `feat/{feature-slug}-{NNNN}-short-slug` or `fix/{feature-slug}-{NNNN}-…`.
 - Suggested branch name: 
@@ -76,6 +79,14 @@ Match existing coastal theme; prefer minimal scope.
 - **If Verify passes includes `pass2`:** after merge + branch delete → agent Pass 2 **or** CEO Production verify per Verifier.
 - Pass 2 / CEO-verify fails → Iteration on same work ID (new branch from `main` if previous feature branch was merged); do not revive a deleted merged branch.
 
+### If Ship path = `feature-branch` + Epic branch + Merge gate `epic`
+
+- Create or reuse **Epic branch** (exact name from this handoff). Do **not** invent a per-ticket branch unless PM says otherwise.
+- PR targets `main` (or as noted); **keep open** across tickets; update Preview URL per ship for Pass 1.
+- After Pass 1 **pass:** leave PR open; prepare next ticket on the same branch when PM hands off.
+- **Do not merge** until CEO/PM says **merge milestone**. Then: merge → delete epic branch → Pass 2 for the milestone (if required).
+- Full rules: [`GIT_DEPLOY.md`](../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
+
 ### If Ship path = `direct-to-main` (CEO-approved / Verifier = `ceo` default)
 
 - Work on `main`; commit/push only when CEO asks.
@@ -85,7 +96,9 @@ Match existing coastal theme; prefer minimal scope.
 
 ## Done means
 
-- **`feature-branch` (pre-merge):** lint/typecheck clean; PR open (work ID in title); Preview URL recorded for agent QA or CEO as required by Verifier / Verify passes.
-- **`feature-branch` (post-merge):** PR merged; local + remote feature branch **deleted**; Pass 2 / CEO verify ready if required.
+- **`feature-branch` + Merge gate `item` (pre-merge):** lint/typecheck clean; PR open (work ID in title); Preview URL recorded for agent QA or CEO as required.
+- **`feature-branch` + Merge gate `item` (post-merge):** PR merged; local + remote feature branch **deleted**; Pass 2 / CEO verify ready if required.
+- **`feature-branch` + Merge gate `epic` (mid-milestone):** lint/typecheck clean; PR open on Epic branch; Preview URL for this ticket’s Pass 1; **PR not merged**; ready for next ticket when PM says.
+- **`feature-branch` + Merge gate `epic` (milestone close):** PR merged; epic branch deleted; Pass 2 / CEO verify ready if required.
 - **`direct-to-main`:** lint/typecheck clean; ready to commit/push when CEO asks; agent Pass 2 handoff **or** CEO verify cue per Verifier.
 - **Iteration rework:** same Done means for the delta; backlog stays `in-progress` until CEO **verified** (CEO Verifier) or agent Pass 2 **ship confirmed** (agent Verifier).

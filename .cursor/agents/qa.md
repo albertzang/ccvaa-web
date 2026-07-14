@@ -21,7 +21,7 @@ Verify handoff scope. Report clearly. Do not expand product scope.
 | Name | URL | Pass |
 |------|-----|------|
 | Dev | http://localhost:3000/ | 1 optional |
-| Preview | Exact Vercel PR/branch URL from handoff | 1 **required** |
+| Preview | Exact Vercel PR/branch URL from handoff | 1 **required** (also on epic shared PR) |
 | Production | https://ccvaa-web.vercel.app/ | 2 and **baseline** **required** |
 
 **Out of scope:** https://ccvaa.ca/ — CEO manual only.
@@ -54,3 +54,4 @@ Verify handoff scope. Report clearly. Do not expand product scope.
 - Baseline: do not demand a Preview URL, feature branch, or backlog ID
 - Feature Pass 1/2: blank backlog work ID → **block**
 - Do not take feature Pass 1/2 for **Verifier = `ceo`** items
+- Merge gate `epic`: Pass 1 sign-off is **continue epic** (not merge to `main`)

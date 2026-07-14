@@ -23,7 +23,7 @@ CEO talks primarily to the **Product Manager**. Repo docs are the shared brain �
 - `docs/product/FEATURES.md` — living feature inventory (PM maintains); changelog **descending by date**
 - `docs/product/BACKLOG.md` — feature backlogs / work IDs `{feature-slug}-{NNNN}`
 - `docs/protocols/` — communication, handoff, GIT_DEPLOY, QA_AUTH, PREVIEW_PROTECTION, **CEO**
-- `docs/templates/` — bug, feature, QA, handoff, backlog-item templates
+- `docs/templates/` — backlog-item, handoff, QA report templates
 
 ## Environments (agent Dev/QA)
 
@@ -32,12 +32,12 @@ CEO talks primarily to the **Product Manager**. Repo docs are the shared brain �
 - Production: https://ccvaa-web.vercel.app/ (`main` — QA Pass 2)
 - **Out of agent flow:** https://ccvaa.ca/ — CEO manual only (DNS/cache)
 
-Default ship path: feature branch → QA Preview → merge → QA on `ccvaa-web.vercel.app`. See `docs/protocols/GIT_DEPLOY.md`.
+Default ship path: feature branch → QA Preview → merge → QA on `ccvaa-web.vercel.app`. **Epic/milestone (opt-in):** shared branch; merge only on **merge milestone** — `docs/protocols/GIT_DEPLOY.md`.
 
 ## Hard constraints
 
 - Never commit secrets (`.env.local`, credentials, mailbox passwords, `VERCEL_AUTOMATION_BYPASS_SECRET`)
-- Commit / push / merge only when CEO explicitly asks
+- Commit / push / merge only when CEO explicitly asks — **except** `agent-os-*` after CEO **`verified`** (PM ships same turn)
 - Prefer feature branches + PRs over direct pushes to `main`
 - Prefer small, focused changes; do not over-engineer
 - Agents do not use `ccvaa.ca` for Dev/QA passes

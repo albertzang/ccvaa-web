@@ -18,7 +18,7 @@ Always **`Developer`**. On session start (or if the title drifts), rename via `r
 
 ## Git & deploy
 
-Read **Verifier**, **Verify passes**, and **Ship path** on the handoff first (`docs/protocols/GIT_DEPLOY.md`).
+Read **Verifier**, **Verify passes**, **Ship path**, and optional **Epic branch** / **Merge gate** on the handoff first (`docs/protocols/GIT_DEPLOY.md`).
 
 ### Defaults if Ship path blank
 
@@ -30,7 +30,7 @@ Read **Verifier**, **Verify passes**, and **Ship path** on the handoff first (`d
 
 **Tiny-fix:** if the handoff is abbreviated (ceo + direct-to-main + short Acceptance only), treat missing sections as `n/a` — still require work ID and Ship path.
 
-### `feature-branch`
+### `feature-branch` (Merge gate `item` or blank — happy path)
 
 1. Confirm **Backlog work ID** on the handoff (`{feature-slug}-{NNNN}`). Blank → **block** and ask PM.
 2. Branch from latest `main` as `feat/{feature-slug}-{NNNN}-short-slug` or `fix/{feature-slug}-{NNNN}-…`
@@ -43,20 +43,35 @@ Read **Verifier**, **Verify passes**, and **Ship path** on the handoff first (`d
 9. **If Verify passes includes `pass2`:** tell PM Production is ready (agent Pass 2 **or** CEO verify per Verifier)
 10. Failures after merge: Iteration same work ID; new `fix/{feature-slug}-{NNNN}-…` from latest `main` (or CEO `direct-to-main`) — never revive the merged feature branch
 
-### `direct-to-main` (handoff says so **and** CEO approved, **or** Verifier = `ceo`)
+### `feature-branch` + Epic branch + Merge gate `epic`
+
+1. Confirm work ID, **Epic branch** name, and Merge gate `epic` on the handoff
+2. Create Epic branch once from latest `main` (or reuse if it already exists / PR open)
+3. Implement on the **shared** Epic branch; keep **one** PR open across tickets
+4. PR title may list the current work ID (and epic name); update Preview URL in Pass 1 handoff per ticket
+5. After Pass 1 **pass:** **do not merge** — notify PM ready for next ticket
+6. Merge only when CEO/PM says **merge milestone**
+7. After milestone merge: delete epic branch local + remote; cue Pass 2 for the milestone if required
+8. Ticket Pass 1 fail: fix on the same epic branch/PR
+9. Pass 2 fail after milestone: new `fix/…` from `main` — never revive the deleted epic branch
+
+Canonical: [`docs/protocols/GIT_DEPLOY.md`](../../docs/protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
+
+### `direct-to-main` (handoff says so **and** CEO approved, **or** Verifier = `ceo` / `n/a`)
 
 1. Do **not** invent this path because the change “looks small”
-2. If CEO approval missing and Verifier ≠ `ceo` → block and ask PM/CEO
+2. If CEO approval missing and Verifier is neither `ceo` nor `n/a` → block and ask PM/CEO
 3. Commit/push on `main` only when CEO asks
 4. Skip agent Pass 1 unless Verify passes explicitly includes `pass1`
 5. **Verifier = `agent`:** recommend light QA Pass 2 for **code** if pass2
 6. **Verifier = `ceo`:** notify PM that CEO can verify — **no** agent QA files
+7. **Verifier = `n/a`:** docs/process (usually PM-owned); no Pass 1/2
 
 Do not use `ccvaa-web.vercel.app` as the feature Preview. Do not ask QA to verify `ccvaa.ca` (CEO manual).
 
 ## Before coding
 
-1. Read Verifier, Verify passes, Ship path, **Backlog work ID**, acceptance criteria, and out of scope
+1. Read Verifier, Verify passes, Ship path, **Epic branch** / **Merge gate** (if set), **Backlog work ID**, acceptance criteria, and out of scope
 2. Locate related code (`src/lib/site.ts`, admin routes, components)
 3. For unfamiliar Next 16 APIs: read `node_modules/next/dist/docs/`
 4. Load `.cursor/skills/ccvaa-dev-memory/SKILL.md` for institutional notes

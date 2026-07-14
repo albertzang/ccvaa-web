@@ -35,6 +35,8 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 4. Admin roster — `0008`
 5. Then `next`: `0010` links → `0009` go-live (CEO); `later`: `0011`–`0013`
 
+**Ship lane:** Prefer **epic / milestone** (`Epic branch` e.g. `feat/members`, **Merge gate `epic`**) so half-built platform work does not land on `main` per ticket. Declare at first Members kickoff. See [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in) / `agent-os-0011`.
+
 ---
 
 ## members-0013 — Admin impersonation
