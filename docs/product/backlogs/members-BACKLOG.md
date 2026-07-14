@@ -371,12 +371,18 @@ Contact `#contact` owns the **Newsletter** axis: subscribe (double opt-in via Re
 
 ### Overall
 
-- Pass 1 (2026-07-14): **continue epic** — Subscribe/#contact UI on Preview; subscribe API + health fail-closed without env; invalid unsub token landing OK; live double opt-in blocked pending secrets. Report: `docs/reports/QA-pass1.md`
+- Pass 1 (2026-07-14, early): UI checks ok while DB missing — **continue epic** (stale once `DATABASE_URL` landed).
+- Pass 1 (2026-07-14, retest): **hold** — with DB present and Resend missing, `POST …/newsletter/subscribe` and preference lookup return **500** `MEMBERS_INTERNAL_ERROR` instead of clear **503** fail-closed. Report: `docs/reports/QA-pass1.md` (`448cb30`).
+
+### Iteration 2 — Fail-closed when Resend unset
+
+**Source:** `qa` (Pass 1 hold). Map `MembersEnvError` / missing Resend (and missing schema if unmigrated) to **503** with clear codes on newsletter subscribe / confirm / preference — not generic 500. Retest Pass 1 after fix.
 
 ### Links
 
 - Depends on: `members-0001`, `members-0002`
 - PR: https://github.com/albertzang/ccvaa-web/pull/8
+- Handoff: `docs/handoffs/HANDOFF-DEV.md` (Iteration 2)
 
 ---
 

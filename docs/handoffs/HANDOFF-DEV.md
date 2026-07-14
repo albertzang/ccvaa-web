@@ -2,10 +2,10 @@
 
 **Date:** 2026-07-14  
 **Requested by:** CEO / PM  
-**Backlog work ID:** `members-0005`  
+**Backlog work ID:** `members-0003`  
 **Backlog link:** `docs/product/backlogs/members-BACKLOG.md`  
 **Priority:** now  
-**Iteration:** `1`
+**Iteration:** `2`
 
 **Save as:** `docs/handoffs/HANDOFF-DEV.md`
 
@@ -17,46 +17,38 @@
 **Epic branch:** `feat/members`  
 **Merge gate:** `epic`
 
-**CEO approved direct-to-main?** n/a  
-
 ## Goal
 
-Member email OTP login for the public site `#membership` wall: 6-digit OTP via Resend → httpOnly member session + logout. DB-backed challenges (reuse `members-0002` helpers). Does **not** grant `/admin`. Enables Join → profile transition for later `members-0006`.
+**Delta only:** Newsletter APIs must fail closed with clear **503** when Resend (or other required env) is missing — not generic **500** `MEMBERS_INTERNAL_ERROR`.
 
-## User value
+QA repro (Preview with `DATABASE_URL` set, `RESEND_*` missing):
+- `POST /api/members/newsletter/subscribe` → currently 500; expect 503 + clear code/message
+- `POST /api/members/newsletter/preference` (`lookup`) → same
 
-Paid (or seeded) members can open the membership profile side of `#membership` without admin auth.
+Also harden: if schema missing (unmigrated Neon), return clear 503 rather than unhandled 500.
 
 ## Acceptance criteria
 
-- [ ] Login from/near `#membership`; OTP send + verify → httpOnly session; logout
-- [ ] Zod; rate limits/expiry documented; session never grants `/admin`
-- [ ] FEATURES.md Member auth updated
-- [ ] Lint + typecheck clean; push on `feat/members`; Pass 1 handoff updated
+- [ ] Subscribe / confirm / preference map `MembersEnvError` / Resend-not-configured to **503** with stable codes (not blank “Something went wrong”)
+- [ ] Preference `lookup` without Resend should not require send — if it 500s for env reasons, fix mapping; DB-only lookup should work with just `DATABASE_URL` if no email send is needed
+- [ ] Quick check join OTP routes share same error helper so 0004/0005 don’t regress the same way
+- [ ] Lint + typecheck; push on `feat/members`; overwrite `HANDOFF-QA-pass1.md` for **members-0003** Iteration 2 retest
 - [ ] **Do not merge**
 
 ## Out of scope
 
-OAuth; passwords; admin auth; join/subscribe form redesign (`0003`/`0004`); full profile chrome (`0006`).
+Setting CEO secrets; full double opt-in with Mailosaur; merge to main; pausing unrelated `members-0005` work except pull/rebase onto this fix.
 
 ## Technical hints
 
-- Reuse: `src/lib/members/otp-challenges.ts`, `confirm.ts`, `resend.ts` from `0002`
-- Seeded members available via `npm run db:seed` for QA without live Join
-- Preview already has `DATABASE_URL`; CEO still adding Resend — fail closed without `RESEND_*`
-- Cookie/session: httpOnly, secure in production, same-site appropriate; do not touch Hover admin session
-- Related: next ticket `members-0006` profile UI depends on this session
+- Routes under `src/app/api/members/newsletter/*`; shared error mapper if present
+- Health already reports `email.resend: "missing"` — API responses should align
+- After fix: QA will retest Pass 1 (continue epic expected)
 
-## Design / UX constraints
+## Git / deploy
 
-Minimal login wall near `#membership`; match coastal theme; keep Join UI for logged-out.
-
-## Git / deploy expectations
-
-- Reuse **`feat/members`** + PR #8  
-- PM authorizes commit/push; **do not merge**  
-- Overwrite `docs/handoffs/HANDOFF-QA-pass1.md` when ready
+Reuse `feat/members` / PR #8. PM authorizes commit/push. Pull tip first (`b90116a`+). If `members-0005` WIP lands mid-flight, rebase/merge carefully — this Iteration is small and priority.
 
 ## Done means
 
-Acceptance met; Pass 1 handoff ready; **PR not merged**
+503 fail-closed verified on Preview without Resend; Pass 1 handoff ready for retest; **PR not merged**
