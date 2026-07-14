@@ -1,11 +1,11 @@
 # QA report
 
 **Pass:** 1 (pre-merge)  
-**Backlog work ID:** `members-0003`  
-**Environment(s) + exact URLs:** Preview https://ccvaa-web-git-feat-members-azang-projects.vercel.app (Deployment Protection bypass used via `.env.local`; bypass query/header omitted from written URL; interactive forms still need `x-vercel-set-bypass-cookie=true`)  
-**Branch / PR / commit:** `feat/members` · PR https://github.com/albertzang/ccvaa-web/pull/8 · fail-closed fix `8fb76ba` (in tip ancestry) · Preview tip at report time `3841026` (handoff noted `8fb76ba` / `62d4b16`)  
+**Backlog work ID:** `members-0005`  
+**Environment(s) + exact URLs:** Preview https://ccvaa-web-git-feat-members-azang-projects.vercel.app (Deployment Protection bypass used via `.env.local`; bypass query omitted from written URL; `x-vercel-set-bypass-cookie=true` used for API/HTML fetches)  
+**Branch / PR / commit:** `feat/members` · PR https://github.com/albertzang/ccvaa-web/pull/8 · tip `afb0f19`  
 **Date:** 2026-07-14  
-**Result:** pass
+**Result:** pass-with-issues
 
 **Save as:** `docs/reports/QA-pass1.md`
 
@@ -13,35 +13,35 @@
 
 ## Scope tested
 
-**members-0003 Iteration 2** fail-closed retest (epic Merge gate): newsletter/API **503** clarity when Resend and/or schema are missing, health smoke, Hero/Contact + invalid unsub landing, lint/typecheck. Sign-off is **continue epic** / **hold** / **retest** — not merge to `main`.
+**members-0005** (epic Merge gate): `#membership` member email OTP login UI, login/session/logout APIs, fail-closed behavior without migrated Preview schema, admin isolation, lint/typecheck. Live OTP E2E blocked per handoff (unmigrated Neon + no Mailosaur). Browser MCP tab unavailable this pass — verified via bypassed curl + SSR HTML.
 
 ## Checklist results
 
 | Area | Result | Notes |
 |------|--------|-------|
-| `GET /api/members/health` | pass | **200** throughout. Early sample this pass: `email.resend: "missing"` (db ok). Later on same Preview alias: `email.resend: "configured"`, `session: "configured"` (env drift mid-pass). No secrets in body |
-| Subscribe fail-closed (Resend missing) | pass | First API sample (Resend **missing**): `POST /api/members/newsletter/subscribe` → **503** `MEMBERS_EMAIL_UNAVAILABLE` with clear message — **not** **500** `MEMBERS_INTERNAL_ERROR` |
-| Subscribe / confirm (Resend present, schema missing) | pass | Later env: Resend configured, Neon schema incomplete → subscribe & confirm **503** `MEMBERS_DB_UNAVAILABLE` (clear fail-closed; no generic 500) |
-| Preference lookup | pass | `POST …/preference` `action=lookup` → **503** `MEMBERS_DB_UNAVAILABLE` (unmigrated) — allowed per handoff; never generic **500** |
-| Hero **Subscribe** → `#contact` | pass | Preview HTML: `href="#contact"` + Subscribe CTA; no Vercel login wall with bypass |
-| Contact newsletter UI | pass | Preview HTML includes newsletter form markers; Subscribe + Manage preference UI/copy present (CASL + separate from paid membership) |
-| Invalid `/?unsub=bad-token` | pass | **200**; page includes “This unsubscribe link is invalid or has expired.” |
-| Live double opt-in + Mailosaur | blocked | Schema still unmigrated (`MEMBERS_DB_UNAVAILABLE`); Mailosaur missing on health. Not blocking Iteration 2 fail-closed acceptance |
-| Seed unsub success path | blocked | Needs Preview `db:seed`; without seed, landing stays invalid — not counted as fail |
+| `#membership` Member sign-in + Join (logged out) | pass | Preview SSR HTML: “Member sign-in”, email field, “Send login code”, “Join CCVAA” panel; Stripe Join shows expected unavailable alert (`STRIPE_SECRET_KEY` missing — known `members-0004` gap) |
+| Seeded/active member OTP login (live) | blocked | Preview Neon reachable (`GET /api/members/health` **200**, `db.ok: true`) but `members` schema unmigrated: `POST /api/members/login/start` → **503** `MEMBERS_DB_UNAVAILABLE`; `POST …/verify` → **503** with “Run migrations” message. Mailosaur missing on health. Cannot capture Resend OTP or use seed `123456` without migrate+seed |
+| Fail-closed API (no generic 500) | pass | Invalid email → **400** `MEMBERS_VALIDATION_ERROR`. Unmigrated schema → **503** with stable codes/messages |
+| `GET /api/members/login/session` (no cookie) | pass | **200** `authenticated: false`, `grantsAdmin: false` |
+| `POST /api/members/login/logout` (no session) | pass | **200** idempotent sign-out message; `grantsAdmin: false` |
+| Member session does not open `/admin` | pass | `GET /admin` **200** without member cookie (Hover mail-session chrome only); session API always `grantsAdmin: false` per contract |
+| Newsletter-only not-eligible | blocked | `newsletter-only@ccvaa-seed.test` login start returns **503** `MEMBERS_DB_UNAVAILABLE` (schema), not **404** `MEMBERS_LOGIN_NOT_ELIGIBLE` — cannot distinguish until Preview migrate+seed |
+| `GET /api/members/health` | pass | **200** `resend: configured`, `session: configured`, `stripe: missing`, `mailosaur: missing` |
 | `npm run lint` + `typecheck` | pass | Clean locally on workstation |
 | Do not merge (epic) | n/a | Confirmed — epic merge gate |
 
 ## Bugs found
 
-- (none) — prior hold (generic **500** when Resend/schema unset) resolved in `8fb76ba`; retest confirms clear **503** fail-closed (`MEMBERS_EMAIL_UNAVAILABLE` and/or `MEMBERS_DB_UNAVAILABLE`).
+- (none) — Preview env gaps (unmigrated schema, no Mailosaur) block live OTP E2E but match handoff known risks; deployed UI and fail-closed paths behave as specified.
 
-Known backlog IDs already under test: `members-0003` in [`docs/product/backlogs/members-BACKLOG.md`](../product/backlogs/members-BACKLOG.md).
+Known backlog IDs already under test: `members-0005` in [`docs/product/backlogs/members-BACKLOG.md`](../product/backlogs/members-BACKLOG.md).
 
 ## Suggestions (non-blocking)
 
-- Run Preview Neon migrations (+ optional `npm run db:seed`) before a later pass if live double opt-in / seed unsub success should be verified.
-- Tip includes later `members-0005` OTP login WIP (`3841026`); this retest only judged the Iteration 2 fail-closed delta.
+- Run `npm run db:migrate` (+ optional `npm run db:seed`) against Preview Neon before a later pass to verify full OTP → session → logout E2E and `MEMBERS_LOGIN_NOT_ELIGIBLE` for newsletter-only seed.
+- Configure Mailosaur on Preview (or document CEO Resend log capture) for OTP verification without manual inbox.
+- `login/start` unmigrated-schema errors surface as generic “Failed to look up member for login.” while `login/verify` returns the clearer migration message — consider aligning copy (cosmetic).
 
 ## Sign-off
 
-**Pass 1:** **continue epic** — Iteration 2 fail-closed verified on Preview (clear **503** codes; no generic **500** `MEMBERS_INTERNAL_ERROR`). Epic branch `feat/members` stays open; do **not** merge to `main`.
+**Pass 1:** **continue epic** — Member sign-in UI ships on Preview; session/logout APIs and admin isolation look correct; fail-closed **503**/**400** behavior verified. Live OTP login E2E remains blocked until Preview migrate/seed (+ OTP capture). Epic branch `feat/members` stays open; do **not** merge to `main`.
