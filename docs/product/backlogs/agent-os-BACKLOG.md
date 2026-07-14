@@ -38,6 +38,7 @@ CEO-kickoff **self-evolve** on `chore/agent-os-0012-self-evolve`. Evaluate OS vs
 ### Links
 
 - Branch: `chore/agent-os-0012-self-evolve`
+- PR: https://github.com/albertzang/ccvaa-web/pull/7
 
 ---
 
