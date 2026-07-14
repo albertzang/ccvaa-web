@@ -32,7 +32,8 @@ CEO-kickoff **self-evolve** on `chore/agent-os-0012-self-evolve`. Evaluate OS vs
 - **Epic status/close/Pass 1 notes:** Merge gate `epic` stays `in-progress` until milestone Pass 2; record Pass 1 on backlog before overwriting fixed QA paths; delete handoffs at milestone close (`GIT_DEPLOY`, `HANDOFF`, `BACKLOG`, PM skill/rule)
 - **Thin rules:** shared hard constraints respect Verifier ship defaults + self-evolve mid-loop commits; PM rule self-evolve + #9 prune
 - **Members pre-wire:** `feat/members` + Merge gate `epic` on `0001`–`0008` and `0010`
-- **Prune:** GIT_DEPLOY common-lanes list includes epic; COMMUNICATION merge exception for agent-os `verified`; CEO “continue epic” only; handoff-qa feature/epic cleanup; ccvaa-dev-memory Ops
+- **Prune:** GIT_DEPLOY common-lanes list includes epic; Pass 1 sign-off distinguishes Merge gate `item` vs `epic`; COMMUNICATION merge exception for agent-os `verified`; CEO “continue epic” only; handoff-qa feature/epic cleanup; ccvaa-dev-memory Ops
+- **Stop:** remaining ideas insignificant (verified-table dedupe, staging/CI smoke later items)
 
 ### Links
 

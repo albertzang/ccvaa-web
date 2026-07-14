@@ -139,13 +139,14 @@ PM handoff (Verifier: ceo)
     → CEO (optional): check ccvaa.ca
 ```
 
-### Pass 1 — before merge (QA agent, or CEO if Verifier = `ceo`)
+### Pass 1 — Preview (QA agent, or CEO if Verifier = `ceo`)
 
 - Only when **Verify passes** includes `pass1`
 - **Required:** exact Preview URL from handoff (Developer-provided)
 - **Optional:** Dev (`localhost:3000`) for early feedback while coding
 - **Do not** use Production (`ccvaa-web.vercel.app`) or `ccvaa.ca` for Pass 1 of new work
-- **Agent:** result **pass** → ready to merge; **fail** → same feature branch / PR; retest Preview after fixes
+- **Agent + Merge gate `item` (default):** result **pass** → ready to merge; **fail** → same feature branch / PR; retest Preview after fixes
+- **Agent + Merge gate `epic`:** result **pass** → **continue epic** (do **not** merge); **fail** → same Epic branch / PR; retest Preview
 - **CEO Verifier:** CEO replies **verified** (for this pass) or notes issues → Iteration
 
 ### Pass 2 — after merge / direct-to-main push (QA agent, or CEO if Verifier = `ceo`)
