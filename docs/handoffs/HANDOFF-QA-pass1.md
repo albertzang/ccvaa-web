@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-14  
 **Pass:** `1`  
-**Backlog work ID:** `members-0005`  
+**Backlog work ID:** `members-0003`  
 **Ship path that led here:** `feature-branch`  
 **Epic branch:** `feat/members`  
 **Merge gate:** `epic`  
@@ -12,59 +12,52 @@
 
 **Branch name:** `feat/members`  
 **PR link:** https://github.com/albertzang/ccvaa-web/pull/8  
-**Commit:** _(latest after push — use branch HEAD)_  
+**Commit:** `8fb76ba`  
 **Preview URL:** https://ccvaa-web-git-feat-members-azang-projects.vercel.app  
 **Preview protection:** QA reads `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local` (do **not** paste the secret here). See `docs/protocols/PREVIEW_PROTECTION.md`.  
 **Production URL:** https://ccvaa-web.vercel.app/ (Pass **2** only — not for this pass)
 
 **Post-merge cleanup (Pass 2 only):** n/a until **merge milestone**
 
-**Out of scope for QA:** https://ccvaa.ca/ — CEO manual only. OAuth/passwords; admin auth; Join redesign; full profile UI (`members-0006`).
+**Out of scope for QA:** https://ccvaa.ca/ — CEO manual only.
+
+## Environments to test this pass
+
+- [ ] Dev — http://localhost:3000/ (optional)
+- [ ] Preview — https://ccvaa-web-git-feat-members-azang-projects.vercel.app (required)
+- [ ] Production — n/a for this pass
 
 ## What changed
 
-`#membership` member email OTP login wall: send 6-digit code (Resend, `purpose=login`) → verify → httpOnly signed cookie `ccvaa_member_session` (7-day TTL) + logout. Active paid members only. Logged-out view shows **Member sign-in** above **Join**. Logged-in stub shows email/plan + Sign out (profile chrome is `0006`). Session **never** grants `/admin`. Fail closed without `DATABASE_URL` / `RESEND_*` / `MEMBER_SESSION_SECRET`.
+**members-0003 Iteration 2** — fail-closed newsletter/API errors when Resend or schema is missing:
 
-APIs: `POST /api/members/login/start`, `POST /api/members/login/verify`, `POST /api/members/login/logout`, `GET /api/members/login/session`.
+- Subscribe / confirm / preference map missing Resend / `MembersEnvError` / DB-unavailable / unmigrated schema to clear **503** (not generic **500** `MEMBERS_INTERNAL_ERROR`)
+- Subscribe checks Resend before DB write → `MEMBERS_EMAIL_UNAVAILABLE` **503**
+- Preference `lookup` remains DB-only (no Resend required when schema is present)
+- Shared `handleMembersApiError` + OTP/join DB wrappers aligned so join OTP routes do not regress the same 500
 
 ## Focus checklist
 
-- [ ] Homepage `#membership`: login form + Join when logged out
-- [ ] Without `DATABASE_URL` / `RESEND_*` / `MEMBER_SESSION_SECRET`: login start/verify fail closed (503 / clear message)
-- [ ] With secrets + seeded (or real) active member: start → email OTP → verify → signed-in stub (plan + email)
-- [ ] Logout clears member session; Join/login return; `/admin` still Hover-only (member cookie does not open admin)
-- [ ] Non-member / newsletter-only email: not eligible (404-style clear message)
-- [ ] OTP rate limits / expiry behave (15 min TTL; 3 sends/hour; 5 verify attempts) — light spot-check OK
-- [ ] `npm run lint` + `npm run typecheck` clean (CI on PR)
+- [ ] `GET /api/members/health` still **200** with `email.resend: "missing"` (and `db.ok` as before)
+- [ ] With `DATABASE_URL` set and `RESEND_*` missing: `POST /api/members/newsletter/subscribe` → **503** with clear code (`MEMBERS_EMAIL_UNAVAILABLE` or `MEMBERS_ENV_MISSING`), not **500** / “Something went wrong…”
+- [ ] Same env: `POST /api/members/newsletter/preference` with `{"action":"lookup","email":"qa-pass1@example.com"}` → **200** if schema migrated, or clear **503** `MEMBERS_DB_UNAVAILABLE` if unmigrated — never generic **500**
+- [ ] Confirm route with missing Resend (and no valid OTP) still fail-closed clearly (400 OTP / 503 env-db as applicable) — no blank 500
+- [ ] Hero Subscribe → `#contact` and Contact newsletter UI still load
+- [ ] Invalid `/?unsub=bad-token#contact` still shows invalid/expired message
+- [ ] `npm run lint` + `typecheck` clean (CI on PR)
 - [ ] **Do not merge** (epic merge gate)
 
 ## Known risks / flaky areas
 
-- Live OTP requires Preview: `DATABASE_URL`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, **`MEMBER_SESSION_SECRET`** (new).
-- Seeded emails (`founding@` / `lifetime@` / `annual@ccvaa-seed.test`) need `npm run db:seed` on Preview Neon. Seed login OTP `123456` for annual is optional/dev-only and may be superseded by a fresh start.
-- Mailosaur optional for capturing login OTP — `docs/members/mailosaur-qa.md`.
-- Open Preview with protection bypass **and** `x-vercel-set-bypass-cookie=true` so client `fetch` keeps the bypass cookie.
-- Join paths still need Stripe secrets if testing Join alongside login.
+- Full double opt-in + Mailosaur still blocked until CEO sets Preview `RESEND_*` (and optional seed)
+- Browser `fetch` needs deployment-protection bypass cookie (`x-vercel-set-bypass-cookie=true`) — query-only bypass is enough for curl
+- Tip may race with in-flight `members-0005` OTP login WIP on the same epic branch — this retest is **only** the fail-closed Iteration 2 delta
 
 ## Preview env notes (Pass 1)
 
-CEO/PM set in Vercel **Preview** (and `.env.local` for Dev):
-
-| Var | Purpose |
-|-----|---------|
-| `DATABASE_URL` | Neon |
-| `RESEND_API_KEY` / `RESEND_FROM_EMAIL` | Login OTP send |
-| `MEMBER_SESSION_SECRET` | HMAC for httpOnly member session cookie |
-| Mailosaur (optional) | Capture `login` purpose OTP |
-
-Deployment Protection bypass — `VERCEL_AUTOMATION_BYPASS_SECRET` in `.env.local`.
-
-## Production / baseline / Pass 2 auth notes
-
-- Admin auth = Hover mailbox login in Mail iframe — see `docs/protocols/QA_AUTH.md`
-- Member session ≠ admin session
-- QA reads `ADMIN_EMAIL` / `ADMIN_PASS` from `.env.local` — **do not** paste into handoffs or reports
+Admin mail auth needs Preview Deployment Protection bypass if testing `/admin` on Preview (mailbox login in iframe).
 
 ## Report back with
 
-`docs/reports/QA-pass1.md` — Pass 1 result for **continue epic** (do **not** merge to `main`).
+`docs/templates/qa-report.md` → overwrite `docs/reports/QA-pass1.md`  
+Sign-off: **continue epic** / **hold** / **retest** (not merge to `main`)
