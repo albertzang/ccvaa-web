@@ -5,6 +5,8 @@ export * from "@/lib/members/confirm";
 export * from "@/lib/members/crypto";
 export * from "@/lib/members/env";
 export * from "@/lib/members/errors";
+export * from "@/lib/members/esp";
+export * from "@/lib/members/newsletter";
 export * from "@/lib/members/otp-challenges";
 export * from "@/lib/members/otp-config";
 export * from "@/lib/members/resend";

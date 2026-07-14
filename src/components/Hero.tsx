@@ -38,6 +38,15 @@ export function Hero() {
         <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ocean-50/95 sm:text-xl">
           {heroContent.subheadline}
         </p>
+
+        <div className="mt-8">
+          <a
+            href="#contact"
+            className="inline-flex rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-dark"
+          >
+            {heroContent.subscribeLabel}
+          </a>
+        </div>
       </div>
     </section>
   );

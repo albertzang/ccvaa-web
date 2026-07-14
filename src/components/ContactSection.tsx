@@ -1,6 +1,15 @@
 import { contactContent, organization } from "@/lib/site";
+import { NewsletterForm } from "@/components/NewsletterForm";
 
-export function ContactSection() {
+export type UnsubLandingProps =
+  | { kind: "success"; already: boolean }
+  | { kind: "invalid" };
+
+type ContactSectionProps = {
+  unsubLanding?: UnsubLandingProps;
+};
+
+export function ContactSection({ unsubLanding }: ContactSectionProps) {
   const { address } = organization;
 
   return (
@@ -13,6 +22,8 @@ export function ContactSection() {
           <p className="mt-4 text-base leading-relaxed text-ocean-600">
             {contactContent.description}
           </p>
+
+          <NewsletterForm unsubLanding={unsubLanding} />
 
           <div className="mt-8">
             <p className="text-sm font-medium uppercase tracking-wider text-ocean-500">

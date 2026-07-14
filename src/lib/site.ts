@@ -46,6 +46,7 @@ export const heroContent = {
   headline: "Celebrating visual arts from coast to coast",
   subheadline:
     "We bring artists, educators, and communities together to create, learn, and share the power of visual expression.",
+  subscribeLabel: "Subscribe",
 } as const;
 
 export const aboutContent = {
@@ -142,4 +143,28 @@ export const contactContent = {
     "Interested in partnering, volunteering, or learning more about our programs? We would love to hear from you.",
   emailLabel: "Email",
   addressLabel: "Mailing address",
+} as const;
+
+export const newsletterContent = {
+  title: "Newsletter",
+  description:
+    "Occasional updates about exhibitions, programs, and community news. This mailing list is separate from paid CCVAA membership — you can subscribe or unsubscribe anytime.",
+  subscribeLabel: "Subscribe",
+  manageLabel: "Manage preference",
+  emailPlaceholder: "you@example.com",
+  namePlaceholder: "Your name (optional)",
+  codePlaceholder: "6-digit code",
+  consentNote:
+    "By subscribing you consent to receive email from CCVAA. You can unsubscribe anytime. This is not a membership plan.",
+  pendingNote:
+    "Enter the 6-digit code we emailed you. You are not subscribed until you confirm.",
+  subscribedNote: "You are subscribed to the CCVAA newsletter.",
+  unsubscribedNote: "You are not subscribed to the newsletter.",
+  membershipNote:
+    "Paid membership is managed separately and is not affected by newsletter changes.",
+  unsubLandingSuccess:
+    "You have been unsubscribed from the CCVAA newsletter. Your paid membership, if any, is unchanged.",
+  unsubLandingAlready:
+    "You were already unsubscribed from the newsletter. Your paid membership, if any, is unchanged.",
+  unsubLandingInvalid: "This unsubscribe link is invalid or has expired.",
 } as const;

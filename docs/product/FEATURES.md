@@ -28,7 +28,8 @@
 - Full-bleed coastal hero image (`hero-background.webp`)
 - Eyebrow, headline, subheadline from `src/lib/site.ts`
 - Text is non-selectable
-- **Planned:** **Subscribe** + **Join** buttons with live counters; anchors to `#contact` (newsletter) and `#membership` (Join / profile panel) — see Members backlog
+- **Subscribe** button anchors to `#contact` (newsletter)
+- **Planned:** **Join** button with live counters; anchor to `#membership` (Join / profile panel) — see Members backlog
 
 ### Membership (`#membership`) — planned
 - After Hero, before About
@@ -42,7 +43,7 @@
 
 ### Contact (`#contact`)
 - Email + mailing address card
-- **Planned:** Newsletter subscribe / manage (orthogonal to paid membership); ESP unsubscribe → Contact by anchor + token — see [`backlogs/members-BACKLOG.md`](backlogs/members-BACKLOG.md). Hero **Subscribe** anchors here.
+- **Newsletter** (orthogonal to paid membership): subscribe with double opt-in (Resend OTP), manage preference (incl. paid members), tokenized unsubscribe landing `/?unsub=<token>#contact` — unsub never cancels membership. ESP sync stub until provider chosen — see [`docs/members/esp.md`](../members/esp.md). APIs: `POST /api/members/newsletter/{subscribe,confirm,preference,unsub}`.
 
 ### Footer
 - Org name, tagline, copyright (no duplicate contact block)
@@ -103,6 +104,8 @@
 
 **Platform (members-0001, epic `feat/members`):** Drizzle schema on Neon — orthogonal `newsletter_status` vs `membership_plan`; OTP challenges; unsub tokens. Annual plans use `membership_anniversary` + `next_renewal_at` (null for Founding/Lifetime). Shared Zod in `src/lib/members/zod/`. `GET /api/members/health` fails closed (503) without `DATABASE_URL`. Migrate/seed: `npm run db:migrate`, `npm run db:seed` (seeds non-Production only). Schema notes: [`docs/members/schema.md`](../members/schema.md). Env: `DATABASE_URL` in `.env.example`; Stripe/Mailosaur placeholders for later tickets.
 
+**Newsletter (members-0003, epic `feat/members`):** Contact `#contact` UI + `POST /api/members/newsletter/*` routes. Double opt-in via Resend OTP; pending does not count toward subscriber count. Manage preference for newsletter-only and paid members. Token unsub `/?unsub=<token>#contact` (idempotent; membership unchanged). ESP sync stub in `src/lib/members/esp.ts` — footer URL: [`docs/members/esp.md`](../members/esp.md). Requires `DATABASE_URL` + `RESEND_*` for live subscribe; fails closed without them.
+
 ---
 
 ## Infra & ops
@@ -139,6 +142,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-14 | **members-0003** (epic `feat/members`): Contact newsletter — double opt-in, manage preference, token unsub landing; Hero Subscribe → `#contact`; ESP stub + docs |
 | 2026-07-14 | **agent-os-0013:** CEO talks only to PM; PM invokes Dev/QA (no CEO Dev/QA chats) |
 | 2026-07-14 | **agent-os-0012** self-evolve: epic status/close/Pass 1 notes; thin-rule defaults; Members epic pre-wire |
 | 2026-07-14 | Guiding principle #9: living docs = current state (prune leftovers with every OS change) |

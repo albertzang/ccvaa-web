@@ -22,9 +22,28 @@ export type NewsletterSubscribeInput = z.infer<
 
 export const newsletterConfirmInputSchema = z.object({
   email: z.string().trim().email().max(320),
-  token: z.string().trim().min(16).max(128),
+  code: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, "Confirmation code must be 6 digits"),
 });
 
 export type NewsletterConfirmInput = z.infer<
   typeof newsletterConfirmInputSchema
+>;
+
+export const newsletterLookupInputSchema = z.object({
+  email: z.string().trim().email().max(320),
+});
+
+export type NewsletterLookupInput = z.infer<
+  typeof newsletterLookupInputSchema
+>;
+
+export const newsletterUnsubscribeInputSchema = z.object({
+  email: z.string().trim().email().max(320),
+});
+
+export type NewsletterUnsubscribeInput = z.infer<
+  typeof newsletterUnsubscribeInputSchema
 >;
