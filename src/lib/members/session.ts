@@ -165,6 +165,18 @@ export function createMemberSessionToken(input: {
   };
 }
 
+/** Requires a valid member session cookie or throws. */
+export async function requireMemberSession(): Promise<MemberSessionPayload> {
+  const payload = await readMemberSession();
+  if (!payload) {
+    throw new MembersSessionError(
+      "MEMBERS_SESSION_INVALID",
+      "Sign in to manage your membership profile.",
+    );
+  }
+  return payload;
+}
+
 /** Reads and verifies the member session cookie. Returns null when missing/invalid. */
 export async function readMemberSession(): Promise<MemberSessionPayload | null> {
   const secret = getMemberSessionSecret();

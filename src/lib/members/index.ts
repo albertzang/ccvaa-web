@@ -11,6 +11,7 @@ export * from "@/lib/members/login";
 export * from "@/lib/members/newsletter";
 export * from "@/lib/members/otp-challenges";
 export * from "@/lib/members/otp-config";
+export * from "@/lib/members/profile";
 export * from "@/lib/members/resend";
 export * from "@/lib/members/session";
 export * from "@/lib/members/session-config";

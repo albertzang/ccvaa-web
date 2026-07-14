@@ -2,6 +2,10 @@ import { MembershipPanel, type MemberSessionSummary } from "@/components/Members
 import { type JoinPlansProps } from "@/components/JoinForm";
 import { getJoinPlans } from "@/lib/members/join";
 import {
+  getMemberProfileForSession,
+  toPublicMemberProfile,
+} from "@/lib/members/profile";
+import {
   readMemberSession,
   toPublicMemberSession,
 } from "@/lib/members/session";
@@ -38,20 +42,42 @@ async function loadPlansForJoin(): Promise<
   }
 }
 
-async function loadInitialSession(): Promise<MemberSessionSummary | null> {
+async function loadInitialProfile(): Promise<{
+  profile: MemberSessionSummary | null;
+  profileError: string | null;
+}> {
   const payload = await readMemberSession();
   if (!payload) {
-    return null;
+    return { profile: null, profileError: null };
   }
-  return toPublicMemberSession(payload);
+
+  try {
+    const memberProfile = await getMemberProfileForSession(payload);
+    return {
+      profile: toPublicMemberProfile(memberProfile, payload.exp),
+      profileError: null,
+    };
+  } catch (error) {
+    return {
+      profile: {
+        ...toPublicMemberSession(payload),
+        membershipAnniversary: null,
+        nextRenewalAt: null,
+      },
+      profileError:
+        error instanceof Error
+          ? error.message
+          : "Could not load your membership profile.",
+    };
+  }
 }
 
 export async function MembershipSection({
   joinedLanding,
 }: MembershipSectionProps) {
-  const [plansResult, initialSession] = await Promise.all([
+  const [plansResult, initialProfileState] = await Promise.all([
     loadPlansForJoin(),
-    loadInitialSession(),
+    loadInitialProfile(),
   ]);
 
   return (
@@ -69,7 +95,8 @@ export async function MembershipSection({
           </p>
           <MembershipPanel
             joinedLanding={joinedLanding}
-            initialSession={initialSession}
+            initialProfile={initialProfileState.profile}
+            initialProfileError={initialProfileState.profileError}
             initialPlans={plansResult.ok ? plansResult.data : null}
             initialPlansError={plansResult.ok ? null : plansResult.message}
           />

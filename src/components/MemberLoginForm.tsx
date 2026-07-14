@@ -2,17 +2,8 @@
 
 import { useState } from "react";
 
+import { type MemberProfileSummary } from "@/components/MemberProfileForm";
 import { membershipContent } from "@/lib/site";
-
-type PublicMemberSession = {
-  authenticated: true;
-  memberId: string;
-  email: string;
-  name: string | null;
-  plan: "founding" | "lifetime" | "annual";
-  expiresAt: string;
-  grantsAdmin: false;
-};
 
 type ApiError = {
   ok: false;
@@ -23,7 +14,7 @@ type ApiError = {
 type View = "email" | "verify";
 
 type MemberLoginFormProps = {
-  onAuthenticated: (session: PublicMemberSession) => void;
+  onAuthenticated: (profile: MemberProfileSummary) => void;
 };
 
 async function postJson<T>(url: string, body: unknown): Promise<T> {
@@ -76,12 +67,29 @@ export function MemberLoginForm({ onAuthenticated }: MemberLoginFormProps) {
     clearFeedback();
     setLoading(true);
     try {
-      const result = await postJson<{
-        session: PublicMemberSession;
-        message: string;
-      }>("/api/members/login/verify", { email, code });
+      const result = await postJson<{ message: string }>(
+        "/api/members/login/verify",
+        { email, code },
+      );
       setMessage(result.message);
-      onAuthenticated(result.session);
+
+      const profileResponse = await fetch("/api/members/profile");
+      const profileData = (await profileResponse.json()) as
+        | { ok: true; profile: MemberProfileSummary }
+        | ApiError;
+      if (
+        profileResponse.ok &&
+        profileData.ok !== false &&
+        "profile" in profileData
+      ) {
+        onAuthenticated(profileData.profile);
+        return;
+      }
+
+      throw new Error(
+        (profileData as ApiError).message ??
+          "Signed in, but could not load your profile.",
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not verify code.");
       setLoading(false);

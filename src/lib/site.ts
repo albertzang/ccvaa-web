@@ -158,11 +158,25 @@ export const membershipContent = {
   loginVerifyLabel: "Sign in",
   loginVerifyHint:
     "Enter the 6-digit code we emailed you to open your membership session.",
-  signedInTitle: "You are signed in",
+  signedInTitle: "Your membership",
   signedInDescription:
-    "Full member profile chrome ships next. For now you can confirm your plan and sign out.",
+    "Update your name or email, view your plan, and sign out. Newsletter preference stays in Contact.",
   signedInAdminNote:
     "This membership session does not grant access to /admin.",
+  profileNameLabel: "Display name",
+  profileNameSaveLabel: "Save name",
+  profileEmailLabel: "Email",
+  profileEmailChangeLabel: "Change email",
+  profileEmailSendCodeLabel: "Send verification code",
+  profileEmailVerifyLabel: "Confirm new email",
+  profileEmailVerifyHint:
+    "Enter the 6-digit code we sent to your new address.",
+  profilePlanLabel: "Plan",
+  profileAnniversaryLabel: "Membership anniversary",
+  profileNextRenewalLabel: "Next renewal",
+  profilePerksTitle: "Member perks",
+  profilePerksDescription:
+    "Exclusive member benefits will appear here in a future update.",
   logoutLabel: "Sign out",
   joinTitle: "Join CCVAA",
   joinDescription:

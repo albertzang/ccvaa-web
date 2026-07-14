@@ -21,6 +21,10 @@ import {
   MembersNewsletterError,
 } from "@/lib/members/newsletter";
 import {
+  isMembersProfileError,
+  MembersProfileError,
+} from "@/lib/members/profile";
+import {
   MembersOtpError,
   MembersRateLimitError,
 } from "@/lib/members/otp-challenges";
@@ -148,6 +152,21 @@ export function handleMembersApiError(error: unknown) {
   ) {
     const status =
       error.code === "MEMBERS_LOGIN_NOT_ELIGIBLE" ? 404 : 503;
+    return membersApiError(error.code, error.message, status);
+  }
+
+  if (
+    error instanceof MembersProfileError ||
+    isMembersProfileError(error)
+  ) {
+    const status =
+      error.code === "MEMBERS_PROFILE_NOT_FOUND"
+        ? 404
+        : error.code === "MEMBERS_PROFILE_EMAIL_TAKEN"
+          ? 409
+          : error.code === "MEMBERS_PROFILE_SAME_EMAIL"
+            ? 400
+            : 503;
     return membersApiError(error.code, error.message, status);
   }
 
