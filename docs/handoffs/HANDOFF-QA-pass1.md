@@ -1,49 +1,52 @@
-# Handoff: Developer → QA
+# Handoff: Developer / PM → QA
 
 **Date:** 2026-07-14  
 **Pass:** `1`  
-**Backlog work ID:** `members-0008`  
+**Backlog work ID:** `members-0003` (then `members-0005`)  
 **Ship path that led here:** `feature-branch`  
 **Epic branch:** `feat/members`  
 **Merge gate:** `epic`  
-**Filled by:** Developer  
+**Filled by:** Product Manager  
 
 **Save as:** `docs/handoffs/HANDOFF-QA-pass1.md`
 
 **Branch name:** `feat/members`  
 **PR link:** https://github.com/albertzang/ccvaa-web/pull/8  
-**Commit:** `956be8a`  
+**Commit:** tip of `feat/members`  
 **Preview URL:** https://ccvaa-web-git-feat-members-azang-projects.vercel.app  
-**Preview protection:** QA reads `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local`. Browser Pass 1: both bypass query **and** `x-vercel-set-bypass-cookie=true`. See `docs/protocols/PREVIEW_PROTECTION.md`.  
-**Production URL:** https://ccvaa-web.vercel.app/ (Pass **2** only)
+**Preview protection:** Read `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local`. Browser Pass 1 **must** open with both:
+`?x-vercel-protection-bypass=<secret>&x-vercel-set-bypass-cookie=true`
+See `docs/protocols/PREVIEW_PROTECTION.md` (**agent-os-0014**). Never paste the secret.
 
-**Post-merge cleanup (Pass 2 only):** n/a until **merge milestone**
+**Production URL:** https://ccvaa-web.vercel.app/ (Pass **2** only — not this pass)
 
 **Out of scope for QA:** https://ccvaa.ca/
 
-## What changed
+## Environments
 
-Admin **Members** panel replaces the scaffold with a mail-session-gated roster. Search by name/email; separate **plan** and **newsletter** filters. Table shows membership status, newsletter flag, and Annual anniversary/next renewal when applicable. Edit (modal) and delete (confirm dialog) call Zod-validated `/api/admin/members` APIs. Fail closed with clear error when DB is missing or unmigrated.
+- [ ] Preview — required (URL above)
+- [ ] Dev / Production — n/a this pass
 
-## Focus checklist
+## Why retest
 
-- [ ] Sign in via Webmail (Hover mailbox in iframe); **Members** nav appears after auth
-- [ ] Roster loads when `DATABASE_URL` + migrated Neon (seed data shows plan/newsletter variants incl. Annual dates)
-- [ ] Without DB or unmigrated schema: roster shows fail-closed error (503 message), not a blank crash
-- [ ] Search filters name/email; **plan** and **newsletter** filters work independently
-- [ ] Annual member row shows anniversary + next renewal; non-Annual shows em dash
-- [ ] Edit opens modal; save updates row; invalid payload rejected
-- [ ] Delete requires confirm dialog; member removed from list
-- [ ] Unauthenticated `/api/admin/members` returns **401**
-- [ ] Lint + typecheck clean on branch
-- [ ] Sign-off **continue epic** — **do not merge**
+Prior Pass 1 **hold**: Preview Neon schema missing (`MEMBERS_DB_UNAVAILABLE`) while health `db.ok`. CEO has now **migrate + seed** against the Preview branch `DATABASE_URL`. Expect schema present; live newsletter + login OTP unblocked (Stripe still missing — Join Checkout out of scope).
 
-## Known risks
+## Part A — `members-0003`
 
-- Preview Neon branch may still be unmigrated (`health` `db.ok` but tables missing) — expect roster 503 until migrate+seed on Preview branch
-- Admin mail auth on Preview needs Deployment Protection bypass + mailbox credentials from `.env.local`
-- Prior epic tickets unchanged; spot-check hero/profile if time permits
+- [ ] Health: `db.ok`, `email.resend: "configured"`; subscribe/preference **not** schema 503
+- [ ] Live subscribe → OTP path (capture via Resend dashboard / Mailosaur / evidence of accept)
+- [ ] Preference lookup for seed or known email
+- [ ] Hero Subscribe → `#contact`; invalid unsub landing
+- [ ] Sign-off: **continue epic** / **hold** / **retest** — do not merge
 
-## Report back with
+Overwrite `docs/reports/QA-pass1.md`, commit+push, then Part B.
 
-Overwrite `docs/reports/QA-pass1.md`. Commit + push on `feat/members`.
+## Part B — `members-0005`
+
+- [ ] `#membership` login; seed active member OTP → session stub; logout; `grantsAdmin: false`
+- [ ] Non-member / newsletter-only clear rejection
+- [ ] Sign-off: **continue epic** / **hold** / **retest** — do not merge
+
+## Report
+
+Template `docs/templates/qa-report.md` → `docs/reports/QA-pass1.md`. Epic sign-off only.
