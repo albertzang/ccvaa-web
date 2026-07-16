@@ -204,11 +204,15 @@ Replace Members scaffold with roster gated by Hover mail-session. Filter/search 
 
 **Out of scope:** Impersonation (`members-0013`); Events/Financial; public CTAs.
 
+### Overall
+
+- Pass 1 (2026-07-15): **continue epic** — admin roster list/search/filters, Zod, mail-session gate. Report tip `2093de1`.
+
 ### Links
 
 - Depends on: `members-0001`
 - FEATURES.md: Admin → Members
-- Handoff: `docs/handoffs/HANDOFF-DEV.md` (Iteration 1)
+- PR: https://github.com/albertzang/ccvaa-web/pull/8
 
 ---
 
@@ -275,7 +279,7 @@ Logged-in face of `#membership` (same slot as Join). Profile: name; email change
 ### Overall
 
 - Pass 1 (2026-07-14): **continue epic** — logged-out UI + fail-closed APIs OK; logged-in profile E2E blocked (Preview Neon unmigrated). Report: `docs/reports/QA-pass1.md` (`95a4497`)
-- Pass 1 retest (2026-07-15): queued after live `0005` — profile E2E with Mailosaur session (no Stripe).
+- Pass 1 (2026-07-15): **continue epic** — logged-in profile E2E (Mailosaur session). Report tip `2093de1` / `61face7`.
 
 ### Links
 
