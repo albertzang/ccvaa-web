@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-16  
 **Pass:** `1`  
-**Backlog work ID:** `members-0020`  
+**Backlog work ID:** `members-0021`  
 **Ship path that led here:** `feature-branch`  
 **Epic branch:** `feat/members`  
 **Merge gate:** `epic`  
@@ -12,45 +12,47 @@
 
 **Branch name:** `feat/members`  
 **PR link:** https://github.com/albertzang/ccvaa-web/pull/8  
-**Commit:** `6401807` (tip; impl `203eec1`)  
+**Commit:** `1d3ca6b`  
 **Preview URL:** https://ccvaa-web-git-feat-members-azang-projects.vercel.app  
 **Preview protection:** both `x-vercel-protection-bypass` + `x-vercel-set-bypass-cookie=true` from `.env.local` (`PREVIEW_PROTECTION.md`). Never paste secret.
 
-**Out of scope:** https://ccvaa.ca/ · merge to `main` · newsletter move · Stripe/Checkout/API/schema changes · counter definitions
+**Out of scope:** https://ccvaa.ca/ · merge to `main` · moving newsletter into Membership · ESP provider (`0009`) · changing double opt-in rules
 
 ## Environments to test this pass
 
 - [ ] Dev — http://localhost:3000/ (optional)
-- [ ] Preview — https://ccvaa-web-git-feat-members-azang-projects.vercel.app (required; wait for deploy of tip)
+- [ ] Preview — https://ccvaa-web-git-feat-members-azang-projects.vercel.app (required; wait for deploy of tip `1d3ca6b`)
 - [ ] Production — n/a (Pass 1)
 
 ## What changed
 
-`members-0020` on epic `feat/members`:
+`members-0021` on epic `feat/members`:
 
-1. **Membership section:** title/subtitle removed (logged out and logged in); section uses `aria-label="Membership"`
-2. **Logged out tabs:** **Sign in** (left, default) | **Join** (right); only active panel visible
-3. **Join:** form title/subtitle and visible “Choose a plan” removed; offered plans in responsive two-column grid (stacks on narrow screens); plan legend is `sr-only`
-4. **Logged in profile:** summary-first — name/email edit revealed on demand; plan + Annual anniversary/renewal kept; future-perks placeholder and `/admin` note removed; feedback + sign-out preserved
-5. **Hero badges:** compact `K`/`M`/`B` display; bounded badge (no overflow); exact counts in CTA `aria-label`; ocean/coral brand contrast (not black-on-white)
-6. Newsletter remains in Contact only
+1. **Contact newsletter tabs:** **Subscribe** | **Unsubscribe** (Membership-like pill tablist); only active panel visible
+2. **Unsubscribe:** email + Unsubscribe only — no “Check preference” / lookup step
+3. **Backend outcomes:** distinct user-safe messages for subscribed→off, already off, and unknown email; membership never cancelled
+4. **One-click `/?unsub=<token>#contact`:** server redeem (idempotent) → Contact newsletter, Unsubscribe tab active, email prefilled, result message shown; invalid/expired token shows clear message on Unsubscribe tab
+5. **Subscribe:** double opt-in + required name preserved (confirm stays under Subscribe tab)
+6. Docs: FEATURES.md + `docs/members/esp.md`
 
 ## Focus checklist
 
-### Membership UI
-- [ ] No Membership section title/subtitle when logged out or logged in
-- [ ] Tabs: Sign in left/default; Join right; mutual exclusivity of panels
-- [ ] Join: no title/subtitle; no visible “Choose a plan”; two-column plan grid on desktop; stacks on narrow mobile
-- [ ] Logged in: materially less cluttered; can still edit name, change email (OTP), see plan/renewal, see feedback, sign out
-- [ ] Future-perks placeholder and `/admin` note absent
-- [ ] Newsletter UI still only under Contact (`#contact`)
-
-### Hero badges
-- [ ] Compact notation for large values (`K`/`M`/`B`); badge stays circular/bounded without overflow
-- [ ] Exact count still in Subscribe/Join `aria-label`
-- [ ] Brand ocean/coral treatment (not plain black on white); readable on both CTAs
-- [ ] Anchors still `#contact` / `#membership`
+### Tabs / Subscribe
+- [ ] Tabs: Subscribe left; Unsubscribe right; Membership-like chrome; one panel at a time
+- [ ] Subscribe still requires name + email; double opt-in confirm code flow works
 - [ ] Desktop + mobile
+
+### Manual Unsubscribe
+- [ ] Email + Unsubscribe only (no preference lookup / “Check preference”)
+- [ ] Subscribed address → clear unsubscribed success; membership unchanged
+- [ ] Already-off address → clear already-unsubscribed message
+- [ ] Unknown email → clear not-found / unknown message
+- [ ] Paid membership (if tested) unchanged after unsub
+
+### One-click token landing
+- [ ] Valid `/?unsub=<token>#contact`: Contact focused, Unsubscribe tab active, email filled, success (or already) message shown
+- [ ] Reload same URL: idempotent (already-unsubscribed message OK)
+- [ ] Invalid/expired token: clear invalid message on Unsubscribe tab
 
 ### Sign-off
 - [ ] Lint/typecheck if feasible
@@ -58,13 +60,14 @@
 
 ## Known risks / flaky areas
 
-- Preview deploy must include the latest tip before visual check
-- Logged-in profile needs a member session (OTP) to exercise progressive disclosure
-- Extremely large compact strings may truncate inside the bounded badge; exact value remains in `aria-label`
+- Preview deploy must include tip `1d3ca6b` before testing
+- Token landing needs a real `unsub_tokens` row (seed or after confirmed subscribe)
+- Hash `#contact` scroll depends on browser; confirm Contact newsletter is visible
+- Manual unknown vs already-off messages are intentional and should not be conflated in the report
 
 ## Preview env notes (Pass 1)
 
-Admin mail auth needs Preview Deployment Protection bypass if testing `/admin` on Preview. Member OTP / Stripe not required for most UI checks; session needed for logged-in profile declutter verification.
+Admin mail auth not required for this ticket. Newsletter subscribe needs `DATABASE_URL` + `RESEND_*` on Preview for live double opt-in; token unsub needs DB. Bypass both protection headers from `.env.local`.
 
 ## Report back with
 
