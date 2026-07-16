@@ -356,6 +356,8 @@ Logged-out `#membership` Join UI + Stripe Checkout (test on Dev/Preview). Flow: 
 ### Overall
 
 - Pass 1 (2026-07-14): **continue epic** — Join UI + fail-closed without Stripe; live Checkout/OTP blocked pending Resend + Stripe test secrets + migrate. Report: `docs/reports/QA-pass1.md`
+- Pass 1 hold (2026-07-15): Checkout failed — Preview `STRIPE_PRICE_*` were Product IDs (`prod_…`) not Price IDs (`price_…`). Report `9ba157a`.
+- Pass 1 (2026-07-15): **continue epic** — live Join → Mailosaur OTP → Stripe Checkout → webhook activation. Report tip `829c3e9`.
 
 ### Links
 
