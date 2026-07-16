@@ -157,6 +157,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-16 | **members-0018** (epic `feat/members`): trim Join/newsletter/membership UI notes; keep CASL + newsletter≠membership clarity |
 | 2026-07-16 | **members-0016** (epic `feat/members`): Hero subscriber/member counts as annotations beside Subscribe/Join CTAs |
 | 2026-07-16 | **members-0014** (epic `feat/members`): Checkout success return auto-establishes member session → `#membership` profile (webhook race poll) |
 | 2026-07-16 | **members-0015** (epic `feat/members`): Join + newsletter opt-in uses one email OTP only; webhook activates newsletter without a second confirm mail |

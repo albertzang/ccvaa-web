@@ -318,9 +318,11 @@ export function JoinForm({
 
       {view === "verify" ? (
         <form onSubmit={handleVerify} className="mt-6 space-y-4">
-          <p className="text-sm text-ocean-600">
-            {membershipContent.verifyHint}
-          </p>
+          {!message ? (
+            <p className="text-sm text-ocean-600">
+              {membershipContent.verifyHint}
+            </p>
+          ) : null}
           <div>
             <label htmlFor="join-code" className="sr-only">
               Verification code

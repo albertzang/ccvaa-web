@@ -311,7 +311,9 @@ export function NewsletterForm({ unsubLanding }: NewsletterFormProps) {
 
       {view === "confirm" ? (
         <form onSubmit={handleConfirm} className="mt-6 space-y-4">
-          <p className="text-sm text-ocean-600">{newsletterContent.pendingNote}</p>
+          {!message ? (
+            <p className="text-sm text-ocean-600">{newsletterContent.pendingNote}</p>
+          ) : null}
           <div>
             <label htmlFor="newsletter-confirm-email" className="sr-only">
               Email

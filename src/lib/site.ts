@@ -152,19 +152,15 @@ export const contactContent = {
 export const membershipContent = {
   title: "Membership",
   description:
-    "Join CCVAA as a paid member, or sign in with email if you already belong. Newsletter signup stays in Contact.",
+    "Join as a paid member, or sign in with email. Newsletter signup is in Contact.",
   loginTitle: "Member sign-in",
-  loginDescription:
-    "Enter the email on your membership. We will send a 6-digit code — no password.",
+  loginDescription: "We email a 6-digit code — no password.",
   loginSendLabel: "Send login code",
   loginVerifyLabel: "Sign in",
-  loginVerifyHint:
-    "Enter the 6-digit code we emailed you to open your membership session.",
+  loginVerifyHint: "Enter the 6-digit code we emailed you.",
   signedInTitle: "Your membership",
-  signedInDescription:
-    "Update your name or email, view your plan, and sign out. Newsletter preference stays in Contact.",
-  signedInAdminNote:
-    "This membership session does not grant access to /admin.",
+  signedInDescription: "Manage your name, email, and plan.",
+  signedInAdminNote: "Does not grant /admin access.",
   profileNameLabel: "Display name",
   profileNameSaveLabel: "Save name",
   profileEmailLabel: "Email",
@@ -181,47 +177,45 @@ export const membershipContent = {
     "Exclusive member benefits will appear here in a future update.",
   logoutLabel: "Sign out",
   joinTitle: "Join CCVAA",
-  joinDescription:
-    "New members: verify your email, then complete payment with Stripe Checkout. You return here when finished.",
+  joinDescription: "Verify your email, then pay with Stripe Checkout.",
   namePlaceholder: "Your name",
   emailPlaceholder: "you@example.com",
   codePlaceholder: "6-digit code",
   verifyEmailLabel: "Verify email",
-  verifyHint:
-    "Enter the 6-digit code we emailed you. We will open Stripe Checkout next.",
+  verifyHint: "Enter the 6-digit code, then continue to Checkout.",
   checkoutLabel: "Continue to checkout",
   newsletterOptInLabel:
     "Also send me the CCVAA newsletter (optional)",
   consentNote:
-    "Paid membership is separate from the newsletter. Change newsletter preference anytime in Contact.",
+    "Membership is separate from the newsletter (CASL). Manage newsletter in Contact.",
   joinedSuccess:
-    "Thanks for joining. Sign in above with your membership email if you are not signed in automatically.",
+    "Thanks for joining. Sign in above if you are not signed in automatically.",
   joinedActivating:
     "Payment received — activating your membership and signing you in…",
   joinedSessionTimeout:
-    "Membership may still be activating. Sign in above with your email in a moment, or refresh this page.",
+    "Membership may still be activating. Sign in above, or refresh this page.",
 } as const;
 
 export const newsletterContent = {
   title: "Newsletter",
   description:
-    "Occasional updates about exhibitions, programs, and community news. This mailing list is separate from paid CCVAA membership — you can subscribe or unsubscribe anytime.",
+    "Occasional updates on exhibitions, programs, and community news.",
   subscribeLabel: "Subscribe",
   manageLabel: "Manage preference",
   emailPlaceholder: "you@example.com",
   namePlaceholder: "Your name",
   codePlaceholder: "6-digit code",
   consentNote:
-    "By subscribing you consent to receive email from CCVAA. You can unsubscribe anytime. This is not a membership plan.",
+    "By subscribing you consent to email from CCVAA (CASL). Unsubscribe anytime. Not a membership.",
   pendingNote:
-    "Enter the 6-digit code we emailed you. You are not subscribed until you confirm.",
+    "Enter the 6-digit code we emailed you to confirm.",
   subscribedNote: "You are subscribed to the CCVAA newsletter.",
   unsubscribedNote: "You are not subscribed to the newsletter.",
   membershipNote:
-    "Paid membership is managed separately and is not affected by newsletter changes.",
+    "Unsubscribing does not change paid membership.",
   unsubLandingSuccess:
     "You have been unsubscribed from the CCVAA newsletter. Your paid membership, if any, is unchanged.",
   unsubLandingAlready:
-    "You were already unsubscribed from the newsletter. Your paid membership, if any, is unchanged.",
+    "You were already unsubscribed. Your paid membership, if any, is unchanged.",
   unsubLandingInvalid: "This unsubscribe link is invalid or has expired.",
 } as const;

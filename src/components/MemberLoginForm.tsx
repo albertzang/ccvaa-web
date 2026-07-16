@@ -152,7 +152,11 @@ export function MemberLoginForm({ onAuthenticated }: MemberLoginFormProps) {
 
       {view === "verify" ? (
         <form onSubmit={handleVerify} className="mt-6 space-y-4">
-          <p className="text-sm text-ocean-600">{membershipContent.loginVerifyHint}</p>
+          {!message ? (
+            <p className="text-sm text-ocean-600">
+              {membershipContent.loginVerifyHint}
+            </p>
+          ) : null}
           <div>
             <label htmlFor="member-login-code" className="sr-only">
               Login code
