@@ -89,11 +89,12 @@ export function MembershipPanel({
     }
 
     let cancelled = false;
-    setEstablishingSession(true);
-    setJoinReturnError(null);
-    setJoinReturnMessage(membershipContent.joinedActivating);
 
     const run = async () => {
+      setEstablishingSession(true);
+      setJoinReturnError(null);
+      setJoinReturnMessage(membershipContent.joinedActivating);
+
       for (let attempt = 0; attempt < SESSION_MAX_ATTEMPTS; attempt += 1) {
         if (cancelled) {
           return;
