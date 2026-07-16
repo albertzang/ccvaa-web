@@ -4,7 +4,7 @@ import { heroContent, siteConfig } from "@/lib/site";
 
 const countFormatter = new Intl.NumberFormat(siteConfig.locale);
 
-function HeroCounter({
+function HeroCtaAnnotation({
   value,
   label,
 }: {
@@ -12,12 +12,12 @@ function HeroCounter({
   label: string;
 }) {
   return (
-    <p className="mt-2 text-xs leading-snug text-ocean-100/80">
+    <span className="text-xs leading-snug text-ocean-100/80 sm:text-sm">
       <span className="font-semibold tabular-nums lining-nums text-ocean-50">
         {countFormatter.format(value)}
       </span>{" "}
       <span>{label}</span>
-    </p>
+    </span>
   );
 }
 
@@ -61,27 +61,27 @@ export async function Hero() {
           {heroContent.subheadline}
         </p>
 
-        <div className="mt-8 flex flex-wrap gap-6 sm:gap-8">
-          <div>
+        <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <a
               href="#contact"
               className="inline-flex rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-dark"
             >
               {heroContent.subscribeLabel}
             </a>
-            <HeroCounter
+            <HeroCtaAnnotation
               value={counts.newsletterSubscribers}
               label={heroContent.newsletterCountLabel}
             />
           </div>
-          <div>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <a
               href="#membership"
               className="inline-flex rounded-full border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
             >
               {heroContent.joinLabel}
             </a>
-            <HeroCounter
+            <HeroCtaAnnotation
               value={counts.paidMembers}
               label={heroContent.paidMembersCountLabel}
             />

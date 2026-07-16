@@ -28,8 +28,8 @@
 - Full-bleed coastal hero image (`hero-background.webp`)
 - Eyebrow, headline, subheadline from `src/lib/site.ts`
 - Text is non-selectable
-- **Subscribe** button anchors to `#contact` (newsletter); live count of confirmed newsletter subscribers (`newsletter_status = on`)
-- **Join** button anchors to `#membership` (Join panel); live count of active paid members (`membership_status = active`)
+- **Subscribe** button anchors to `#contact` (newsletter); live subscriber count as an annotation beside the button (`newsletter_status = on`)
+- **Join** button anchors to `#membership` (Join panel); live paid-member count as an annotation beside the button (`membership_status = active`)
 - Dual-axis counter labels (“Newsletter subscribers” / “Paid members”) — never conflates mailing list with membership plans
 - Counts stub to `0` when `DATABASE_URL` / members DB unavailable; homepage still loads (`members-0007`)
 
@@ -107,7 +107,7 @@
 | **UI** | Contact; ESP unsub → `#contact` + token | `#membership`: Join ↔ profile (login wall; perks later) |
 | **Count** | Anyone with newsletter on | Active paid plans |
 
-**Hero:** Subscribe / Join + counters → `#contact` / `#membership` (anchors).  
+**Hero:** Subscribe / Join with count annotations beside each CTA → `#contact` / `#membership` (anchors).
 **Stack:** Neon + Drizzle + Zod · Stripe · Resend · ESP · Mailosaur. Admin roster (`0008`); Resend/ESP new-tab links (`0010`); later: in-admin blast, member perks, impersonation.  
 **Standing:** No Resend/ESP iframes; member auth = email OTP (no OAuth/passwords); homepage SPA anchors over separate marketing routes.
 
@@ -157,6 +157,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-16 | **members-0016** (epic `feat/members`): Hero subscriber/member counts as annotations beside Subscribe/Join CTAs |
 | 2026-07-16 | **members-0014** (epic `feat/members`): Checkout success return auto-establishes member session → `#membership` profile (webhook race poll) |
 | 2026-07-16 | **members-0015** (epic `feat/members`): Join + newsletter opt-in uses one email OTP only; webhook activates newsletter without a second confirm mail |
 | 2026-07-16 | **members-0017** (epic `feat/members`): newsletter Name required; shared international `personNameSchema` for newsletter + Join + profile |
