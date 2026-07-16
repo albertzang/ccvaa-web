@@ -1,7 +1,7 @@
 # CCVAA Web — Feature Inventory
 
 > **Owner:** Product Manager agent  
-> **Updated:** 2026-07-14  
+> **Updated:** 2026-07-16  
 > Keep this document current whenever features ship or change. Work-to-do: [`BACKLOG.md`](BACKLOG.md).
 
 ## Product summary
@@ -46,7 +46,7 @@
 
 ### Contact (`#contact`)
 - Email + mailing address card
-- **Newsletter** (orthogonal to paid membership): subscribe with double opt-in (Resend OTP), manage preference (incl. paid members), tokenized unsubscribe landing `/?unsub=<token>#contact` — unsub never cancels membership. ESP sync stub until provider chosen — see [`docs/members/esp.md`](../members/esp.md). APIs: `POST /api/members/newsletter/{subscribe,confirm,preference,unsub}`.
+- **Newsletter** (orthogonal to paid membership): subscribe requires **name** + email with double opt-in (Resend OTP); international-friendly name Zod (`personNameSchema`) shared with Join/profile; manage preference (incl. paid members), tokenized unsubscribe landing `/?unsub=<token>#contact` — unsub never cancels membership. ESP sync stub until provider chosen — see [`docs/members/esp.md`](../members/esp.md). APIs: `POST /api/members/newsletter/{subscribe,confirm,preference,unsub}`.
 
 ### Footer
 - Org name, tagline, copyright (no duplicate contact block)
@@ -113,7 +113,7 @@
 
 **Platform (members-0001, epic `feat/members`):** Drizzle schema on Neon — orthogonal `newsletter_status` vs `membership_plan`; OTP challenges; unsub tokens; `stripe_webhook_events` for Join idempotency. Annual plans use `membership_anniversary` + `next_renewal_at` (null for Founding/Lifetime). Shared Zod in `src/lib/members/zod/`. `GET /api/members/health` fails closed (503) without `DATABASE_URL` (Stripe/Resend status informational). Migrate/seed: `npm run db:migrate`, `npm run db:seed` (seeds non-Production only). Schema notes: [`docs/members/schema.md`](../members/schema.md).
 
-**Newsletter (members-0003, epic `feat/members`):** Contact `#contact` UI + `POST /api/members/newsletter/*` routes. Double opt-in via Resend OTP; pending does not count toward subscriber count. Manage preference for newsletter-only and paid members. Token unsub `/?unsub=<token>#contact` (idempotent; membership unchanged). ESP sync stub in `src/lib/members/esp.ts` — footer URL: [`docs/members/esp.md`](../members/esp.md). Requires `DATABASE_URL` + `RESEND_*` for live subscribe; fails closed without them.
+**Newsletter (members-0003, epic `feat/members`):** Contact `#contact` UI + `POST /api/members/newsletter/*` routes. Subscribe requires name + email; double opt-in via Resend OTP; pending does not count toward subscriber count. Name validation: shared `personNameSchema` (Unicode letters/marks, spaces, common punctuation — `members-0017`). Manage preference for newsletter-only and paid members. Token unsub `/?unsub=<token>#contact` (idempotent; membership unchanged). ESP sync stub in `src/lib/members/esp.ts` — footer URL: [`docs/members/esp.md`](../members/esp.md). Requires `DATABASE_URL` + `RESEND_*` for live subscribe; fails closed without them.
 
 **Join / Stripe (members-0004, epic `feat/members`):** `#membership` Join UI + Stripe Checkout (test keys on Dev/Preview). Flow: name/email/newsletter opt-in → `email_verify` OTP → Checkout → `checkout.session.completed` webhook activates membership. Pre-cap Founding+Annual; post-cap Lifetime+Annual. Env: `STRIPE_*`, `MEMBERSHIP_FOUNDING_CAP`, fee cents (Lifetime > Founding enforced). Webhook: `POST /api/members/webhooks/stripe`. Live keys: `members-0009`.
 
@@ -157,6 +157,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-16 | **members-0017** (epic `feat/members`): newsletter Name required; shared international `personNameSchema` for newsletter + Join + profile |
 | 2026-07-14 | **members-0006** (epic `feat/members`): `#membership` logged-in profile — name edit, email change with OTP re-verify, Annual anniversary/renewal read-only, perks placeholder |
 | 2026-07-14 | **agent-os-0014:** Preview browser bypass requires `x-vercel-set-bypass-cookie` (with protection-bypass) for Pass 1 |
 | 2026-07-14 | **members-0005** (epic `feat/members`): `#membership` email OTP login → httpOnly member session + logout; never grants `/admin` |

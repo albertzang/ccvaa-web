@@ -1,9 +1,10 @@
 import { z } from "zod";
 
 import { otpCodeSchema } from "@/lib/members/zod/otp";
+import { personNameSchema } from "@/lib/members/zod/person-name";
 
 export const profileNameUpdateSchema = z.object({
-  name: z.string().trim().min(1, "Name is required.").max(200),
+  name: personNameSchema,
 });
 
 export type ProfileNameUpdateInput = z.infer<typeof profileNameUpdateSchema>;

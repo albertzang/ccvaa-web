@@ -66,7 +66,7 @@ async function findMemberByEmail(email: string) {
 
 async function upsertMemberForNewsletter(
   email: string,
-  name?: string,
+  name: string,
 ): Promise<string> {
   return withMembersDbError(async () => {
     const db = getMembersDb();
@@ -76,7 +76,7 @@ async function upsertMemberForNewsletter(
       await db
         .update(members)
         .set({
-          name: name ?? existing.name,
+          name,
           newsletterStatus: "pending",
           newsletterConfirmedAt: null,
           updatedAt: new Date(),
@@ -89,7 +89,7 @@ async function upsertMemberForNewsletter(
       .insert(members)
       .values({
         email,
-        name: name ?? null,
+        name,
         newsletterStatus: "pending",
       })
       .returning({ id: members.id });

@@ -64,7 +64,7 @@ export function NewsletterForm({ unsubLanding }: NewsletterFormProps) {
     try {
       const result = await postJson<{ message: string; status: "pending" }>(
         "/api/members/newsletter/subscribe",
-        { email, name: name.trim() || undefined },
+        { email, name },
       );
       setStatus("pending");
       setView("confirm");
@@ -235,6 +235,7 @@ export function NewsletterForm({ unsubLanding }: NewsletterFormProps) {
             <input
               id="newsletter-name"
               type="text"
+              required
               autoComplete="name"
               value={name}
               onChange={(event) => setName(event.target.value)}

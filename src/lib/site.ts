@@ -205,7 +205,7 @@ export const newsletterContent = {
   subscribeLabel: "Subscribe",
   manageLabel: "Manage preference",
   emailPlaceholder: "you@example.com",
-  namePlaceholder: "Your name (optional)",
+  namePlaceholder: "Your name",
   codePlaceholder: "6-digit code",
   consentNote:
     "By subscribing you consent to receive email from CCVAA. You can unsubscribe anytime. This is not a membership plan.",
