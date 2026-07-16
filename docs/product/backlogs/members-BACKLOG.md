@@ -3,7 +3,7 @@
 **Feature:** Members  
 **Slug:** `members`  
 **Owner:** Product Manager  
-**Next ID:** `0020`  
+**Next ID:** `0021`  
 
 Canonical work IDs: `members-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
@@ -35,7 +35,51 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 4. Admin roster — `0008`
 5. Then `next`: `0010` links → `0009` go-live (CEO); `later`: `0011`–`0013`
 
-**Ship lane:** Default for Verifier=`agent` tickets in the first Members milestone: **Epic branch `feat/members`**, **Merge gate `epic`** (fields set on `0001`–`0008`, `0010`, and `0014`–`0019`). `members-0009` (CEO go-live) stays outside that gate. See [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
+**Ship lane:** Default for Verifier=`agent` tickets in the first Members milestone: **Epic branch `feat/members`**, **Merge gate `epic`** (fields set on `0001`–`0008`, `0010`, and `0014`–`0020`). `members-0009` (CEO go-live) stays outside that gate. See [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
+
+---
+
+## members-0020 — Simplify Membership UI + compact Hero badges
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `in-progress` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
+| **Epic branch** | `feat/members` |
+| **Merge gate** | `epic` |
+
+### Description
+
+CEO manual-test refinement after `members-0019`: further reduce the public Membership UI’s hierarchy, text, and vertical footprint in both logged-out and logged-in states.
+
+**Logged out:** remove the Membership section title/subtitle. Tabs become **Sign in** on the left and **Join** on the right, with **Sign in selected by default**. In Join, remove its title/subtitle and the visible “Choose a plan” legend; show the two currently offered plans side-by-side in a two-column selection grid (stack only where necessary on narrow screens).
+
+**Logged in:** remove the section title/subtitle and simplify the profile into one calm, compact surface. Preserve plan/renewal information, name edit, email re-verification, feedback, and sign-out, but reduce stacked cards, placeholder copy, notes, and always-visible edit controls. Prefer summary-first with secondary edit actions revealed on demand. Remove the future-perks placeholder and `/admin` explanatory note from the public profile.
+
+**Hero badges:** format large counts with compact notation (`K` / `M` / `B`) so the circle never overflows; keep the exact count in accessible labels. Replace plain black-on-white styling with a brand-consistent, high-contrast treatment that remains distinct on both Hero CTAs.
+
+**Acceptance:**
+- [ ] Membership section title/subtitle absent when logged out and logged in
+- [ ] Logged out tabs: **Sign in** left/default; **Join** right; one panel visible
+- [ ] Join title/subtitle and visible “Choose a plan” text removed
+- [ ] Offered plans use two columns at suitable widths and stack cleanly on narrow mobile
+- [ ] Logged-in profile is materially less cluttered without losing name/email/plan/renewal/sign-out capability
+- [ ] Future-perks placeholder and `/admin` note removed from the public profile
+- [ ] Hero badges use compact `K` / `M` / `B` notation for large values, cannot overflow, and retain exact accessible counts
+- [ ] Badge colors use accessible CCVAA brand styling rather than black on white
+- [ ] Desktop + mobile; FEATURES.md updated
+
+**Out of scope:** Moving newsletter UI; changing membership behavior, Stripe Checkout, data model, or counter definitions; merge to main.
+
+### Links
+
+- Source: CEO manual test (2026-07-16)
+- Depends on: `members-0006`, `members-0019`
+- PR: https://github.com/albertzang/ccvaa-web/pull/8
 
 ---
 

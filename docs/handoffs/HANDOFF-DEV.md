@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-16  
 **Requested by:** CEO / PM  
-**Backlog work ID:** `members-0019`  
+**Backlog work ID:** `members-0020`  
 **Backlog link:** `docs/product/backlogs/members-BACKLOG.md`  
 **Priority:** now  
 **Iteration:** `1`
@@ -19,34 +19,42 @@
 
 ## Goal
 
-1. **`#membership` tabs (logged out):** **Join** | **Sign in**, **Join default** — only one form visible. Logged-in stays profile-only. Do **not** move newsletter UI from Contact.
-2. **Hero counts:** Replace beside-button annotations (`members-0016`) with a **simple numeric circle badge** on the **top-right corner** of Subscribe (subscriber count) and Join (member count). Live counts + `#contact` / `#membership` anchors unchanged.
+Simplify the public Membership experience following CEO manual testing:
+
+1. Remove the Membership section title/subtitle in both auth states.
+2. Logged out: tabs become **Sign in** (left/default) | **Join** (right).
+3. Join: remove title/subtitle and visible “Choose a plan”; use a responsive two-column plan grid.
+4. Logged in: materially declutter the profile while preserving all real account actions and plan/renewal data.
+5. Hero count badges: compact `K` / `M` / `B` display, exact accessible count, brand-consistent high-contrast styling.
 
 ## Acceptance criteria
 
-- [ ] Tabs Join | Sign in; Join default; mutual exclusivity of forms
-- [ ] Profile when authenticated (no dual forms)
-- [ ] Newsletter remains in Contact only
-- [ ] Hero: circular number badge top-right on each CTA; accessible labeling
-- [ ] Old beside annotation removed
-- [ ] FEATURES.md + changelog; lint + typecheck
-- [ ] Pass 1 handoff; **do not merge**
+Use the complete list under `members-0020`. In particular:
+
+- [ ] Logged-in profile keeps name edit, email re-verification, plan/annual dates, feedback, and sign-out
+- [ ] Use summary-first/progressive disclosure for secondary account edits
+- [ ] Remove future-perks placeholder and `/admin` note
+- [ ] Compact badges do not overflow at large values; exact counts stay in CTA `aria-label`
+- [ ] Mobile and desktop; lint + typecheck; FEATURES.md + date-desc changelog
+- [ ] Overwrite `HANDOFF-QA-pass1.md`; **do not merge**
 
 ## Out of scope
 
-Newsletter move into Membership; Stripe/Checkout changes; merge milestone.
+Newsletter placement; Stripe/Checkout behavior; schema/API behavior; counter definitions; merge milestone.
 
 ## Technical hints
 
-- `MembershipPanel.tsx` / `MemberLoginForm` / `JoinForm` / `MembershipSection.tsx`
-- `Hero.tsx` + `HeroCtaAnnotation` — replace with positioned badge on the `<a>`
-- Keep brand tokens; avoid purple/glow; minimal tab chrome
-- Pull tip of `feat/members` first
+- `MembershipSection.tsx`: remove section heading copy and reconsider excess vertical spacing
+- `MembershipPanel.tsx`: default tab + order
+- `JoinForm.tsx`: remove duplicate headings/legend; responsive plan grid
+- `MemberProfileForm.tsx`: preserve functionality but flatten hierarchy; hide secondary edit forms until invoked
+- `Hero.tsx`: `Intl.NumberFormat` compact notation can format K/M/B; constrain badge dimensions and keep exact-value `aria-label`
+- Keep existing CCVAA ocean/coral palette and WCAG contrast
 
 ## Git / deploy
 
-Reuse `feat/members` / PR #8. PM authorizes commit/push. **Do not merge.**
+Reuse `feat/members` / PR #8. Pull tip first. PM authorizes commit/push. **Do not merge.**
 
 ## Done means
 
-Acceptance met on Preview-ready tip; `HANDOFF-QA-pass1.md` overwritten for `members-0019`; PR not merged.
+Acceptance met on Preview-ready tip; `HANDOFF-QA-pass1.md` overwritten for `members-0020`; PR not merged.
