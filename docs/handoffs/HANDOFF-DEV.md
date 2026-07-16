@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-16  
 **Requested by:** CEO / PM  
-**Backlog work ID:** `members-0020`  
+**Backlog work ID:** `members-0021`  
 **Backlog link:** `docs/product/backlogs/members-BACKLOG.md`  
 **Priority:** now  
 **Iteration:** `1`
@@ -19,42 +19,36 @@
 
 ## Goal
 
-Simplify the public Membership experience following CEO manual testing:
+Reshape Contact newsletter UI and unsubscribe UX:
 
-1. Remove the Membership section title/subtitle in both auth states.
-2. Logged out: tabs become **Sign in** (left/default) | **Join** (right).
-3. Join: remove title/subtitle and visible “Choose a plan”; use a responsive two-column plan grid.
-4. Logged in: materially declutter the profile while preserving all real account actions and plan/renewal data.
-5. Hero count badges: compact `K` / `M` / `B` display, exact accessible count, brand-consistent high-contrast styling.
+1. Replace Subscribe / Manage preference with Membership-style tabs: **Subscribe** | **Unsubscribe** (one panel visible).
+2. Unsubscribe = email + Unsubscribe only — no “Check preference” / lookup step. Backend returns clear messages for subscribed→off, already off, unknown/invalid; never cancel membership.
+3. One-click from email: `/?unsub=<token>#contact` lands on Contact newsletter, activates **Unsubscribe** tab, prefills email, auto-runs unsub, shows result (idempotent). Invalid/expired token still shows clear message on that tab.
+4. Keep subscribe double opt-in + required name unless layout-only changes need copy tweaks.
+5. Update FEATURES.md and `docs/members/esp.md` for the new landing UX.
 
 ## Acceptance criteria
 
-Use the complete list under `members-0020`. In particular:
+See full list under `members-0021` in the backlog. Also:
 
-- [ ] Logged-in profile keeps name edit, email re-verification, plan/annual dates, feedback, and sign-out
-- [ ] Use summary-first/progressive disclosure for secondary account edits
-- [ ] Remove future-perks placeholder and `/admin` note
-- [ ] Compact badges do not overflow at large values; exact counts stay in CTA `aria-label`
-- [ ] Mobile and desktop; lint + typecheck; FEATURES.md + date-desc changelog
-- [ ] Overwrite `HANDOFF-QA-pass1.md`; **do not merge**
+- [ ] Match tab chrome pattern from Membership (`members-0019` / `0020`) where practical
+- [ ] Lint + typecheck; Pass 1 handoff overwritten; **do not merge**
 
 ## Out of scope
 
-Newsletter placement; Stripe/Checkout behavior; schema/API behavior; counter definitions; merge milestone.
+Moving newsletter into Membership; ESP provider (`0009`); changing double opt-in; merge milestone.
 
 ## Technical hints
 
-- `MembershipSection.tsx`: remove section heading copy and reconsider excess vertical spacing
-- `MembershipPanel.tsx`: default tab + order
-- `JoinForm.tsx`: remove duplicate headings/legend; responsive plan grid
-- `MemberProfileForm.tsx`: preserve functionality but flatten hierarchy; hide secondary edit forms until invoked
-- `Hero.tsx`: `Intl.NumberFormat` compact notation can format K/M/B; constrain badge dimensions and keep exact-value `aria-label`
-- Keep existing CCVAA ocean/coral palette and WCAG contrast
+- `NewsletterForm.tsx`, Contact section, `src/lib/members/newsletter.ts`, unsub token redeem, preference API
+- Token landing is currently server-redeemed — preserve security/idempotency while presenting Unsubscribe-tab UX (email from member record after redeem)
+- Manual unsub may call existing unsubscribe action with clearer client messaging; avoid requiring lookup first
+- Pull tip of `feat/members` first
 
 ## Git / deploy
 
-Reuse `feat/members` / PR #8. Pull tip first. PM authorizes commit/push. **Do not merge.**
+Reuse `feat/members` / PR #8. PM authorizes commit/push. **Do not merge.**
 
 ## Done means
 
-Acceptance met on Preview-ready tip; `HANDOFF-QA-pass1.md` overwritten for `members-0020`; PR not merged.
+Acceptance met on Preview-ready tip; `HANDOFF-QA-pass1.md` for `members-0021`; PR not merged.
