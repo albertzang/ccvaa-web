@@ -2,19 +2,37 @@ import Image from "next/image";
 import { getHeroCounts } from "@/lib/members/hero-counts";
 import { heroContent, siteConfig } from "@/lib/site";
 
-const countFormatter = new Intl.NumberFormat(siteConfig.locale);
+const exactCountFormatter = new Intl.NumberFormat(siteConfig.locale);
+const compactCountFormatter = new Intl.NumberFormat(siteConfig.locale, {
+  notation: "compact",
+  compactDisplay: "short",
+  maximumFractionDigits: 1,
+});
+
+function formatCompactCount(value: number): string {
+  return compactCountFormatter.format(value);
+}
 
 function HeroCtaBadge({
   value,
+  tone,
 }: {
   value: number;
+  tone: "on-coral" | "on-glass";
 }) {
+  const toneClass =
+    tone === "on-coral"
+      ? "bg-ocean-950 text-ocean-50 ring-2 ring-white/85"
+      : "bg-coral text-white ring-2 ring-white/90";
+
   return (
     <span
-      className="absolute -right-2 -top-2 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-white px-1.5 text-[11px] font-semibold tabular-nums lining-nums text-ocean-900 shadow-sm ring-2 ring-ocean-950/25"
+      className={`absolute -right-2 -top-2 inline-flex h-7 min-w-7 max-w-[2.85rem] shrink-0 items-center justify-center overflow-hidden rounded-full px-1 text-[10px] font-semibold tabular-nums lining-nums leading-none ${toneClass}`}
       aria-hidden="true"
     >
-      {countFormatter.format(value)}
+      <span className="block max-w-full truncate text-center">
+        {formatCompactCount(value)}
+      </span>
     </span>
   );
 }
@@ -63,18 +81,21 @@ export async function Hero() {
           <a
             href="#contact"
             className="relative inline-flex rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-dark"
-            aria-label={`${heroContent.subscribeLabel}, ${countFormatter.format(counts.newsletterSubscribers)} ${heroContent.newsletterCountLabel}`}
+            aria-label={`${heroContent.subscribeLabel}, ${exactCountFormatter.format(counts.newsletterSubscribers)} ${heroContent.newsletterCountLabel}`}
           >
             {heroContent.subscribeLabel}
-            <HeroCtaBadge value={counts.newsletterSubscribers} />
+            <HeroCtaBadge
+              value={counts.newsletterSubscribers}
+              tone="on-coral"
+            />
           </a>
           <a
             href="#membership"
             className="relative inline-flex rounded-full border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
-            aria-label={`${heroContent.joinLabel}, ${countFormatter.format(counts.paidMembers)} ${heroContent.paidMembersCountLabel}`}
+            aria-label={`${heroContent.joinLabel}, ${exactCountFormatter.format(counts.paidMembers)} ${heroContent.paidMembersCountLabel}`}
           >
             {heroContent.joinLabel}
-            <HeroCtaBadge value={counts.paidMembers} />
+            <HeroCtaBadge value={counts.paidMembers} tone="on-glass" />
           </a>
         </div>
       </div>

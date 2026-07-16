@@ -22,6 +22,7 @@ type ApiError = {
   message: string;
 };
 
+type NameView = "display" | "edit";
 type EmailView = "display" | "edit" | "verify";
 
 type MemberProfileFormProps = {
@@ -98,6 +99,7 @@ export function MemberProfileForm({
   loggingOut,
 }: MemberProfileFormProps) {
   const [profile, setProfile] = useState(initialProfile);
+  const [nameView, setNameView] = useState<NameView>("display");
   const [name, setName] = useState(profile.name?.trim() ?? "");
   const [emailView, setEmailView] = useState<EmailView>("display");
   const [newEmail, setNewEmail] = useState("");
@@ -130,6 +132,7 @@ export function MemberProfileForm({
         message: string;
       }>("/api/members/profile/name", { name });
       applyProfile(result.profile);
+      setNameView("display");
       setMessage(result.message);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not update name.");
@@ -187,18 +190,13 @@ export function MemberProfileForm({
     setEmailCode("");
   };
 
-  return (
-    <div className="mt-10 rounded-2xl border border-ocean-100 bg-white/70 p-6 text-left sm:p-8">
-      <h3 className="font-display text-xl font-semibold text-ocean-900">
-        {membershipContent.signedInTitle}
-      </h3>
-      <p className="mt-2 text-sm leading-relaxed text-ocean-600">
-        {membershipContent.signedInDescription}
-      </p>
+  const displayName = profile.name?.trim() || "—";
 
+  return (
+    <div className="mt-2 rounded-2xl border border-ocean-100 bg-white/70 p-5 text-left sm:p-6">
       {message ? (
         <p
-          className="mt-4 rounded-lg bg-ocean-50 px-4 py-3 text-sm text-ocean-700"
+          className="mb-4 rounded-lg bg-ocean-50 px-4 py-3 text-sm text-ocean-700"
           role="status"
         >
           {message}
@@ -207,72 +205,90 @@ export function MemberProfileForm({
 
       {error ? (
         <p
-          className="mt-4 rounded-lg bg-coral/10 px-4 py-3 text-sm text-coral-dark"
+          className="mb-4 rounded-lg bg-coral/10 px-4 py-3 text-sm text-coral-dark"
           role="alert"
         >
           {error}
         </p>
       ) : null}
 
-      <dl className="mt-6 space-y-2 text-sm text-ocean-800">
-        <div className="flex flex-wrap gap-x-2">
-          <dt className="font-medium text-ocean-600">
-            {membershipContent.profilePlanLabel}
-          </dt>
-          <dd>{PLAN_LABELS[profile.plan]}</dd>
-        </div>
-        {profile.plan === "annual" && profile.membershipAnniversary ? (
-          <div className="flex flex-wrap gap-x-2">
-            <dt className="font-medium text-ocean-600">
-              {membershipContent.profileAnniversaryLabel}
+      <dl className="space-y-3 text-sm text-ocean-800">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+          <div className="min-w-0">
+            <dt className="text-xs font-medium uppercase tracking-wide text-ocean-500">
+              {membershipContent.profileNameLabel}
             </dt>
-            <dd>{formatAnniversary(profile.membershipAnniversary)}</dd>
+            {nameView === "display" ? (
+              <dd className="mt-0.5 truncate font-medium text-ocean-900">
+                {displayName}
+              </dd>
+            ) : null}
           </div>
-        ) : null}
-        {profile.plan === "annual" && profile.nextRenewalAt ? (
-          <div className="flex flex-wrap gap-x-2">
-            <dt className="font-medium text-ocean-600">
-              {membershipContent.profileNextRenewalLabel}
-            </dt>
-            <dd>{formatRenewal(profile.nextRenewalAt)}</dd>
-          </div>
-        ) : null}
-      </dl>
-
-      <form onSubmit={handleNameSave} className="mt-8 space-y-4">
-        <div>
-          <label
-            htmlFor="member-profile-name"
-            className="block text-sm font-medium text-ocean-700"
-          >
-            {membershipContent.profileNameLabel}
-          </label>
-          <input
-            id="member-profile-name"
-            type="text"
-            required
-            maxLength={200}
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            className="mt-2 w-full rounded-xl border border-ocean-200 bg-white px-4 py-3 text-ocean-900 placeholder:text-ocean-400 focus:border-ocean-500 focus:outline-none focus:ring-2 focus:ring-ocean-200"
-          />
+          {nameView === "display" ? (
+            <button
+              type="button"
+              onClick={() => {
+                clearFeedback();
+                setNameView("edit");
+                setName(profile.name?.trim() ?? "");
+              }}
+              className="shrink-0 text-sm font-semibold text-ocean-700 underline decoration-ocean-300 underline-offset-4 hover:text-ocean-900"
+            >
+              {membershipContent.profileNameEditLabel}
+            </button>
+          ) : null}
         </div>
-        <button
-          type="submit"
-          disabled={nameLoading}
-          className="rounded-full bg-ocean-800 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-ocean-900 disabled:opacity-60"
-        >
-          {nameLoading ? "Saving…" : membershipContent.profileNameSaveLabel}
-        </button>
-      </form>
 
-      <div className="mt-8 border-t border-ocean-100 pt-8">
-        <p className="text-sm font-medium text-ocean-700">
-          {membershipContent.profileEmailLabel}
-        </p>
-        {emailView === "display" ? (
-          <div className="mt-2 flex flex-wrap items-center gap-3">
-            <p className="text-sm text-ocean-800">{profile.email}</p>
+        {nameView === "edit" ? (
+          <form onSubmit={handleNameSave} className="space-y-3">
+            <label htmlFor="member-profile-name" className="sr-only">
+              {membershipContent.profileNameLabel}
+            </label>
+            <input
+              id="member-profile-name"
+              type="text"
+              required
+              maxLength={200}
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              className="w-full rounded-xl border border-ocean-200 bg-white px-4 py-2.5 text-ocean-900 placeholder:text-ocean-400 focus:border-ocean-500 focus:outline-none focus:ring-2 focus:ring-ocean-200"
+            />
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="submit"
+                disabled={nameLoading}
+                className="rounded-full bg-ocean-800 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-ocean-900 disabled:opacity-60"
+              >
+                {nameLoading
+                  ? "Saving…"
+                  : membershipContent.profileNameSaveLabel}
+              </button>
+              <button
+                type="button"
+                disabled={nameLoading}
+                onClick={() => {
+                  clearFeedback();
+                  setNameView("display");
+                  setName(profile.name?.trim() ?? "");
+                }}
+                className="rounded-full border border-ocean-300 bg-white px-4 py-2 text-sm font-semibold text-ocean-800 transition-colors hover:bg-ocean-50 disabled:opacity-60"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        ) : null}
+
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-t border-ocean-100 pt-3">
+          <div className="min-w-0">
+            <dt className="text-xs font-medium uppercase tracking-wide text-ocean-500">
+              {membershipContent.profileEmailLabel}
+            </dt>
+            {emailView === "display" ? (
+              <dd className="mt-0.5 truncate text-ocean-900">{profile.email}</dd>
+            ) : null}
+          </div>
+          {emailView === "display" ? (
             <button
               type="button"
               onClick={() => {
@@ -280,15 +296,15 @@ export function MemberProfileForm({
                 setEmailView("edit");
                 setNewEmail("");
               }}
-              className="rounded-full border border-ocean-300 bg-white px-4 py-2 text-sm font-semibold text-ocean-800 transition-colors hover:bg-ocean-50"
+              className="shrink-0 text-sm font-semibold text-ocean-700 underline decoration-ocean-300 underline-offset-4 hover:text-ocean-900"
             >
               {membershipContent.profileEmailChangeLabel}
             </button>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
 
         {emailView === "edit" ? (
-          <form onSubmit={handleEmailStart} className="mt-4 space-y-4">
+          <form onSubmit={handleEmailStart} className="space-y-3">
             <input
               id="member-profile-new-email"
               type="email"
@@ -297,13 +313,13 @@ export function MemberProfileForm({
               value={newEmail}
               onChange={(event) => setNewEmail(event.target.value)}
               placeholder={membershipContent.emailPlaceholder}
-              className="w-full rounded-xl border border-ocean-200 bg-white px-4 py-3 text-ocean-900 placeholder:text-ocean-400 focus:border-ocean-500 focus:outline-none focus:ring-2 focus:ring-ocean-200"
+              className="w-full rounded-xl border border-ocean-200 bg-white px-4 py-2.5 text-ocean-900 placeholder:text-ocean-400 focus:border-ocean-500 focus:outline-none focus:ring-2 focus:ring-ocean-200"
             />
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2">
               <button
                 type="submit"
                 disabled={emailLoading}
-                className="rounded-full bg-ocean-800 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-ocean-900 disabled:opacity-60"
+                className="rounded-full bg-ocean-800 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-ocean-900 disabled:opacity-60"
               >
                 {emailLoading
                   ? "Sending code…"
@@ -313,7 +329,7 @@ export function MemberProfileForm({
                 type="button"
                 disabled={emailLoading}
                 onClick={resetEmailFlow}
-                className="rounded-full border border-ocean-300 bg-white px-6 py-3 text-sm font-semibold text-ocean-800 transition-colors hover:bg-ocean-50 disabled:opacity-60"
+                className="rounded-full border border-ocean-300 bg-white px-4 py-2 text-sm font-semibold text-ocean-800 transition-colors hover:bg-ocean-50 disabled:opacity-60"
               >
                 Cancel
               </button>
@@ -322,7 +338,7 @@ export function MemberProfileForm({
         ) : null}
 
         {emailView === "verify" ? (
-          <form onSubmit={handleEmailVerify} className="mt-4 space-y-4">
+          <form onSubmit={handleEmailVerify} className="space-y-3">
             <p className="text-sm text-ocean-600">
               {membershipContent.profileEmailVerifyHint}
             </p>
@@ -336,13 +352,13 @@ export function MemberProfileForm({
               value={emailCode}
               onChange={(event) => setEmailCode(event.target.value)}
               placeholder={membershipContent.codePlaceholder}
-              className="w-full rounded-xl border border-ocean-200 bg-white px-4 py-3 font-mono tracking-widest text-ocean-900 placeholder:font-sans placeholder:tracking-normal placeholder:text-ocean-400 focus:border-ocean-500 focus:outline-none focus:ring-2 focus:ring-ocean-200"
+              className="w-full rounded-xl border border-ocean-200 bg-white px-4 py-2.5 font-mono tracking-widest text-ocean-900 placeholder:font-sans placeholder:tracking-normal placeholder:text-ocean-400 focus:border-ocean-500 focus:outline-none focus:ring-2 focus:ring-ocean-200"
             />
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2">
               <button
                 type="submit"
                 disabled={emailLoading}
-                className="rounded-full bg-ocean-800 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-ocean-900 disabled:opacity-60"
+                className="rounded-full bg-ocean-800 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-ocean-900 disabled:opacity-60"
               >
                 {emailLoading
                   ? "Confirming…"
@@ -352,27 +368,35 @@ export function MemberProfileForm({
                 type="button"
                 disabled={emailLoading}
                 onClick={resetEmailFlow}
-                className="rounded-full border border-ocean-300 bg-white px-6 py-3 text-sm font-semibold text-ocean-800 transition-colors hover:bg-ocean-50 disabled:opacity-60"
+                className="rounded-full border border-ocean-300 bg-white px-4 py-2 text-sm font-semibold text-ocean-800 transition-colors hover:bg-ocean-50 disabled:opacity-60"
               >
                 Cancel
               </button>
             </div>
           </form>
         ) : null}
-      </div>
 
-      <div className="mt-8 rounded-xl border border-dashed border-ocean-200 bg-ocean-50/50 px-4 py-5">
-        <h4 className="font-display text-base font-semibold text-ocean-900">
-          {membershipContent.profilePerksTitle}
-        </h4>
-        <p className="mt-2 text-sm leading-relaxed text-ocean-600">
-          {membershipContent.profilePerksDescription}
-        </p>
-      </div>
-
-      <p className="mt-6 text-xs text-ocean-500">
-        {membershipContent.signedInAdminNote}
-      </p>
+        <div className="border-t border-ocean-100 pt-3">
+          <dt className="text-xs font-medium uppercase tracking-wide text-ocean-500">
+            {membershipContent.profilePlanLabel}
+          </dt>
+          <dd className="mt-0.5 font-medium text-ocean-900">
+            {PLAN_LABELS[profile.plan]}
+          </dd>
+          {profile.plan === "annual" && profile.membershipAnniversary ? (
+            <p className="mt-1 text-xs text-ocean-600">
+              {membershipContent.profileAnniversaryLabel}:{" "}
+              {formatAnniversary(profile.membershipAnniversary)}
+            </p>
+          ) : null}
+          {profile.plan === "annual" && profile.nextRenewalAt ? (
+            <p className="mt-0.5 text-xs text-ocean-600">
+              {membershipContent.profileNextRenewalLabel}:{" "}
+              {formatRenewal(profile.nextRenewalAt)}
+            </p>
+          ) : null}
+        </div>
+      </dl>
 
       {logoutError ? (
         <p
@@ -387,7 +411,7 @@ export function MemberProfileForm({
         type="button"
         onClick={onLogout}
         disabled={loggingOut}
-        className="mt-6 rounded-full border border-ocean-300 bg-white px-6 py-3 text-sm font-semibold text-ocean-800 transition-colors hover:bg-ocean-50 disabled:opacity-60"
+        className="mt-5 rounded-full border border-ocean-300 bg-white px-5 py-2.5 text-sm font-semibold text-ocean-800 transition-colors hover:bg-ocean-50 disabled:opacity-60"
       >
         {loggingOut ? "Signing out…" : membershipContent.logoutLabel}
       </button>

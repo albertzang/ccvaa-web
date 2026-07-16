@@ -9,7 +9,6 @@ import {
   readMemberSession,
   toPublicMemberSession,
 } from "@/lib/members/session";
-import { membershipContent } from "@/lib/site";
 
 type MembershipSectionProps = {
   joinedLanding?: boolean;
@@ -83,16 +82,11 @@ export async function MembershipSection({
   return (
     <section
       id="membership"
-      className="scroll-mt-24 bg-ocean-50/80 py-20 sm:py-28"
+      className="scroll-mt-24 bg-ocean-50/80 py-14 sm:py-20"
+      aria-label="Membership"
     >
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="font-display text-3xl font-semibold tracking-tight text-ocean-900 sm:text-4xl">
-            {membershipContent.title}
-          </h2>
-          <p className="mt-4 text-base leading-relaxed text-ocean-600">
-            {membershipContent.description}
-          </p>
           <MembershipPanel
             joinedLanding={joinedLanding}
             initialProfile={initialProfileState.profile}

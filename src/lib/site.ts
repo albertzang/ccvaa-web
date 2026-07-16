@@ -150,9 +150,6 @@ export const contactContent = {
 } as const;
 
 export const membershipContent = {
-  title: "Membership",
-  description:
-    "Join as a paid member, or sign in with email. Newsletter signup is in Contact.",
   joinTabLabel: "Join",
   signInTabLabel: "Sign in",
   loginTitle: "Member sign-in",
@@ -160,26 +157,19 @@ export const membershipContent = {
   loginSendLabel: "Send login code",
   loginVerifyLabel: "Sign in",
   loginVerifyHint: "Enter the 6-digit code we emailed you.",
-  signedInTitle: "Your membership",
-  signedInDescription: "Manage your name, email, and plan.",
-  signedInAdminNote: "Does not grant /admin access.",
-  profileNameLabel: "Display name",
+  profileNameLabel: "Name",
+  profileNameEditLabel: "Edit",
   profileNameSaveLabel: "Save name",
   profileEmailLabel: "Email",
-  profileEmailChangeLabel: "Change email",
+  profileEmailChangeLabel: "Change",
   profileEmailSendCodeLabel: "Send verification code",
   profileEmailVerifyLabel: "Confirm new email",
   profileEmailVerifyHint:
     "Enter the 6-digit code we sent to your new address.",
   profilePlanLabel: "Plan",
-  profileAnniversaryLabel: "Membership anniversary",
+  profileAnniversaryLabel: "Anniversary",
   profileNextRenewalLabel: "Next renewal",
-  profilePerksTitle: "Member perks",
-  profilePerksDescription:
-    "Exclusive member benefits will appear here in a future update.",
   logoutLabel: "Sign out",
-  joinTitle: "Join CCVAA",
-  joinDescription: "Verify your email, then pay with Stripe Checkout.",
   namePlaceholder: "Your name",
   emailPlaceholder: "you@example.com",
   codePlaceholder: "6-digit code",

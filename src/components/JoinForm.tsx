@@ -173,17 +173,10 @@ export function JoinForm({
   };
 
   return (
-    <div className="mt-4 rounded-2xl border border-ocean-100 bg-white/70 p-6 text-left sm:p-8">
-      <h3 className="font-display text-xl font-semibold text-ocean-900">
-        {membershipContent.joinTitle}
-      </h3>
-      <p className="mt-2 text-sm leading-relaxed text-ocean-600">
-        {membershipContent.joinDescription}
-      </p>
-
+    <div className="mt-4 rounded-2xl border border-ocean-100 bg-white/70 p-5 text-left sm:p-6">
       {joinedLanding ? (
         <p
-          className="mt-4 rounded-lg bg-white px-4 py-3 text-sm text-ocean-700"
+          className="rounded-lg bg-white px-4 py-3 text-sm text-ocean-700"
           role="status"
         >
           {membershipContent.joinedSuccess}
@@ -191,12 +184,14 @@ export function JoinForm({
       ) : null}
 
       {seatsNote && !plansError ? (
-        <p className="mt-3 text-xs text-ocean-500">{seatsNote}</p>
+        <p className={`${joinedLanding ? "mt-3" : ""} text-xs text-ocean-500`}>
+          {seatsNote}
+        </p>
       ) : null}
 
       {message ? (
         <p
-          className="mt-4 rounded-lg bg-ocean-50 px-4 py-3 text-sm text-ocean-700"
+          className="mt-3 rounded-lg bg-ocean-50 px-4 py-3 text-sm text-ocean-700"
           role="status"
         >
           {message}
@@ -205,7 +200,7 @@ export function JoinForm({
 
       {error || plansError ? (
         <p
-          className="mt-4 rounded-lg bg-coral/10 px-4 py-3 text-sm text-coral-dark"
+          className="mt-3 rounded-lg bg-coral/10 px-4 py-3 text-sm text-coral-dark"
           role="alert"
         >
           {error ?? plansError}
@@ -217,36 +212,34 @@ export function JoinForm({
           type="button"
           onClick={() => void reloadPlans()}
           disabled={loading}
-          className="mt-4 text-sm font-medium text-ocean-700 underline decoration-ocean-300 underline-offset-4 hover:text-ocean-900 disabled:opacity-60"
+          className="mt-3 text-sm font-medium text-ocean-700 underline decoration-ocean-300 underline-offset-4 hover:text-ocean-900 disabled:opacity-60"
         >
           Retry loading plans
         </button>
       ) : null}
 
       {view === "form" && plans ? (
-        <form onSubmit={handleStart} className="mt-6 space-y-4">
-          <fieldset className="space-y-3">
-            <legend className="text-sm font-medium text-ocean-800">
-              Choose a plan
-            </legend>
-            {plans.map((offer) => (
-              <label
-                key={offer.id}
-                className={`flex cursor-pointer gap-3 rounded-xl border px-4 py-3 transition-colors ${
-                  plan === offer.id
-                    ? "border-ocean-500 bg-ocean-50"
-                    : "border-ocean-200 bg-white hover:border-ocean-300"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="membership-plan"
-                  value={offer.id}
-                  checked={plan === offer.id}
-                  onChange={() => setPlan(offer.id)}
-                  className="mt-1"
-                />
-                <span className="min-w-0 flex-1">
+        <form onSubmit={handleStart} className="mt-4 space-y-4">
+          <fieldset>
+            <legend className="sr-only">Choose a plan</legend>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {plans.map((offer) => (
+                <label
+                  key={offer.id}
+                  className={`flex h-full cursor-pointer flex-col rounded-xl border px-4 py-3 text-left transition-colors ${
+                    plan === offer.id
+                      ? "border-ocean-500 bg-ocean-50 ring-1 ring-ocean-500"
+                      : "border-ocean-200 bg-white hover:border-ocean-300"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="membership-plan"
+                    value={offer.id}
+                    checked={plan === offer.id}
+                    onChange={() => setPlan(offer.id)}
+                    className="sr-only"
+                  />
                   <span className="flex flex-wrap items-baseline justify-between gap-2">
                     <span className="font-display font-semibold text-ocean-900">
                       {offer.label}
@@ -258,9 +251,9 @@ export function JoinForm({
                   <span className="mt-1 block text-sm text-ocean-600">
                     {offer.description}
                   </span>
-                </span>
-              </label>
-            ))}
+                </label>
+              ))}
+            </div>
           </fieldset>
 
           <div>

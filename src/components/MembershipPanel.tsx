@@ -71,7 +71,7 @@ export function MembershipPanel({
   const tabListId = useId();
   const joinPanelId = `${tabListId}-join`;
   const signInPanelId = `${tabListId}-sign-in`;
-  const [activeTab, setActiveTab] = useState<LoggedOutTab>("join");
+  const [activeTab, setActiveTab] = useState<LoggedOutTab>("sign-in");
   const [profile, setProfile] = useState<MemberProfileSummary | null>(
     initialProfile,
   );
@@ -218,26 +218,10 @@ export function MembershipPanel({
       ) : null}
 
       <div
-        className="mt-8 inline-flex rounded-full border border-ocean-200 bg-white/80 p-1"
+        className="mt-2 inline-flex rounded-full border border-ocean-200 bg-white/80 p-1"
         role="tablist"
         aria-label="Membership"
       >
-        <button
-          type="button"
-          role="tab"
-          id={`${tabListId}-tab-join`}
-          aria-controls={joinPanelId}
-          aria-selected={activeTab === "join"}
-          tabIndex={activeTab === "join" ? 0 : -1}
-          onClick={() => setActiveTab("join")}
-          className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
-            activeTab === "join"
-              ? "bg-ocean-800 text-white"
-              : "text-ocean-700 hover:text-ocean-900"
-          }`}
-        >
-          {membershipContent.joinTabLabel}
-        </button>
         <button
           type="button"
           role="tab"
@@ -254,6 +238,33 @@ export function MembershipPanel({
         >
           {membershipContent.signInTabLabel}
         </button>
+        <button
+          type="button"
+          role="tab"
+          id={`${tabListId}-tab-join`}
+          aria-controls={joinPanelId}
+          aria-selected={activeTab === "join"}
+          tabIndex={activeTab === "join" ? 0 : -1}
+          onClick={() => setActiveTab("join")}
+          className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
+            activeTab === "join"
+              ? "bg-ocean-800 text-white"
+              : "text-ocean-700 hover:text-ocean-900"
+          }`}
+        >
+          {membershipContent.joinTabLabel}
+        </button>
+      </div>
+
+      <div
+        id={signInPanelId}
+        role="tabpanel"
+        aria-labelledby={`${tabListId}-tab-sign-in`}
+        hidden={activeTab !== "sign-in"}
+      >
+        {activeTab === "sign-in" ? (
+          <MemberLoginForm onAuthenticated={setProfile} />
+        ) : null}
       </div>
 
       <div
@@ -268,17 +279,6 @@ export function MembershipPanel({
             initialPlans={initialPlans}
             initialPlansError={initialPlansError}
           />
-        ) : null}
-      </div>
-
-      <div
-        id={signInPanelId}
-        role="tabpanel"
-        aria-labelledby={`${tabListId}-tab-sign-in`}
-        hidden={activeTab !== "sign-in"}
-      >
-        {activeTab === "sign-in" ? (
-          <MemberLoginForm onAuthenticated={setProfile} />
         ) : null}
       </div>
     </>
