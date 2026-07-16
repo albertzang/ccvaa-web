@@ -72,6 +72,10 @@ Subscribe path (double opt-in + name required) stays unless needed for tab layou
 
 **Out of scope:** Moving newsletter into Membership; ESP provider choice (`0009`); changing subscribe double opt-in rules; merge to main.
 
+### Overall
+
+- Pass 1 (2026-07-16): **continue epic** — Subscribe|Unsubscribe tabs; email-only unsub outcomes; token landing + Mailosaur subscribe. Report tip `27a2b4d`. Branch alias lagged; QA used CLI Preview for tip `ce89d4c`.
+
 ### Links
 
 - Source: CEO product request (2026-07-16)
