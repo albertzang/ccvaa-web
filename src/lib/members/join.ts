@@ -5,15 +5,14 @@ import { getMembersDb } from "@/db/client";
 import { members, stripeWebhookEvents } from "@/db/schema";
 import {
   sendEmailVerifyOtp,
-  sendNewsletterConfirmOtp,
   verifyDeliveredOtp,
 } from "@/lib/members/confirm";
 import {
   MembersDbError,
   withMembersDbError,
 } from "@/lib/members/errors";
-import { syncNewsletterToEsp } from "@/lib/members/esp";
 import { requireDatabaseUrl } from "@/lib/members/env";
+import { activateNewsletterFromVerifiedEmail } from "@/lib/members/newsletter";
 import {
   requireStripeJoinConfig,
   type StripeJoinConfig,
@@ -473,23 +472,9 @@ async function activateNonFoundingMembership(params: {
 }
 
 async function applyNewsletterOptIn(email: string): Promise<void> {
-  const db = getMembersDb();
-  const member = await findMemberByEmail(email);
-  if (!member || member.newsletterStatus === "on") {
-    return;
-  }
-
-  await db
-    .update(members)
-    .set({
-      newsletterStatus: "pending",
-      newsletterConfirmedAt: null,
-      updatedAt: new Date(),
-    })
-    .where(eq(members.id, member.id));
-
-  await sendNewsletterConfirmOtp(email);
-  await syncNewsletterToEsp({ email, status: "off" });
+  // Join already verified email via email_verify OTP — activate immediately
+  // (no second newsletter confirm mail). Contact-only subscribe stays double opt-in.
+  await activateNewsletterFromVerifiedEmail(email);
 }
 
 async function refundCheckoutSession(

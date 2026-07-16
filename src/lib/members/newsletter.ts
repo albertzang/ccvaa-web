@@ -350,6 +350,36 @@ export async function redeemUnsubToken(
   };
 }
 
+/**
+ * Activates newsletter after an already-verified email (e.g. Join OTP).
+ * Does not send a second confirm mail — Contact-only subscribe stays double opt-in.
+ */
+export async function activateNewsletterFromVerifiedEmail(
+  email: string,
+): Promise<void> {
+  const normalized = email.trim().toLowerCase();
+  const member = await findMemberByEmail(normalized);
+  if (!member || member.newsletterStatus === "on") {
+    return;
+  }
+
+  const now = new Date();
+  await withMembersDbError(async () => {
+    const db = getMembersDb();
+    await db
+      .update(members)
+      .set({
+        newsletterStatus: "on",
+        newsletterConfirmedAt: now,
+        updatedAt: now,
+      })
+      .where(eq(members.id, member.id));
+  }, "Failed to activate newsletter after verified Join.");
+
+  await ensureUnsubToken(member.id);
+  await syncNewsletterToEsp({ email: normalized, status: "on" });
+}
+
 export class MembersNewsletterError extends Error {
   readonly code:
     | "MEMBERS_UNSUB_INVALID"

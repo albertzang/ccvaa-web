@@ -36,7 +36,7 @@
 ### Membership (`#membership`)
 - After Hero, before About
 - Plans: **Founding** (capped one-time) while seats remain → then **Lifetime** (one-time, fee always > Founding); **Annual** always offered (stores `membership_anniversary` + `next_renewal_at` from Stripe)
-- Logged out → **Join** (name, email, optional newsletter opt-in → email OTP → Stripe Checkout → webhook activates; return `/?joined=1#membership`) **or Member sign-in** (6-digit login OTP → httpOnly session). Logged in → **profile** (name edit; email change via OTP re-verify on new address; Annual shows read-only anniversary / next renewal; light perks placeholder). Newsletter stays in Contact.
+- Logged out → **Join** (name, email, optional newsletter opt-in → **one** email OTP → Stripe Checkout → webhook activates; Join+newsletter opt-in does not send a second confirm mail — Contact-only subscribe stays double opt-in; return `/?joined=1#membership`) **or Member sign-in** (6-digit login OTP → httpOnly session). Logged in → **profile** (name edit; email change via OTP re-verify on new address; Annual shows read-only anniversary / next renewal; light perks placeholder). Newsletter stays in Contact.
 - APIs: `GET /api/members/join/plans`, `POST /api/members/join/{start,verify}`, `POST /api/members/webhooks/stripe` (idempotent); profile: `GET /api/members/profile`, `PATCH /api/members/profile/name`, `POST /api/members/profile/email/{start,verify}`. Fail closed without Stripe/`DATABASE_URL`/session secrets. Race-safe Founding seat claim.
 
 ### About (`#about`)
@@ -115,7 +115,7 @@
 
 **Newsletter (members-0003, epic `feat/members`):** Contact `#contact` UI + `POST /api/members/newsletter/*` routes. Subscribe requires name + email; double opt-in via Resend OTP; pending does not count toward subscriber count. Name validation: shared `personNameSchema` (Unicode letters/marks, spaces, common punctuation — `members-0017`). Manage preference for newsletter-only and paid members. Token unsub `/?unsub=<token>#contact` (idempotent; membership unchanged). ESP sync stub in `src/lib/members/esp.ts` — footer URL: [`docs/members/esp.md`](../members/esp.md). Requires `DATABASE_URL` + `RESEND_*` for live subscribe; fails closed without them.
 
-**Join / Stripe (members-0004, epic `feat/members`):** `#membership` Join UI + Stripe Checkout (test keys on Dev/Preview). Flow: name/email/newsletter opt-in → `email_verify` OTP → Checkout → `checkout.session.completed` webhook activates membership. Pre-cap Founding+Annual; post-cap Lifetime+Annual. Env: `STRIPE_*`, `MEMBERSHIP_FOUNDING_CAP`, fee cents (Lifetime > Founding enforced). Webhook: `POST /api/members/webhooks/stripe`. Live keys: `members-0009`.
+**Join / Stripe (members-0004, epic `feat/members`):** `#membership` Join UI + Stripe Checkout (test keys on Dev/Preview). Flow: name/email/optional newsletter opt-in → single `email_verify` OTP → Checkout → `checkout.session.completed` webhook activates membership. When newsletter was opted in at Join, webhook sets newsletter `on` from that verified email (**members-0015** — no second Resend confirm). Contact-only subscribe remains double opt-in. Pre-cap Founding+Annual; post-cap Lifetime+Annual. Env: `STRIPE_*`, `MEMBERSHIP_FOUNDING_CAP`, fee cents (Lifetime > Founding enforced). Webhook: `POST /api/members/webhooks/stripe`. Live keys: `members-0009`.
 
 **Member auth (members-0005, epic `feat/members`):** `#membership` login wall — email → 6-digit OTP (`purpose=login` via Resend) → httpOnly signed cookie `ccvaa_member_session` (7-day TTL). Logout clears cookie only (does not touch Hover admin). Active paid members only (`membership_status=active`, plan ≠ none). APIs: `POST /api/members/login/{start,verify,logout}`, `GET /api/members/login/session`. Zod on payloads; OTP rate limits/expiry in `otp-config` / [`docs/members/schema.md`](../members/schema.md). Requires `DATABASE_URL` + `RESEND_*` + `MEMBER_SESSION_SECRET`; fails closed without them. **Never grants `/admin`.**
 
@@ -157,6 +157,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-16 | **members-0015** (epic `feat/members`): Join + newsletter opt-in uses one email OTP only; webhook activates newsletter without a second confirm mail |
 | 2026-07-16 | **members-0017** (epic `feat/members`): newsletter Name required; shared international `personNameSchema` for newsletter + Join + profile |
 | 2026-07-14 | **members-0006** (epic `feat/members`): `#membership` logged-in profile — name edit, email change with OTP re-verify, Annual anniversary/renewal read-only, perks placeholder |
 | 2026-07-14 | **agent-os-0014:** Preview browser bypass requires `x-vercel-set-bypass-cookie` (with protection-bypass) for Pass 1 |

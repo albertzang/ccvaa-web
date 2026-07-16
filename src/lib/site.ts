@@ -191,9 +191,9 @@ export const membershipContent = {
     "Enter the 6-digit code we emailed you. We will open Stripe Checkout next.",
   checkoutLabel: "Continue to checkout",
   newsletterOptInLabel:
-    "Also send me the CCVAA newsletter (optional — confirm separately after payment)",
+    "Also send me the CCVAA newsletter (optional)",
   consentNote:
-    "Paid membership is separate from the newsletter mailing list. You can change newsletter preference anytime in Contact.",
+    "Paid membership is separate from the newsletter. Change newsletter preference anytime in Contact.",
   joinedSuccess:
     "Thanks for joining. Your membership activates when Stripe confirms payment — then sign in above with your email.",
 } as const;
