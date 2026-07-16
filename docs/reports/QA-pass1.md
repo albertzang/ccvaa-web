@@ -1,9 +1,11 @@
 # QA report
 
 **Pass:** 1 (pre-merge)  
-**Backlog work ID:** `members-0020`  
-**Environment(s) + exact URLs:** Preview https://ccvaa-web-git-feat-members-azang-projects.vercel.app (Deployment Protection bypass via `.env.local`; both `x-vercel-protection-bypass` + `x-vercel-set-bypass-cookie=true`; bypass value omitted).  
-**Branch / PR / commit:** `feat/members` · PR https://github.com/albertzang/ccvaa-web/pull/8 · tip `0615132` (impl `203eec1`; Preview deploy Ready — CLI redeploy aliased to branch URL after GitHub webhook lag)  
+**Backlog work ID:** `members-0021`  
+**Environment(s) + exact URLs:**  
+- Preview (tested): https://ccvaa-5n1rvpmc1-azang-projects.vercel.app — CLI redeploy of tip `ce89d4c` / impl `1d3ca6b` (Deployment Protection bypass via `.env.local`; header and/or both `x-vercel-protection-bypass` + `x-vercel-set-bypass-cookie=true`; bypass value omitted).  
+- Handoff branch alias https://ccvaa-web-git-feat-members-azang-projects.vercel.app remained on a **pre-0021** deploy (still showed **Manage preference**) after tip push; GitHub auto-Preview did not update within ~10m — QA triggered `vercel deploy` of local tip to unblock.  
+**Branch / PR / commit:** `feat/members` · PR https://github.com/albertzang/ccvaa-web/pull/8 · tip `ce89d4c` · impl `1d3ca6b`  
 **Date:** 2026-07-16  
 **Result:** pass  
 **Merge gate:** `epic` → **continue epic** (do **not** merge)
@@ -14,39 +16,36 @@
 
 ## Scope tested
 
-`members-0020` on epic `feat/members` (handoff `HANDOFF-QA-pass1.md`):
+`members-0021` on epic `feat/members` (handoff `HANDOFF-QA-pass1.md` + `docs/members/esp.md`):
 
-1. Membership section title/subtitle absent logged out and logged in (`aria-label="Membership"` only)
-2. Logged-out tabs: **Sign in** left/default | **Join** right; one panel visible
-3. Join: no title/subtitle; “Choose a plan” `sr-only` (not visually shown); plans two-column at ≥`sm`, stack on 390px
-4. Logged-in profile declutter: summary-first name/email edit; plan + Annual anniversary/renewal; no future-perks / `/admin` note; sign-out
-5. Hero compact badges: circular ocean/coral brand treatment; exact counts in `aria-label`; anchors `#contact` / `#membership`
-6. Newsletter remains under Contact only
-7. Desktop + mobile; `tsc --noEmit` clean
+1. Contact newsletter tabs **Subscribe** | **Unsubscribe** (Membership-like pill tablist); one panel visible
+2. Unsubscribe: email + Unsubscribe only (no preference lookup / Check preference)
+3. Distinct messages: subscribed→off / already off / unknown; `membershipUnchanged`
+4. Token landing `/?unsub=<token>#contact`: Unsubscribe tab, email filled, auto result, idempotent reload; invalid token message
+5. Subscribe smoke: required name + double opt-in (Mailosaur)
+6. Desktop SSR markers + `tsc --noEmit` clean
 
 ## Checklist results
 
 | Area | Result | Notes |
 |------|--------|-------|
-| Preview bypass | pass | No Vercel wall with both bypass params |
-| Preview deploy | pass | Tip `0615132` / impl `203eec1` Ready on branch alias (CLI redeploy after auto-deploy lag) |
-| Section title/subtitle (logged out) | pass | No visible `h2`; section `aria-label="Membership"` |
-| Tabs Sign in \| Join | pass | Sign in left + `aria-selected=true` by default; Join right |
-| Tab mutual exclusivity | pass | Only active tabpanel visible (`hidden` / `display:none` on inactive) |
-| Join title / “Choose a plan” | pass | No Join headings; legend `sr-only` (1×1 clipped; not visually shown) |
-| Join plan grid | pass | `sm:grid-cols-2` → 2 cols @1280; 1 col @390 |
-| Newsletter placement | pass | Newsletter under `#contact`; no Newsletter heading in `#membership` |
-| Hero Subscribe badge | pass | Circle `8`, ocean-950 on coral CTA; `aria-label="Subscribe, 8 Newsletter subscribers"`; `#contact` |
-| Hero Join badge | pass | Circle `9`, coral on glass CTA; `aria-label="Join, 9 Paid members"`; `#membership` |
-| Compact K/M/B | pass | Counts 8/9 correctly plain digits; compact formatter present for large values; badge `max-w` + truncate bounds overflow |
-| Badge brand styling | pass | Not black-on-white; ocean / coral contrast on both CTAs |
-| Desktop viewport | pass | 1280×900 |
-| Mobile viewport | pass | 390×844: stacked plans; badges bounded |
-| Logged-in profile declutter | pass | Mailosaur OTP session (Founding + Annual); no tabs/`h2`; Edit/Change on demand; plan visible; no future-perks or `/admin` note |
-| Annual renewal | pass | Anniversary + Next renewal shown for Annual plan |
-| Name edit / sign-out | pass | Edit reveals name input; Cancel returns; Sign out → Sign-in default tabs |
+| Preview bypass | pass | No Vercel wall with protection bypass |
+| Preview deploy (tip) | pass-with-note | Branch alias stale; tested CLI Preview of tip `ce89d4c` / `1d3ca6b` |
+| Tabs Subscribe \| Unsubscribe | pass | Home: Subscribe `aria-selected=true`, Unsubscribe `false`; token/invalid landings flip selection |
+| One panel visible | pass | Inactive panel not rendered / `hidden`; unsubscribe email field only when Unsubscribe active |
+| No Check preference / Manage preference | pass | Absent on tip Preview HTML |
+| Unsubscribe email + button only | pass | `newsletter-unsub-email` + Unsubscribe submit; no lookup step |
+| Manual unsub → off | pass | Fresh Mailosaur confirm then unsub → `outcome=unsubscribed`, membershipUnchanged |
+| Manual already off | pass | Second unsub + `founding@ccvaa-seed.test` → `already_off` |
+| Manual unknown | pass | Unknown address → `unknown` (“could not find…”) |
+| Membership unchanged | pass | API `membershipUnchanged: true` for annual/lifetime/founding paths; unsub updates newsletter only |
+| Token landing (seed) | pass | `seed-unsub-annual-member`: Unsubscribe selected, seed email in payload, success/already message |
+| Token idempotent reload | pass | Reload same URL still shows already/success message |
+| Invalid token | pass | Message “This unsubscribe link is invalid or has expired.” on Unsubscribe tab |
+| Subscribe name required | pass | Missing name → 400 `MEMBERS_VALIDATION_ERROR` |
+| Subscribe double opt-in | pass | Mailosaur: pending → confirm → `on` |
 | Lint / typecheck | pass | `tsc --noEmit` clean |
-| FEATURES.md | pass | Changelog notes members-0020 declutter + compact badges |
+| Desktop + mobile | pass-with-note | Responsive markup verified via SSR/API; interactive browser MCP tab unavailable this session — tab/panel behavior confirmed via RSC HTML (`aria-selected` / field presence) |
 
 ## Bugs found
 
@@ -54,8 +53,9 @@
 
 ## Suggestions (non-blocking)
 
-- GitHub→Vercel auto Preview for tip `0615132` lagged (~10+ min with no new deployment). QA unblocked with `vercel deploy --target=preview` + branch alias. Worth checking the Vercel Git integration if this recurs.
+- Git → Vercel Preview for `feat/members` lagged after `members-0021` push (branch alias still served pre-0021 **Manage preference**). PM/Dev: confirm Vercel Git webhook / Ignored Build Step so the handoff alias tracks tip without CLI redeploy.
+- Optional: re-seed `newsletter_status=on` for seed members after aggressive unsub QA so the next Pass 1 does not need a Mailosaur bootstrap for the fresh unsub path.
 
 ## Sign-off
 
-**Pass 1:** **continue epic** — do **not** merge to `main`
+**Pass 1:** **continue epic** (Merge gate `epic` — do **not** merge)
