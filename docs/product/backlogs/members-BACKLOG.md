@@ -275,6 +275,7 @@ Logged-in face of `#membership` (same slot as Join). Profile: name; email change
 ### Overall
 
 - Pass 1 (2026-07-14): **continue epic** — logged-out UI + fail-closed APIs OK; logged-in profile E2E blocked (Preview Neon unmigrated). Report: `docs/reports/QA-pass1.md` (`95a4497`)
+- Pass 1 retest (2026-07-15): queued after live `0005` — profile E2E with Mailosaur session (no Stripe).
 
 ### Links
 
@@ -311,7 +312,8 @@ Homepage SPA login wall for `#membership`: 6-digit OTP (Resend) → httpOnly ses
 ### Overall
 
 - Pass 1 (2026-07-14): **continue epic** — sign-in UI + session/logout/admin isolation OK; live OTP E2E blocked (Preview Neon unmigrated / no Mailosaur). Report: `docs/reports/QA-pass1.md` (`0f0bada`)
-- Pass 1 hold (2026-07-14, Dev probe): health **200** `db.ok` but login/newsletter **503** `MEMBERS_DB_UNAVAILABLE` (schema missing). Local `.env.local` + `vercel env pull --environment=preview` hit the **same** Neon parent (`ep-shiny-smoke-a6pt9h7u…`, tables+seed present). Hypothesized empty **Neon Preview branch** (deploy-time `DATABASE_URL` inject ≠ env pull). CEO: migrate+seed that Preview branch (or add migrate to Preview build).
+- Pass 1 hold (2026-07-14, Dev probe): schema missing on Preview Neon branch while health `db.ok`.
+- Pass 1 (2026-07-15): **continue epic** — live Mailosaur OTP login → session → logout; `grantsAdmin: false`. Report tip `239574a`.
 
 ### Links
 
@@ -390,7 +392,8 @@ Contact `#contact` owns the **Newsletter** axis: subscribe (double opt-in via Re
 - Pass 1 (2026-07-14, early): UI checks ok while DB missing — **continue epic** (stale once `DATABASE_URL` landed).
 - Pass 1 (2026-07-14): **hold** — Resend missing / unmigrated → generic **500** (Iteration 2).
 - Iteration 2 Pass 1 (2026-07-14): **continue epic** — clear **503** fail-closed (`MEMBERS_EMAIL_UNAVAILABLE` / `MEMBERS_DB_UNAVAILABLE`); live double opt-in still blocked until Neon migrate+seed on Preview. Report: `docs/reports/QA-pass1.md` (`d0f360b` / tip).
-- Pass 1 hold (2026-07-14, Dev probe): same as `members-0005` — subscribe **503** schema message while health `db.ok`; parent Neon already migrated/seeded; Preview likely on unmigrated Neon branch. Fix = migrate+seed Preview branch (not re-run against `.env.local` alone).
+- Pass 1 hold (2026-07-14, Dev probe): schema missing on Preview Neon branch while health `db.ok`.
+- Pass 1 (2026-07-15): **continue epic** — live subscribe → Mailosaur OTP → confirm; preference; hero/unsub. Report tip `239574a`.
 
 ### Links
 
