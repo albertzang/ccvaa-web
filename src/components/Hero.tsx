@@ -4,19 +4,17 @@ import { heroContent, siteConfig } from "@/lib/site";
 
 const countFormatter = new Intl.NumberFormat(siteConfig.locale);
 
-function HeroCtaAnnotation({
+function HeroCtaBadge({
   value,
-  label,
 }: {
   value: number;
-  label: string;
 }) {
   return (
-    <span className="text-xs leading-snug text-ocean-100/80 sm:text-sm">
-      <span className="font-semibold tabular-nums lining-nums text-ocean-50">
-        {countFormatter.format(value)}
-      </span>{" "}
-      <span>{label}</span>
+    <span
+      className="absolute -right-2 -top-2 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-white px-1.5 text-[11px] font-semibold tabular-nums lining-nums text-ocean-900 shadow-sm ring-2 ring-ocean-950/25"
+      aria-hidden="true"
+    >
+      {countFormatter.format(value)}
     </span>
   );
 }
@@ -61,31 +59,23 @@ export async function Hero() {
           {heroContent.subheadline}
         </p>
 
-        <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <a
-              href="#contact"
-              className="inline-flex rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-dark"
-            >
-              {heroContent.subscribeLabel}
-            </a>
-            <HeroCtaAnnotation
-              value={counts.newsletterSubscribers}
-              label={heroContent.newsletterCountLabel}
-            />
-          </div>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <a
-              href="#membership"
-              className="inline-flex rounded-full border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
-            >
-              {heroContent.joinLabel}
-            </a>
-            <HeroCtaAnnotation
-              value={counts.paidMembers}
-              label={heroContent.paidMembersCountLabel}
-            />
-          </div>
+        <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-5">
+          <a
+            href="#contact"
+            className="relative inline-flex rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-dark"
+            aria-label={`${heroContent.subscribeLabel}, ${countFormatter.format(counts.newsletterSubscribers)} ${heroContent.newsletterCountLabel}`}
+          >
+            {heroContent.subscribeLabel}
+            <HeroCtaBadge value={counts.newsletterSubscribers} />
+          </a>
+          <a
+            href="#membership"
+            className="relative inline-flex rounded-full border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+            aria-label={`${heroContent.joinLabel}, ${countFormatter.format(counts.paidMembers)} ${heroContent.paidMembersCountLabel}`}
+          >
+            {heroContent.joinLabel}
+            <HeroCtaBadge value={counts.paidMembers} />
+          </a>
         </div>
       </div>
     </section>

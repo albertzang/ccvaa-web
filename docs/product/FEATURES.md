@@ -28,15 +28,15 @@
 - Full-bleed coastal hero image (`hero-background.webp`)
 - Eyebrow, headline, subheadline from `src/lib/site.ts`
 - Text is non-selectable
-- **Subscribe** button anchors to `#contact` (newsletter); live subscriber count as an annotation beside the button (`newsletter_status = on`)
-- **Join** button anchors to `#membership` (Join panel); live paid-member count as an annotation beside the button (`membership_status = active`)
-- Dual-axis counter labels (“Newsletter subscribers” / “Paid members”) — never conflates mailing list with membership plans
+- **Subscribe** button anchors to `#contact` (newsletter); live subscriber count as a numeric circle badge on the top-right of the button (`newsletter_status = on`)
+- **Join** button anchors to `#membership` (Join panel); live paid-member count as a numeric circle badge on the top-right of the button (`membership_status = active`)
+- Dual-axis counter labels (“Newsletter subscribers” / “Paid members”) — never conflates mailing list with membership plans; counts exposed via CTA `aria-label`
 - Counts stub to `0` when `DATABASE_URL` / members DB unavailable; homepage still loads (`members-0007`)
 
 ### Membership (`#membership`)
 - After Hero, before About
 - Plans: **Founding** (capped one-time) while seats remain → then **Lifetime** (one-time, fee always > Founding); **Annual** always offered (stores `membership_anniversary` + `next_renewal_at` from Stripe)
-- Logged out → **Join** (name, email, optional newsletter opt-in → **one** email OTP → Stripe Checkout → webhook activates; Join+newsletter opt-in does not send a second confirm mail — Contact-only subscribe stays double opt-in; return `/?joined=1&session_id=…#membership` auto-establishes member session → profile) **or Member sign-in** (6-digit login OTP → httpOnly session). Logged in → **profile** (name edit; email change via OTP re-verify on new address; Annual shows read-only anniversary / next renewal; light perks placeholder). Newsletter stays in Contact.
+- Logged out → tabs **Join** (default) | **Sign in** — only the active form is shown. **Join**: name, email, optional newsletter opt-in → **one** email OTP → Stripe Checkout → webhook activates; Join+newsletter opt-in does not send a second confirm mail — Contact-only subscribe stays double opt-in; return `/?joined=1&session_id=…#membership` auto-establishes member session → profile. **Sign in**: 6-digit login OTP → httpOnly session. Logged in → **profile** only (name edit; email change via OTP re-verify on new address; Annual shows read-only anniversary / next renewal; light perks placeholder). Newsletter stays in Contact.
 - APIs: `GET /api/members/join/plans`, `POST /api/members/join/{start,verify,session}`, `POST /api/members/webhooks/stripe` (idempotent); profile: `GET /api/members/profile`, `PATCH /api/members/profile/name`, `POST /api/members/profile/email/{start,verify}`. Fail closed without Stripe/`DATABASE_URL`/session secrets. Race-safe Founding seat claim.
 
 ### About (`#about`)
@@ -104,10 +104,10 @@
 | | Newsletter | Membership |
 |--|------------|------------|
 | **Meaning** | Mailing-list opt-in | Paid association (Stripe) |
-| **UI** | Contact; ESP unsub → `#contact` + token | `#membership`: Join ↔ profile (login wall; perks later) |
+| **UI** | Contact; ESP unsub → `#contact` + token | `#membership`: Join | Sign-in tabs ↔ profile (login wall; perks later) |
 | **Count** | Anyone with newsletter on | Active paid plans |
 
-**Hero:** Subscribe / Join with count annotations beside each CTA → `#contact` / `#membership` (anchors).
+**Hero:** Subscribe / Join with numeric circle count badges on each CTA (top-right) → `#contact` / `#membership` (anchors).
 **Stack:** Neon + Drizzle + Zod · Stripe · Resend · ESP · Mailosaur. Admin roster (`0008`); Resend/ESP new-tab links (`0010`); later: in-admin blast, member perks, impersonation.  
 **Standing:** No Resend/ESP iframes; member auth = email OTP (no OAuth/passwords); homepage SPA anchors over separate marketing routes.
 
@@ -157,6 +157,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-16 | **members-0019** (epic `feat/members`): `#membership` Join \| Sign-in tabs (Join default); Hero counts as top-right circle badges on Subscribe/Join |
 | 2026-07-16 | **members-0018** (epic `feat/members`): trim Join/newsletter/membership UI notes; keep CASL + newsletter≠membership clarity |
 | 2026-07-16 | **members-0016** (epic `feat/members`): Hero subscriber/member counts as annotations beside Subscribe/Join CTAs |
 | 2026-07-16 | **members-0014** (epic `feat/members`): Checkout success return auto-establishes member session → `#membership` profile (webhook race poll) |

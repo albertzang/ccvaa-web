@@ -97,7 +97,7 @@ export function MemberLoginForm({ onAuthenticated }: MemberLoginFormProps) {
   };
 
   return (
-    <div className="mt-10 rounded-2xl border border-ocean-100 bg-white/70 p-6 text-left sm:p-8">
+    <div className="mt-4 rounded-2xl border border-ocean-100 bg-white/70 p-6 text-left sm:p-8">
       <h3 className="font-display text-xl font-semibold text-ocean-900">
         {membershipContent.loginTitle}
       </h3>

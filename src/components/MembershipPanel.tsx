@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 
 import { JoinForm, type JoinPlansProps } from "@/components/JoinForm";
 import { MemberLoginForm } from "@/components/MemberLoginForm";
@@ -19,6 +19,8 @@ type MembershipPanelProps = {
   initialPlans: JoinPlansProps | null;
   initialPlansError: string | null;
 };
+
+type LoggedOutTab = "join" | "sign-in";
 
 type ApiError = {
   ok: false;
@@ -66,6 +68,10 @@ export function MembershipPanel({
   initialPlans,
   initialPlansError,
 }: MembershipPanelProps) {
+  const tabListId = useId();
+  const joinPanelId = `${tabListId}-join`;
+  const signInPanelId = `${tabListId}-sign-in`;
+  const [activeTab, setActiveTab] = useState<LoggedOutTab>("join");
   const [profile, setProfile] = useState<MemberProfileSummary | null>(
     initialProfile,
   );
@@ -210,12 +216,71 @@ export function MembershipPanel({
           ) : null}
         </div>
       ) : null}
-      <MemberLoginForm onAuthenticated={setProfile} />
-      <JoinForm
-        joinedLanding={false}
-        initialPlans={initialPlans}
-        initialPlansError={initialPlansError}
-      />
+
+      <div
+        className="mt-8 inline-flex rounded-full border border-ocean-200 bg-white/80 p-1"
+        role="tablist"
+        aria-label="Membership"
+      >
+        <button
+          type="button"
+          role="tab"
+          id={`${tabListId}-tab-join`}
+          aria-controls={joinPanelId}
+          aria-selected={activeTab === "join"}
+          tabIndex={activeTab === "join" ? 0 : -1}
+          onClick={() => setActiveTab("join")}
+          className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
+            activeTab === "join"
+              ? "bg-ocean-800 text-white"
+              : "text-ocean-700 hover:text-ocean-900"
+          }`}
+        >
+          {membershipContent.joinTabLabel}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          id={`${tabListId}-tab-sign-in`}
+          aria-controls={signInPanelId}
+          aria-selected={activeTab === "sign-in"}
+          tabIndex={activeTab === "sign-in" ? 0 : -1}
+          onClick={() => setActiveTab("sign-in")}
+          className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
+            activeTab === "sign-in"
+              ? "bg-ocean-800 text-white"
+              : "text-ocean-700 hover:text-ocean-900"
+          }`}
+        >
+          {membershipContent.signInTabLabel}
+        </button>
+      </div>
+
+      <div
+        id={joinPanelId}
+        role="tabpanel"
+        aria-labelledby={`${tabListId}-tab-join`}
+        hidden={activeTab !== "join"}
+      >
+        {activeTab === "join" ? (
+          <JoinForm
+            joinedLanding={false}
+            initialPlans={initialPlans}
+            initialPlansError={initialPlansError}
+          />
+        ) : null}
+      </div>
+
+      <div
+        id={signInPanelId}
+        role="tabpanel"
+        aria-labelledby={`${tabListId}-tab-sign-in`}
+        hidden={activeTab !== "sign-in"}
+      >
+        {activeTab === "sign-in" ? (
+          <MemberLoginForm onAuthenticated={setProfile} />
+        ) : null}
+      </div>
     </>
   );
 }

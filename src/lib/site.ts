@@ -153,6 +153,8 @@ export const membershipContent = {
   title: "Membership",
   description:
     "Join as a paid member, or sign in with email. Newsletter signup is in Contact.",
+  joinTabLabel: "Join",
+  signInTabLabel: "Sign in",
   loginTitle: "Member sign-in",
   loginDescription: "We email a 6-digit code — no password.",
   loginSendLabel: "Send login code",
@@ -189,11 +191,11 @@ export const membershipContent = {
   consentNote:
     "Membership is separate from the newsletter (CASL). Manage newsletter in Contact.",
   joinedSuccess:
-    "Thanks for joining. Sign in above if you are not signed in automatically.",
+    "Thanks for joining. Use Sign in if you are not signed in automatically.",
   joinedActivating:
     "Payment received — activating your membership and signing you in…",
   joinedSessionTimeout:
-    "Membership may still be activating. Sign in above, or refresh this page.",
+    "Membership may still be activating. Use Sign in, or refresh this page.",
 } as const;
 
 export const newsletterContent = {
