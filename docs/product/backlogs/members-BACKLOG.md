@@ -63,6 +63,10 @@ CEO feedback: some explanatory notes on Join / newsletter / membership UI feel e
 
 **Out of scope:** New features; redesign of whole homepage.
 
+### Overall
+
+- Pass 1 (2026-07-16): **continue epic** — notes trimmed; CASL + newsletter≠membership clear. Report tip `d69adfa`.
+
 ### Links
 
 - Source: CEO manual test (2026-07-16)
@@ -95,6 +99,10 @@ Make **Name required** on newsletter subscribe (Contact). Ensure Name validation
 
 **Out of scope:** Legal name verification; address/phone fields.
 
+### Overall
+
+- Pass 1 (2026-07-16): **continue epic** — name required; Unicode/diacritics OK. Report tip `d69adfa`.
+
 ### Links
 
 - Source: CEO manual test (2026-07-16)
@@ -126,6 +134,10 @@ CEO: Subscriber / Member counters should read as **annotations beside** the Hero
 - [ ] FEATURES.md Hero CTAs updated
 
 **Out of scope:** Changing what is counted; forms inside the hero.
+
+### Overall
+
+- Pass 1 (2026-07-16): **continue epic** — counts as annotations beside Subscribe/Join. Report tip `d69adfa`.
 
 ### Links
 
@@ -167,6 +179,10 @@ CEO: Subscriber / Member counters should read as **annotations beside** the Hero
 
 **Out of scope:** Changing Contact-only subscribe to single opt-in; ESP blast copy.
 
+### Overall
+
+- Pass 1 (2026-07-16): **continue epic** — one Join OTP; newsletter on after Checkout; Contact still double opt-in. Report tip `d69adfa`.
+
 ### Links
 
 - Source: CEO manual test (2026-07-16)
@@ -200,6 +216,10 @@ After successful Stripe Checkout return (`/?joined=1#membership`), automatically
 - [ ] FEATURES.md Join / login notes
 
 **Out of scope:** Changing Checkout itself; password auth; admin Hover session.
+
+### Overall
+
+- Pass 1 (2026-07-16): **continue epic** — Checkout return → auto session → profile; `grantsAdmin: false`. Report tip `d69adfa`.
 
 ### Links
 
