@@ -3,7 +3,7 @@
 **Feature:** Members  
 **Slug:** `members`  
 **Owner:** Product Manager  
-**Next ID:** `0021`  
+**Next ID:** `0022`  
 
 Canonical work IDs: `members-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
@@ -35,7 +35,48 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 4. Admin roster — `0008`
 5. Then `next`: `0010` links → `0009` go-live (CEO); `later`: `0011`–`0013`
 
-**Ship lane:** Default for Verifier=`agent` tickets in the first Members milestone: **Epic branch `feat/members`**, **Merge gate `epic`** (fields set on `0001`–`0008`, `0010`, and `0014`–`0020`). `members-0009` (CEO go-live) stays outside that gate. See [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
+**Ship lane:** Default for Verifier=`agent` tickets in the first Members milestone: **Epic branch `feat/members`**, **Merge gate `epic`** (fields set on `0001`–`0008`, `0010`, and `0014`–`0021`). `members-0009` (CEO go-live) stays outside that gate. See [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
+
+---
+
+## members-0021 — Newsletter Subscribe / Unsubscribe tabs + one-click email unsub
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `not-started` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
+| **Epic branch** | `feat/members` |
+| **Merge gate** | `epic` |
+
+### Description
+
+CEO: reshape Contact newsletter UI to match Membership tab pattern and simplify unsubscribe.
+
+1. **Tabs:** Replace **Subscribe** / **Manage preference** with Membership-style tabs: **Subscribe** | **Unsubscribe** (same chrome as Sign in | Join). Show only the active panel.
+2. **Manual Unsubscribe:** Remove the “Check preference” / lookup step. User enters **email only** and clicks **Unsubscribe**. Backend determines whether the address is subscribed (or unknown / already off) and returns a clear success / already-unsubscribed / not-found (or equivalent) message for the UI. Unsub still must **never** cancel paid membership.
+3. **One-click from newsletter email:** Clicking the unsubscribe link must land on Contact → Newsletter, switch to the **Unsubscribe** tab, prefill the recipient email, and **automatically** run the unsub request so the visitor gets a one-click experience and can read the backend success/fail (or already-unsubscribed) message on the page. Preserve tokenized footer URL semantics (`/?unsub=<token>#contact` per `docs/members/esp.md`) — redeem/idempotent behavior stays; UI presentation changes to the Unsubscribe tab flow. Update ESP docs if the landing UX description changes.
+
+Subscribe path (double opt-in + name required) stays unless needed for tab layout consistency.
+
+**Acceptance:**
+- [ ] Contact newsletter uses tabs **Subscribe** | **Unsubscribe** (Membership-like); one panel visible
+- [ ] Unsubscribe panel: email + Unsubscribe control only — no preference lookup step
+- [ ] Backend returns distinct, user-safe messages for subscribed→off, already off, and unknown / invalid cases; membership unchanged
+- [ ] `/?unsub=<token>#contact`: opens Contact newsletter, Unsubscribe tab active, email filled, unsub auto-run, result message shown (idempotent on reload)
+- [ ] Invalid/expired token still shows a clear message on the Unsubscribe tab
+- [ ] Desktop + mobile; FEATURES.md + `docs/members/esp.md` updated as needed
+
+**Out of scope:** Moving newsletter into Membership; ESP provider choice (`0009`); changing subscribe double opt-in rules; merge to main.
+
+### Links
+
+- Source: CEO product request (2026-07-16)
+- Depends on: `members-0003`, `members-0019` (tab pattern)
+- PR: https://github.com/albertzang/ccvaa-web/pull/8
 
 ---
 
