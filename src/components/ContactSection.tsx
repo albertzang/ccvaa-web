@@ -2,7 +2,7 @@ import { contactContent, organization } from "@/lib/site";
 import { NewsletterForm } from "@/components/NewsletterForm";
 
 export type UnsubLandingProps =
-  | { kind: "success"; already: boolean }
+  | { kind: "success"; already: boolean; email: string }
   | { kind: "invalid" };
 
 type ContactSectionProps = {

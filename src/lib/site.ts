@@ -193,7 +193,7 @@ export const newsletterContent = {
   description:
     "Occasional updates on exhibitions, programs, and community news.",
   subscribeLabel: "Subscribe",
-  manageLabel: "Manage preference",
+  unsubscribeLabel: "Unsubscribe",
   emailPlaceholder: "you@example.com",
   namePlaceholder: "Your name",
   codePlaceholder: "6-digit code",
@@ -201,10 +201,6 @@ export const newsletterContent = {
     "By subscribing you consent to email from CCVAA (CASL). Unsubscribe anytime. Not a membership.",
   pendingNote:
     "Enter the 6-digit code we emailed you to confirm.",
-  subscribedNote: "You are subscribed to the CCVAA newsletter.",
-  unsubscribedNote: "You are not subscribed to the newsletter.",
-  membershipNote:
-    "Unsubscribing does not change paid membership.",
   unsubLandingSuccess:
     "You have been unsubscribed from the CCVAA newsletter. Your paid membership, if any, is unchanged.",
   unsubLandingAlready:

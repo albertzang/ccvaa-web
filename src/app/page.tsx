@@ -29,7 +29,11 @@ async function resolveUnsubLanding(
 
   try {
     const result = await redeemUnsubToken({ token: parsed.data });
-    return { kind: "success", already: result.alreadyUnsubscribed };
+    return {
+      kind: "success",
+      already: result.alreadyUnsubscribed,
+      email: result.email,
+    };
   } catch (error) {
     if (
       isMembersNewsletterError(error) ||

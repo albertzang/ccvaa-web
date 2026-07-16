@@ -38,9 +38,15 @@ export type NewsletterConfirmResult = {
   message: string;
 };
 
+export type NewsletterUnsubscribeOutcome =
+  | "unsubscribed"
+  | "already_off"
+  | "unknown";
+
 export type NewsletterUnsubscribeResult = {
   email: string;
   status: "off";
+  outcome: NewsletterUnsubscribeOutcome;
   message: string;
   membershipUnchanged: true;
 };
@@ -166,7 +172,7 @@ export async function subscribeToNewsletter(
   if (member?.newsletterStatus === "on") {
     throw new MembersNewsletterError(
       "MEMBERS_NEWSLETTER_ALREADY_SUBSCRIBED",
-      "This email is already subscribed to our newsletter. Use manage preference to update your settings.",
+      "This email is already subscribed to our newsletter. Use Unsubscribe if you want to leave the list.",
     );
   }
 
@@ -241,8 +247,9 @@ export async function lookupNewsletterPreference(
 }
 
 /**
- * Unsubscribes from the newsletter via Contact manage UI.
+ * Unsubscribes from the newsletter via Contact Unsubscribe tab.
  * Never changes membership plan or status.
+ * Distinct outcomes: unsubscribed | already_off | unknown.
  */
 export async function unsubscribeFromNewsletter(
   input: unknown,
@@ -251,11 +258,24 @@ export async function unsubscribeFromNewsletter(
   const email = parsed.email.trim().toLowerCase();
 
   const member = await findMemberByEmail(email);
-  if (!member || member.newsletterStatus === "off") {
+  if (!member) {
     return {
       email,
       status: "off",
-      message: "You are not subscribed to the newsletter.",
+      outcome: "unknown",
+      message:
+        "We could not find a newsletter subscription for that email. Your paid membership, if any, is unchanged.",
+      membershipUnchanged: true,
+    };
+  }
+
+  if (member.newsletterStatus === "off") {
+    return {
+      email,
+      status: "off",
+      outcome: "already_off",
+      message:
+        "You are already unsubscribed from the newsletter. Your paid membership, if any, is unchanged.",
       membershipUnchanged: true,
     };
   }
@@ -277,6 +297,7 @@ export async function unsubscribeFromNewsletter(
   return {
     email,
     status: "off",
+    outcome: "unsubscribed",
     message:
       "You have been unsubscribed from the newsletter. Your paid membership, if any, is unchanged.",
     membershipUnchanged: true,

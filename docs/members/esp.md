@@ -25,7 +25,8 @@ https://ccvaa-web.vercel.app/?unsub=seed-unsub-annual-member#contact
 
 - Landing redeems the token server-side (idempotent — safe to reload).
 - Sets `newsletter_status` to `off` only — **never** changes `membership_plan` or `membership_status`.
-- Shows confirmation in Contact `#contact`.
+- Opens Contact `#contact` newsletter with the **Unsubscribe** tab active, recipient email prefilled, and the success / already-unsubscribed / invalid message shown (one-click UX).
+- Manual Unsubscribe (same tab): email + Unsubscribe only — distinct messages for subscribed→off, already off, and unknown email; membership untouched.
 - ESP sync stub runs on redeem when `ESP_API_KEY` + `ESP_LIST_ID` are set (no-op until `members-0009`).
 
 ## Env (stub)
@@ -36,4 +37,5 @@ See `.env.example` — `ESP_API_KEY`, `ESP_LIST_ID` (commented placeholders).
 
 - Sync stub: `src/lib/members/esp.ts`
 - Unsub redeem: `src/lib/members/newsletter.ts` → `redeemUnsubToken`
+- Manual unsub: `unsubscribeFromNewsletter` (outcomes `unsubscribed` | `already_off` | `unknown`)
 - URL builder: `buildNewsletterUnsubUrl()` in `esp.ts`
