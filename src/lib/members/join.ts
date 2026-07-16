@@ -1,5 +1,6 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
 import type Stripe from "stripe";
+import { z } from "zod";
 
 import { getMembersDb } from "@/db/client";
 import { members, stripeWebhookEvents } from "@/db/schema";
@@ -13,6 +14,15 @@ import {
 } from "@/lib/members/errors";
 import { requireDatabaseUrl } from "@/lib/members/env";
 import { activateNewsletterFromVerifiedEmail } from "@/lib/members/newsletter";
+import {
+  createMemberSessionToken,
+  requireMemberSessionSecret,
+  toPublicMemberSession,
+} from "@/lib/members/session";
+import {
+  getMemberProfileForSession,
+  toPublicMemberProfile,
+} from "@/lib/members/profile";
 import {
   requireStripeJoinConfig,
   type StripeJoinConfig,
@@ -56,13 +66,32 @@ export type JoinVerifyResult = {
   checkoutUrl: string;
 };
 
+export type JoinCheckoutSessionReady = {
+  status: "ready";
+  token: string;
+  expiresAt: Date;
+  session: ReturnType<typeof toPublicMemberSession>;
+  profile: ReturnType<typeof toPublicMemberProfile>;
+  message: string;
+};
+
+export type JoinCheckoutSessionPending = {
+  status: "pending";
+  message: string;
+};
+
+export type JoinCheckoutSessionResult =
+  | JoinCheckoutSessionReady
+  | JoinCheckoutSessionPending;
+
 export class MembersJoinError extends Error {
   readonly code:
     | "MEMBERS_JOIN_UNAVAILABLE"
     | "MEMBERS_JOIN_PLAN_UNAVAILABLE"
     | "MEMBERS_ALREADY_MEMBER"
     | "MEMBERS_FOUNDING_FULL"
-    | "MEMBERS_STRIPE_ERROR";
+    | "MEMBERS_STRIPE_ERROR"
+    | "MEMBERS_JOIN_CHECKOUT_INVALID";
 
   constructor(code: MembersJoinError["code"], message: string) {
     super(message);
@@ -298,7 +327,7 @@ export async function verifyJoinAndCreateCheckout(
     mode,
     line_items: [{ price: priceId, quantity: 1 }],
     customer_email: email,
-    success_url: `${origin}/?joined=1#membership`,
+    success_url: `${origin}/?joined=1&session_id={CHECKOUT_SESSION_ID}#membership`,
     cancel_url: `${origin}/#membership`,
     metadata: {
       email,
@@ -329,6 +358,103 @@ export async function verifyJoinAndCreateCheckout(
     email,
     plan: parsed.plan,
     checkoutUrl: session.url,
+  };
+}
+
+const joinCheckoutSessionInputSchema = z.object({
+  sessionId: z
+    .string()
+    .trim()
+    .min(1)
+    .max(200)
+    .regex(/^cs_[A-Za-z0-9_]+$/, "Invalid Checkout session id."),
+});
+
+/**
+ * After Stripe success return: verify paid Checkout session and mint member
+ * session cookie payload. Returns pending when webhook has not activated yet.
+ */
+export async function establishMemberSessionFromCheckout(
+  input: unknown,
+): Promise<JoinCheckoutSessionResult> {
+  requireDatabaseUrl();
+  requireStripeJoinConfig();
+  requireMemberSessionSecret();
+
+  const parsed = joinCheckoutSessionInputSchema.parse(input);
+  const stripe = getStripeClient();
+
+  let checkout: Stripe.Checkout.Session;
+  try {
+    checkout = await stripe.checkout.sessions.retrieve(parsed.sessionId);
+  } catch {
+    throw new MembersJoinError(
+      "MEMBERS_JOIN_CHECKOUT_INVALID",
+      "Could not verify this Checkout session. Sign in with your membership email instead.",
+    );
+  }
+
+  if (checkout.payment_status !== "paid") {
+    throw new MembersJoinError(
+      "MEMBERS_JOIN_CHECKOUT_INVALID",
+      "Payment is not complete yet. If you were charged, wait a moment and refresh, or sign in with your email.",
+    );
+  }
+
+  const email = (checkout.metadata?.email ?? checkout.customer_email ?? "")
+    .trim()
+    .toLowerCase();
+  if (!email) {
+    throw new MembersJoinError(
+      "MEMBERS_JOIN_CHECKOUT_INVALID",
+      "Checkout session is missing membership email metadata.",
+    );
+  }
+
+  const db = getMembersDb();
+  const rows = await db
+    .select({
+      id: members.id,
+      email: members.email,
+      name: members.name,
+      membershipPlan: members.membershipPlan,
+      membershipStatus: members.membershipStatus,
+    })
+    .from(members)
+    .where(
+      and(
+        eq(members.email, email),
+        eq(members.membershipStatus, "active"),
+        ne(members.membershipPlan, "none"),
+      ),
+    )
+    .limit(1);
+
+  const member = rows[0];
+  if (!member || member.membershipPlan === "none") {
+    return {
+      status: "pending",
+      message:
+        "Payment received — activating your membership. This usually takes a few seconds.",
+    };
+  }
+
+  const { token, expiresAt, payload } = createMemberSessionToken({
+    memberId: member.id,
+    email: member.email,
+    name: member.name,
+    plan: member.membershipPlan as Exclude<JoinPlanId, never>,
+  });
+
+  const memberProfile = await getMemberProfileForSession(payload);
+
+  return {
+    status: "ready",
+    token,
+    expiresAt,
+    session: toPublicMemberSession(payload),
+    profile: toPublicMemberProfile(memberProfile, payload.exp),
+    message: "Welcome — you are signed in to your membership.",
   };
 }
 

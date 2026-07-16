@@ -142,7 +142,9 @@ export function handleMembersApiError(error: unknown) {
           ? 409
           : error.code === "MEMBERS_JOIN_UNAVAILABLE"
             ? 503
-            : 502;
+            : error.code === "MEMBERS_JOIN_CHECKOUT_INVALID"
+              ? 400
+              : 502;
     return membersApiError(error.code, error.message, status);
   }
 

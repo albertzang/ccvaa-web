@@ -195,7 +195,11 @@ export const membershipContent = {
   consentNote:
     "Paid membership is separate from the newsletter. Change newsletter preference anytime in Contact.",
   joinedSuccess:
-    "Thanks for joining. Your membership activates when Stripe confirms payment — then sign in above with your email.",
+    "Thanks for joining. Sign in above with your membership email if you are not signed in automatically.",
+  joinedActivating:
+    "Payment received — activating your membership and signing you in…",
+  joinedSessionTimeout:
+    "Membership may still be activating. Sign in above with your email in a moment, or refresh this page.",
 } as const;
 
 export const newsletterContent = {
