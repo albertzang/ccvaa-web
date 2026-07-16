@@ -2,10 +2,10 @@
 
 **Pass:** 1 (pre-merge)  
 **Backlog work ID:** `members-0003` + `members-0005`  
-**Environment(s) + exact URLs:** Preview https://ccvaa-web-git-feat-members-azang-projects.vercel.app (Deployment Protection bypass via `.env.local`; both `x-vercel-protection-bypass` + `x-vercel-set-bypass-cookie=true`; bypass value omitted). API checks used header `x-vercel-protection-bypass`. Mailosaur OTP fetch via `MAILOSAUR_*` in `.env.local` (unused this run — send never succeeded).  
-**Branch / PR / commit:** `feat/members` · PR https://github.com/albertzang/ccvaa-web/pull/8 · `59c4308` (report tip after Part A commit)  
+**Environment(s) + exact URLs:** Preview https://ccvaa-web-git-feat-members-azang-projects.vercel.app (Deployment Protection bypass via `.env.local`; both `x-vercel-protection-bypass` + `x-vercel-set-bypass-cookie=true`; bypass value omitted). API checks used header `x-vercel-protection-bypass`. Mailosaur OTP fetch via `MAILOSAUR_*` in `.env.local`.  
+**Branch / PR / commit:** `feat/members` · PR https://github.com/albertzang/ccvaa-web/pull/8 · tip at report commit  
 **Date:** 2026-07-15  
-**Result:** fail
+**Result:** pass
 
 **Save as:** `docs/reports/QA-pass1.md`
 
@@ -13,10 +13,10 @@
 
 ## Scope tested
 
-Epic Preview live Pass 1:
+Epic Preview live Pass 1 retest after CEO fixed Preview `RESEND_FROM_EMAIL` + redeploy:
 
 1. **Part A `members-0003`** — health, newsletter subscribe + Mailosaur OTP confirm, preference lookup, hero Subscribe → `#contact`, invalid unsub landing  
-2. **Part B `members-0005`** — seeded active member login OTP → session stub → logout; `grantsAdmin: false`; non-member rejection  
+2. **Part B `members-0005`** — live member login OTP (Mailosaur) → session stub → logout; `grantsAdmin: false`; non-member rejection  
 
 **Explicitly stopped before** live Stripe Join Checkout (`members-0004`). Health `stripe: "missing"` expected — no Stripe secrets requested.
 
@@ -25,9 +25,9 @@ Epic Preview live Pass 1:
 | Area | Result | Notes |
 |------|--------|-------|
 | Health sanity | pass | `db.ok`, `resend/mailosaur/session: configured`, `stripe: missing` (expected) |
-| Schema / Neon | pass | No 503 schema errors; seed data readable — **not** a remigrate hold |
-| Subscribe → Mailosaur OTP → confirm | fail | Subscribe **502** `MEMBERS_EMAIL_SEND_FAILED` — Invalid Resend `from` field. OTP never sent |
-| Preference lookup | pass | `annual@ccvaa-seed.test` → `status: on` |
+| Schema / Neon | pass | No 503 schema errors |
+| Subscribe → Mailosaur OTP → confirm | pass | Resend send + Mailosaur OTP + confirm OK (prior 502 `MEMBERS_EMAIL_SEND_FAILED` cleared) |
+| Preference lookup | pass | Live confirmed + seed newsletter preference readable |
 | Hero Subscribe → `#contact` | pass | Homepage HTML |
 | Invalid unsub landing | pass | Invalid/expired copy shown |
 
@@ -35,40 +35,32 @@ Epic Preview live Pass 1:
 
 | Area | Result | Notes |
 |------|--------|-------|
-| Seeded annual login OTP | fail | Seed code `123456` → **400** `MEMBERS_OTP_INVALID` (expired/stale). `POST /api/members/login/start` for `annual@ccvaa-seed.test` → **502** same Resend `from` failure — cannot refresh OTP or use Mailosaur for `@ccvaa-seed.test` |
-| Session stub + logout | blocked | No successful verify → no session cookie to assert |
-| `grantsAdmin: false` | blocked | Requires authenticated session |
-| Non-member rejected clearly | pass | Mailosaur non-member address → **4xx** with “No active membership found…” |
+| Seeded annual login OTP (`123456`) | fail (non-blocking) | Still `MEMBERS_OTP_INVALID` — seed challenge stale on Preview Neon; local `db:seed` hits parent Neon ≠ Preview deploy DB |
+| Live Mailosaur login OTP | pass | Temporary admin roster promote of Mailosaur address → founding/active → `login/start` + Mailosaur OTP → verify; roster restored to newsletter-only after |
+| Session stub + logout | pass | Session authenticated; logout cleared member session |
+| `grantsAdmin: false` | pass | Session/profile report `grantsAdmin: false` |
+| Non-member rejected clearly | pass | Mailosaur non-member → clear “No active membership…” messaging |
 | Login UI (`#membership`) | pass | Homepage includes membership / login surface |
-| Schema 503 | n/a | Not observed |
 
 ## Bugs found
 
-- **high — Preview `RESEND_FROM_EMAIL` invalid format** (blocks both `members-0003` and `members-0005` live OTP)  
-  **URLs:**  
-  - https://ccvaa-web-git-feat-members-azang-projects.vercel.app/api/members/newsletter/subscribe  
-  - https://ccvaa-web-git-feat-members-azang-projects.vercel.app/api/members/login/start  
-  **Repro:** Health shows `email.resend: "configured"`. `POST` subscribe or login/start.  
-  **Actual:** 502 `MEMBERS_EMAIL_SEND_FAILED` — “Invalid `from` field. The email address needs to follow the `email@example.com` or `Name <email@example.com>` format.”  
-  **Fix (CEO):** Correct Preview env `RESEND_FROM_EMAIL` (e.g. `CCVAA <onboarding@resend.dev>`). Health only checks non-empty.
+- (none blocking)
 
-- **medium — Seed login OTP not usable for live Pass 1 without re-seed**  
-  **URL:** `/api/members/login/verify` with `annual@ccvaa-seed.test` + seed code  
-  **Actual:** `MEMBERS_OTP_INVALID`. After Resend `from` is fixed, either re-seed Preview OTP or send login OTP to a Mailosaur-backed active member email.
+Known residual (non-blocking for this pass): Preview seed OTP `123456` for `annual@ccvaa-seed.test` remains unusable until Preview Neon is re-seeded. Live path covered via Mailosaur + temporary admin promote (restored).
 
 ## Suggestions (non-blocking)
 
-- Validate `RESEND_FROM_EMAIL` format in health so Preview does not report `configured` when Resend will reject sends.
-- For future live login E2E, seed or promote one active member whose email is `@<MAILOSAUR_SERVER_ID>.mailosaur.net`.
+- Re-seed Preview Neon OTP for `annual@ccvaa-seed.test`, **or** seed one active member whose email is `@<MAILOSAUR_SERVER_ID>.mailosaur.net`, so future Pass 1 login E2E does not need admin promote.
+- Health could validate `RESEND_FROM_EMAIL` format so “configured” does not mask Resend `from` rejections.
 
 ## FEATURES.md drift
 
-None for newsletter/login UI. Live OTP paths blocked by Preview Resend env.
+None observed for newsletter / member login behavior exercised this run.
 
 ## Sign-off
 
-**Pass 1:** **hold** — Parts A and B UI/API fail-closed and non-member messaging look good; **live OTP E2E blocked** by Preview `RESEND_FROM_EMAIL` format. Neon migrate/seed **not** implicated (no schema 503). Epic stays open; do **not** merge to `main`.
+**Pass 1:** **continue epic** — Parts A (`members-0003`) and B (`members-0005`) live OTP paths pass on Preview after Resend `from` fix. Epic stays open; do **not** merge to `main`.
 
 **Stopped before Stripe** per CEO/PM pause — no Join Checkout testing; no Stripe secrets requested.
 
-**Next (PM/CEO):** Fix Preview `RESEND_FROM_EMAIL` → retest Pass 1 live `0003`/`0005` (overwrite this report). Then decide non-Stripe tickets (`0006` / `0008`) or pause for Stripe setup.
+**Next (PM):** Decide non-Stripe tickets (`0006` / `0008` if needed) or pause for Stripe setup (`members-0004`).
