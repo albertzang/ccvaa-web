@@ -68,6 +68,10 @@ Same ticket: Hero Subscriber/Member counts become a **simple number in a circle*
 
 **Out of scope:** Moving newsletter into Membership; Checkout/Elements changes; merge to main.
 
+### Overall
+
+- Pass 1 (2026-07-16): **continue epic** — Join|Sign-in tabs (Join default); Hero circle badges; newsletter still Contact. Report tip `0f57d29`. Logged-in profile-only not exercised this pass (no session).
+
 ### Links
 
 - Source: CEO product choice (2026-07-16) — Option B tabs + corner badges
