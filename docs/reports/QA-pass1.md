@@ -1,9 +1,9 @@
 # QA report
 
 **Pass:** 1 (pre-merge)  
-**Backlog work ID:** `members-0019`  
+**Backlog work ID:** `members-0020`  
 **Environment(s) + exact URLs:** Preview https://ccvaa-web-git-feat-members-azang-projects.vercel.app (Deployment Protection bypass via `.env.local`; both `x-vercel-protection-bypass` + `x-vercel-set-bypass-cookie=true`; bypass value omitted).  
-**Branch / PR / commit:** `feat/members` · PR https://github.com/albertzang/ccvaa-web/pull/8 · tip `0ecf058` (impl `030f96b`; Preview deploy Ready, aliased to branch URL)  
+**Branch / PR / commit:** `feat/members` · PR https://github.com/albertzang/ccvaa-web/pull/8 · tip `0615132` (impl `203eec1`; Preview deploy Ready — CLI redeploy aliased to branch URL after GitHub webhook lag)  
 **Date:** 2026-07-16  
 **Result:** pass  
 **Merge gate:** `epic` → **continue epic** (do **not** merge)
@@ -14,31 +14,39 @@
 
 ## Scope tested
 
-`members-0019` on epic `feat/members` (handoff `HANDOFF-QA-pass1.md`):
+`members-0020` on epic `feat/members` (handoff `HANDOFF-QA-pass1.md`):
 
-1. Logged-out `#membership`: **Join** | **Sign in** tabs; Join default; only active form visible; tab switch works  
-2. Logged-in profile-only chrome — **not exercised** (no member session in this run; optional per handoff)  
-3. Newsletter public UI remains under Contact (`#contact`), not Membership  
-4. Hero: numeric circle badges top-right on Subscribe / Join; beside-button annotations gone; counts in `aria-label`; anchors `#contact` / `#membership`  
-5. Desktop + mobile spot-check  
+1. Membership section title/subtitle absent logged out and logged in (`aria-label="Membership"` only)
+2. Logged-out tabs: **Sign in** left/default | **Join** right; one panel visible
+3. Join: no title/subtitle; “Choose a plan” `sr-only` (not visually shown); plans two-column at ≥`sm`, stack on 390px
+4. Logged-in profile declutter: summary-first name/email edit; plan + Annual anniversary/renewal; no future-perks / `/admin` note; sign-out
+5. Hero compact badges: circular ocean/coral brand treatment; exact counts in `aria-label`; anchors `#contact` / `#membership`
+6. Newsletter remains under Contact only
+7. Desktop + mobile; `tsc --noEmit` clean
 
 ## Checklist results
 
 | Area | Result | Notes |
 |------|--------|-------|
 | Preview bypass | pass | No Vercel wall with both bypass params |
-| Preview deploy | pass | Ready; GitHub Preview deployment SHA `0ecf058` (includes `030f96b`) |
-| `#membership` tabs (logged out) | pass | Tablist Join \| Sign in; Join `aria-selected=true` by default |
-| Tab mutual exclusivity | pass | Join panel shows Join form; Sign in panel shows Member sign-in + email OTP; inactive panel `hidden` / `display:none` |
-| Newsletter placement | pass | Newsletter heading + Subscribe/Manage under `#contact`; Membership copy points to Contact; no Newsletter heading in `#membership` (optional Join newsletter checkbox OK / out of scope) |
-| Hero Subscribe badge | pass | Circle `8` at top-right (`-right-2 -top-2`); `aria-label="Subscribe, 8 Newsletter subscribers"` |
-| Hero Join badge | pass | Circle `8` at top-right; `aria-label="Join, 8 Paid members"` |
-| Beside annotations removed | pass | No sibling text annotation beside CTAs; hero text is Subscribe/Join + badge numerals only |
-| Anchors | pass | Subscribe → `#contact`; Join → `#membership` |
-| Desktop viewport | pass | 1280–1440 wide: tabs, badges, Contact newsletter readable |
-| Mobile viewport | pass | 390×844: default Join; Sign in switch hides Join; badges ≥16px / readable |
-| Logged-in profile-only | skip | No member session available this run |
-| FEATURES.md | pass | Changelog already notes members-0019 tabs + Hero circle badges |
+| Preview deploy | pass | Tip `0615132` / impl `203eec1` Ready on branch alias (CLI redeploy after auto-deploy lag) |
+| Section title/subtitle (logged out) | pass | No visible `h2`; section `aria-label="Membership"` |
+| Tabs Sign in \| Join | pass | Sign in left + `aria-selected=true` by default; Join right |
+| Tab mutual exclusivity | pass | Only active tabpanel visible (`hidden` / `display:none` on inactive) |
+| Join title / “Choose a plan” | pass | No Join headings; legend `sr-only` (1×1 clipped; not visually shown) |
+| Join plan grid | pass | `sm:grid-cols-2` → 2 cols @1280; 1 col @390 |
+| Newsletter placement | pass | Newsletter under `#contact`; no Newsletter heading in `#membership` |
+| Hero Subscribe badge | pass | Circle `8`, ocean-950 on coral CTA; `aria-label="Subscribe, 8 Newsletter subscribers"`; `#contact` |
+| Hero Join badge | pass | Circle `9`, coral on glass CTA; `aria-label="Join, 9 Paid members"`; `#membership` |
+| Compact K/M/B | pass | Counts 8/9 correctly plain digits; compact formatter present for large values; badge `max-w` + truncate bounds overflow |
+| Badge brand styling | pass | Not black-on-white; ocean / coral contrast on both CTAs |
+| Desktop viewport | pass | 1280×900 |
+| Mobile viewport | pass | 390×844: stacked plans; badges bounded |
+| Logged-in profile declutter | pass | Mailosaur OTP session (Founding + Annual); no tabs/`h2`; Edit/Change on demand; plan visible; no future-perks or `/admin` note |
+| Annual renewal | pass | Anniversary + Next renewal shown for Annual plan |
+| Name edit / sign-out | pass | Edit reveals name input; Cancel returns; Sign out → Sign-in default tabs |
+| Lint / typecheck | pass | `tsc --noEmit` clean |
+| FEATURES.md | pass | Changelog notes members-0020 declutter + compact badges |
 
 ## Bugs found
 
@@ -46,7 +54,7 @@
 
 ## Suggestions (non-blocking)
 
-- Spot-check logged-in `#membership` (profile only, no Join/Sign-in tabs) on a later Pass 1 or Pass 2 when a member session is handy.
+- GitHub→Vercel auto Preview for tip `0615132` lagged (~10+ min with no new deployment). QA unblocked with `vercel deploy --target=preview` + branch alias. Worth checking the Vercel Git integration if this recurs.
 
 ## Sign-off
 
