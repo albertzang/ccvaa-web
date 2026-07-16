@@ -1,11 +1,11 @@
 # QA report
 
 **Pass:** 1 (pre-merge)  
-**Backlog work ID:** `members-0006` + `members-0008`  
-**Environment(s) + exact URLs:** Preview https://ccvaa-web-git-feat-members-azang-projects.vercel.app (Deployment Protection bypass via `.env.local`; both `x-vercel-protection-bypass` + `x-vercel-set-bypass-cookie=true`; bypass value omitted). API checks used header `x-vercel-protection-bypass`. Mailosaur OTP via `MAILOSAUR_*`; admin Hover mail-session via `ADMIN_EMAIL` / `ADMIN_PASS` (values omitted).  
-**Branch / PR / commit:** `feat/members` · PR https://github.com/albertzang/ccvaa-web/pull/8 · tip at report commit  
+**Backlog work ID:** `members-0004`  
+**Environment(s) + exact URLs:** Preview https://ccvaa-web-git-feat-members-azang-projects.vercel.app (Deployment Protection bypass via `.env.local`; both `x-vercel-protection-bypass` + `x-vercel-set-bypass-cookie=true`; bypass value omitted). API checks used header `x-vercel-protection-bypass`. Mailosaur OTP via `MAILOSAUR_*` (values omitted).  
+**Branch / PR / commit:** `feat/members` · PR https://github.com/albertzang/ccvaa-web/pull/8 · `7c7ee44`  
 **Date:** 2026-07-15  
-**Result:** pass
+**Result:** fail
 
 **Save as:** `docs/reports/QA-pass1.md`
 
@@ -13,51 +13,60 @@
 
 ## Scope tested
 
-1. **Part A `members-0006`** — logged-in `#membership` profile E2E (Mailosaur login after temporary annual promote; name edit; email re-verify; Annual dates; perks placeholder; no newsletter controls)
-2. **Part B `members-0008`** — admin Members roster (list/search/filter plan ⊥ newsletter; Annual dates; edit/delete confirmation; Zod reject; mail-session gate)
+Live Join path for **members-0004** (Stripe Join Checkout) on Preview:
 
-**Explicitly stopped before** live Stripe Join Checkout (`members-0004`). Health `stripe: "missing"` expected — no Stripe secrets requested.
+1. Health `stripe: "configured"`
+2. `#membership` Join UI + `GET /api/members/join/plans` (pre-cap Founding + Annual; seat note; Lifetime fee rule via config)
+3. Join start → Mailosaur `email_verify` OTP → verify → Stripe Checkout Session
+4. Invalid OTP fail path
+5. Checkout payment + webhook activation (**blocked** — never reached Checkout URL)
 
-## Checklist results — Part A (`members-0006`)
+Epic merge gate → **hold** (do **not** merge).
 
-| Area | Result | Notes |
-|------|--------|-------|
-| Health sanity | pass | `db.ok`, resend/session configured; `stripe: missing` (expected) |
-| Login → profile | pass | Mailosaur login; profile returns name + annual plan |
-| Annual anniversary / next renewal | pass | Both present on profile after annual promote |
-| Name edit | pass | PATCH name OK; empty/whitespace name rejected (Zod) |
-| Email change re-verify | pass | OTP to new Mailosaur address required before email update |
-| Perks placeholder | pass | “Member perks” placeholder visible in `#membership` |
-| No newsletter UI in profile | pass | No subscribe/opt-in controls in profile face |
-
-## Checklist results — Part B (`members-0008`)
+## Checklist results
 
 | Area | Result | Notes |
 |------|--------|-------|
-| Preview + bypass | pass | No Vercel wall with both bypass params |
-| Mail-session gate | pass | Unauth GET/PATCH → 401; after Hover login, Members/Events/Financial + Log out |
-| Roster list | pass | 10 rows loaded |
-| Search | pass | `annual@ccvaa-seed` narrows rows |
-| Plan filter ⊥ newsletter filter | pass | Plan=`annual` and newsletter=`on` each return rows |
-| Annual anniversary / next renewal | pass | Annual row shows both date columns (not —) |
-| Edit / delete confirmation | pass | Edit dialog + “Delete member?” cancel path |
-| Zod on mutations | pass | founding + anniversary/renewal PATCH rejected |
-| Unauth cannot mutate | pass | PATCH without mail-session → 401 |
+| Preview bypass | pass | No Vercel wall with both bypass params |
+| Health `stripe: configured` | pass | `db.ok`; Resend/Mailosaur/session configured |
+| Plans UI / API | pass | Pre-cap: Founding + Annual available; `99 of 100 Founding seats remaining`; Lifetime not offered (expected) |
+| Lifetime fee > Founding | pass | Config validates (health would not report `configured` otherwise); Lifetime not in pre-cap offers |
+| Join UI (`#membership`) | pass | Join title, name/email fields, Founding + Annual, checkout CTA |
+| Invalid OTP | pass | `POST /api/members/join/verify` with `000000` → clear error (4xx / `ok: false`) |
+| Join start + Mailosaur OTP | pass | Annual and Founding starts succeeded; OTP retrieved via Mailosaur API |
+| Verify → Checkout URL | **fail** | `POST /api/members/join/verify` → HTTP 500 `MEMBERS_INTERNAL_ERROR` |
+| Stripe Checkout (4242…) | blocked | No Checkout URL returned |
+| Success return `/?joined=1#membership` | blocked | Not reached |
+| Webhook activates membership | blocked | Not reached |
+| Lint | pass-with-issues | `eslint` clean for app; unused helpers only in local QA script (not shipped) |
 
 ## Bugs found
 
-- (none)
+List new defects for PM triage (do **not** invent work IDs). Include severity + short repro.  
+PM promotes each to a backlog `bug` (**Source:** `qa`).
+
+- **blocker — Preview Stripe Price IDs are Product IDs (`prod_…`), not Price IDs (`price_…`)**  
+  - **URL:** https://ccvaa-web-git-feat-members-azang-projects.vercel.app  
+  - **Repro:**  
+    1. `POST /api/members/join/start` with Mailosaur email + plan `annual` or `founding` → 200, OTP delivered.  
+    2. `POST /api/members/join/verify` with valid 6-digit OTP → **500** `MEMBERS_INTERNAL_ERROR`.  
+  - **Evidence (Vercel runtime logs, Preview `feat/members`):** Stripe `StripeInvalidRequestError` / `resource_missing`:  
+    - Annual: `No such price: 'prod_UtTjwJ4gVdh7mm'` (`line_items[0][price]`)  
+    - Founding: `No such price: 'prod_UtU4qRJEPLQbRI'`  
+  - **Expected:** `STRIPE_PRICE_ANNUAL` / `STRIPE_PRICE_FOUNDING` / `STRIPE_PRICE_LIFETIME` are Stripe **Price** IDs (`price_…`) matching test Products.  
+  - **Actual:** Env values are **Product** IDs (`prod_…`); Checkout Session create fails before a URL is returned.  
+  - **Owner:** CEO / env (Vercel Preview) — replace with Price IDs from Stripe Test mode Dashboard → Product → Price. Then retest Pass 1.  
+  - **Browser:** Playwright/Chromium (API path) + Cursor QA workstation.
 
 ## Suggestions (non-blocking)
 
-- Seed one Preview active member on `@<MAILOSAUR_SERVER_ID>.mailosaur.net` so profile/login E2E does not need temporary admin promote.
+- Map Stripe `StripeInvalidRequestError` (e.g. invalid price) to `MEMBERS_STRIPE_ERROR` (502) instead of generic `MEMBERS_INTERNAL_ERROR` (500) so QA/ops see a clearer fail-closed signal without reading runtime logs.
+- After Price IDs are fixed, re-run full path: Checkout test card `4242…` → `/?joined=1#membership` → roster or `login/start` evidence of active plan.
 
 ## FEATURES.md drift
 
-None observed for profile or admin roster behavior exercised this run.
+None for Join UI / plans / OTP start. Checkout activation path not observable until Price IDs are corrected.
 
 ## Sign-off
 
-**Pass 1:** **continue epic** — Parts A (`members-0006`) and B (`members-0008`) pass on Preview. Epic stays open; do **not** merge to `main`.
-
-**Stopped before Stripe** per handoff — no Join Checkout testing; no Stripe secrets requested. PM/CEO pause for Stripe setup (`members-0004`) is next.
+**Pass 1:** **hold** — Join UI, plans, health, Mailosaur OTP start/verify-attempt work; **blocked on Preview Stripe env** (Product IDs in `STRIPE_PRICE_*`). Epic stays open; do **not** merge to `main`. Retest after CEO sets real test **Price** IDs and redeploys/refreshes Preview env.
