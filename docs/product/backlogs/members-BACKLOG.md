@@ -75,6 +75,10 @@ CEO manual-test refinement after `members-0019`: further reduce the public Membe
 
 **Out of scope:** Moving newsletter UI; changing membership behavior, Stripe Checkout, data model, or counter definitions; merge to main.
 
+### Overall
+
+- Pass 1 (2026-07-16): **continue epic** — Sign-in default tabs; Join declutter + two-column plans; logged-in summary profile; Hero ocean/coral compact badges. Report tip `cc465ed`.
+
 ### Links
 
 - Source: CEO manual test (2026-07-16)
