@@ -3,7 +3,7 @@
 **Feature:** Members  
 **Slug:** `members`  
 **Owner:** Product Manager  
-**Next ID:** `0014`  
+**Next ID:** `0019`  
 
 Canonical work IDs: `members-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
@@ -35,7 +35,177 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 4. Admin roster — `0008`
 5. Then `next`: `0010` links → `0009` go-live (CEO); `later`: `0011`–`0013`
 
-**Ship lane:** Default for Verifier=`agent` tickets in the first Members milestone: **Epic branch `feat/members`**, **Merge gate `epic`** (fields set on `0001`–`0008` and `0010`). `members-0009` (CEO go-live) stays outside that gate. See [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
+**Ship lane:** Default for Verifier=`agent` tickets in the first Members milestone: **Epic branch `feat/members`**, **Merge gate `epic`** (fields set on `0001`–`0008`, `0010`, and `0014`–`0018`). `members-0009` (CEO go-live) stays outside that gate. See [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
+
+---
+
+## members-0018 — Trim excessive Members UI notes
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `in-progress` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
+| **Epic branch** | `feat/members` |
+| **Merge gate** | `epic` |
+
+### Description
+
+CEO feedback: some explanatory notes on Join / newsletter / membership UI feel excessive. Tighten copy — keep CASL / membership-separate / legal necessities; remove redundant helper text and stacked notes that clutter `#membership` and `#contact`.
+
+**Acceptance:**
+- [ ] Audit Join, newsletter subscribe/manage, and logged-in membership chrome for redundant notes
+- [ ] Keep required legal/CASL and “newsletter ≠ membership” clarity in one short line where needed
+- [ ] FEATURES.md copy notes if behavior/text contracts change
+
+**Out of scope:** New features; redesign of whole homepage.
+
+### Links
+
+- Source: CEO manual test (2026-07-16)
+- PR: https://github.com/albertzang/ccvaa-web/pull/8
+
+---
+
+## members-0017 — Required international Name (newsletter + membership)
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `in-progress` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
+| **Epic branch** | `feat/members` |
+| **Merge gate** | `epic` |
+
+### Description
+
+Make **Name required** on newsletter subscribe (Contact). Ensure Name validation supports people from different countries/languages for **both** newsletter and membership Join (Unicode letters, spaces, common punctuation; avoid ASCII-only / Latin-only rules). Align Zod + UI required markers + error messages.
+
+**Acceptance:**
+- [ ] Newsletter subscribe requires non-empty name (API + UI)
+- [ ] Join name already required — same international-friendly validation rules
+- [ ] Zod schemas reject empty/whitespace; accept diverse scripts/diacritics within a sane max length
+- [ ] FEATURES.md updated
+
+**Out of scope:** Legal name verification; address/phone fields.
+
+### Links
+
+- Source: CEO manual test (2026-07-16)
+- PR: https://github.com/albertzang/ccvaa-web/pull/8
+
+---
+
+## members-0016 — Hero counters as button annotations
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `in-progress` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
+| **Epic branch** | `feat/members` |
+| **Merge gate** | `epic` |
+
+### Description
+
+CEO: Subscriber / Member counters should read as **annotations beside** the Hero **Subscribe** / **Join** buttons (not a separate heavy strip or competing layout). Preserve live counts; keep anchors to `#contact` / `#membership`. Fit existing brand; mobile-friendly.
+
+**Acceptance:**
+- [ ] Counts sit as annotation UI adjacent to each CTA (Subscribe ↔ subscribers; Join ↔ members)
+- [ ] Counts still update from platform APIs; zeros OK when empty
+- [ ] Desktop + mobile readable; no new card clutter in hero
+- [ ] FEATURES.md Hero CTAs updated
+
+**Out of scope:** Changing what is counted; forms inside the hero.
+
+### Links
+
+- Source: CEO manual test (2026-07-16)
+- Depends on: `members-0007`
+- PR: https://github.com/albertzang/ccvaa-web/pull/8
+
+---
+
+## members-0015 — One email verify for Join + newsletter opt-in
+
+| Field | Value |
+|-------|--------|
+| **Type** | `bug` |
+| **Priority** | `now` |
+| **Status** | `in-progress` |
+| **Source** | `ceo` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
+| **Epic branch** | `feat/members` |
+| **Merge gate** | `epic` |
+
+### Description
+
+**Summary:** Checking newsletter opt-in on Join should not require a second, separate newsletter confirmation email. One successful email verification during Join should cover membership verify **and** newsletter opt-in.
+
+**Environment:** Preview / Dev Join flow  
+**Expected:** Single OTP (or single verify step); on success, newsletter preference is set without a second Resend confirm.  
+**Actual:** Separate membership and newsletter verification emails / steps (CEO report).  
+**Severity:** high (friction + duplicate mail)
+
+**Acceptance:**
+- [ ] Join with newsletter checked → one OTP email only
+- [ ] After verify + Checkout success, newsletter is on (or pending→on per product rules) without a second confirm mail
+- [ ] Join without newsletter unchecked → membership-only path unchanged
+- [ ] Contact-only subscribe still double opt-in as today
+- [ ] FEATURES.md Join / newsletter notes
+
+**Out of scope:** Changing Contact-only subscribe to single opt-in; ESP blast copy.
+
+### Links
+
+- Source: CEO manual test (2026-07-16)
+- Depends on: `members-0003`, `members-0004`
+- PR: https://github.com/albertzang/ccvaa-web/pull/8
+
+---
+
+## members-0014 — Auto-login after successful Join Checkout
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `in-progress` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
+| **Epic branch** | `feat/members` |
+| **Merge gate** | `epic` |
+
+### Description
+
+After successful Stripe Checkout return (`/?joined=1#membership`), automatically establish the member session (same httpOnly cookie as OTP login) so the user lands on the logged-in `#membership` profile without a separate sign-in.
+
+**Acceptance:**
+- [ ] Successful Join return → signed-in session for that member email
+- [ ] `#membership` shows profile (not Join) after return
+- [ ] Session still never grants `/admin`
+- [ ] Safe if webhook races (retry/wait or clear messaging if membership not active yet)
+- [ ] FEATURES.md Join / login notes
+
+**Out of scope:** Changing Checkout itself; password auth; admin Hover session.
+
+### Links
+
+- Source: CEO manual test (2026-07-16)
+- Depends on: `members-0004`, `members-0005`
+- PR: https://github.com/albertzang/ccvaa-web/pull/8
 
 ---
 

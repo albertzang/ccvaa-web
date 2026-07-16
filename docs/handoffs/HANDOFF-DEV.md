@@ -1,8 +1,8 @@
 # Handoff: Product Manager → Developer
 
-**Date:** 2026-07-14  
+**Date:** 2026-07-16  
 **Requested by:** CEO / PM  
-**Backlog work ID:** `members-0008`  
+**Backlog work ID:** `members-0014` … `members-0018` (batch — implement in order below)  
 **Backlog link:** `docs/product/backlogs/members-BACKLOG.md`  
 **Priority:** now  
 **Iteration:** `1`
@@ -19,36 +19,38 @@
 
 ## Goal
 
-Replace Admin **Members** scaffold with a real roster gated by Hover **mail-session** (same as existing `/admin`). Filter/search by **plan** and **newsletter-on** as separate axes. Update/delete with confirmation. Show plan, status, newsletter flag, Annual anniversary/next renewal. Zod on mutations. No impersonation.
+CEO manual-test feedback on Members — five tickets on the same epic branch. Implement **in order**, commit as you go (one commit per work ID preferred), then overwrite **one** Pass 1 handoff covering the batch (or per-ticket if you split QA).
+
+### Implement order
+
+1. **`members-0017`** — Name required on newsletter; international-friendly name Zod/UI for newsletter + Join  
+2. **`members-0015`** — Join + newsletter opt-in → **one** email OTP only (bug, Source ceo)  
+3. **`members-0014`** — After Checkout success return, **auto-login** member session → profile  
+4. **`members-0016`** — Hero Subscriber/Member counts as **annotations beside** Subscribe/Join buttons  
+5. **`members-0018`** — Trim excessive UI notes on Join/newsletter/membership (keep CASL / separate-axes clarity)
 
 ## Acceptance criteria
 
-- [ ] List / search / filter (plan + newsletter as separate concerns)
-- [ ] Confirm UX for update/delete; Zod on payloads
-- [ ] Annual anniversary / next renewal visible when applicable
-- [ ] Mail-session gated (unauthenticated visitors cannot mutate)
-- [ ] FEATURES.md Admin → Members updated
-- [ ] Lint + typecheck; on `feat/members` / PR #8; Pass 1 handoff ready; **do not merge**
+See each item in `members-BACKLOG.md` (`0014`–`0018`). All must pass lint + typecheck. Update `FEATURES.md` for behavior changes (changelog date-desc).
 
 ## Out of scope
 
-Impersonation (`members-0013`); Events/Financial; public CTAs; merge to `main`.
+Merge to `main`; Production go-live (`0009`); ESP; changing Contact-only double opt-in model; Elements/Checkout redesign.
 
 ## Technical hints
 
-- Admin chrome: mail-session probe / existing Members nav entry
-- Load ccvaa-dev-memory for admin/auth patterns
-- Fail closed without DB; Preview may still have Neon branch migrate gap — still ship UI + APIs
-- Notify **PM** if blocked on secrets (do not ping CEO)
-
-## Design / UX constraints
-
-Match existing admin console patterns (dark sidebar). Keep roster usable; avoid decorative card clutter.
+- Join: `src/components/JoinForm.tsx`, `src/lib/members/join.ts`, webhook return `/?joined=1#membership`  
+- Session: `members-0005` cookie helpers — reuse for post-Checkout login  
+- Newsletter: `NewsletterForm.tsx`, `zod/newsletter.ts` (name currently optional)  
+- Hero counters: `members-0007` CTA area  
+- Copy: `site` / membership & newsletter content modules  
+- Load `ccvaa-dev-memory` for auth/session pitfalls  
+- Preview already has Stripe/Resend/Mailosaur/session configured
 
 ## Git / deploy
 
-Reuse `feat/members` + PR #8. PM authorizes commit/push; **do not merge**.
+Reuse `feat/members` / PR #8. Pull tip first. PM authorizes commit/push. **Do not merge.**
 
 ## Done means
 
-Acceptance + lint/typecheck; Pass 1 handoff ready; PR not merged
+All five acceptance lists met on branch; Pass 1 handoff ready (`HANDOFF-QA-pass1.md`); **PR not merged**.
