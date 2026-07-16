@@ -3,7 +3,7 @@
 **Feature:** Members  
 **Slug:** `members`  
 **Owner:** Product Manager  
-**Next ID:** `0019`  
+**Next ID:** `0020`  
 
 Canonical work IDs: `members-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
@@ -35,7 +35,44 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 4. Admin roster — `0008`
 5. Then `next`: `0010` links → `0009` go-live (CEO); `later`: `0011`–`0013`
 
-**Ship lane:** Default for Verifier=`agent` tickets in the first Members milestone: **Epic branch `feat/members`**, **Merge gate `epic`** (fields set on `0001`–`0008`, `0010`, and `0014`–`0018`). `members-0009` (CEO go-live) stays outside that gate. See [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
+**Ship lane:** Default for Verifier=`agent` tickets in the first Members milestone: **Epic branch `feat/members`**, **Merge gate `epic`** (fields set on `0001`–`0008`, `0010`, and `0014`–`0019`). `members-0009` (CEO go-live) stays outside that gate. See [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
+
+---
+
+## members-0019 — Membership tabs + Hero count badges
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `in-progress` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
+| **Epic branch** | `feat/members` |
+| **Merge gate** | `epic` |
+
+### Description
+
+CEO: `#membership` feels overwhelming with Join + Sign-in stacked. Use **tabs** — **Join** (default) | **Sign in** — show only one full form at a time. Newsletter UI stays in Contact (not moved).
+
+Same ticket: Hero Subscriber/Member counts become a **simple number in a circle** on the **top-right corner** of the Subscribe / Join buttons (badge overlay), replacing the beside-button annotation from `members-0016`. Keep live counts + anchors. Accessible (don’t rely on color alone; expose count to AT). Mobile-friendly; avoid cluttering the hero.
+
+**Acceptance:**
+- [ ] Logged-out `#membership`: tabs Join | Sign in; **Join selected by default**; only active tab’s form visible
+- [ ] Logged-in: profile only (no tabs clutter)
+- [ ] Newsletter public UI remains in Contact
+- [ ] Hero: count badge = numeric circle on top-right of Subscribe (subscribers) and Join (members)
+- [ ] Prior beside-button annotation removed/replaced
+- [ ] Desktop + mobile; FEATURES.md updated
+
+**Out of scope:** Moving newsletter into Membership; Checkout/Elements changes; merge to main.
+
+### Links
+
+- Source: CEO product choice (2026-07-16) — Option B tabs + corner badges
+- Depends on: `members-0005`, `members-0007`, `members-0016`
+- PR: https://github.com/albertzang/ccvaa-web/pull/8
 
 ---
 
