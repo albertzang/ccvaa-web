@@ -12,7 +12,7 @@
 
 **Branch name:** `feat/members`  
 **PR link:** https://github.com/albertzang/ccvaa-web/pull/8  
-**Commit:** `1d3ca6b`  
+**Commit:** `1d3ca6b` (impl; tip confirmed after push)  
 **Preview URL:** https://ccvaa-web-git-feat-members-azang-projects.vercel.app  
 **Preview protection:** both `x-vercel-protection-bypass` + `x-vercel-set-bypass-cookie=true` from `.env.local` (`PREVIEW_PROTECTION.md`). Never paste secret.
 
@@ -21,7 +21,7 @@
 ## Environments to test this pass
 
 - [ ] Dev — http://localhost:3000/ (optional)
-- [ ] Preview — https://ccvaa-web-git-feat-members-azang-projects.vercel.app (required; wait for deploy of tip `1d3ca6b`)
+- [ ] Preview — https://ccvaa-web-git-feat-members-azang-projects.vercel.app (required; wait for deploy of tip)
 - [ ] Production — n/a (Pass 1)
 
 ## What changed
@@ -60,7 +60,7 @@
 
 ## Known risks / flaky areas
 
-- Preview deploy must include tip `1d3ca6b` before testing
+- Preview deploy must include the latest tip before testing
 - Token landing needs a real `unsub_tokens` row (seed or after confirmed subscribe)
 - Hash `#contact` scroll depends on browser; confirm Contact newsletter is visible
 - Manual unknown vs already-off messages are intentional and should not be conflated in the report
