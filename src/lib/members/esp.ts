@@ -5,7 +5,7 @@
  * a future ticket (members-0009) will replace this stub with real API calls.
  *
  * Unsubscribe footer URL for ESP templates:
- *   {SITE_ORIGIN}/?unsub={UNSUB_TOKEN}#contact
+ *   {SITE_ORIGIN}/?unsub={UNSUB_TOKEN}#membership
  * See docs/members/esp.md.
  */
 
@@ -50,5 +50,5 @@ export function buildNewsletterUnsubUrl(
   siteOrigin: string,
 ): string {
   const origin = siteOrigin.replace(/\/$/, "");
-  return `${origin}/?unsub=${encodeURIComponent(token)}#contact`;
+  return `${origin}/?unsub=${encodeURIComponent(token)}#membership`;
 }

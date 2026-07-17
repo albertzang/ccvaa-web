@@ -17,4 +17,5 @@ export * from "@/lib/members/session";
 export * from "@/lib/members/session-config";
 export * from "@/lib/members/stripe";
 export * from "@/lib/members/stripe-env";
+export * from "@/lib/members/verify-email";
 export * from "@/lib/members/zod";

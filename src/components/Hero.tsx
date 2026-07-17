@@ -13,21 +13,10 @@ function formatCompactCount(value: number): string {
   return compactCountFormatter.format(value);
 }
 
-function HeroCtaBadge({
-  value,
-  tone,
-}: {
-  value: number;
-  tone: "on-coral" | "on-glass";
-}) {
-  const toneClass =
-    tone === "on-coral"
-      ? "bg-ocean-950 text-ocean-50 ring-2 ring-white/85"
-      : "bg-coral text-white ring-2 ring-white/90";
-
+function HeroCtaBadge({ value }: { value: number }) {
   return (
     <span
-      className={`absolute -right-2 -top-2 inline-flex h-7 min-w-7 max-w-[2.85rem] shrink-0 items-center justify-center overflow-hidden rounded-full px-1 text-[10px] font-semibold tabular-nums lining-nums leading-none ${toneClass}`}
+      className="absolute -right-2 -top-2 inline-flex h-7 min-w-7 max-w-[2.85rem] shrink-0 items-center justify-center overflow-hidden rounded-full bg-ocean-950 px-1 text-[10px] font-semibold tabular-nums lining-nums leading-none text-cream ring-2 ring-cream/90"
       aria-hidden="true"
     >
       <span className="block max-w-full truncate text-center">
@@ -36,6 +25,9 @@ function HeroCtaBadge({
     </span>
   );
 }
+
+const ctaBaseClass =
+  "relative inline-flex min-h-12 min-w-[9.5rem] items-center justify-center rounded-full px-6 py-3 text-sm font-semibold tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream focus-visible:ring-offset-2 focus-visible:ring-offset-ocean-950";
 
 export async function Hero() {
   const counts = await getHeroCounts();
@@ -77,25 +69,22 @@ export async function Hero() {
           {heroContent.subheadline}
         </p>
 
-        <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-5">
+        <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-5">
           <a
-            href="#contact"
-            className="relative inline-flex rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-dark"
+            href="#membership"
+            className={`${ctaBaseClass} bg-coral text-white hover:bg-coral-dark`}
             aria-label={`${heroContent.subscribeLabel}, ${exactCountFormatter.format(counts.newsletterSubscribers)} ${heroContent.newsletterCountLabel}`}
           >
             {heroContent.subscribeLabel}
-            <HeroCtaBadge
-              value={counts.newsletterSubscribers}
-              tone="on-coral"
-            />
+            <HeroCtaBadge value={counts.newsletterSubscribers} />
           </a>
           <a
             href="#membership"
-            className="relative inline-flex rounded-full border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+            className={`${ctaBaseClass} border border-cream/55 bg-cream/15 text-cream backdrop-blur-sm hover:bg-cream/25`}
             aria-label={`${heroContent.joinLabel}, ${exactCountFormatter.format(counts.paidMembers)} ${heroContent.paidMembersCountLabel}`}
           >
             {heroContent.joinLabel}
-            <HeroCtaBadge value={counts.paidMembers} tone="on-glass" />
+            <HeroCtaBadge value={counts.paidMembers} />
           </a>
         </div>
       </div>

@@ -3,7 +3,7 @@
 **Feature:** Members  
 **Slug:** `members`  
 **Owner:** Product Manager  
-**Next ID:** `0022`  
+**Next ID:** `0023`
 
 Canonical work IDs: `members-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
@@ -13,16 +13,18 @@ Two **orthogonal** axes (not one ladder of plans):
 
 | Axis | What it is | Plans / states | Primary UI |
 |------|------------|----------------|------------|
-| **Newsletter** | Mailing-list opt-in | On / off (double opt-in; unsubscribe anytime) | Contact `#contact` |
+| **Newsletter** | Mailing-list opt-in | On / off (verified-session toggle; default off on first verify) | `#membership` |
 | **Membership** | Paid association (Stripe) | Founding · Lifetime · Annual · none | `#membership` |
 
 **Membership plans:** Founding (one-time, capped, lifetime) → after cap, Join shows Lifetime (one-time, fee always higher than Founding) instead of Founding; Annual (yearly recurring) always offered alongside. Annual stores anniversary / next renewal from Stripe. Auth: email OTP (not admin Hover); no OAuth/passwords.
 
-**`#membership`:** after Hero, before About. Logged out → Join; logged in (paid) → profile (+ future perks). Newsletter never lives here.
+**`#membership`:** after Hero, before About. Unverified → identity/OTP strip + glass gate. Verified → Name/email strip + newsletter toggle + Join Checkout or perks placeholder. Contact is inquiry-only.
 
-**Homepage order:** Nav → Hero → `#membership` → About → Contact → Footer. Hero: Subscribe / Join + counters → `#contact` / `#membership` (anchors only).
+**Homepage order:** Nav → Hero → `#membership` → About → Contact → Footer. Hero: Subscribe / Join + counters → both `#membership`.
 
 **Counts:** Members = active paid; Newsletter subscribers = anyone with newsletter on.
+
+**Identity:** `members.id` (UUID) is the primary key (**Member ID**); `email` is unique but not the PK. One `members` table tracks newsletter subscribers and paid members.
 
 **Stack:** Neon + Drizzle + Zod · Stripe (test on Dev/Preview) · Resend (transactional) · ESP (blasts; preference sync from Neon) · Mailosaur (Preview QA). Admin: Resend/ESP **new-tab links** only (no iframes; Hover remains the only embed). In-admin blast send = `members-0011` (`later`).
 
@@ -34,8 +36,100 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 3. Public membership — `0004` → `0005` → `0006` (same `#membership` slot); `0007` can stub counts early
 4. Admin roster — `0008`
 5. Then `next`: `0010` links → `0009` go-live (CEO); `later`: `0011`–`0013`
+6. Portal redesign — `0022` (CEO kickoff when ready)
 
-**Ship lane:** Default for Verifier=`agent` tickets in the first Members milestone: **Epic branch `feat/members`**, **Merge gate `epic`** (fields set on `0001`–`0008`, `0010`, and `0014`–`0021`). `members-0009` (CEO go-live) stays outside that gate. See [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
+**Ship lane:** Default for Verifier=`agent` tickets in the first Members milestone: **Epic branch `feat/members`**, **Merge gate `epic`** (fields set on `0001`–`0008`, `0010`, `0014`–`0022`). `members-0009` (CEO go-live) stays outside that gate. See [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
+
+---
+
+## members-0022 — Membership portal: verified-email gate + newsletter moves to `#membership`
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `in-progress` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
+| **Epic branch** | `feat/members` |
+| **Merge gate** | `epic` |
+
+### Description
+
+CEO product redesign: unify identity, newsletter, and join under `#membership` with a verified-email gate. Replaces Contact newsletter UI and the current Membership Join | Sign-in tab chrome.
+
+**Mental model**
+
+1. Move **all newsletter UI out of Contact** into `#membership`. Contact keeps inquiry/message only.
+2. `#membership` has **two sections** and **two states** (email not verified vs verified). Layout must work on all supported viewports (desktop: compact identity strip; mobile: stacked full-width controls — do not force a single cramped row on small screens).
+
+**2.1 Email not verified**
+
+- **Top — identity / OTP strip (one-liner on desktop, stacked on mobile):**
+  - Required **Name** (international / multi-language: Unicode letters, spaces, common punctuation; align Zod + UI; no ASCII-only rules). Name is client-held until verify succeeds; after verify, Name **auto-saves** on change (debounce).
+  - **Email** + **Send Code** + **OTP Code** + **Verify Email**.
+- **Bottom — gate panel** on a glassmorphism surface (fit existing brand; not a generic purple glass card):
+  - Short appeal copy, e.g. headline **“Verify your email to unlock the newsletter and membership.”** Supporting line: **“One code. Then subscribe, join, or both — on your terms.”**
+  - No newsletter toggle and no Join checkout until verified.
+
+**2.2 Email verified**
+
+- Successful verify **creates/upserts** a `members` row and starts a session bound to **Member ID** (`members.id` UUID PK). Email remains unique, not the primary key. No hollow sessions (verified UI always has a DB person).
+- **Top — same strip** now edits profile: Name auto-save; email change requires a **new OTP** before the unique email updates (Member ID unchanged).
+- **Bottom — two components:**
+  1. **Newsletter toggle** — default **off** after first verify (**option A / CASL**). User may flip on/off **without another OTP** while the verified session is active. Unsub never cancels paid membership.
+  2. If not an active paid member → **Join membership** checkout form (Stripe Checkout path retained). If active paid member → perks placeholder: **“Membership perks coming soon…”** (real perks stay `members-0012`).
+
+**OTP rules (explicit)**
+
+- OTP is required to enter verified state and to change email.
+- **No OTP** to toggle newsletter on/off once verified (session-authenticated preference update only).
+- Session expiry returns the user to **Email not verified** (must Verify again); then toggle again needs no OTP after re-verify.
+
+**One-click unsubscribe from newsletter email**
+
+- Token URL retargets to `#membership` (update `docs/members/esp.md`; stop using `#contact` for unsub landing).
+- Redeeming a valid token must: set newsletter **off** (idempotent; membership unchanged), **establish/resume a verified session** for that member, and land on `#membership` in **Email verified** state with the **toggle showing off**.
+- Invalid/expired token: clear message on `#membership` (do not fake verified state).
+
+**Hero / anchors**
+
+- Hero **Subscribe** and **Join** both scroll to `#membership` (update counters/anchors as needed).
+- Redesign the **Subscribe / Join button pair and their counter badges** as one cohesive, polished CTA group:
+  - Use the existing coastal brand palette (ocean / cream / coral), but replace the current visually disconnected coral-button/dark-badge and glass-button/coral-badge treatment.
+  - Keep Subscribe and Join immediately distinguishable without making either look disabled or unrelated. Use consistent dimensions, typography, border/radius language, hover/focus behavior, and badge placement.
+  - Counter badges must feel integrated with their associated button, remain readable from `0` through compact `K` / `M` / `B` values, and meet accessible contrast in every interaction state.
+  - Preserve both live counter meanings and accessible labels. The pair must remain balanced when wrapping or stacking on narrow screens.
+
+**Docs**
+
+- Update FEATURES.md, this file’s **Product model** (newsletter UI = `#membership`; remove Contact newsletter), and ESP unsub landing docs on ship.
+
+**Acceptance:**
+- [ ] Contact has no newsletter subscribe/unsubscribe UI
+- [ ] Unverified `#membership`: identity/OTP strip + glass gate message; no toggle/Join until verify
+- [ ] Verify creates/upserts `members` (UUID Member ID PK; email unique) and verified session
+- [ ] Verified: Name auto-save; email change re-OTP; newsletter toggle defaults **off** after first verify
+- [ ] Toggle on/off with active verified session requires **no** OTP; does not affect paid plan
+- [ ] Non-member verified → Join Checkout; active paid → perks placeholder copy
+- [ ] `/?unsub=<token>#membership`: redeem → newsletter off → verified session → toggle UI off (idempotent)
+- [ ] Hero Subscribe + Join → `#membership`; both retain correct live counters and accessible labels
+- [ ] Subscribe / Join buttons + badges use one cohesive coastal-brand color system (no disconnected reciprocal color treatment), with readable hover/focus states and balanced desktop/mobile layout
+- [ ] FEATURES.md + members Product model + `docs/members/esp.md` updated
+
+**Out of scope:** Real membership perks (`0012`); ESP provider choice / Production go-live (`0009`); Elements (keep Checkout); merge milestone.
+
+### Overall
+
+- Kicked off 2026-07-16. CEO confirmed: newsletter default **A** (off); no OTP on toggle while verified; email unsub link → verified `#membership` with toggle off. Scope also includes a cohesive coastal-brand redesign of the Hero Subscribe / Join buttons and counter badges.
+
+### Links
+
+- Source: CEO product redesign (2026-07-16)
+- Supersedes UI placement from `members-0003` / `members-0021` (Contact newsletter) once shipped
+- Depends on: `members-0003`–`0006`, `members-0015`, `members-0017`, `members-0021` (behavior to fold in)
+- PR: https://github.com/albertzang/ccvaa-web/pull/8
 
 ---
 

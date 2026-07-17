@@ -16,9 +16,12 @@ import {
   isResendConfigured,
   MembersEmailError,
 } from "@/lib/members/resend";
+import type { MemberSessionPayload } from "@/lib/members/session";
+import type { MembershipPlan } from "@/lib/members/zod/membership";
 import {
   newsletterConfirmInputSchema,
   newsletterLookupInputSchema,
+  newsletterSessionPreferenceSchema,
   newsletterSubscribeInputSchema,
   newsletterUnsubscribeInputSchema,
   type NewsletterPreference,
@@ -56,6 +59,17 @@ export type UnsubTokenRedeemResult = {
   status: "off";
   alreadyUnsubscribed: boolean;
   membershipUnchanged: true;
+  memberId: string;
+  name: string | null;
+  plan: MembershipPlan;
+};
+
+export type NewsletterSessionPreferenceResult = {
+  email: string;
+  status: "on" | "off";
+  preference: NewsletterPreference;
+  membershipUnchanged: true;
+  message: string;
 };
 
 async function findMemberByEmail(email: string) {
@@ -160,7 +174,6 @@ export async function subscribeToNewsletter(
   const parsed = newsletterSubscribeInputSchema.parse(input);
   const email = parsed.email.trim().toLowerCase();
 
-  // Fail closed before DB writes when Resend is missing (clear 503 via http mapper).
   if (!isResendConfigured()) {
     throw new MembersEmailError(
       "MEMBERS_EMAIL_UNAVAILABLE",
@@ -247,9 +260,8 @@ export async function lookupNewsletterPreference(
 }
 
 /**
- * Unsubscribes from the newsletter via Contact Unsubscribe tab.
+ * Unsubscribes from the newsletter via email (legacy path).
  * Never changes membership plan or status.
- * Distinct outcomes: unsubscribed | already_off | unknown.
  */
 export async function unsubscribeFromNewsletter(
   input: unknown,
@@ -305,8 +317,89 @@ export async function unsubscribeFromNewsletter(
 }
 
 /**
- * Redeems a tokenized unsubscribe link (`/?unsub=<token>#contact`).
+ * Session-authenticated newsletter on/off. No OTP while the verified session is active.
+ * Turning on sets confirmedAt (CASL consent via verified email). Never changes membership.
+ */
+export async function updateNewsletterPreferenceForSession(
+  session: MemberSessionPayload,
+  input: unknown,
+): Promise<NewsletterSessionPreferenceResult> {
+  const parsed = newsletterSessionPreferenceSchema.parse(input);
+  const now = new Date();
+
+  const member = await withMembersDbError(async () => {
+    const db = getMembersDb();
+    const rows = await db
+      .select()
+      .from(members)
+      .where(eq(members.id, session.memberId))
+      .limit(1);
+    return rows[0] ?? null;
+  }, "Failed to load newsletter preference for session.");
+
+  if (!member) {
+    throw new MembersDbError("Member record not found for session.");
+  }
+
+  if (parsed.status === "on") {
+    await withMembersDbError(async () => {
+      const db = getMembersDb();
+      await db
+        .update(members)
+        .set({
+          newsletterStatus: "on",
+          newsletterConfirmedAt: member.newsletterConfirmedAt ?? now,
+          updatedAt: now,
+        })
+        .where(eq(members.id, member.id));
+    }, "Failed to enable newsletter preference.");
+
+    await ensureUnsubToken(member.id);
+    await syncNewsletterToEsp({ email: member.email, status: "on" });
+
+    return {
+      email: member.email,
+      status: "on",
+      preference: {
+        status: "on",
+        confirmedAt: member.newsletterConfirmedAt ?? now,
+      },
+      membershipUnchanged: true,
+      message:
+        "You are subscribed to the CCVAA newsletter. This is separate from paid membership.",
+    };
+  }
+
+  await withMembersDbError(async () => {
+    const db = getMembersDb();
+    await db
+      .update(members)
+      .set({
+        newsletterStatus: "off",
+        updatedAt: now,
+      })
+      .where(eq(members.id, member.id));
+  }, "Failed to disable newsletter preference.");
+
+  await syncNewsletterToEsp({ email: member.email, status: "off" });
+
+  return {
+    email: member.email,
+    status: "off",
+    preference: {
+      status: "off",
+      confirmedAt: member.newsletterConfirmedAt,
+    },
+    membershipUnchanged: true,
+    message:
+      "You are unsubscribed from the newsletter. Your paid membership, if any, is unchanged.",
+  };
+}
+
+/**
+ * Redeems a tokenized unsubscribe link (`/?unsub=<token>#membership`).
  * Idempotent — safe to reload. Never changes membership.
+ * Returns member identity so the page can establish a verified session.
  */
 export async function redeemUnsubToken(
   input: unknown,
@@ -321,9 +414,9 @@ export async function redeemUnsubToken(
         usedAt: unsubTokens.usedAt,
         memberId: unsubTokens.memberId,
         email: members.email,
-        newsletterStatus: members.newsletterStatus,
+        name: members.name,
         membershipPlan: members.membershipPlan,
-        membershipStatus: members.membershipStatus,
+        newsletterStatus: members.newsletterStatus,
       })
       .from(unsubTokens)
       .innerJoin(members, eq(unsubTokens.memberId, members.id))
@@ -368,12 +461,15 @@ export async function redeemUnsubToken(
     status: "off",
     alreadyUnsubscribed: alreadyOff,
     membershipUnchanged: true,
+    memberId: row.memberId,
+    name: row.name,
+    plan: row.membershipPlan,
   };
 }
 
 /**
- * Activates newsletter after an already-verified email (e.g. Join OTP).
- * Does not send a second confirm mail — Contact-only subscribe stays double opt-in.
+ * Activates newsletter after an already-verified email (e.g. Join metadata).
+ * Does not send a second confirm mail.
  */
 export async function activateNewsletterFromVerifiedEmail(
   email: string,

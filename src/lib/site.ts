@@ -150,42 +150,46 @@ export const contactContent = {
 } as const;
 
 export const membershipContent = {
-  joinTabLabel: "Join",
-  signInTabLabel: "Sign in",
-  loginTitle: "Member sign-in",
-  loginDescription: "We email a 6-digit code — no password.",
-  loginSendLabel: "Send login code",
-  loginVerifyLabel: "Sign in",
-  loginVerifyHint: "Enter the 6-digit code we emailed you.",
-  profileNameLabel: "Name",
-  profileNameEditLabel: "Edit",
-  profileNameSaveLabel: "Save name",
-  profileEmailLabel: "Email",
-  profileEmailChangeLabel: "Change",
-  profileEmailSendCodeLabel: "Send verification code",
-  profileEmailVerifyLabel: "Confirm new email",
-  profileEmailVerifyHint:
-    "Enter the 6-digit code we sent to your new address.",
-  profilePlanLabel: "Plan",
-  profileAnniversaryLabel: "Anniversary",
-  profileNextRenewalLabel: "Next renewal",
-  logoutLabel: "Sign out",
+  gateHeadline: "Verify your email to unlock the newsletter and membership.",
+  gateSupport:
+    "One code. Then subscribe, join, or both — on your terms.",
+  sendCodeLabel: "Send code",
+  verifyEmailLabel: "Verify email",
+  verifyHint: "Enter the 6-digit code we emailed you.",
   namePlaceholder: "Your name",
   emailPlaceholder: "you@example.com",
   codePlaceholder: "6-digit code",
-  verifyEmailLabel: "Verify email",
-  verifyHint: "Enter the 6-digit code, then continue to Checkout.",
+  nameSavingLabel: "Saving…",
+  nameSavedLabel: "Name saved",
+  nameSaveErrorLabel: "Could not save name.",
+  changeEmailLabel: "Change email",
+  emailSendCodeLabel: "Send code",
+  emailVerifyLabel: "Confirm email",
+  emailVerifyHint: "Enter the 6-digit code we sent to your new address.",
+  newsletterToggleLabel: "Newsletter",
+  newsletterToggleDescription:
+    "Occasional updates on exhibitions, programs, and community news. Separate from paid membership (CASL).",
+  newsletterOnLabel: "Subscribed",
+  newsletterOffLabel: "Not subscribed",
+  perksComingSoon: "Membership perks coming soon…",
   checkoutLabel: "Continue to checkout",
-  newsletterOptInLabel:
-    "Also send me the CCVAA newsletter (optional)",
   consentNote:
-    "Membership is separate from the newsletter (CASL). Manage newsletter in Contact.",
+    "Membership is separate from the newsletter. You can change either anytime while verified.",
+  logoutLabel: "Sign out",
+  profilePlanLabel: "Plan",
+  profileAnniversaryLabel: "Anniversary",
+  profileNextRenewalLabel: "Next renewal",
   joinedSuccess:
-    "Thanks for joining. Use Sign in if you are not signed in automatically.",
+    "Thanks for joining. Your membership session is ready.",
   joinedActivating:
     "Payment received — activating your membership and signing you in…",
   joinedSessionTimeout:
-    "Membership may still be activating. Use Sign in, or refresh this page.",
+    "Membership may still be activating. Refresh this page, or verify your email again.",
+  unsubLandingSuccess:
+    "You have been unsubscribed from the CCVAA newsletter. Your paid membership, if any, is unchanged.",
+  unsubLandingAlready:
+    "You were already unsubscribed. Your paid membership, if any, is unchanged.",
+  unsubLandingInvalid: "This unsubscribe link is invalid or has expired.",
 } as const;
 
 export const newsletterContent = {

@@ -6,3 +6,4 @@ export * from "./otp";
 export * from "./person-name";
 export * from "./profile";
 export * from "./unsub-token";
+export * from "./verify-email";

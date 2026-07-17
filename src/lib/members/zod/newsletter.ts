@@ -49,3 +49,12 @@ export const newsletterUnsubscribeInputSchema = z.object({
 export type NewsletterUnsubscribeInput = z.infer<
   typeof newsletterUnsubscribeInputSchema
 >;
+
+/** Session-authenticated newsletter preference toggle (no OTP). */
+export const newsletterSessionPreferenceSchema = z.object({
+  status: z.enum(["on", "off"]),
+});
+
+export type NewsletterSessionPreferenceInput = z.infer<
+  typeof newsletterSessionPreferenceSchema
+>;

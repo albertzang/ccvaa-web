@@ -1,23 +1,35 @@
 import { AboutSection } from "@/components/AboutSection";
-import {
-  ContactSection,
-  type UnsubLandingProps,
-} from "@/components/ContactSection";
+import { ContactSection } from "@/components/ContactSection";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
-import { MembershipSection } from "@/components/MembershipSection";
+import {
+  MembershipSection,
+} from "@/components/MembershipSection";
+import type { UnsubLanding } from "@/components/MembershipPanel";
 import {
   isMembersNewsletterError,
   redeemUnsubToken,
 } from "@/lib/members/newsletter";
 import { MembersDbError } from "@/lib/members/errors";
-import { MembersEnvError } from "@/lib/members/env";
+import {
+  MembersEnvError,
+  requireDatabaseUrl,
+} from "@/lib/members/env";
+import {
+  getMemberProfileForSession,
+  toPublicMemberProfile,
+} from "@/lib/members/profile";
+import {
+  createMemberSessionToken,
+  isMemberSessionSecretConfigured,
+  setMemberSessionCookie,
+} from "@/lib/members/session";
 import { unsubTokenValueSchema } from "@/lib/members/zod/unsub-token";
 
 async function resolveUnsubLanding(
   token: string | undefined,
-): Promise<UnsubLandingProps | undefined> {
+): Promise<UnsubLanding | undefined> {
   if (!token) {
     return undefined;
   }
@@ -28,11 +40,34 @@ async function resolveUnsubLanding(
   }
 
   try {
+    requireDatabaseUrl();
     const result = await redeemUnsubToken({ token: parsed.data });
+
+    if (!isMemberSessionSecretConfigured()) {
+      return {
+        kind: "success",
+        already: result.alreadyUnsubscribed,
+        email: result.email,
+      };
+    }
+
+    const { token: sessionToken, expiresAt, payload } =
+      createMemberSessionToken({
+        memberId: result.memberId,
+        email: result.email,
+        name: result.name,
+        plan: result.plan,
+      });
+    await setMemberSessionCookie(sessionToken, expiresAt);
+
+    const memberProfile = await getMemberProfileForSession(payload);
+    const profile = toPublicMemberProfile(memberProfile, payload.exp);
+
     return {
       kind: "success",
       already: result.alreadyUnsubscribed,
       email: result.email,
+      profile,
     };
   } catch (error) {
     if (
@@ -67,9 +102,12 @@ export default async function Home({
       <Header />
       <main>
         <Hero />
-        <MembershipSection joinedLanding={joinedLanding} />
+        <MembershipSection
+          joinedLanding={joinedLanding}
+          unsubLanding={unsubLanding}
+        />
         <AboutSection />
-        <ContactSection unsubLanding={unsubLanding} />
+        <ContactSection />
       </main>
       <Footer />
     </>

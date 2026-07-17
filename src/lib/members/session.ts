@@ -14,7 +14,8 @@ export type MemberSessionPayload = {
   memberId: string;
   email: string;
   name: string | null;
-  plan: Exclude<MembershipPlan, "none">;
+  /** Paid plan or `none` for verified email without paid membership. */
+  plan: MembershipPlan;
   exp: number;
 };
 
@@ -105,7 +106,8 @@ function decodeSessionToken(token: string, secret: string): MemberSessionPayload
     typeof payload?.memberId !== "string" ||
     typeof payload?.email !== "string" ||
     typeof payload?.exp !== "number" ||
-    (payload.plan !== "founding" &&
+    (payload.plan !== "none" &&
+      payload.plan !== "founding" &&
       payload.plan !== "lifetime" &&
       payload.plan !== "annual")
   ) {
@@ -118,7 +120,7 @@ function decodeSessionToken(token: string, secret: string): MemberSessionPayload
   if (payload.exp <= Date.now()) {
     throw new MembersSessionError(
       "MEMBERS_SESSION_EXPIRED",
-      "Member session has expired. Please sign in again.",
+      "Member session has expired. Please verify your email again.",
     );
   }
 
@@ -142,12 +144,12 @@ function cookieOptions(expires: Date) {
   };
 }
 
-/** Creates a signed session token for an active paid member. */
+/** Creates a signed session token for a verified member (paid or newsletter-only). */
 export function createMemberSessionToken(input: {
   memberId: string;
   email: string;
   name: string | null;
-  plan: Exclude<MembershipPlan, "none">;
+  plan: MembershipPlan;
 }): { token: string; expiresAt: Date; payload: MemberSessionPayload } {
   const secret = requireMemberSessionSecret();
   const expiresAt = new Date(Date.now() + MEMBER_SESSION_TTL_MS);
@@ -171,7 +173,7 @@ export async function requireMemberSession(): Promise<MemberSessionPayload> {
   if (!payload) {
     throw new MembersSessionError(
       "MEMBERS_SESSION_INVALID",
-      "Sign in to manage your membership profile.",
+      "Verify your email to manage newsletter and membership.",
     );
   }
   return payload;

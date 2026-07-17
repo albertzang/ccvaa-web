@@ -159,7 +159,7 @@ export async function verifyMemberLogin(
     memberId: member.id,
     email: member.email,
     name: member.name,
-    plan: member.membershipPlan as Exclude<MembershipPlan, "none">,
+    plan: member.membershipPlan,
   });
 
   return {

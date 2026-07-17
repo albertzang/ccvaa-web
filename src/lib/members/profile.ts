@@ -1,4 +1,4 @@
-import { and, eq, ne } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import { getMembersDb } from "@/db/client";
 import { members } from "@/db/schema";
@@ -14,6 +14,7 @@ import {
   type MemberSessionPayload,
 } from "@/lib/members/session";
 import type { MembershipPlan } from "@/lib/members/zod/membership";
+import type { NewsletterStatus } from "@/lib/members/zod/newsletter";
 import {
   profileEmailChangeStartSchema,
   profileEmailChangeVerifySchema,
@@ -24,7 +25,8 @@ export type MemberProfile = {
   memberId: string;
   email: string;
   name: string | null;
-  plan: Exclude<MembershipPlan, "none">;
+  plan: MembershipPlan;
+  newsletterStatus: NewsletterStatus;
   membershipAnniversary: string | null;
   nextRenewalAt: string | null;
 };
@@ -83,17 +85,11 @@ function rowToProfile(row: {
   email: string;
   name: string | null;
   membershipPlan: MembershipPlan;
+  newsletterStatus: NewsletterStatus;
   membershipAnniversary: string | Date | null;
   nextRenewalAt: Date | null;
 }): MemberProfile {
   const plan = row.membershipPlan;
-  if (plan === "none") {
-    throw new MembersProfileError(
-      "MEMBERS_PROFILE_NOT_FOUND",
-      "No active membership found for this account.",
-    );
-  }
-
   const isAnnual = plan === "annual";
 
   return {
@@ -101,6 +97,7 @@ function rowToProfile(row: {
     email: row.email,
     name: row.name,
     plan,
+    newsletterStatus: row.newsletterStatus,
     membershipAnniversary: isAnnual
       ? formatAnniversary(row.membershipAnniversary)
       : null,
@@ -108,7 +105,7 @@ function rowToProfile(row: {
   };
 }
 
-async function loadActiveMemberById(memberId: string) {
+async function loadMemberById(memberId: string) {
   const db = getMembersDb();
   try {
     const rows = await db
@@ -117,24 +114,15 @@ async function loadActiveMemberById(memberId: string) {
         email: members.email,
         name: members.name,
         membershipPlan: members.membershipPlan,
+        newsletterStatus: members.newsletterStatus,
         membershipAnniversary: members.membershipAnniversary,
         nextRenewalAt: members.nextRenewalAt,
       })
       .from(members)
-      .where(
-        and(
-          eq(members.id, memberId),
-          eq(members.membershipStatus, "active"),
-          ne(members.membershipPlan, "none"),
-        ),
-      )
+      .where(eq(members.id, memberId))
       .limit(1);
 
-    const row = rows[0];
-    if (!row || row.membershipPlan === "none") {
-      return null;
-    }
-    return row;
+    return rows[0] ?? null;
   } catch (error) {
     throw new MembersDbError("Failed to load member profile.", { cause: error });
   }
@@ -145,11 +133,11 @@ export async function getMemberProfileForSession(
   session: MemberSessionPayload,
 ): Promise<MemberProfile> {
   requireDatabaseUrl();
-  const row = await loadActiveMemberById(session.memberId);
+  const row = await loadMemberById(session.memberId);
   if (!row) {
     throw new MembersProfileError(
       "MEMBERS_PROFILE_NOT_FOUND",
-      "No active membership found for this account.",
+      "No member record found for this session.",
     );
   }
   return rowToProfile(row);
@@ -165,6 +153,7 @@ export function toPublicMemberProfile(
     email: profile.email,
     name: profile.name,
     plan: profile.plan,
+    newsletterStatus: profile.newsletterStatus,
     membershipAnniversary: profile.membershipAnniversary,
     nextRenewalAt: profile.nextRenewalAt,
     expiresAt: new Date(sessionExp).toISOString(),
@@ -195,11 +184,11 @@ export async function updateMemberProfileName(
 ) {
   requireDatabaseUrl();
   const parsed = profileNameUpdateSchema.parse(input);
-  const row = await loadActiveMemberById(session.memberId);
+  const row = await loadMemberById(session.memberId);
   if (!row) {
     throw new MembersProfileError(
       "MEMBERS_PROFILE_NOT_FOUND",
-      "No active membership found for this account.",
+      "No member record found for this session.",
     );
   }
 
@@ -258,11 +247,11 @@ export async function startMemberProfileEmailChange(
     );
   }
 
-  const row = await loadActiveMemberById(session.memberId);
+  const row = await loadMemberById(session.memberId);
   if (!row) {
     throw new MembersProfileError(
       "MEMBERS_PROFILE_NOT_FOUND",
-      "No active membership found for this account.",
+      "No member record found for this session.",
     );
   }
 
@@ -293,11 +282,11 @@ export async function verifyMemberProfileEmailChange(
     );
   }
 
-  const row = await loadActiveMemberById(session.memberId);
+  const row = await loadMemberById(session.memberId);
   if (!row) {
     throw new MembersProfileError(
       "MEMBERS_PROFILE_NOT_FOUND",
-      "No active membership found for this account.",
+      "No member record found for this session.",
     );
   }
 

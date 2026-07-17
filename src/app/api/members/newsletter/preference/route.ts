@@ -1,35 +1,21 @@
 import {
   handleMembersApiError,
-  membersApiError,
   membersApiSuccess,
 } from "@/lib/members/http";
-import {
-  lookupNewsletterPreference,
-  unsubscribeFromNewsletter,
-} from "@/lib/members/newsletter";
+import { updateNewsletterPreferenceForSession } from "@/lib/members/newsletter";
+import { requireMemberSession } from "@/lib/members/session";
 
+/**
+ * POST session-authenticated newsletter preference toggle.
+ * Body: `{ status: "on" | "off" }` — no OTP while verified session is active.
+ * Legacy email lookup/unsubscribe actions are no longer used by the public UI.
+ */
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as {
-      action?: string;
-      email?: string;
-    };
-
-    if (body.action === "lookup") {
-      const result = await lookupNewsletterPreference(body);
-      return membersApiSuccess(result);
-    }
-
-    if (body.action === "unsubscribe") {
-      const result = await unsubscribeFromNewsletter(body);
-      return membersApiSuccess(result);
-    }
-
-    return membersApiError(
-      "MEMBERS_VALIDATION_ERROR",
-      "Invalid action. Use lookup or unsubscribe.",
-      400,
-    );
+    const session = await requireMemberSession();
+    const body = (await request.json()) as unknown;
+    const result = await updateNewsletterPreferenceForSession(session, body);
+    return membersApiSuccess(result);
   } catch (error) {
     return handleMembersApiError(error);
   }

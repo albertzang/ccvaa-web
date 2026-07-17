@@ -1,4 +1,8 @@
-import { MembershipPanel, type MemberSessionSummary } from "@/components/MembershipPanel";
+import {
+  MembershipPanel,
+  type MemberProfileSummary,
+  type UnsubLanding,
+} from "@/components/MembershipPanel";
 import { type JoinPlansProps } from "@/components/JoinForm";
 import { getJoinPlans } from "@/lib/members/join";
 import {
@@ -12,6 +16,7 @@ import {
 
 type MembershipSectionProps = {
   joinedLanding?: boolean;
+  unsubLanding?: UnsubLanding;
 };
 
 async function loadPlansForJoin(): Promise<
@@ -42,7 +47,7 @@ async function loadPlansForJoin(): Promise<
 }
 
 async function loadInitialProfile(): Promise<{
-  profile: MemberSessionSummary | null;
+  profile: MemberProfileSummary | null;
   profileError: string | null;
 }> {
   const payload = await readMemberSession();
@@ -60,6 +65,7 @@ async function loadInitialProfile(): Promise<{
     return {
       profile: {
         ...toPublicMemberSession(payload),
+        newsletterStatus: "off",
         membershipAnniversary: null,
         nextRenewalAt: null,
       },
@@ -73,6 +79,7 @@ async function loadInitialProfile(): Promise<{
 
 export async function MembershipSection({
   joinedLanding,
+  unsubLanding,
 }: MembershipSectionProps) {
   const [plansResult, initialProfileState] = await Promise.all([
     loadPlansForJoin(),
@@ -86,9 +93,10 @@ export async function MembershipSection({
       aria-label="Membership"
     >
       <div className="mx-auto max-w-6xl px-6">
-        <div className="mx-auto max-w-2xl text-center">
+        <div className="mx-auto max-w-3xl">
           <MembershipPanel
             joinedLanding={joinedLanding}
+            unsubLanding={unsubLanding}
             initialProfile={initialProfileState.profile}
             initialProfileError={initialProfileState.profileError}
             initialPlans={plansResult.ok ? plansResult.data : null}

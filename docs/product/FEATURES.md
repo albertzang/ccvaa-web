@@ -28,16 +28,19 @@
 - Full-bleed coastal hero image (`hero-background.webp`)
 - Eyebrow, headline, subheadline from `src/lib/site.ts`
 - Text is non-selectable
-- **Subscribe** button anchors to `#contact` (newsletter); live subscriber count as a compact (`K`/`M`/`B`) circle badge on the top-right of the button (`newsletter_status = on`)
-- **Join** button anchors to `#membership` (Join panel); live paid-member count as a compact (`K`/`M`/`B`) circle badge on the top-right of the button (`membership_status = active`)
-- Dual-axis counter labels (“Newsletter subscribers” / “Paid members”) — never conflates mailing list with membership plans; exact counts in CTA `aria-label`; badges use ocean/coral brand contrast (not black-on-white)
+- **Subscribe** and **Join** both anchor to `#membership` (verified-email portal)
+- Cohesive coastal CTA pair: shared dimensions/typography/radius/focus; Subscribe = solid coral; Join = cream glass; both use the same ocean-950/cream counter badge treatment
+- Live counts as compact (`K`/`M`/`B`) circle badges (newsletter `on` / paid `active`); exact counts in CTA `aria-label`
 - Counts stub to `0` when `DATABASE_URL` / members DB unavailable; homepage still loads (`members-0007`)
 
 ### Membership (`#membership`)
-- After Hero, before About — no section title/subtitle
-- Plans: **Founding** (capped one-time) while seats remain → then **Lifetime** (one-time, fee always > Founding); **Annual** always offered (stores `membership_anniversary` + `next_renewal_at` from Stripe)
-- Logged out → tabs **Sign in** (default, left) | **Join** (right) — only the active form is shown. **Join**: no form title/subtitle; offered plans in a responsive two-column grid (stacks on narrow screens); name, email, optional newsletter opt-in → **one** email OTP → Stripe Checkout → webhook activates; Join+newsletter opt-in does not send a second confirm mail — Contact-only subscribe stays double opt-in; return `/?joined=1&session_id=…#membership` auto-establishes member session → profile. **Sign in**: 6-digit login OTP → httpOnly session. Logged in → compact **profile** summary (name/email edit on demand with email OTP re-verify; Annual shows read-only anniversary / next renewal; no future-perks placeholder or `/admin` note). Newsletter stays in Contact.
-- APIs: `GET /api/members/join/plans`, `POST /api/members/join/{start,verify,session}`, `POST /api/members/webhooks/stripe` (idempotent); profile: `GET /api/members/profile`, `PATCH /api/members/profile/name`, `POST /api/members/profile/email/{start,verify}`. Fail closed without Stripe/`DATABASE_URL`/session secrets. Race-safe Founding seat claim.
+- After Hero, before About — compact verified-email portal (no Join | Sign-in tabs)
+- **Unverified:** Name + Email + Send code / OTP strip (stacked on mobile) over branded glass gate copy (“Verify your email…”, “One code…”)
+- **Verified:** same strip for Name auto-save + email change (re-OTP); session subject = Member ID UUID; newsletter toggle (default **off** on first verify; on/off without OTP while session active); non-members → Stripe Checkout plans; active paid → “Membership perks coming soon…”
+- Plans: **Founding** (capped one-time) while seats remain → then **Lifetime** (one-time, fee always > Founding); **Annual** always offered
+- Checkout return `/?joined=1&session_id=…#membership` auto-establishes member session
+- One-click `/?unsub=<token>#membership` → newsletter off + verified session + toggle off (idempotent); invalid token shows clear message without faking verification
+- APIs: `POST /api/members/verify/{start,verify}`, `POST /api/members/newsletter/preference` (session), `POST /api/members/join/checkout` (session), plus `join/plans`, `join/session`, Stripe webhook, profile name/email. Fail closed without Stripe/`DATABASE_URL`/session secrets.
 
 ### About (`#about`)
 - Intro paragraphs
@@ -45,8 +48,7 @@
 - **Our Purposes** (collapsible): 10 purpose cards; titles always visible; descriptions toggle together
 
 ### Contact (`#contact`)
-- Email + mailing address card
-- **Newsletter** (orthogonal to paid membership): tabs **Subscribe** | **Unsubscribe** (Membership-like chrome; one panel visible). Subscribe requires **name** + email with double opt-in (Resend OTP); international-friendly name Zod (`personNameSchema`) shared with Join/profile. Unsubscribe: email + control only (no preference lookup) — backend messages for subscribed→off, already off, unknown; never cancels membership. Tokenized one-click `/?unsub=<token>#contact` opens Unsubscribe tab, prefills email, auto-redeems (idempotent). ESP sync stub until provider chosen — see [`docs/members/esp.md`](../members/esp.md). APIs: `POST /api/members/newsletter/{subscribe,confirm,preference,unsub}`.
+- Email + mailing address card (inquiry only — no newsletter UI)
 
 ### Footer
 - Org name, tagline, copyright (no duplicate contact block)
@@ -99,27 +101,27 @@
 
 > Work IDs: [`backlogs/members-BACKLOG.md`](backlogs/members-BACKLOG.md). Shipped behavior lands in Public / Admin sections above as items complete.
 
-**Two orthogonal axes:** Newsletter (Contact `#contact`) ⊥ Membership (Founding / Lifetime / Annual on `#membership`). A paid member may or may not be on the newsletter.
+**Two orthogonal axes:** Newsletter ⊥ Membership — both managed under `#membership` after verified email. A paid member may or may not be on the newsletter.
 
 | | Newsletter | Membership |
 |--|------------|------------|
 | **Meaning** | Mailing-list opt-in | Paid association (Stripe) |
-| **UI** | Contact tabs Subscribe \| Unsubscribe; ESP unsub → `#contact` Unsubscribe tab + token | `#membership`: Sign-in \| Join tabs ↔ compact profile |
+| **UI** | `#membership` toggle after verify; ESP unsub → `#membership` + verified session | `#membership` Join Checkout or perks placeholder after verify |
 | **Count** | Anyone with newsletter on | Active paid plans |
 
-**Hero:** Subscribe / Join with compact (`K`/`M`/`B`) circle count badges on each CTA (top-right; exact counts in `aria-label`) → `#contact` / `#membership` (anchors).
+**Hero:** Subscribe / Join cohesive coastal CTA pair with compact (`K`/`M`/`B`) badges → both `#membership`.
 **Stack:** Neon + Drizzle + Zod · Stripe · Resend · ESP · Mailosaur. Admin roster (`0008`); Resend/ESP new-tab links (`0010`); later: in-admin blast, member perks, impersonation.  
 **Standing:** No Resend/ESP iframes; member auth = email OTP (no OAuth/passwords); homepage SPA anchors over separate marketing routes.
 
 **Platform (members-0001, epic `feat/members`):** Drizzle schema on Neon — orthogonal `newsletter_status` vs `membership_plan`; OTP challenges; unsub tokens; `stripe_webhook_events` for Join idempotency. Annual plans use `membership_anniversary` + `next_renewal_at` (null for Founding/Lifetime). Shared Zod in `src/lib/members/zod/`. `GET /api/members/health` fails closed (503) without `DATABASE_URL` (Stripe/Resend status informational). Migrate/seed: `npm run db:migrate`, `npm run db:seed` (seeds non-Production only). Schema notes: [`docs/members/schema.md`](../members/schema.md).
 
-**Newsletter (members-0003, epic `feat/members`):** Contact `#contact` UI + `POST /api/members/newsletter/*` routes. Tabs **Subscribe** | **Unsubscribe** (`members-0021`). Subscribe requires name + email; double opt-in via Resend OTP; pending does not count toward subscriber count. Name validation: shared `personNameSchema` (Unicode letters/marks, spaces, common punctuation — `members-0017`). Unsubscribe is email-only (no lookup step); distinct outcomes for off / already off / unknown. Token unsub `/?unsub=<token>#contact` (idempotent; lands on Unsubscribe tab with email + result; membership unchanged). ESP sync stub in `src/lib/members/esp.ts` — footer URL: [`docs/members/esp.md`](../members/esp.md). Requires `DATABASE_URL` + `RESEND_*` for live subscribe; fails closed without them.
+**Newsletter (members-0003 / portal `members-0022`, epic `feat/members`):** Preference lives on `#membership` after email verify. First verify defaults newsletter **off** (CASL). Session toggle on/off requires no OTP. Token unsub `/?unsub=<token>#membership` (idempotent; newsletter off + verified session + toggle UI off; membership unchanged). ESP sync stub in `src/lib/members/esp.ts` — footer URL: [`docs/members/esp.md`](../members/esp.md). APIs: `POST /api/members/newsletter/preference` (session), legacy subscribe/confirm/unsub routes retained for tooling.
 
-**Join / Stripe (members-0004, epic `feat/members`):** `#membership` Join UI + Stripe Checkout (test keys on Dev/Preview). Flow: name/email/optional newsletter opt-in → single `email_verify` OTP → Checkout → `checkout.session.completed` webhook activates membership. Success return includes Stripe `session_id`; `POST /api/members/join/session` mints the same httpOnly member cookie as login (**members-0014**; polls while webhook pending). When newsletter was opted in at Join, webhook sets newsletter `on` from that verified email (**members-0015** — no second Resend confirm). Contact-only subscribe remains double opt-in. Pre-cap Founding+Annual; post-cap Lifetime+Annual. Env: `STRIPE_*`, `MEMBERSHIP_FOUNDING_CAP`, fee cents (Lifetime > Founding enforced). Webhook: `POST /api/members/webhooks/stripe`. Live keys: `members-0009`.
+**Join / Stripe (members-0004 + portal `members-0022`, epic `feat/members`):** Verified session → plan picker → `POST /api/members/join/checkout` → Stripe Checkout (test keys on Dev/Preview). Success return includes Stripe `session_id`; `POST /api/members/join/session` mints httpOnly member cookie (**members-0014**). Pre-cap Founding+Annual; post-cap Lifetime+Annual. Env: `STRIPE_*`, `MEMBERSHIP_FOUNDING_CAP`, fee cents (Lifetime > Founding enforced). Webhook: `POST /api/members/webhooks/stripe`. Live keys: `members-0009`.
 
-**Member auth (members-0005, epic `feat/members`):** `#membership` login wall — email → 6-digit OTP (`purpose=login` via Resend) → httpOnly signed cookie `ccvaa_member_session` (7-day TTL). Logout clears cookie only (does not touch Hover admin). Active paid members only (`membership_status=active`, plan ≠ none). APIs: `POST /api/members/login/{start,verify,logout}`, `GET /api/members/login/session`. Zod on payloads; OTP rate limits/expiry in `otp-config` / [`docs/members/schema.md`](../members/schema.md). Requires `DATABASE_URL` + `RESEND_*` + `MEMBER_SESSION_SECRET`; fails closed without them. **Never grants `/admin`.**
+**Member auth (members-0005 / portal `members-0022`, epic `feat/members`):** Email verify OTP (`purpose=email_verify`) upserts `members` and mints httpOnly `ccvaa_member_session` bound to Member ID UUID (plan may be `none`). 7-day TTL. Logout clears cookie only (does not touch Hover admin). APIs: `POST /api/members/verify/{start,verify}`, `POST /api/members/login/logout`. **Never grants `/admin`.**
 
-**Member profile (members-0006, epic `feat/members`):** Logged-in `#membership` face — name edit; email change requires `email_verify` OTP on the new address before DB update; Annual shows read-only `membership_anniversary` + `next_renewal_at` (null/hidden for Founding/Lifetime); light perks placeholder (`members-0012`). APIs: `GET /api/members/profile`, `PATCH /api/members/profile/name`, `POST /api/members/profile/email/{start,verify}`. Zod on profile payloads; session cookie refreshed after identity updates. Requires active member session + `DATABASE_URL` + `RESEND_*`; fails closed without them. No newsletter UI here.
+**Member profile (members-0006 / portal `members-0022`, epic `feat/members`):** Verified strip — Name debounced auto-save; email change requires `email_verify` OTP on the new address; Annual shows read-only anniversary / next renewal; paid members see perks placeholder (`members-0012`). APIs: `GET /api/members/profile`, `PATCH /api/members/profile/name`, `POST /api/members/profile/email/{start,verify}`.
 
 ---
 
@@ -157,6 +159,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-16 | **members-0022** (epic `feat/members`): `#membership` verified-email portal; newsletter moves from Contact; unsub → `#membership` + session; Hero Subscribe+Join → `#membership` with cohesive coastal CTAs |
 | 2026-07-16 | **members-0021** (epic `feat/members`): Contact newsletter tabs Subscribe \| Unsubscribe; email-only unsub with distinct outcomes; one-click `/?unsub=` lands on Unsubscribe tab |
 | 2026-07-16 | **members-0020** (epic `feat/members`): Membership UI declutter — no section/Join titles; Sign-in \| Join tabs (Sign-in default); two-column plan grid; compact profile; Hero badges compact K/M/B + brand contrast |
 | 2026-07-16 | **members-0019** (epic `feat/members`): `#membership` Join \| Sign-in tabs (Join default); Hero counts as top-right circle badges on Subscribe/Join |

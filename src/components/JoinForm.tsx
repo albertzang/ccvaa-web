@@ -30,8 +30,6 @@ type ApiError = {
   message: string;
 };
 
-type View = "form" | "verify";
-
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, init);
   const data = (await response.json()) as T | ApiError;
@@ -43,17 +41,22 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 type JoinFormProps = {
+  mode?: "public" | "session";
   joinedLanding?: boolean;
   initialPlans: JoinPlansProps | null;
   initialPlansError: string | null;
 };
 
+/**
+ * Session mode: plan picker → Stripe Checkout (identity from verified session).
+ * Public mode retained for legacy OTP join path (unused by portal UI).
+ */
 export function JoinForm({
+  mode = "public",
   joinedLanding,
   initialPlans,
   initialPlansError,
 }: JoinFormProps) {
-  const [view, setView] = useState<View>("form");
   const [plans, setPlans] = useState<JoinPlanOffer[] | null>(
     initialPlans?.plans ?? null,
   );
@@ -63,10 +66,6 @@ export function JoinForm({
   const [plan, setPlan] = useState<JoinPlanId | "">(
     () => initialPlans?.plans.find((p) => p.available)?.id ?? "",
   );
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [newsletterOptIn, setNewsletterOptIn] = useState(false);
-  const [code, setCode] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -109,38 +108,7 @@ export function JoinForm({
     }
   };
 
-  const handleStart = async (event: React.FormEvent) => {
-    event.preventDefault();
-    clearFeedback();
-    if (!plan) {
-      setError("Choose a membership plan.");
-      return;
-    }
-    setLoading(true);
-    try {
-      const result = await fetchJson<{ message: string }>(
-        "/api/members/join/start",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name,
-            email,
-            plan,
-            newsletterOptIn,
-          }),
-        },
-      );
-      setView("verify");
-      setMessage(result.message);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not start join.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerify = async (event: React.FormEvent) => {
+  const handleCheckout = async (event: React.FormEvent) => {
     event.preventDefault();
     clearFeedback();
     if (!plan) {
@@ -150,30 +118,24 @@ export function JoinForm({
     setLoading(true);
     try {
       const result = await fetchJson<{ checkoutUrl: string }>(
-        "/api/members/join/verify",
+        "/api/members/join/checkout",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name,
-            email,
-            plan,
-            newsletterOptIn,
-            code,
-          }),
+          body: JSON.stringify({ plan }),
         },
       );
       window.location.assign(result.checkoutUrl);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Verification or checkout failed.",
+        err instanceof Error ? err.message : "Could not open checkout.",
       );
       setLoading(false);
     }
   };
 
   return (
-    <div className="mt-4 rounded-2xl border border-ocean-100 bg-white/70 p-5 text-left sm:p-6">
+    <div className="rounded-2xl border border-ocean-200/70 bg-white/70 p-5 text-left sm:p-6">
       {joinedLanding ? (
         <p
           className="rounded-lg bg-white px-4 py-3 text-sm text-ocean-700"
@@ -218,8 +180,8 @@ export function JoinForm({
         </button>
       ) : null}
 
-      {view === "form" && plans ? (
-        <form onSubmit={handleStart} className="mt-4 space-y-4">
+      {plans ? (
+        <form onSubmit={handleCheckout} className="mt-4 space-y-4">
           <fieldset>
             <legend className="sr-only">Choose a plan</legend>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -256,104 +218,15 @@ export function JoinForm({
             </div>
           </fieldset>
 
-          <div>
-            <label htmlFor="join-name" className="sr-only">
-              Name
-            </label>
-            <input
-              id="join-name"
-              type="text"
-              required
-              autoComplete="name"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder={membershipContent.namePlaceholder}
-              className="w-full rounded-xl border border-ocean-200 bg-white px-4 py-3 text-ocean-900 placeholder:text-ocean-400 focus:border-ocean-500 focus:outline-none focus:ring-2 focus:ring-ocean-200"
-            />
-          </div>
-          <div>
-            <label htmlFor="join-email" className="sr-only">
-              Email
-            </label>
-            <input
-              id="join-email"
-              type="email"
-              required
-              autoComplete="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder={membershipContent.emailPlaceholder}
-              className="w-full rounded-xl border border-ocean-200 bg-white px-4 py-3 text-ocean-900 placeholder:text-ocean-400 focus:border-ocean-500 focus:outline-none focus:ring-2 focus:ring-ocean-200"
-            />
-          </div>
-
-          <label className="flex items-start gap-3 text-sm text-ocean-700">
-            <input
-              type="checkbox"
-              checked={newsletterOptIn}
-              onChange={(event) => setNewsletterOptIn(event.target.checked)}
-              className="mt-1"
-            />
-            <span>{membershipContent.newsletterOptInLabel}</span>
-          </label>
-
           <p className="text-xs text-ocean-500">{membershipContent.consentNote}</p>
 
           <button
             type="submit"
-            disabled={loading}
-            className="rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-dark disabled:opacity-60"
+            disabled={loading || mode !== "session"}
+            className="rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/60 disabled:opacity-60"
           >
-            {loading ? "Sending code…" : membershipContent.verifyEmailLabel}
+            {loading ? "Opening checkout…" : membershipContent.checkoutLabel}
           </button>
-        </form>
-      ) : null}
-
-      {view === "verify" ? (
-        <form onSubmit={handleVerify} className="mt-6 space-y-4">
-          {!message ? (
-            <p className="text-sm text-ocean-600">
-              {membershipContent.verifyHint}
-            </p>
-          ) : null}
-          <div>
-            <label htmlFor="join-code" className="sr-only">
-              Verification code
-            </label>
-            <input
-              id="join-code"
-              type="text"
-              inputMode="numeric"
-              pattern="\d{6}"
-              maxLength={6}
-              required
-              value={code}
-              onChange={(event) => setCode(event.target.value)}
-              placeholder={membershipContent.codePlaceholder}
-              className="w-full rounded-xl border border-ocean-200 bg-white px-4 py-3 font-mono tracking-widest text-ocean-900 placeholder:font-sans placeholder:tracking-normal placeholder:text-ocean-400 focus:border-ocean-500 focus:outline-none focus:ring-2 focus:ring-ocean-200"
-            />
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="submit"
-              disabled={loading}
-              className="rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-dark disabled:opacity-60"
-            >
-              {loading ? "Opening checkout…" : membershipContent.checkoutLabel}
-            </button>
-            <button
-              type="button"
-              disabled={loading}
-              onClick={() => {
-                clearFeedback();
-                setView("form");
-                setCode("");
-              }}
-              className="rounded-full border border-ocean-300 bg-white px-6 py-3 text-sm font-semibold text-ocean-800 transition-colors hover:bg-ocean-50 disabled:opacity-60"
-            >
-              Back
-            </button>
-          </div>
         </form>
       ) : null}
     </div>

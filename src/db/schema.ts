@@ -101,7 +101,7 @@ export const otpChallenges = pgTable(
   ],
 );
 
-/** Tokenized newsletter unsubscribe links (`/?unsub=<token>#contact`). */
+/** Tokenized newsletter unsubscribe links (`/?unsub=<token>#membership`). */
 export const unsubTokens = pgTable(
   "unsub_tokens",
   {

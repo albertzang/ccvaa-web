@@ -18,6 +18,7 @@ import {
   createMemberSessionToken,
   requireMemberSessionSecret,
   toPublicMemberSession,
+  type MemberSessionPayload,
 } from "@/lib/members/session";
 import {
   getMemberProfileForSession,
@@ -29,6 +30,7 @@ import {
 } from "@/lib/members/stripe-env";
 import { getStripeClient } from "@/lib/members/stripe";
 import {
+  joinCheckoutFromSessionSchema,
   joinMembershipInputSchema,
   joinMembershipVerifyInputSchema,
   type JoinMembershipInput,
@@ -361,6 +363,86 @@ export async function verifyJoinAndCreateCheckout(
   };
 }
 
+/**
+ * Creates Stripe Checkout for a verified session member (no second OTP).
+ * Newsletter stays on its own toggle — checkout metadata does not opt-in.
+ */
+export async function createJoinCheckoutForSession(
+  session: MemberSessionPayload,
+  input: unknown,
+  options?: { requestOrigin?: string },
+): Promise<JoinVerifyResult> {
+  requireDatabaseUrl();
+  const config = requireStripeJoinConfig();
+
+  const parsed = joinCheckoutFromSessionSchema.parse(input);
+  const offers = await getJoinPlans();
+  assertPlanOffered(parsed.plan, offers);
+
+  if (session.plan !== "none") {
+    throw new MembersJoinError(
+      "MEMBERS_ALREADY_MEMBER",
+      "You already have an active membership.",
+    );
+  }
+
+  const existing = await findMemberByEmail(session.email);
+  if (
+    existing &&
+    existing.membershipStatus === "active" &&
+    existing.membershipPlan !== "none"
+  ) {
+    throw new MembersJoinError(
+      "MEMBERS_ALREADY_MEMBER",
+      "You already have an active membership.",
+    );
+  }
+
+  const email = session.email;
+  const name = (session.name ?? existing?.name ?? "").trim() || "Member";
+  const origin = getAppOrigin(options?.requestOrigin);
+  const stripe = getStripeClient();
+  const priceId = priceIdForPlan(config, parsed.plan);
+  const mode = parsed.plan === "annual" ? "subscription" : "payment";
+
+  const checkout = await stripe.checkout.sessions.create({
+    mode,
+    line_items: [{ price: priceId, quantity: 1 }],
+    customer_email: email,
+    success_url: `${origin}/?joined=1&session_id={CHECKOUT_SESSION_ID}#membership`,
+    cancel_url: `${origin}/#membership`,
+    metadata: {
+      email,
+      name,
+      plan: parsed.plan,
+      newsletterOptIn: "false",
+    },
+    ...(mode === "subscription"
+      ? {
+          subscription_data: {
+            metadata: {
+              email,
+              plan: parsed.plan,
+            },
+          },
+        }
+      : {}),
+  });
+
+  if (!checkout.url) {
+    throw new MembersJoinError(
+      "MEMBERS_STRIPE_ERROR",
+      "Stripe Checkout did not return a URL. Try again later.",
+    );
+  }
+
+  return {
+    email,
+    plan: parsed.plan,
+    checkoutUrl: checkout.url,
+  };
+}
+
 const joinCheckoutSessionInputSchema = z.object({
   sessionId: z
     .string()
@@ -443,7 +525,7 @@ export async function establishMemberSessionFromCheckout(
     memberId: member.id,
     email: member.email,
     name: member.name,
-    plan: member.membershipPlan as Exclude<JoinPlanId, never>,
+    plan: member.membershipPlan,
   });
 
   const memberProfile = await getMemberProfileForSession(payload);

@@ -68,6 +68,15 @@ export type JoinMembershipVerifyInput = z.infer<
   typeof joinMembershipVerifyInputSchema
 >;
 
+/** Session-authenticated Join checkout (plan only; identity from session). */
+export const joinCheckoutFromSessionSchema = z.object({
+  plan: joinPlanIdSchema,
+});
+
+export type JoinCheckoutFromSessionInput = z.infer<
+  typeof joinCheckoutFromSessionSchema
+>;
+
 /** Validates that non-annual plans do not carry renewal dates. */
 export function assertAnnualRenewalConsistency(
   plan: MembershipPlan,
