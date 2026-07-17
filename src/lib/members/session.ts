@@ -205,6 +205,24 @@ export async function setMemberSessionCookie(token: string, expiresAt: Date) {
   cookieStore.set(MEMBER_SESSION_COOKIE, token, cookieOptions(expiresAt));
 }
 
+/**
+ * Sets the member session cookie on an outgoing response (e.g. redirect).
+ * Prefer this over `cookies().set` when returning `NextResponse.redirect`.
+ */
+export function setMemberSessionCookieOnResponse(
+  response: {
+    cookies: { set: (name: string, value: string, options: object) => void };
+  },
+  token: string,
+  expiresAt: Date,
+) {
+  response.cookies.set(
+    MEMBER_SESSION_COOKIE,
+    token,
+    cookieOptions(expiresAt),
+  );
+}
+
 /** Clears the member session cookie. Does not touch admin/Hover cookies. */
 export async function clearMemberSessionCookie() {
   const cookieStore = await cookies();

@@ -123,12 +123,24 @@ CEO product redesign: unify identity, newsletter, and join under `#membership` w
 ### Overall
 
 - Kicked off 2026-07-16. CEO confirmed: newsletter default **A** (off); no OTP on toggle while verified; email unsub link → verified `#membership` with toggle off. Scope also includes a cohesive coastal-brand redesign of the Hero Subscribe / Join buttons and counter badges.
+- Pass 1 (2026-07-16): **hold** — valid `/?unsub=<token>` → HTTP 500 (`setMemberSessionCookie` from RSC `page.tsx`). Contact / verify / toggle / Checkout / Hero passed on tip deploy. Report: `docs/reports/QA-pass1.md`.
+
+### Iteration 2
+
+Fix valid one-click unsub landing: do not set member session cookies from the RSC page. Redeem + establish verified session from a Route Handler or Server Action (or equivalent Next-allowed path), then land on `#membership` with toggle off. Retest paid “perks coming soon…” via seed annual unsub once landing works. Keep Merge gate `epic`.
+
+**Acceptance (delta):**
+- [ ] Valid `/?unsub=<token>#membership` → 200, newsletter off, verified session, toggle off (idempotent)
+- [ ] Invalid/expired token still clear message, no fake session
+- [ ] Paid seed unsub path shows “Membership perks coming soon…”
+- [ ] Pass 1 retest → **continue epic**
 
 ### Links
 
 - Source: CEO product redesign (2026-07-16)
 - Supersedes UI placement from `members-0003` / `members-0021` (Contact newsletter) once shipped
 - Depends on: `members-0003`–`0006`, `members-0015`, `members-0017`, `members-0021` (behavior to fold in)
+- QA Pass 1 (hold): `docs/reports/QA-pass1.md`
 - PR: https://github.com/albertzang/ccvaa-web/pull/8
 
 ---

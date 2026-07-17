@@ -23,6 +23,7 @@ https://ccvaa-web.vercel.app/?unsub=seed-unsub-annual-member#membership
 
 ### Behaviour
 
+- `/?unsub=<token>` redirects to `GET /api/members/newsletter/unsub/landing` (Route Handler) so redeem + session cookie run outside the RSC page; then redirects to `/?unsubscribed=1|already|invalid#membership`.
 - Landing redeems the token server-side (idempotent — safe to reload).
 - Sets `newsletter_status` to `off` only — **never** changes `membership_plan` or `membership_status`.
 - Establishes/resumes a **verified member session** for the token’s member and opens `#membership` in verified state with the newsletter toggle **off**.
@@ -38,5 +39,6 @@ See `.env.example` — `ESP_API_KEY`, `ESP_LIST_ID` (commented placeholders).
 
 - Sync stub: `src/lib/members/esp.ts`
 - Unsub redeem: `src/lib/members/newsletter.ts` → `redeemUnsubToken`
+- Unsub landing (cookie + redirect): `src/app/api/members/newsletter/unsub/landing/route.ts`
 - Session preference: `updateNewsletterPreferenceForSession`
 - URL builder: `buildNewsletterUnsubUrl()` in `esp.ts` (hash `#membership`)

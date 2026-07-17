@@ -1,84 +1,30 @@
+import { redirect } from "next/navigation";
+
 import { AboutSection } from "@/components/AboutSection";
 import { ContactSection } from "@/components/ContactSection";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
-import {
-  MembershipSection,
-} from "@/components/MembershipSection";
+import { MembershipSection } from "@/components/MembershipSection";
 import type { UnsubLanding } from "@/components/MembershipPanel";
-import {
-  isMembersNewsletterError,
-  redeemUnsubToken,
-} from "@/lib/members/newsletter";
-import { MembersDbError } from "@/lib/members/errors";
-import {
-  MembersEnvError,
-  requireDatabaseUrl,
-} from "@/lib/members/env";
-import {
-  getMemberProfileForSession,
-  toPublicMemberProfile,
-} from "@/lib/members/profile";
-import {
-  createMemberSessionToken,
-  isMemberSessionSecretConfigured,
-  setMemberSessionCookie,
-} from "@/lib/members/session";
-import { unsubTokenValueSchema } from "@/lib/members/zod/unsub-token";
 
-async function resolveUnsubLanding(
-  token: string | undefined,
-): Promise<UnsubLanding | undefined> {
-  if (!token) {
+function resolveUnsubLandingFromStatus(
+  status: string | undefined,
+): UnsubLanding | undefined {
+  if (!status) {
     return undefined;
   }
-
-  const parsed = unsubTokenValueSchema.safeParse(token);
-  if (!parsed.success) {
+  if (status === "invalid") {
     return { kind: "invalid" };
   }
-
-  try {
-    requireDatabaseUrl();
-    const result = await redeemUnsubToken({ token: parsed.data });
-
-    if (!isMemberSessionSecretConfigured()) {
-      return {
-        kind: "success",
-        already: result.alreadyUnsubscribed,
-        email: result.email,
-      };
-    }
-
-    const { token: sessionToken, expiresAt, payload } =
-      createMemberSessionToken({
-        memberId: result.memberId,
-        email: result.email,
-        name: result.name,
-        plan: result.plan,
-      });
-    await setMemberSessionCookie(sessionToken, expiresAt);
-
-    const memberProfile = await getMemberProfileForSession(payload);
-    const profile = toPublicMemberProfile(memberProfile, payload.exp);
-
+  if (status === "1" || status === "already") {
     return {
       kind: "success",
-      already: result.alreadyUnsubscribed,
-      email: result.email,
-      profile,
+      already: status === "already",
+      email: "",
     };
-  } catch (error) {
-    if (
-      isMembersNewsletterError(error) ||
-      error instanceof MembersEnvError ||
-      error instanceof MembersDbError
-    ) {
-      return { kind: "invalid" };
-    }
-    throw error;
   }
+  return { kind: "invalid" };
 }
 
 export default async function Home({
@@ -86,12 +32,25 @@ export default async function Home({
 }: {
   searchParams: Promise<{
     unsub?: string | string[];
+    unsubscribed?: string | string[];
     joined?: string | string[];
   }>;
 }) {
   const params = await searchParams;
   const rawToken = Array.isArray(params.unsub) ? params.unsub[0] : params.unsub;
-  const unsubLanding = await resolveUnsubLanding(rawToken);
+
+  // Redeem + Set-Cookie must run in a Route Handler, not this RSC page.
+  if (rawToken) {
+    redirect(
+      `/api/members/newsletter/unsub/landing?token=${encodeURIComponent(rawToken)}`,
+    );
+  }
+
+  const unsubscribedRaw = Array.isArray(params.unsubscribed)
+    ? params.unsubscribed[0]
+    : params.unsubscribed;
+  const unsubLanding = resolveUnsubLandingFromStatus(unsubscribedRaw);
+
   const joinedRaw = Array.isArray(params.joined)
     ? params.joined[0]
     : params.joined;
