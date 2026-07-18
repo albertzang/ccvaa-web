@@ -13,10 +13,13 @@
 
 **Branch name:** `feat/members`  
 **PR link:** https://github.com/albertzang/ccvaa-web/pull/8  
-**Implementation commit:** `86c74c8`
-**Preview URL:** https://ccvaa-1ziz8i31i-azang-projects.vercel.app
-**Preview deployment:** `dpl_BqxHwEaQUuHV5LUKmpvA3CZQCRPf`
+**Implementation commit:** `47b10e3` (empty trigger commit; feature code unchanged since `86c74c8`)
+**Preview URL:** https://ccvaa-5o8uzjx2h-azang-projects.vercel.app
+**Preview URL (branch alias, always latest READY):** https://ccvaa-web-git-feat-members-azang-projects.vercel.app
+**Preview deployment:** `dpl_GCYqkMn3DvmkKeHDuUmBjKCN6qaM`
 **Preview protection:** use both `x-vercel-protection-bypass` and `x-vercel-set-bypass-cookie=true` from `.env.local`; never paste the secret.
+
+> **Redeploy retest (EDGE_CONFIG bake-in).** The previous Preview deploys were built **before** the CEO connected `EDGE_CONFIG`; Vercel captures env at deploy-creation time, so those deploys had no `EDGE_CONFIG` and failed closed to Off even with `preview.members=true`. The deploy above was created **after** `EDGE_CONFIG` was connected (Prod/Preview/Dev), so it now carries `EDGE_CONFIG` and the **On** path is testable. Same Iteration 2 checklist as before — no feature code changed.
 
 **Out of scope:** Production flag changes · https://ccvaa.ca/ · merge to `main` · Events feature · gating webhooks/unsubscribe/admin · in-app flag editor.
 
@@ -87,7 +90,7 @@ Never edit the `production` item. Agents may edit only `preview` for this pass (
 
 ## Known risks / blockers
 
-- Pass 1 On testing is blocked until the CEO connects the single store, seeds all three JSON-object items, and the Preview deployment receives `EDGE_CONFIG`.
+- Pass 1 On testing was previously blocked pending `EDGE_CONFIG`; the store is now connected and the Preview deploy above carries `EDGE_CONFIG`, so On is unblocked for this retest.
 - QA needs Vercel dashboard access to edit the Preview item.
 - Resend/Mailosaur and Stripe test-mode timing remain existing live-flow risks.
 
