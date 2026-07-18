@@ -7,78 +7,88 @@
 **Epic branch:** `feat/members`  
 **Merge gate:** `epic`  
 **Filled by:** Developer  
-**Iteration:** `1`
+**Iteration:** `2`
 
 **Save as:** `docs/handoffs/HANDOFF-QA-pass1.md`
 
 **Branch name:** `feat/members`  
 **PR link:** https://github.com/albertzang/ccvaa-web/pull/8  
-**Implementation commit:** `061160a`  
-**Preview URL:** https://ccvaa-r3syu9ogc-azang-projects.vercel.app  
-**Preview deployment:** `dpl_AKoBNs7ieEbpvnGkBYasLeLpYazK`  
+**Implementation commit:** `86c74c8`
+**Preview URL:** https://ccvaa-1ziz8i31i-azang-projects.vercel.app
+**Preview deployment:** `dpl_BqxHwEaQUuHV5LUKmpvA3CZQCRPf`
 **Preview protection:** use both `x-vercel-protection-bypass` and `x-vercel-set-bypass-cookie=true` from `.env.local`; never paste the secret.
 
-**Out of scope:** Production flag changes · https://ccvaa.ca/ · merge to `main` · Events feature · gating webhooks/unsubscribe/admin · ESP Production go-live.
+**Out of scope:** Production flag changes · https://ccvaa.ca/ · merge to `main` · Events feature · gating webhooks/unsubscribe/admin · in-app flag editor.
 
 ## Environments to test this pass
 
 - [ ] Dev — http://localhost:3000/ (optional)
-- [ ] Preview — https://ccvaa-r3syu9ogc-azang-projects.vercel.app (required)
+- [ ] Preview — use the exact URL above (required)
 - [ ] Production — n/a (Pass 1; agents must never flip Production flags)
 
-## Preview flag setup and operation
+## Edge Config setup
 
-At handoff time, `npx vercel env ls preview` showed all four switch variables still pending:
+The CEO connects the project’s one Edge Config store to all environments so the app receives only `EDGE_CONFIG`. In the Vercel dashboard, Edge Config → Items must contain these three top-level items, each with a JSON object value:
 
-- `EDGE_CONFIG` — read connection string
-- `EDGE_CONFIG_ID` — Preview store ID
-- `VERCEL_API_TOKEN` — write-capable token
-- `VERCEL_TEAM_ID` — team scope (optional in code, expected for this team)
+```json
+{
+  "production": { "members": false },
+  "preview": { "members": false },
+  "development": { "members": false }
+}
+```
 
-The current Preview therefore intentionally fails closed to **Members Off**. After the CEO adds the Preview-scoped values, a new Preview deployment is required so that deployment receives them. Preview must use a store separate from Production.
+The dashboard may display these as three item rows named `production`, `preview`, and `development`. Do not create separate stores. Do not add `EDGE_CONFIG_ID`, `VERCEL_API_TOKEN`, or `VERCEL_TEAM_ID` to the app.
 
-After env is available:
+## How QA flips the Preview flag
 
-1. Sign into Hover webmail through Preview `/admin`, then open **Members**.
-2. Read the current flag from the **Members on public site** control. Off is the default for missing/non-boolean/read-error values.
-3. Click the control to write **On** or **Off**. It calls authenticated `PATCH /api/admin/feature-flags/members` with `{"enabled":true|false}`; refresh/read uses authenticated `GET /api/admin/feature-flags/members`.
-4. Allow up to about 10 seconds, then refresh the homepage and retry a gated API.
-5. Restore the Preview flag to **Off** after testing unless the CEO/PM asks to leave it On.
+1. Open Vercel dashboard → the connected Edge Config store → **Items**.
+2. Edit only the `preview` item’s JSON object.
+3. Set `"members": false` for Off or `"members": true` for On, preserving sibling flags if present.
+4. Save and allow a short propagation window, then refresh the Preview homepage and retry a gated API. No app redeploy should be needed for a value-only change.
+5. At the end of Pass 1, restore `preview.members` to `false`.
 
-Do not call the write API without the authenticated admin mail session. Never expose the Vercel token or Edge Config connection string.
+Never edit the `production` item. Agents may edit only `preview` for this pass (`development` is allowed only for local Dev testing). Flag changes happen in Vercel, not `/admin`.
 
 ## What changed
 
-- Generic typed slug-keyed flag helpers under `src/lib/flags/`: fail-closed Edge Config read and Vercel REST API upsert.
-- Generic mail-session-authenticated + Zod-validated admin flag route and reusable switch UI.
-- Members Off hides the Membership nav link, Hero Subscribe/Join CTAs and badges, and the full `#membership` portal.
-- Members Off returns stable `404` JSON from public user-initiated member APIs:
+- One Edge Config store now holds environment buckets keyed by `production`, `preview`, and `development`; each bucket contains generic slug-keyed booleans (`members` first).
+- `VERCEL_ENV` selects the bucket; local/unset uses `development`. Missing/unknown environment, bucket, key, non-boolean value, unset `EDGE_CONFIG`, timeout, or read error fails closed to Off.
+- The Admin Members flag control, authenticated flag API, and all in-app Edge Config write code were removed.
+- Members Off still hides the Membership nav link, Hero Subscribe/Join CTAs and badges, and the full `#membership` portal.
+- Members Off still returns stable `404` JSON from public user-initiated member APIs:
   `{"ok":false,"code":"MEMBERS_FEATURE_UNAVAILABLE","message":"The members feature is not available."}`
-- Always live: Stripe webhook, unsubscribe redeem/landing, member logout/health, admin roster/switch, and future `/api/members/esp/*` hooks.
-- Unsubscribe landing still renders a minimal confirmation while Members is Off.
+- Always live: Stripe webhook, unsubscribe redeem/landing, member logout/health, admin roster, and future `/api/members/esp/*` hooks.
 
 ## Focus checklist
 
 ### Off (test first and restore last)
+
+- [ ] Set `preview.members` false.
 - [ ] Homepage 200: no Membership nav link, no `#membership` portal, no Hero Subscribe/Join CTAs or count badges; About and Contact remain balanced.
 - [ ] `POST /api/members/verify/start` and representative preference/join/profile requests return the stable `404` body above.
 - [ ] Stripe webhook route is not switch-blocked (a malformed unsigned probe may return its own 400).
 - [ ] Invalid `/?unsub=<token>` still lands on a minimal invalid/expired confirmation; valid seed unsubscribe still redeems and leaves paid membership unchanged.
-- [ ] `/admin` Members roster and flag control remain available.
+- [ ] `/admin` Members roster remains available and has no feature-switch control.
 
 ### On
+
+- [ ] Set `preview.members` true.
 - [ ] After propagation, homepage matches members-0022: Membership nav/portal + Hero CTAs/counters.
 - [ ] Verify OTP, newsletter preference, Join plans/checkout, and profile APIs are no longer switch-blocked and preserve prior behavior.
-- [ ] Flip On→Off reflects without a code redeploy after the propagation window.
+- [ ] Flip On→Off reflects without a code redeploy.
 
-### Security and resilience
-- [ ] Unauthenticated GET/PATCH of `/api/admin/feature-flags/members` returns admin-auth required.
-- [ ] Invalid slug/body is rejected; no secret appears in browser responses or logs.
+### Isolation and resilience
+
+- [ ] `preview.members` changes do not require or modify `production.members`.
+- [ ] `/api/admin/feature-flags/members` no longer exists.
 - [ ] Missing Edge Config env does not crash build/homepage and remains Off.
+- [ ] Restore `preview.members` to false after testing.
 
 ## Known risks / blockers
 
-- **Blocker for On/write testing:** Preview Edge Config env was not configured when this handoff was written. CEO must add it and trigger/redeploy Preview.
+- Pass 1 On testing is blocked until the CEO connects the single store, seeds all three JSON-object items, and the Preview deployment receives `EDGE_CONFIG`.
+- QA needs Vercel dashboard access to edit the Preview item.
 - Resend/Mailosaur and Stripe test-mode timing remain existing live-flow risks.
 
 ## Report back with
