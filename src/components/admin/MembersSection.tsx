@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useId, useState } from "react";
 
-import { FeatureFlagSwitch } from "@/components/admin/FeatureFlagSwitch";
 import type { AdminRosterMember } from "@/lib/members/zod/admin-roster";
 import type {
   MembershipPlan,
@@ -280,14 +279,6 @@ export function MembersSection({ hidden = false }: MembersSectionProps) {
           {loading ? "Loading…" : `${total} member${total === 1 ? "" : "s"}`}
         </p>
       </header>
-
-      <div className="mb-4">
-        <FeatureFlagSwitch
-          slug="members"
-          label="Members on public site"
-          description="Controls the homepage membership portal, its Subscribe and Join calls to action, and public member APIs."
-        />
-      </div>
 
       <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="sm:col-span-2">

@@ -92,7 +92,6 @@
 - Table shows plan, membership status, newsletter flag; **Annual** rows show anniversary date and next renewal
 - Edit (modal + confirm) and delete (confirm dialog); mutations validated with Zod; API routes under `/api/admin/members`
 - Fail closed when `DATABASE_URL` is missing or Neon schema is unmigrated (503) — UI shows error state
-- **Members on public site** On/Off control reads and writes the environment's Vercel Edge Config store; mail-session auth and Zod protect the generic slug-keyed admin API
 
 ### Post-auth scaffolds (placeholders only)
 - **Events** — coming soon
@@ -116,7 +115,7 @@
 **Stack:** Neon + Drizzle + Zod · Stripe · Resend · ESP · Mailosaur. Admin roster (`0008`); Resend/ESP new-tab links (`0010`); later: in-admin blast, member perks, impersonation.  
 **Standing:** No Resend/ESP iframes; member auth = email OTP (no OAuth/passwords); homepage SPA anchors over separate marketing routes.
 
-**Public feature switch (members-0023, epic `feat/members`):** Generic slug-keyed booleans in Vercel Edge Config (`members` first). Reads use `@vercel/edge-config`; missing key, read failure, or unset `EDGE_CONFIG` fails closed to Off. Admin writes use the Vercel REST API with `EDGE_CONFIG_ID`, `VERCEL_API_TOKEN`, and optional `VERCEL_TEAM_ID`. Preview/Local and Production use different stores. **Production values are CEO/Admin-only; agents never flip Production.** CEO/Admin and agents may flip Preview/Local for testing and should normally restore Off afterward.
+**Public feature switch (members-0023, epic `feat/members`):** One shared Edge Config store has three top-level JSON-object items: `production = { "members": false }`, `preview = { "members": false }`, and `development = { "members": false }`. Future flags are sibling booleans in each object. The app reads the item matching `VERCEL_ENV` (`development` when local/unset) via `@vercel/edge-config`; missing/unknown environment, bucket, key, invalid value, read failure, or unset `EDGE_CONFIG` fails closed to Off. Flags are managed in the Vercel dashboard or by an external API — there is no Admin Console toggle or in-app write path, and the app needs only `EDGE_CONFIG`. **Production values are CEO/Admin-only; agents never flip Production.** CEO/Admin and agents may flip Preview/Development for testing and should restore Off afterward.
 
 **Platform (members-0001, epic `feat/members`):** Drizzle schema on Neon — orthogonal `newsletter_status` vs `membership_plan`; OTP challenges; unsub tokens; `stripe_webhook_events` for Join idempotency. Annual plans use `membership_anniversary` + `next_renewal_at` (null for Founding/Lifetime). Shared Zod in `src/lib/members/zod/`. `GET /api/members/health` fails closed (503) without `DATABASE_URL` (Stripe/Resend status informational). Migrate/seed: `npm run db:migrate`, `npm run db:seed` (seeds non-Production only). Schema notes: [`docs/members/schema.md`](../members/schema.md).
 
@@ -164,7 +163,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
-| 2026-07-17 | **members-0023** (epic `feat/members`): generic Edge Config public feature switches; Members Off hides homepage portal/CTAs and gates public APIs while webhooks, unsubscribe, and admin remain live |
+| 2026-07-17 | **members-0023** (epic `feat/members`): one shared Edge Config store with environment buckets; Vercel-managed Members switch hides homepage portal/CTAs and gates public APIs while webhooks, unsubscribe, and admin remain live |
 | 2026-07-16 | **members-0022** (epic `feat/members`): `#membership` verified-email portal; newsletter moves from Contact; unsub → `#membership` + session; Hero Subscribe+Join → `#membership` with cohesive coastal CTAs |
 | 2026-07-16 | **members-0021** (epic `feat/members`): Contact newsletter tabs Subscribe \| Unsubscribe; email-only unsub with distinct outcomes; one-click `/?unsub=` lands on Unsubscribe tab |
 | 2026-07-16 | **members-0020** (epic `feat/members`): Membership UI declutter — no section/Join titles; Sign-in \| Join tabs (Sign-in default); two-column plan grid; compact profile; Hero badges compact K/M/B + brand contrast |
