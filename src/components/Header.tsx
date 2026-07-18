@@ -4,8 +4,11 @@ import { useEffect, useState } from "react";
 import { BrandMark } from "@/components/BrandMark";
 import { navigation } from "@/lib/site";
 
-export function Header() {
+export function Header({ membersEnabled }: { membersEnabled: boolean }) {
   const [overHero, setOverHero] = useState(true);
+  const visibleNavigation = membersEnabled
+    ? navigation
+    : navigation.filter((item) => item.href !== "#membership");
 
   useEffect(() => {
     const hero = document.getElementById("hero");
@@ -41,7 +44,7 @@ export function Header() {
 
         <nav aria-label="Main navigation">
           <ul className="flex items-center gap-1 sm:gap-2">
-            {navigation.map((item) => (
+            {visibleNavigation.map((item) => (
               <li key={item.href}>
                 <a
                   href={item.href}

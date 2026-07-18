@@ -1,7 +1,7 @@
 # CCVAA Web — Feature Inventory
 
 > **Owner:** Product Manager agent  
-> **Updated:** 2026-07-16  
+> **Updated:** 2026-07-17  
 > Keep this document current whenever features ship or change. Work-to-do: [`BACKLOG.md`](BACKLOG.md).
 
 ## Product summary
@@ -16,7 +16,7 @@
 
 ## Public site (`/`)
 
-**Page order (top → bottom):** Nav → Hero → Membership (`#membership`) → About (`#about`) → Contact (`#contact`) → Footer.
+**Page order (top → bottom):** Nav → Hero → Membership (`#membership`, when enabled) → About (`#about`) → Contact (`#contact`) → Footer.
 
 ### Header / nav
 - Fixed overlay header; style switches when scrolling past hero
@@ -32,6 +32,7 @@
 - Cohesive coastal CTA pair: shared dimensions/typography/radius/focus; Subscribe = solid coral; Join = cream glass; both use the same ocean-950/cream counter badge treatment
 - Live counts as compact (`K`/`M`/`B`) circle badges (newsletter `on` / paid `active`); exact counts in CTA `aria-label`
 - Counts stub to `0` when `DATABASE_URL` / members DB unavailable; homepage still loads (`members-0007`)
+- The Members feature switch hides both CTAs and counter badges when Off
 
 ### Membership (`#membership`)
 - After Hero, before About — compact verified-email portal (no Join | Sign-in tabs)
@@ -41,6 +42,7 @@
 - Checkout return `/?joined=1&session_id=…#membership` auto-establishes member session
 - One-click `/?unsub=<token>#membership` → newsletter off + verified session + toggle off (idempotent); invalid token shows clear message without faking verification
 - APIs: `POST /api/members/verify/{start,verify}`, `POST /api/members/newsletter/preference` (session), `POST /api/members/join/checkout` (session), plus `join/plans`, `join/session`, Stripe webhook, profile name/email. Fail closed without Stripe/`DATABASE_URL`/session secrets.
+- Generic Edge Config flag `members` gates the public portal and user-initiated member APIs. Missing/unreadable/unset config is Off. Stripe webhooks, unsubscribe redeem/landing, admin, health/logout, and ESP hooks remain live.
 
 ### About (`#about`)
 - Intro paragraphs
@@ -90,6 +92,7 @@
 - Table shows plan, membership status, newsletter flag; **Annual** rows show anniversary date and next renewal
 - Edit (modal + confirm) and delete (confirm dialog); mutations validated with Zod; API routes under `/api/admin/members`
 - Fail closed when `DATABASE_URL` is missing or Neon schema is unmigrated (503) — UI shows error state
+- **Members on public site** On/Off control reads and writes the environment's Vercel Edge Config store; mail-session auth and Zod protect the generic slug-keyed admin API
 
 ### Post-auth scaffolds (placeholders only)
 - **Events** — coming soon
@@ -113,6 +116,8 @@
 **Stack:** Neon + Drizzle + Zod · Stripe · Resend · ESP · Mailosaur. Admin roster (`0008`); Resend/ESP new-tab links (`0010`); later: in-admin blast, member perks, impersonation.  
 **Standing:** No Resend/ESP iframes; member auth = email OTP (no OAuth/passwords); homepage SPA anchors over separate marketing routes.
 
+**Public feature switch (members-0023, epic `feat/members`):** Generic slug-keyed booleans in Vercel Edge Config (`members` first). Reads use `@vercel/edge-config`; missing key, read failure, or unset `EDGE_CONFIG` fails closed to Off. Admin writes use the Vercel REST API with `EDGE_CONFIG_ID`, `VERCEL_API_TOKEN`, and optional `VERCEL_TEAM_ID`. Preview/Local and Production use different stores. **Production values are CEO/Admin-only; agents never flip Production.** CEO/Admin and agents may flip Preview/Local for testing and should normally restore Off afterward.
+
 **Platform (members-0001, epic `feat/members`):** Drizzle schema on Neon — orthogonal `newsletter_status` vs `membership_plan`; OTP challenges; unsub tokens; `stripe_webhook_events` for Join idempotency. Annual plans use `membership_anniversary` + `next_renewal_at` (null for Founding/Lifetime). Shared Zod in `src/lib/members/zod/`. `GET /api/members/health` fails closed (503) without `DATABASE_URL` (Stripe/Resend status informational). Migrate/seed: `npm run db:migrate`, `npm run db:seed` (seeds non-Production only). Schema notes: [`docs/members/schema.md`](../members/schema.md).
 
 **Newsletter (members-0003 / portal `members-0022`, epic `feat/members`):** Preference lives on `#membership` after email verify. First verify defaults newsletter **off** (CASL). Session toggle on/off requires no OTP. Token unsub `/?unsub=<token>#membership` (idempotent; newsletter off + verified session + toggle UI off; membership unchanged). ESP sync stub in `src/lib/members/esp.ts` — footer URL: [`docs/members/esp.md`](../members/esp.md). APIs: `POST /api/members/newsletter/preference` (session), legacy subscribe/confirm/unsub routes retained for tooling.
@@ -135,7 +140,7 @@
 | Preview | Per-branch/PR Vercel URL (pre-merge QA target) |
 | DNS / email | Hover |
 | CI | lint, typecheck, build (GitHub Actions) |
-| Stack | Next.js App Router, React, Tailwind; admin auth = Hover mail-session; Members DB = Neon + Drizzle (`DATABASE_URL`) |
+| Stack | Next.js App Router, React, Tailwind; admin auth = Hover mail-session; Members DB = Neon + Drizzle (`DATABASE_URL`); public feature flags = Vercel Edge Config |
 | Ship path | Feature branch → QA Preview → merge → cleanup → QA on `ccvaa-web.vercel.app` (Verifier = `agent`). **Epic/milestone (opt-in):** shared branch; Pass 1 per ticket; merge only on **merge milestone**. **Verifier = `ceo`:** CEO verifies (defaults: `direct-to-main` + Production pass2). Work IDs `{feature-slug}-{NNNN}` — [`BACKLOG.md`](BACKLOG.md). **Baseline** pass = Production audit with no PR. See `docs/protocols/GIT_DEPLOY.md`. CEO may manually check `ccvaa.ca`. |
 
 ### Important technical notes for Developer
@@ -159,6 +164,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-17 | **members-0023** (epic `feat/members`): generic Edge Config public feature switches; Members Off hides homepage portal/CTAs and gates public APIs while webhooks, unsubscribe, and admin remain live |
 | 2026-07-16 | **members-0022** (epic `feat/members`): `#membership` verified-email portal; newsletter moves from Contact; unsub → `#membership` + session; Hero Subscribe+Join → `#membership` with cohesive coastal CTAs |
 | 2026-07-16 | **members-0021** (epic `feat/members`): Contact newsletter tabs Subscribe \| Unsubscribe; email-only unsub with distinct outcomes; one-click `/?unsub=` lands on Unsubscribe tab |
 | 2026-07-16 | **members-0020** (epic `feat/members`): Membership UI declutter — no section/Join titles; Sign-in \| Join tabs (Sign-in default); two-column plan grid; compact profile; Hero badges compact K/M/B + brand contrast |

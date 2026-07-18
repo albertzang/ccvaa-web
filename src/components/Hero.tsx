@@ -29,8 +29,8 @@ function HeroCtaBadge({ value }: { value: number }) {
 const ctaBaseClass =
   "relative inline-flex min-h-12 min-w-[9.5rem] items-center justify-center rounded-full px-6 py-3 text-sm font-semibold tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream focus-visible:ring-offset-2 focus-visible:ring-offset-ocean-950";
 
-export async function Hero() {
-  const counts = await getHeroCounts();
+export async function Hero({ membersEnabled }: { membersEnabled: boolean }) {
+  const counts = membersEnabled ? await getHeroCounts() : null;
 
   return (
     <section
@@ -69,24 +69,26 @@ export async function Hero() {
           {heroContent.subheadline}
         </p>
 
-        <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-5">
-          <a
-            href="#membership"
-            className={`${ctaBaseClass} bg-coral text-white hover:bg-coral-dark`}
-            aria-label={`${heroContent.subscribeLabel}, ${exactCountFormatter.format(counts.newsletterSubscribers)} ${heroContent.newsletterCountLabel}`}
-          >
-            {heroContent.subscribeLabel}
-            <HeroCtaBadge value={counts.newsletterSubscribers} />
-          </a>
-          <a
-            href="#membership"
-            className={`${ctaBaseClass} border border-cream/55 bg-cream/15 text-cream backdrop-blur-sm hover:bg-cream/25`}
-            aria-label={`${heroContent.joinLabel}, ${exactCountFormatter.format(counts.paidMembers)} ${heroContent.paidMembersCountLabel}`}
-          >
-            {heroContent.joinLabel}
-            <HeroCtaBadge value={counts.paidMembers} />
-          </a>
-        </div>
+        {counts && (
+          <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-5">
+            <a
+              href="#membership"
+              className={`${ctaBaseClass} bg-coral text-white hover:bg-coral-dark`}
+              aria-label={`${heroContent.subscribeLabel}, ${exactCountFormatter.format(counts.newsletterSubscribers)} ${heroContent.newsletterCountLabel}`}
+            >
+              {heroContent.subscribeLabel}
+              <HeroCtaBadge value={counts.newsletterSubscribers} />
+            </a>
+            <a
+              href="#membership"
+              className={`${ctaBaseClass} border border-cream/55 bg-cream/15 text-cream backdrop-blur-sm hover:bg-cream/25`}
+              aria-label={`${heroContent.joinLabel}, ${exactCountFormatter.format(counts.paidMembers)} ${heroContent.paidMembersCountLabel}`}
+            >
+              {heroContent.joinLabel}
+              <HeroCtaBadge value={counts.paidMembers} />
+            </a>
+          </div>
+        )}
       </div>
     </section>
   );
