@@ -99,9 +99,9 @@
 
 ---
 
-## Members (planned)
+## Members
 
-> Work IDs: [`backlogs/members-BACKLOG.md`](backlogs/members-BACKLOG.md). Shipped behavior lands in Public / Admin sections above as items complete.
+> Work IDs: [`backlogs/members-BACKLOG.md`](backlogs/members-BACKLOG.md). First epic milestone on Production (PR #8); public surface gated by Edge Config `production.members` (default Off) until CEO go-live (`members-0009`).
 
 **Two orthogonal axes:** Newsletter ⊥ Membership — both managed under `#membership` after verified email. A paid member may or may not be on the newsletter.
 
@@ -163,6 +163,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-18 | **Members epic milestone** merged to Production (PR #8); Pass 2 **ship confirmed** for `members-0001`–`0008`, `0014`–`0023`. Public Members remains behind Edge Config `production.members` (default Off) until CEO go-live (`members-0009`) |
 | 2026-07-17 | **members-0023** (epic `feat/members`): one shared Edge Config store with environment buckets; Vercel-managed Members switch hides homepage portal/CTAs and gates public APIs while webhooks, unsubscribe, and admin remain live |
 | 2026-07-16 | **members-0022** (epic `feat/members`): `#membership` verified-email portal; newsletter moves from Contact; unsub → `#membership` + session; Hero Subscribe+Join → `#membership` with cohesive coastal CTAs |
 | 2026-07-16 | **members-0021** (epic `feat/members`): Contact newsletter tabs Subscribe \| Unsubscribe; email-only unsub with distinct outcomes; one-click `/?unsub=` lands on Unsubscribe tab |

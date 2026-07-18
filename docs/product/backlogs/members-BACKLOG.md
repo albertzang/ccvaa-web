@@ -3,7 +3,7 @@
 **Feature:** Members  
 **Slug:** `members`  
 **Owner:** Product Manager  
-**Next ID:** `0023`
+**Next ID:** `0024`
 
 Canonical work IDs: `members-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
@@ -38,7 +38,35 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 5. Then `next`: `0010` links → `0009` go-live (CEO); `later`: `0011`–`0013`
 6. Portal redesign — `0022` (CEO kickoff when ready)
 
-**Ship lane:** Default for Verifier=`agent` tickets in the first Members milestone: **Epic branch `feat/members`**, **Merge gate `epic`** (fields set on `0001`–`0008`, `0010`, `0014`–`0022`). `members-0009` (CEO go-live) stays outside that gate. See [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
+**Ship lane:** First Members milestone **merged to `main`** 2026-07-18 (PR #8); epic branch `feat/members` deleted. Pass 2 **ship confirmed**. Remaining: `members-0009` (CEO go-live / Production flag), `0010` if still open, `0011`–`0013` later. See [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
+
+---
+
+## members-0023 — Public homepage feature switches via Edge Config (members first)
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `completed` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
+| **Epic branch** | `feat/members` |
+| **Merge gate** | `epic` |
+
+### Description
+
+Generic public feature-switch via **one** Vercel Edge Config store nested by env (`production` / `preview` / `development` → slug flags). First flag = **Members**. Managed in Vercel dashboard only (no Admin Console toggle). Default **Off**. Gates public homepage Members UI + public user-initiated `/api/members/*`; Stripe webhooks, unsub, admin roster always live. Production flips = CEO/Admin only; Preview/Dev = CEO/Admin + agents for tests.
+
+### Overall
+
+- Shipped on Members epic milestone. Pass 1 continue epic (Iter 2 nested store + no admin UI). Pass 2 (2026-07-18): **ship confirmed** with `production.members` Off (fail-closed). PR #8 merge `0f12b0d`.
+
+### Links
+
+- Source: CEO (2026-07-16–17)
+- PR: https://github.com/albertzang/ccvaa-web/pull/8
 
 ---
 
@@ -48,7 +76,7 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -134,6 +162,7 @@ Fix valid one-click unsub landing: do not set member session cookies from the RS
 - [ ] Invalid/expired token still clear message, no fake session
 - [ ] Paid seed unsub path shows “Membership perks coming soon…”
 - [ ] Pass 1 retest → **continue epic**
+- Pass 2 (2026-07-18): Members epic milestone **ship confirmed** on Production (PR #8).
 
 ### Links
 
@@ -151,7 +180,7 @@ Fix valid one-click unsub landing: do not set member session cookies from the RS
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -196,7 +225,7 @@ Subscribe path (double opt-in + name required) stays unless needed for tab layou
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -244,7 +273,7 @@ CEO manual-test refinement after `members-0019`: further reduce the public Membe
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -285,7 +314,7 @@ Same ticket: Hero Subscriber/Member counts become a **simple number in a circle*
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -320,7 +349,7 @@ CEO feedback: some explanatory notes on Join / newsletter / membership UI feel e
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -356,7 +385,7 @@ Make **Name required** on newsletter subscribe (Contact). Ensure Name validation
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -393,7 +422,7 @@ CEO: Subscriber / Member counters should read as **annotations beside** the Hero
 |-------|--------|
 | **Type** | `bug` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Source** | `ceo` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
@@ -437,7 +466,7 @@ CEO: Subscriber / Member counters should read as **annotations beside** the Hero
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -615,7 +644,7 @@ Harden ESP preference sync. CEO sets live fees/cap/Price IDs + Resend/Stripe/ESP
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -652,7 +681,7 @@ Replace Members scaffold with roster gated by Hover mail-session. Filter/search 
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -687,7 +716,7 @@ Hero **Subscribe** + **Join** with live counters (anchors only): Subscribe → `
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -725,7 +754,7 @@ Logged-in face of `#membership` (same slot as Join). Profile: name; email change
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -763,7 +792,7 @@ Homepage SPA login wall for `#membership`: 6-digit OTP (Resend) → httpOnly ses
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -803,7 +832,7 @@ Logged-out `#membership` Join UI + Stripe Checkout (test on Dev/Preview). Flow: 
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -844,7 +873,7 @@ Contact `#contact` owns the **Newsletter** axis: subscribe (double opt-in via Re
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -877,7 +906,7 @@ Resend send path; shared confirm + OTP helpers (DB challenges, expiry, rate limi
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
