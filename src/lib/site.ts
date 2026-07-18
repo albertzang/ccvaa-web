@@ -37,6 +37,7 @@ export const organization = {
 } as const;
 
 export const navigation = [
+  { label: "Membership", href: "#membership" },
   { label: "About", href: "#about" },
   { label: "Contact", href: "#contact" },
 ] as const;
@@ -46,6 +47,10 @@ export const heroContent = {
   headline: "Celebrating visual arts from coast to coast",
   subheadline:
     "We bring artists, educators, and communities together to create, learn, and share the power of visual expression.",
+  subscribeLabel: "Subscribe",
+  joinLabel: "Join",
+  newsletterCountLabel: "Newsletter subscribers",
+  paidMembersCountLabel: "Paid members",
 } as const;
 
 export const aboutContent = {
@@ -142,4 +147,67 @@ export const contactContent = {
     "Interested in partnering, volunteering, or learning more about our programs? We would love to hear from you.",
   emailLabel: "Email",
   addressLabel: "Mailing address",
+} as const;
+
+export const membershipContent = {
+  gateHeadline: "Verify your email to unlock the newsletter and membership.",
+  gateSupport:
+    "One code. Then subscribe, join, or both — on your terms.",
+  sendCodeLabel: "Send code",
+  verifyEmailLabel: "Verify email",
+  verifyHint: "Enter the 6-digit code we emailed you.",
+  namePlaceholder: "Your name",
+  emailPlaceholder: "you@example.com",
+  codePlaceholder: "6-digit code",
+  nameSavingLabel: "Saving…",
+  nameSavedLabel: "Name saved",
+  nameSaveErrorLabel: "Could not save name.",
+  changeEmailLabel: "Change email",
+  emailSendCodeLabel: "Send code",
+  emailVerifyLabel: "Confirm email",
+  emailVerifyHint: "Enter the 6-digit code we sent to your new address.",
+  newsletterToggleLabel: "Newsletter",
+  newsletterToggleDescription:
+    "Occasional updates on exhibitions, programs, and community news. Separate from paid membership (CASL).",
+  newsletterOnLabel: "Subscribed",
+  newsletterOffLabel: "Not subscribed",
+  perksComingSoon: "Membership perks coming soon…",
+  checkoutLabel: "Continue to checkout",
+  consentNote:
+    "Membership is separate from the newsletter. You can change either anytime while verified.",
+  logoutLabel: "Sign out",
+  profilePlanLabel: "Plan",
+  profileAnniversaryLabel: "Anniversary",
+  profileNextRenewalLabel: "Next renewal",
+  joinedSuccess:
+    "Thanks for joining. Your membership session is ready.",
+  joinedActivating:
+    "Payment received — activating your membership and signing you in…",
+  joinedSessionTimeout:
+    "Membership may still be activating. Refresh this page, or verify your email again.",
+  unsubLandingSuccess:
+    "You have been unsubscribed from the CCVAA newsletter. Your paid membership, if any, is unchanged.",
+  unsubLandingAlready:
+    "You were already unsubscribed. Your paid membership, if any, is unchanged.",
+  unsubLandingInvalid: "This unsubscribe link is invalid or has expired.",
+} as const;
+
+export const newsletterContent = {
+  title: "Newsletter",
+  description:
+    "Occasional updates on exhibitions, programs, and community news.",
+  subscribeLabel: "Subscribe",
+  unsubscribeLabel: "Unsubscribe",
+  emailPlaceholder: "you@example.com",
+  namePlaceholder: "Your name",
+  codePlaceholder: "6-digit code",
+  consentNote:
+    "By subscribing you consent to email from CCVAA (CASL). Unsubscribe anytime. Not a membership.",
+  pendingNote:
+    "Enter the 6-digit code we emailed you to confirm.",
+  unsubLandingSuccess:
+    "You have been unsubscribed from the CCVAA newsletter. Your paid membership, if any, is unchanged.",
+  unsubLandingAlready:
+    "You were already unsubscribed. Your paid membership, if any, is unchanged.",
+  unsubLandingInvalid: "This unsubscribe link is invalid or has expired.",
 } as const;

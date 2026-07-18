@@ -16,7 +16,7 @@
 
 There is **no** long-lived staging site today. **Preview = pre-merge staging.**
 
-**Preview access:** Previews use Vercel Deployment Protection. QA bypasses via `VERCEL_AUTOMATION_BYPASS_SECRET` in gitignored `.env.local` (query `x-vercel-protection-bypass`). Full rules: `docs/protocols/PREVIEW_PROTECTION.md`.
+**Preview access:** Previews use Vercel Deployment Protection. QA bypasses via `VERCEL_AUTOMATION_BYPASS_SECRET` in gitignored `.env.local`. **Browser Pass 1** needs both `x-vercel-protection-bypass` and `x-vercel-set-bypass-cookie=true` on the same navigation. Full rules: `docs/protocols/PREVIEW_PROTECTION.md`.
 
 ## Deployment retention (Vercel)
 

@@ -28,16 +28,17 @@ Follow `docs/protocols/GIT_DEPLOY.md`.
 
 **Epic / milestone:** if handoff Merge gate is `epic`, Pass 1 still runs on Preview; sign-off **continue epic** (not merge to `main`) when the ticket looks good. Pass 2 runs once after CEO/PM **merge milestone**. See [`GIT_DEPLOY.md`](../../docs/protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
 
-**Preview protection:** Before opening Preview, read `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local` and navigate with  
-`?x-vercel-protection-bypass=<secret>` (or `&…`). See `docs/protocols/PREVIEW_PROTECTION.md`.  
+**Preview protection:** Before opening Preview, read `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local` and navigate with **both**  
+`?x-vercel-protection-bypass=<secret>&x-vercel-set-bypass-cookie=true` (or `&…` if a query already exists).  
+Query-only (secret without set-bypass-cookie) is **insufficient** for interactive browser forms / same-origin `fetch`. curl/API may use header or query alone. See `docs/protocols/PREVIEW_PROTECTION.md`.  
 If secret empty → block (ask CEO to fill `.env.local`). If Vercel login wall persists → block, do not thrash. Never commit or report the secret.
 
-Always record the **exact** URL tested (you may omit the bypass query from the written report URL; note “bypass used”).
+Always record the **exact** URL tested (you may omit the bypass query from the written report URL; note “bypass + set-bypass-cookie used”).
 
 ## Process
 
 1. Read handoff — confirm **Pass 1, 2, or baseline**, **Backlog work ID** (required for Pass 1/2; `n/a` for baseline), and URLs. Blank work ID on feature work → **block**. If the backlog item’s **Verifier = `ceo`**, you should not receive a handoff — stop and ask PM.
-2. **Pass 1:** apply Preview protection bypass from `.env.local` before browsing
+2. **Pass 1:** apply Preview protection bypass from `.env.local` before browsing — both bypass secret **and** `x-vercel-set-bypass-cookie=true` on the same navigation
 3. Run focused checklist + handoff-specific items (baseline often = full FEATURES.md)
 4. Write report as `docs/reports/QA-pass1.md` (or `QA-pass2.md` / `QA-baseline.md`) from `docs/templates/qa-report.md`. Put feature work ID in the **body** when applicable (baseline: `n/a`). On **retest**, overwrite the same file — never add `-prior` / `-v2` / `-attemptN`. (PM deletes these files when the backlog item closes — do not archive copies.)
 5. List new defects under **Bugs found** in the QA report (PM promotes to backlog `type: bug`, **Source:** `qa`). Do not create a parallel bugs directory
@@ -66,7 +67,7 @@ Always record the **exact** URL tested (you may omit the bypass query from the w
 
 ### Notes
 - Pass 2 is usually smoke + change-focused; **baseline** is usually a fuller FEATURES.md audit
-- **Preview protection:** `.env.local` bypass — `docs/protocols/PREVIEW_PROTECTION.md`
+- **Preview protection:** `.env.local` bypass + set-bypass-cookie for browser — `docs/protocols/PREVIEW_PROTECTION.md`
 - Admin auth is Hover mailbox session — `docs/protocols/QA_AUTH.md` (`ADMIN_EMAIL` / `ADMIN_PASS` in `.env.local`)
 - Never store mailbox passwords in repo/reports
 - Mail proxy can be browser-sensitive — note Chrome vs others if relevant
