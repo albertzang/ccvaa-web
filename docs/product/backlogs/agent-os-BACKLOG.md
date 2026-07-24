@@ -11,6 +11,37 @@ Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
 ---
 
+## agent-os-0013 — CEO talks only to PM (PM invokes Dev/QA)
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `completed` |
+| **Verifier** | `n/a` |
+| **Verify passes** | `n/a` |
+| **Ship path** | `direct-to-main` |
+
+### Description
+
+Encode: human CEO’s only agent counterpart is Product Manager. After kickoff, PM writes handoffs and **invokes** Developer / QA (Task/agent). CEO does not open or brief Dev/QA chats. Principles + COMMUNICATION + CEO.md + PM skill/rule/agent updated.
+
+**Acceptance:**
+- [x] Guiding principle / AGENTS roles say CEO↔PM only; PM invokes Dev/QA
+- [x] COMMUNICATION “who talks to whom” + CEO do-not list
+- [x] PM skill/rule/agent: invoke agents; never ask CEO to open Dev/QA chats
+- [x] CEO **verified** → commit + push `main`
+
+### Overall
+
+- Shipped 2026-07-23 on `main` (CEO **verified**). Motivated by Members epic; encodes PM-orchestrated Dev/QA invocation.
+
+### Links
+
+- Motivated by: Members epic kickoff (`members-0001`)
+
+---
+
 ## agent-os-0014 — Preview bypass requires set-bypass-cookie for browser
 
 | Field | Value |
@@ -31,8 +62,6 @@ Encode Preview Deployment Protection for **browser Pass 1**: navigate with **bot
 - [x] Backlog item completed + Next ID bumped
 - [x] FEATURES changelog
 - [x] Commit + push on `feat/members` (CEO: ship on current branch / Members epic PR; do not merge to main)
-
-**Note:** `agent-os-0013` appears in FEATURES changelog only (not this backlog file) — ID gap left as-is; this item is `0014`.
 
 **Out of scope:** Members product code; overwriting mid-pass QA reports; committing secrets.
 

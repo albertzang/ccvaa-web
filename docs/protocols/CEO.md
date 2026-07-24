@@ -27,13 +27,18 @@ Canonical detail: [`COMMUNICATION.md`](COMMUNICATION.md#what-ceo-verified-means)
 | Goals & priorities | What to build next; accept/reject PM advice; backlog priorities |
 | Choose **Verifier** | `agent` (default) or `ceo` (you verify; bypass agent QA) — see below |
 | Approve **Ship path: `direct-to-main`** | Explicit yes required — **or** implied when Verifier = `ceo` and Ship path stays the default `direct-to-main`, or for ordinary **`agent-os-*`** docs (`n/a`, default `direct-to-main`) |
-| Approve **kickoff** of Developer / baseline / **self-evolve** | Product kickoff still required; agent **Pass 1/2** after kickoff do **not** need a second CEO “kick off QA” ask (see happy-path checklist) |
+| Approve **kickoff** of work / baseline / **self-evolve** | Tell **PM** to kick off (by work ID). PM writes handoffs and **invokes** Dev/QA — **you do not** open Developer or QA chats |
 | Approve **merge to `main`** (or direct push) | After Pass 1 (agent or your Preview check), approved direct-to-main, **merge milestone** (epic lane), or **self-evolve** PR after commit-history review |
 | Approve **process/OS changes** | Multi-agent protocol refinements; for `agent-os-*`, **`verified`** (or explicit merge ask) authorizes PM to mark completed **and ship** per Ship path |
-| **Vercel / Hover secrets & env** | e.g. `ADMIN_EMAIL` / `ADMIN_PASS` in local `.env.local`, `VERCEL_AUTOMATION_BYPASS_SECRET`, any future Vercel secrets — never ask agents to store these in git |
+| **Vercel / Hover secrets & env** | e.g. `ADMIN_EMAIL` / `ADMIN_PASS` in local `.env.local`, `VERCEL_AUTOMATION_BYPASS_SECRET`, Neon/`DATABASE_URL`, any future Vercel secrets — never ask agents to store these in git. PM will ask you when Dev/QA are blocked |
 | **Admin mailbox for QA** | Keep `.env.local` `ADMIN_EMAIL` / `ADMIN_PASS` current for Hover sign-in (`docs/protocols/QA_AUTH.md`). When **you** are Verifier, you run login yourself |
 | **Manual check of https://ccvaa.ca/** | Out of agent Dev/QA flow (DNS/cache) |
 | `gh auth login` / GitHub access on this device | One-time (or refresh); needed for agent `gh pr` flows |
+
+### Do not (CEO)
+
+- Open or brief **Developer** / **QA** chats — always go through PM
+- Paste mailbox passwords, OTP codes, or bypass secrets into agent chat
 
 ## Usually not CEO (agents / PM)
 

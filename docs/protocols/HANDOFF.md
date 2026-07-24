@@ -101,7 +101,7 @@ CEO asks to list/review → PM summarizes open items by feature and priority (in
 
 ### Kickoff (+ tiny-fix)
 
-CEO chooses `{feature-slug}-{NNNN}` → PM sets `in-progress` → writes `HANDOFF-DEV.md` (Verifier + Verify passes + Ship path; + **Epic branch** / **Merge gate** when using the epic lane) → CEO gates per `CEO.md`.
+CEO chooses `{feature-slug}-{NNNN}` → PM sets `in-progress` → writes `HANDOFF-DEV.md` (Verifier + Verify passes + Ship path; + **Epic branch** / **Merge gate** when using the epic lane) → **PM invokes Developer** → CEO gates per `CEO.md` (merge / secrets / verified — not “open a Dev chat”).
 
 **Epic / milestone fast notes:** when CEO/PM declares an epic, set the same **Epic branch** on each participating ticket with **Merge gate `epic`**. Pass 1 still per ticket; **do not** ask for per-ticket merge — ask **merge milestone** when ready. Canonical: [`GIT_DEPLOY.md`](GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
 

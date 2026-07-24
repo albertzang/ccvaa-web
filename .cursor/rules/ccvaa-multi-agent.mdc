@@ -13,7 +13,7 @@ alwaysApply: true
 | Developer | PM (via handoff) | Feature branches, PRs, implementation |
 | QA | PM (via handoff) | Pass 1 / Pass 2 / baseline when backlog **Verifier = `agent`**; admin mailbox login via `.env.local`; Preview bypass via `.env.local` |
 
-CEO talks primarily to the **Product Manager**. Repo docs are the shared brain — not chat history.
+CEO talks **only** to the **Product Manager**. Repo docs are the shared brain — not chat history. PM invokes Developer / QA; CEO does not brief those roles directly.
 
 **Chat titles:** `Product Manager` · `Developer` · `QA` (fixed; rename on session start).
 

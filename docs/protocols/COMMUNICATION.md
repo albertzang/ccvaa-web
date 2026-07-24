@@ -92,27 +92,30 @@ Developer still **blocks** inventing `direct-to-main` when Verifier=`agent` with
 
 ## Who talks to whom
 
+**Hard rule:** CEO ↔ **Product Manager** only. PM writes handoffs and **invokes** Developer / QA. CEO does **not** open Dev/QA chats or assign work to those roles directly.
+
 ```
-CEO  ←→  Product Manager (primary)
+CEO  ←→  Product Manager (only CEO-facing agent)
               │
-              ├─ writes handoff → Developer chat / /developer
-              ├─ writes handoff → QA chat / /qa   (only if Verifier = agent)
-              ├─ asks CEO to verify               (only if Verifier = ceo)
+              ├─ writes HANDOFF-DEV → invokes Developer (Task/agent)
+              ├─ writes HANDOFF-QA-* → invokes QA (Task/agent; only if Verifier = agent)
+              ├─ asks CEO to verify               (only if Verifier = ceo / agent-os / gates)
               └─ updates docs/product/* (FEATURES + feature backlogs)
 ```
 
-**Chat titles (fixed):** `Product Manager` · `Developer` · `QA` — rename on session start; no work-ID/topic titles.
+**Chat titles (fixed)** when a role runs in its own session: `Product Manager` · `Developer` · `QA` — rename on session start; no work-ID/topic titles. **CEO stays in the PM chat.**
 
 **Work ID:** `{feature-slug}-{NNNN}` in Dev/QA handoff **bodies**, branches, and PRs — see `docs/product/BACKLOG.md`. Handoff/report **filenames** are fixed (no slug/ID).
 
 ```
-Developer  →  ship per Ship path + Verifier
-QA Pass 1  →  (Verifier = agent + pass1) Dev optional + Preview → merge recommendation *(epic Merge gate → continue epic)*
-CEO verify →  (Verifier = ceo) Preview and/or Production per Verify passes
-Developer  →  merge / push when CEO/PM asks
+PM         →  kickoff: backlog in-progress + handoff + invoke Dev/QA (do not ask CEO to open those chats)
+Developer  →  ship per Ship path + Verifier; signal PM when Preview/Production ready
+QA Pass 1  →  (Verifier = agent + pass1) Dev optional + Preview → merge / continue epic
+CEO verify →  (Verifier = ceo) via PM one-line ask — Preview and/or Production per Verify passes
+Developer  →  merge / push when CEO/PM asks (PM relays)
 QA Pass 2  →  (Verifier = agent + pass2) Production smoke → ship confirmation
 QA         →  QA reports in docs (Bugs found → PM backlog triage)
-CEO        →  "verified" or Iteration notes (Verifier = ceo / agent-os)
+CEO        →  "verified" or Iteration notes (to PM only)
 PM         →  backlog status + FEATURES.md after ship / triage
 ```
 
@@ -121,9 +124,12 @@ Git/deploy: [`GIT_DEPLOY.md`](GIT_DEPLOY.md). Handoff mechanics: [`HANDOFF.md`](
 ## CEO ↔ Product Manager
 
 - CEO sets goals and priorities; see **`docs/protocols/CEO.md`** for CEO-facing checklists (do not duplicate the [workflow map](#workflow-map-canonical-index) there)
+- **CEO never briefs Developer or QA** — only PM
 - PM maintains **feature backlogs** (`docs/product/BACKLOG.md`); converts conversations into proposed backlog items; lists/reviews on CEO ask
 - PM sets **Verifier** / **Verify passes** / Ship path from CEO intent (prefer [common lanes](#common-lanes-use-defaults-unless-ceo-overrides))
 - PM advises (tradeoffs, sequencing, risk), proposes acceptance criteria, and **reminds CEO** when a gate is due
+- On product kickoff: PM sets `in-progress`, writes Dev handoff, and **invokes Developer** same turn (unless blocked on secrets CEO must provide first)
+- When Preview/Production is ready for agent verify: PM writes QA handoff and **invokes QA** (Verifier = `agent`) — no second CEO “open QA chat” ask
 - PM does **not** implement large code changes; delegates to Developer
 - PM does **not** merge to `main` or set Vercel secrets without CEO ask — **except** `agent-os-*` after CEO **`verified`** (`direct-to-main` → commit+push; `feature-branch` → merge PR same turn)
 - PM may make small doc/protocol updates directly (push still when CEO asks — except `agent-os-*` after **`verified`**)

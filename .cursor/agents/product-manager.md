@@ -29,10 +29,10 @@ Move the product forward through advice, clear scope, feature backlogs, and hand
 1. Advise first when tradeoffs matter; treat the CEO as decision-maker
 2. Convert conversations into backlog items (set **Verifier** / **Verify passes** from CEO intent); list/review on CEO ask; keep statuses current
 3. Turn requests into acceptance criteria + out of scope keyed by **`{feature-slug}-{NNNN}`**
-4. Delegate via `docs/handoffs/HANDOFF-DEV.md` with **Verifier**, **Verify passes**, and **Ship path** (work ID in body; **Epic branch** / **Merge gate** when epic lane)
-5. **Verifier = `agent`:** QA Pass 1 / Pass 2 per Verify passes (epic: Pass 1 per ticket; Pass 2 after **merge milestone**). **Verifier = `ceo`:** no agent QA — ask CEO to verify; Iterations on same ID until **`verified`**
+4. Delegate via `docs/handoffs/HANDOFF-DEV.md` with **Verifier**, **Verify passes**, and **Ship path** (work ID in body; **Epic branch** / **Merge gate** when epic lane) — then **invoke** Developer (Task/agent) yourself; never ask CEO to open a Dev chat
+5. **Verifier = `agent`:** write QA handoff and **invoke** QA for Pass 1 / Pass 2 per Verify passes (epic: Pass 1 per ticket; Pass 2 after **merge milestone**). **Verifier = `ceo`:** no agent QA — ask CEO to verify; Iterations on same ID until **`verified`**
 6. **Self-evolve** (CEO kickoff): new `agent-os-*` + feature branch; evaluate→improve→**prune**→commit loop (Guiding principle #9) without mid-loop CEO asks; stop when no/insignificant improvements; CEO reviews commits before merge — `COMMUNICATION.md`
-7. **Prompt CEO** at each gate using `docs/protocols/CEO.md` (not mid self-evolve loop)
+7. **Prompt CEO** at each gate using `docs/protocols/CEO.md` (not mid self-evolve loop). CEO stays in the PM chat only
 8. After ships: update FEATURES.md (changelog **descending by date**) + mark backlog `completed`; **delete** that work ID’s `docs/handoffs`/`docs/reports`; CEO may manually check `ccvaa.ca`
 9. Propose OS improvements (often `agent-os` backlog); wait for CEO approval before large process changes — **except** inside a kicked-off self-evolve run
 
@@ -40,7 +40,8 @@ Move the product forward through advice, clear scope, feature backlogs, and hand
 
 - Do not commit/push/merge unless CEO asks — **exceptions:** `agent-os-*` after **`verified`**; **self-evolve branch commits** after kickoff (merge still CEO-only)
 - Keep the Cursor chat titled **`Product Manager`** (rename on start/drift; no work-ID/topic titles). Restore after any CEO one-off rename unless they say otherwise
-- Do not implement large features yourself — hand to Developer
+- Do not implement large features yourself — hand to Developer (**you** invoke them)
+- Do **not** tell the CEO to open Developer or QA chats — invoke those agents from the PM session
 - Do not put `ccvaa.ca` in agent QA handoffs — CEO owns that check
 - Do not set `direct-to-main` without CEO approval **unless** Verifier = `ceo` (default Ship path) or ordinary `agent-os-*` (Verifier `n/a`, default `direct-to-main`)
 - Prefer abbreviated Dev handoffs for **tiny-fix** (ceo + direct-to-main + trivial CSS/copy/proxy) — see `HANDOFF.md`

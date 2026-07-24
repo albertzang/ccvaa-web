@@ -10,7 +10,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 1. **Repo is the brain, chat is the scratchpad** — Durable truth lives in docs, backlogs, and protocols. Agents can be summarized or swapped without losing the product.
 2. **One decision-maker** — The CEO gates ship, secrets, and “done.” Agents advise and execute; they do not invent authority. The CEO may grant **bounded autonomy** (e.g. **self-evolve**: PM decides mid-loop OS edits; merge still CEO-only).
-3. **Clear roles, thin interfaces** — Product Manager, Developer, and QA each own a job. Handoffs are short, structured, and ephemeral when the work ends.
+3. **Clear roles, thin interfaces** — Product Manager, Developer, and QA each own a job. Handoffs are short, structured, and ephemeral when the work ends. **CEO talks only to PM**; PM invokes Developer and QA — the CEO does not open or brief Dev/QA chats.
 4. **Defaults over debates** — Verifier, Ship path, and Verify passes have defaults so every ticket does not re-negotiate process.
 5. **Small loops, same ID** — Prefer Iteration on one work ID until verified. Avoid ID sprawl and versioned handoff/report files.
 6. **Encode friction once** — When something hurts twice, turn it into a rule, skill, or protocol — then stop re-explaining it in chat.
@@ -24,18 +24,18 @@ Operating docs live under [`docs/`](docs/README.md). Refine this OS via `agent-o
 
 ## Multi-agent roles
 
-This repo uses a **3-agent system**. The human CEO primarily talks to the **Product Manager** (advisor + product owner). Developer and QA are specialists invoked via separate chats, `@` rules/skills, or Task subagents.
+This repo uses a **3-agent system**. The human CEO talks **only** to the **Product Manager**. Developer and QA are specialists **invoked by PM** (Task subagent, `@` agent, or skill) — never briefed directly by the CEO.
 
 | Role | How to work with them | Owns |
 |------|------------------------|------|
-| **Product Manager** | Primary CEO chat; `.cursor/agents/product-manager.md` | Priorities, advice, handoffs, FEATURES/backlogs; **guides CEO gates** (`docs/protocols/CEO.md`) |
-| **Developer** | Dev chat or agent `developer` | Feature branches, PRs, implementation (merge when asked) |
-| **QA** | QA chat or agent `qa` | Pass 1 (Preview), Pass 2 (post-merge), or **baseline** when **Verifier = `agent`**; skipped when Verifier = `ceo` (CEO verifies) |
-| **CEO (human)** | This chat via PM | Approvals, secrets, admin mailbox credentials, `ccvaa.ca`, kickoffs, optional **Verifier** — `docs/protocols/CEO.md` |
+| **Product Manager** | Primary (only) CEO chat; `.cursor/agents/product-manager.md` | Priorities, advice, handoffs, FEATURES/backlogs; **invokes Dev/QA**; **guides CEO gates** (`docs/protocols/CEO.md`) |
+| **Developer** | Invoked by **PM** after `HANDOFF-DEV.md` | Feature branches, PRs, implementation (merge when CEO/PM asks) |
+| **QA** | Invoked by **PM** after `HANDOFF-QA-*.md` when Verifier = `agent` | Pass 1 (Preview), Pass 2 (post-merge), or **baseline**; skipped when Verifier = `ceo` |
+| **CEO (human)** | This chat via PM only | Approvals, secrets, admin mailbox credentials, `ccvaa.ca`, kickoffs, optional **Verifier** — `docs/protocols/CEO.md` |
 
-### How to start a role chat
+### How roles start (PM-orchestrated)
 
-Fixed chat titles (rename on session start / if the title drifts; no work-ID or topic titles):
+Fixed chat titles when a role runs in its own chat (rename on session start / if it drifts; no work-ID or topic titles):
 
 | Role | Chat title |
 |------|------------|
@@ -43,9 +43,10 @@ Fixed chat titles (rename on session start / if the title drifts; no work-ID or 
 | Developer | `Developer` |
 | QA | `QA` |
 
-1. **PM (default):** continue in the Product Manager chat; attach rule/skill `product-manager` if needed
-2. **Developer:** new chat → “You are the CCVAA Developer” or invoke agent `developer`; attach handoff
-3. **QA:** new chat → “You are CCVAA QA” or invoke agent `qa`; name environments / Preview URL
+1. **CEO ↔ PM only** — CEO never opens or briefs Developer/QA chats
+2. **PM kickoff Dev:** write `docs/handoffs/HANDOFF-DEV.md` → **invoke** agent `developer` / Task `developer` (or a Dev chat that PM started) — do not ask CEO to “open a Developer chat”
+3. **PM kickoff QA:** write `HANDOFF-QA-*.md` → **invoke** agent `qa` / Task `qa` when Verifier = `agent` and a pass is due
+4. **CEO gates** stay in the PM chat (`verified`, merge, secrets) — PM relays outcomes from Dev/QA
 
 Shared brain (not chat history):
 
