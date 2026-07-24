@@ -163,6 +163,8 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-23 | **agent-os-0015:** QA Pass 1 scratch hygiene — ephemeral local scripts/logs; delete with report; `.gitignore`; no commit unless maintained harness backlog |
+| 2026-07-23 | **agent-os-0013:** CEO talks only to PM; PM invokes Dev/QA (no CEO Dev/QA chats) |
 | 2026-07-18 | **Members epic milestone** merged to Production (PR #8); Pass 2 **ship confirmed** for `members-0001`–`0008`, `0014`–`0023`. Public Members remains behind Edge Config `production.members` (default Off) until CEO go-live (`members-0009`) |
 | 2026-07-17 | **members-0023** (epic `feat/members`): one shared Edge Config store with environment buckets; Vercel-managed Members switch hides homepage portal/CTAs and gates public APIs while webhooks, unsubscribe, and admin remain live |
 | 2026-07-16 | **members-0022** (epic `feat/members`): `#membership` verified-email portal; newsletter moves from Contact; unsub → `#membership` + session; Hero Subscribe+Join → `#membership` with cohesive coastal CTAs |
@@ -179,7 +181,6 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 | 2026-07-14 | **members-0005** (epic `feat/members`): `#membership` email OTP login → httpOnly member session + logout; never grants `/admin` |
 | 2026-07-14 | **members-0004** (epic `feat/members`): `#membership` Join UI + Stripe Checkout (test); Founding seat cap; webhook activation; Hero Join → `#membership` |
 | 2026-07-14 | **members-0003** (epic `feat/members`): Contact newsletter — double opt-in, manage preference, token unsub landing; Hero Subscribe → `#contact`; ESP stub + docs |
-| 2026-07-14 | **agent-os-0013:** CEO talks only to PM; PM invokes Dev/QA (no CEO Dev/QA chats) |
 | 2026-07-14 | **agent-os-0012** self-evolve: epic status/close/Pass 1 notes; thin-rule defaults; Members epic pre-wire |
 | 2026-07-14 | Guiding principle #9: living docs = current state (prune leftovers with every OS change) |
 | 2026-07-14 | Agent OS docs prune: align thin rules/`n/a`/epic; drop obsolete FEAT- template; fix `tbd` Ship paths |

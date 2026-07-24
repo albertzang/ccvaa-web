@@ -3,11 +3,81 @@
 **Feature:** Agent OS  
 **Slug:** `agent-os`  
 **Owner:** Product Manager  
-**Next ID:** `0015`  
+**Next ID:** `0016`
 
 Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
 **Note:** All `agent-os-*` items use **Verifier = `n/a`**, **Verify passes = `n/a`**. Default **Ship path = `direct-to-main`**. Use **`feature-branch`** only when (1) **self-evolve** (required) or (2) CEO explicitly asks for an umbrella PR / commit-history review before merge. Do **not** set `feature-branch` merely because the OS change is large or multi-file — ordinary protocol/skill/doc encoding stays `direct-to-main`.
+
+---
+
+## agent-os-0015 — QA Pass 1 scratch hygiene (no ad-hoc harness in repo)
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `completed` |
+| **Verifier** | `n/a` |
+| **Verify passes** | `n/a` |
+| **Ship path** | `direct-to-main` |
+
+### Description
+
+Members epic QA agents improvised local **scratch** (e.g. `scripts/qa-pass1-*.mjs`, `docs/reports/.qa-pass1-*` JSON) — **not** encoded in the OS. Formal deliverables remain `HANDOFF-QA-*` + `QA-pass*.md` only.
+
+Encode:
+1. Ad-hoc Pass 1 scripts/logs are **ephemeral agent scratch** — OK locally during a pass; **delete when the QA report is written** (same lifespan as handoffs/reports).
+2. **Do not commit** scratch unless a **separate backlog item** adds a **maintained** harness (Playwright, CI, shared `scripts/qa/`).
+3. `.gitignore` patterns so scratch does not pollute `git status` if deletion is missed.
+4. Update QA skill, `qa` rule, `qa-report` template, `HANDOFF.md` lifespan.
+
+**Acceptance:**
+- [x] QA skill + `qa.mdc`: scratch allowed locally; delete after report; no commit without maintained-harness backlog
+- [x] `HANDOFF.md` lifespan: QA scratch deleted on backlog close (with handoffs/reports)
+- [x] `qa-report` template: no `-v2` siblings; note on ephemeral scratch
+- [x] `.gitignore`: `docs/reports/.qa-pass1-*`, `scripts/qa-pass1-*.mjs`
+- [x] FEATURES changelog
+- [x] CEO **verified** → commit + push `main`
+
+**Out of scope:** Building Playwright/CI harness (future product backlog if needed).
+
+### Overall
+
+- Shipped 2026-07-23 on `main` (CEO **verified**). Motivated by Members epic QA scratch cleanup.
+
+### Links
+
+- Motivated by: Members epic QA scratch cleanup (2026-07-23)
+
+---
+
+## agent-os-0014 — Preview bypass requires set-bypass-cookie for browser
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `completed` |
+| **Verifier** | `n/a` |
+| **Verify passes** | `n/a` |
+| **Ship path** | `feature-branch` |
+
+### Description
+
+Encode Preview Deployment Protection for **browser Pass 1**: navigate with **both** `x-vercel-protection-bypass=<secret>` and `x-vercel-set-bypass-cookie=true` on the same request so same-origin client `fetch` / forms keep the bypass session. Query-only is insufficient for interactive browser QA; curl/API may keep using header or query alone.
+
+**Acceptance:**
+- [x] Living docs (`PREVIEW_PROTECTION`, QA skill/rule/agent, incomplete GIT_DEPLOY / handoff-qa mentions) require both params for browser Pass 1
+- [x] Backlog item completed + Next ID bumped
+- [x] FEATURES changelog
+- [x] Commit + push on `feat/members` (CEO: ship on current branch / Members epic PR; do not merge to main)
+
+**Out of scope:** Members product code; overwriting mid-pass QA reports; committing secrets.
+
+### Links
+
+- Branch: `feat/members` (Members epic PR)
 
 ---
 
@@ -39,35 +109,6 @@ Encode: human CEO’s only agent counterpart is Product Manager. After kickoff, 
 ### Links
 
 - Motivated by: Members epic kickoff (`members-0001`)
-
----
-
-## agent-os-0014 — Preview bypass requires set-bypass-cookie for browser
-
-| Field | Value |
-|-------|--------|
-| **Type** | `task` |
-| **Priority** | `now` |
-| **Status** | `completed` |
-| **Verifier** | `n/a` |
-| **Verify passes** | `n/a` |
-| **Ship path** | `feature-branch` |
-
-### Description
-
-Encode Preview Deployment Protection for **browser Pass 1**: navigate with **both** `x-vercel-protection-bypass=<secret>` and `x-vercel-set-bypass-cookie=true` on the same request so same-origin client `fetch` / forms keep the bypass session. Query-only is insufficient for interactive browser QA; curl/API may keep using header or query alone.
-
-**Acceptance:**
-- [x] Living docs (`PREVIEW_PROTECTION`, QA skill/rule/agent, incomplete GIT_DEPLOY / handoff-qa mentions) require both params for browser Pass 1
-- [x] Backlog item completed + Next ID bumped
-- [x] FEATURES changelog
-- [x] Commit + push on `feat/members` (CEO: ship on current branch / Members epic PR; do not merge to main)
-
-**Out of scope:** Members product code; overwriting mid-pass QA reports; committing secrets.
-
-### Links
-
-- Branch: `feat/members` (Members epic PR)
 
 ---
 

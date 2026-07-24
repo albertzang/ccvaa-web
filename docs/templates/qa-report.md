@@ -11,6 +11,8 @@
 
 **Retest:** overwrite this same path. Do not create `-prior` / `-v2` / `-attemptN` files.
 
+**Pass 1 scratch (not deliverables):** Ad-hoc local scripts/logs (e.g. `scripts/qa-pass1-*.mjs`, `docs/reports/.qa-pass1-*`) may be used while testing — delete when this report is written; do not commit unless a backlog item adds a maintained harness.
+
 ## Scope tested
 
 ## Checklist results

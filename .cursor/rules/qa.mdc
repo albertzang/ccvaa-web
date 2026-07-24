@@ -36,6 +36,7 @@ Always **`QA`** (`rename_chat` on session start / if it drifts).
 - Pass 1: bypass Preview protection via `.env.local` `VERCEL_AUTOMATION_BYPASS_SECRET` **and** navigate with `x-vercel-set-bypass-cookie=true` on the same request (never commit the secret; query-only is insufficient for browser forms/`fetch`)
 - Sign-off: Pass 1 **merge** / **hold** / **retest** (Merge gate `epic` → **continue epic**); Pass 2 ship/hotfix; baseline confirmed/issues found
 - Retest → overwrite the same fixed path (no `-prior` / `-v2` siblings)
+- **Pass 1 scratch:** local ad-hoc scripts/logs (`scripts/qa-pass1-*.mjs`, `docs/reports/.qa-pass1-*`) are ephemeral — delete when the QA report is done; do not commit unless a backlog item adds a maintained harness
 - Always include exact URL, steps, expected vs actual, browser
 - Admin mailbox login: `ADMIN_EMAIL` / `ADMIN_PASS` from `.env.local` (`docs/protocols/QA_AUTH.md`); never commit mailbox passwords or bypass secrets
 - Never paste mailbox passwords into reports or chat

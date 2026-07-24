@@ -25,7 +25,7 @@ Handoffs and QA reports are **ephemeral working docs** for an open work ID (or o
 
 | When | Delete |
 |------|--------|
-| Backlog item → **`completed`** or **`closed`** | `HANDOFF-DEV.md`, `HANDOFF-QA-pass1.md`, `HANDOFF-QA-pass2.md`, `QA-pass1.md`, `QA-pass2.md` (whichever exist) |
+| Backlog item → **`completed`** or **`closed`** | `HANDOFF-DEV.md`, `HANDOFF-QA-pass1.md`, `HANDOFF-QA-pass2.md`, `QA-pass1.md`, `QA-pass2.md` (whichever exist) **and** any local Pass 1 scratch (`scripts/qa-pass1-*.mjs`, `docs/reports/.qa-pass1-*`) |
 | Baseline closed (findings promoted / triage done) | `HANDOFF-QA-baseline.md` and `QA-baseline.md` |
 
 PM deletes these in the **same turn** as the status change (or baseline close). Recover prior text from **git history** if needed. Do not leave backlog **Links** pointing at deleted paths — keep PR / commit links only.

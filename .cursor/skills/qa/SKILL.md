@@ -41,6 +41,7 @@ Always record the **exact** URL tested (you may omit the bypass query from the w
 2. **Pass 1:** apply Preview protection bypass from `.env.local` before browsing — both bypass secret **and** `x-vercel-set-bypass-cookie=true` on the same navigation
 3. Run focused checklist + handoff-specific items (baseline often = full FEATURES.md)
 4. Write report as `docs/reports/QA-pass1.md` (or `QA-pass2.md` / `QA-baseline.md`) from `docs/templates/qa-report.md`. Put feature work ID in the **body** when applicable (baseline: `n/a`). On **retest**, overwrite the same file — never add `-prior` / `-v2` / `-attemptN`. (PM deletes these files when the backlog item closes — do not archive copies.)
+4b. **Pass 1 scratch (ephemeral):** You may use local ad-hoc scripts (e.g. `scripts/qa-pass1-*.mjs`) or machine logs (e.g. `docs/reports/.qa-pass1-*`) while building the report — **not** OS deliverables. **Delete scratch when the report is written** (same lifespan as handoffs/reports). **Do not commit** scratch unless a separate backlog item adds a **maintained** harness (Playwright/CI). `.gitignore` covers common patterns if deletion is missed.
 5. List new defects under **Bugs found** in the QA report (PM promotes to backlog `type: bug`, **Source:** `qa`). Do not create a parallel bugs directory
 6. Sign off:
    - Pass 1 → **merge** / **hold** / **retest** (Merge gate `epic` → **continue epic** instead of **merge**)

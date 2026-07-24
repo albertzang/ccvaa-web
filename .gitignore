@@ -12,6 +12,9 @@
 
 # testing
 /coverage
+# Agent QA Pass 1 live-run scratch (formal reports use docs/reports/QA-pass*.md)
+docs/reports/.qa-pass1-*
+scripts/qa-pass1-*.mjs
 
 # next.js
 /.next/
