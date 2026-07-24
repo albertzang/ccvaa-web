@@ -40,6 +40,6 @@ Known backlog IDs already under test: link `docs/product/backlogs/{feature}-BACK
 
 ## Sign-off
 
-**Pass 1:** merge / hold / retest after fixes *(Merge gate `epic` → **continue epic** instead of merge)*  
-**Pass 2:** ship confirmed / hotfix needed *(milestone Pass 2 may list multiple work IDs)*  
+**Pass 1:** merge / hold / retest after fixes  
+**Pass 2:** ship confirmed / hotfix needed  
 **Baseline:** baseline confirmed / issues found  

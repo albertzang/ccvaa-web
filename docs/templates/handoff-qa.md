@@ -4,15 +4,13 @@
 **Pass:** `1` | `2` | `baseline`  
 **Backlog work ID:** `{feature-slug}-{NNNN}` (**required** for Pass 1/2 feature work; `n/a` for baseline)  
 **Ship path that led here:** `feature-branch` | `direct-to-main` | `n/a` (baseline)  
-**Epic branch:** _(optional)_ e.g. `feat/members` — blank on happy path  
-**Merge gate:** `item` (default) | `epic` — when `epic`, Pass 1 sign-off is **continue epic** (not merge to `main`)  
 **Filled by:** Developer (Pass 1 Preview URL) / PM (baseline) / either (Pass 2)  
 
 **Save as:**  
 - Feature: `docs/handoffs/HANDOFF-QA-pass1.md` (or `HANDOFF-QA-pass2.md`)  
 - Baseline: `docs/handoffs/HANDOFF-QA-baseline.md` (date in **Date** field only)  
 
-**Branch name:** (per-item: must include work ID; epic: shared Epic branch name; n/a for baseline or direct-to-main)  
+**Branch name:** (must include work ID; n/a for baseline or direct-to-main)  
 **PR link:** (n/a for baseline or direct-to-main)  
 **Commit:** (optional for baseline — note `main` tip if known)  
 **Preview URL:** (Pass **1** only — **required**; paste exact URL from Vercel / GitHub PR — do not reconstruct)  
@@ -20,11 +18,10 @@
 **Production URL:** https://ccvaa-web.vercel.app/ (Pass **2** and **baseline**)  
 
 **Post-merge cleanup (Pass 2 only):**  
-- [ ] Feature/epic branch deleted **locally**  
-- [ ] Feature/epic branch deleted **on origin** (or n/a for `direct-to-main`)  
+- [ ] Feature branch deleted **locally**  
+- [ ] Feature branch deleted **on origin** (or n/a for `direct-to-main`)  
 Cleanup happens **right after merge**, before Pass 2 testing — see `docs/protocols/GIT_DEPLOY.md`.  
 **Baseline:** cleanup n/a (no feature branch for this pass).
-**Epic milestone:** one cleanup after **merge milestone** (not after each ticket Pass 1).
 **Out of scope for QA:** https://ccvaa.ca/ — CEO manual only (DNS/cache). Do not test or block on it.
 
 ## How QA gets the Preview URL (Pass 1 only)
@@ -71,6 +68,6 @@ Admin mail auth needs Preview Deployment Protection bypass if testing `/admin` o
 `docs/templates/qa-report.md` → save as `docs/reports/QA-pass1.md` (or `QA-pass2.md` / `QA-baseline.md`)  
 Bugs found → list in this QA report for PM triage (backlog `type: bug`, **Source:** `qa`). No separate bug files.
   
-- Pass 1: **merge** / **hold** / **retest** *(Merge gate `epic` → **continue epic**)*  
-- Pass 2: **ship confirmed** / **hotfix** *(may cover multiple milestone work IDs)*  
+- Pass 1: **merge** / **hold** / **retest**  
+- Pass 2: **ship confirmed** / **hotfix**  
 - Baseline: **baseline confirmed** / **issues found**

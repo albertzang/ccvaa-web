@@ -69,8 +69,7 @@ Shared brain (not chat history):
 
 **CEO-only (out of agent flow):** https://ccvaa.ca/ — public domain; CEO handles manual testing (DNS/cache). Agents do not use it for Pass 1/2/baseline.
 
-**Default ship path (Verifier = `agent`):** feature branch → QA on Dev (optional) + Preview (required) → merge to `main` → delete feature branch → QA Production smoke on `ccvaa-web.vercel.app`.  
-**Epic / milestone (opt-in):** shared long-lived branch; Pass 1 per ticket; merge only when CEO/PM says **merge milestone** — see `docs/protocols/GIT_DEPLOY.md`.
+**Default ship path (Verifier = `agent`):** feature branch → QA on Dev (optional) + Preview (required) → merge to `main` → delete feature branch → QA Production smoke on `ccvaa-web.vercel.app`. Each item must be **main-safe on `main` alone**; public go-live via Edge Config — see `docs/protocols/GIT_DEPLOY.md`.
 **Verifier = `ceo`:** defaults to `direct-to-main` + CEO Production verify (`pass2`); no agent QA.  
 **Baseline:** PM/CEO may request a Production-only audit with no PR (`Pass: baseline`).  
 Full rules: `docs/protocols/GIT_DEPLOY.md`.

@@ -32,7 +32,7 @@ CEO talks **only** to the **Product Manager**. Repo docs are the shared brain �
 - Production: https://ccvaa-web.vercel.app/ (`main` — QA Pass 2)
 - **Out of agent flow:** https://ccvaa.ca/ — CEO manual only (DNS/cache)
 
-Default ship path: feature branch → QA Preview → merge → QA on `ccvaa-web.vercel.app`. **Epic/milestone (opt-in):** shared branch; merge only on **merge milestone** — `docs/protocols/GIT_DEPLOY.md`.
+Default ship path: feature branch → QA Preview → merge → QA on `ccvaa-web.vercel.app`. Each item **main-safe on `main` alone** — `docs/protocols/GIT_DEPLOY.md`.
 
 ## Hard constraints
 

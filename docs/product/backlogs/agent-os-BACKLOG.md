@@ -3,11 +3,57 @@
 **Feature:** Agent OS  
 **Slug:** `agent-os`  
 **Owner:** Product Manager  
-**Next ID:** `0016`
+**Next ID:** `0017`
 
 Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
 **Note:** All `agent-os-*` items use **Verifier = `n/a`**, **Verify passes = `n/a`**. Default **Ship path = `direct-to-main`**. Use **`feature-branch`** only when (1) **self-evolve** (required) or (2) CEO explicitly asks for an umbrella PR / commit-history review before merge. Do **not** set `feature-branch` merely because the OS change is large or multi-file — ordinary protocol/skill/doc encoding stays `direct-to-main`.
+
+---
+
+## agent-os-0016 — Main-safe increments; retire epic/milestone lane
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `completed` |
+| **Verifier** | `n/a` |
+| **Verify passes** | `n/a` |
+| **Ship path** | `direct-to-main` |
+
+### Description
+
+Simplify ship path to **one lane**: each backlog item must be **main-safe alone** (merge after Pass 1; Pass 2; close). Public go-live after merge uses **Edge Config** (or equivalent fail-closed gate), not a shared long-lived epic branch.
+
+**Retire:** epic/milestone lane (`Epic branch`, **Merge gate `epic`**, merge milestone, continue epic, milestone Pass 2 batching). **Close** `agent-os-0003` (long-lived staging) as superseded.
+
+**Main-safe increment** (PM splits work; Dev verifies before merge):
+
+1. Build + deploy pass; no broken imports or half-wired routes
+2. Production safety — existing behavior unchanged; new public surface **Off by default** until a dedicated go-live item
+3. Fail closed — gated APIs/UI safe off states, not 500s
+4. Migrations expand-only / backward compatible on merge
+5. One ID → merge → Pass 2 → `completed` → delete handoffs/reports
+
+**Acceptance:**
+- [x] `GIT_DEPLOY.md`: main-safe rule; epic section removed
+- [x] `BACKLOG.md`, templates, `HANDOFF.md`, `COMMUNICATION.md`, `CEO.md`: epic fields/lane pruned
+- [x] Skills, rules, agents, `AGENTS.md`, `FEATURES.md` ship-path line updated
+- [x] `agent-os-0003` closed (superseded)
+- [x] FEATURES changelog
+- [x] CEO **verified** → commit + push `main`
+
+**Out of scope:** Rewriting historical Members backlog Overall notes (epic `feat/members` remains history).
+
+### Overall
+
+- Shipped 2026-07-23 on `main` (CEO **verified**). Replaces epic lane with main-safe + Edge Config for public go-live.
+
+### Links
+
+- Supersedes epic encoding from `agent-os-0011` for **future** work (0011 item kept as history)
+- Closes `agent-os-0003`
 
 ---
 
@@ -158,9 +204,13 @@ CEO-kickoff **self-evolve** on `chore/agent-os-0012-self-evolve`. Evaluate OS vs
 
 Encode an **epic / milestone** ship lane so large features (e.g. Members) can share one long-lived branch and merge only when a milestone is ready — while leaving the default per-item merge path unchanged.
 
-**Lane rules (current):** Epic branch + Merge gate `epic`; Pass 1 per ticket (**continue epic**); CEO/PM **merge milestone**; delete epic branch; one Pass 2. Canonical: [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
+**Lane rules (at ship):** Epic branch + Merge gate `epic`; Pass 1 per ticket (**continue epic**); CEO/PM **merge milestone**; delete epic branch; one Pass 2. Used for Members milestone (2026-07).
 
 Also encodes Guiding principle **#9 Living docs = current state** (self-evolve and ordinary `agent-os` encoding must prune leftovers so living docs do not retain superseded instructions).
+
+### Overall
+
+- Shipped 2026-07-13 on `main` (CEO **verified**). **Superseded for future work** by `agent-os-0016` (main-safe increments; epic lane retired 2026-07-23).
 
 **Acceptance:**
 - [x] Protocols document both lanes: **per-item merge** (default) vs **epic/milestone merge**
@@ -370,7 +420,7 @@ On CEO **`verified`** for any `agent-os-*` item, PM marks `completed` and ships 
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `later` |
-| **Status** | `not-started` |
+| **Status** | `closed` |
 | **Verifier** | `n/a` |
 | **Verify passes** | `n/a` |
 | **Ship path** | `direct-to-main` |
@@ -378,6 +428,10 @@ On CEO **`verified`** for any `agent-os-*` item, PM marks `completed` and ships 
 ### Description
 
 If Preview-per-PR is not enough, add a long-lived `staging` branch + dedicated domain. Until then Preview = staging (`docs/protocols/GIT_DEPLOY.md`).
+
+### Overall
+
+- **Closed 2026-07-23** — superseded by main-safe increments + Edge Config + Preview-per-PR (`agent-os-0016`). No long-lived staging branch planned.
 
 ---
 

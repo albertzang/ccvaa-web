@@ -18,15 +18,13 @@ Follow `docs/protocols/GIT_DEPLOY.md`.
 
 | Pass | When | Environments |
 |------|------|----------------|
-| **1** | Before merge (or before **continue epic** on Merge gate `epic`) | Preview URL from handoff **required**; Dev optional |
-| **2** | After merge to `main` (incl. **milestone** merge) | Production https://ccvaa-web.vercel.app/ **required** |
+| **1** | Before merge | Preview URL from handoff **required**; Dev optional |
+| **2** | After merge to `main` | Production https://ccvaa-web.vercel.app/ **required** |
 | **baseline** | Already-on-main audit / regression (no PR) | Production https://ccvaa-web.vercel.app/ **required** |
 
 **Out of scope:** https://ccvaa.ca/ — CEO manual only. Do not test or block on it.
 
 **Preview URL source (Pass 1):** Developer pastes the exact Vercel/GitHub PR Preview URL into the handoff. QA never invents it. If missing on Pass 1 → block.
-
-**Epic / milestone:** if handoff Merge gate is `epic`, Pass 1 still runs on Preview; sign-off **continue epic** (not merge to `main`) when the ticket looks good. Pass 2 runs once after CEO/PM **merge milestone**. See [`GIT_DEPLOY.md`](../../docs/protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
 
 **Preview protection:** Before opening Preview, read `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local` and navigate with **both**  
 `?x-vercel-protection-bypass=<secret>&x-vercel-set-bypass-cookie=true` (or `&…` if a query already exists).  
@@ -44,8 +42,8 @@ Always record the **exact** URL tested (you may omit the bypass query from the w
 4b. **Pass 1 scratch (ephemeral):** You may use local ad-hoc scripts (e.g. `scripts/qa-pass1-*.mjs`) or machine logs (e.g. `docs/reports/.qa-pass1-*`) while building the report — **not** OS deliverables. **Delete scratch when the report is written** (same lifespan as handoffs/reports). **Do not commit** scratch unless a separate backlog item adds a **maintained** harness (Playwright/CI). `.gitignore` covers common patterns if deletion is missed.
 5. List new defects under **Bugs found** in the QA report (PM promotes to backlog `type: bug`, **Source:** `qa`). Do not create a parallel bugs directory
 6. Sign off:
-   - Pass 1 → **merge** / **hold** / **retest** (Merge gate `epic` → **continue epic** instead of **merge**)
-   - Pass 2 → **ship confirmed** / **hotfix** (epic milestone Pass 2 may list multiple work IDs)
+   - Pass 1 → **merge** / **hold** / **retest**
+   - Pass 2 → **ship confirmed** / **hotfix**
    - Baseline → **baseline confirmed** / **issues found** (PM promotes findings to backlog)
 
 **Note:** Items with **Verifier = `ceo`** are verified by the CEO, not this agent. Baseline audits still use the QA agent.

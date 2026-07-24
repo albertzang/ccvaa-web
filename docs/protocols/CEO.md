@@ -28,7 +28,7 @@ Canonical detail: [`COMMUNICATION.md`](COMMUNICATION.md#what-ceo-verified-means)
 | Choose **Verifier** | `agent` (default) or `ceo` (you verify; bypass agent QA) — see below |
 | Approve **Ship path: `direct-to-main`** | Explicit yes required — **or** implied when Verifier = `ceo` and Ship path stays the default `direct-to-main`, or for ordinary **`agent-os-*`** docs (`n/a`, default `direct-to-main`) |
 | Approve **kickoff** of work / baseline / **self-evolve** | Tell **PM** to kick off (by work ID). PM writes handoffs and **invokes** Dev/QA — **you do not** open Developer or QA chats |
-| Approve **merge to `main`** (or direct push) | After Pass 1 (agent or your Preview check), approved direct-to-main, **merge milestone** (epic lane), or **self-evolve** PR after commit-history review |
+| Approve **merge to `main`** (or direct push) | After Pass 1 (agent or your Preview check), approved direct-to-main, or **self-evolve** PR after commit-history review |
 | Approve **process/OS changes** | Multi-agent protocol refinements; for `agent-os-*`, **`verified`** (or explicit merge ask) authorizes PM to mark completed **and ship** per Ship path |
 | **Vercel / Hover secrets & env** | e.g. `ADMIN_EMAIL` / `ADMIN_PASS` in local `.env.local`, `VERCEL_AUTOMATION_BYPASS_SECRET`, Neon/`DATABASE_URL`, any future Vercel secrets — never ask agents to store these in git. PM will ask you when Dev/QA are blocked |
 | **Admin mailbox for QA** | Keep `.env.local` `ADMIN_EMAIL` / `ADMIN_PASS` current for Hover sign-in (`docs/protocols/QA_AUTH.md`). When **you** are Verifier, you run login yourself |
@@ -156,7 +156,7 @@ Handoff/report names: `HANDOFF-QA-baseline.md` / `QA-baseline.md` (date in body 
 
 ## Checklist: feature-branch PR (happy path — Verifier = `agent`)
 
-Use this whenever a PR is open for a kicked-off backlog item with **agent** QA and **Merge gate `item`** (default — merge after this ticket’s Pass 1).
+Use this whenever a PR is open for a kicked-off backlog item with **agent** QA (merge after this ticket’s Pass 1).
 
 **Standing after kickoff:** Once you kicked off the work ID, PM/Developer may advance **Pass 1** (and after your merge, **Pass 2**) without a separate “kick off QA” ask from you. You still own **merge to `main`** (and secrets / holds).
 
@@ -186,40 +186,6 @@ Use this whenever a PR is open for a kicked-off backlog item with **agent** QA a
 |-------------|------------|
 | **ship confirmed** | Done — PM marks backlog item `completed` and updates FEATURES.md if needed |
 | **hotfix** | Approve next Ship path (`feature-branch` or `direct-to-main`); often Iteration on same ID or a new backlog ID |
-
----
-
-## Checklist: epic / milestone (Verifier = `agent` + Merge gate `epic`)
-
-Use when PM sets **Epic branch** (e.g. `feat/members`) and **Merge gate `epic`** on a set of tickets. Full rules: [`GIT_DEPLOY.md`](GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
-
-**Standing after kickoff:** Pass 1 may run per ticket without a second QA kickoff ask. You still own **merge milestone** (not per-ticket merge).
-
-### 1. Epic PR open + Preview ready (each ticket)
-
-- [ ] Confirm Epic branch / PR / Preview URL / work ID
-- [ ] PM starts QA Pass 1 on Preview when ready — **do not** merge to `main` yet
-
-### 2. After each ticket’s Pass 1
-
-| QA sign-off | CEO action |
-|-------------|------------|
-| **continue epic** | Do **not** merge; PM kicks next epic ticket on the same branch when ready |
-| **hold** / **retest** | Wait; fixes on the same Epic branch |
-| **fail** | Do not merge; PM opens Iteration on same work ID (still on Epic branch) |
-
-### 3. When the milestone is ready
-
-- [ ] Optional: short Preview recheck if last Pass 1 is stale
-- [ ] Tell PM/Developer: **merge milestone** (list work IDs) → merge PR → delete epic branch
-- [ ] PM starts **one** Pass 2 covering the milestone IDs if Verify passes need `pass2`
-
-### 4. After Pass 2
-
-| QA sign-off | CEO action |
-|-------------|------------|
-| **ship confirmed** | PM marks milestone items `completed` + FEATURES as needed |
-| **hotfix** | Iteration / new fix branch from `main` (do not revive deleted epic branch) |
 
 ---
 
@@ -259,19 +225,6 @@ you: pick ID + kick off
      → QA: ship confirmed
      → PM: backlog completed + FEATURES.md
      → you (optional): check ccvaa.ca
-```
-
-### Agent Verifier (epic / milestone)
-
-```
-you: declare epic (e.g. feat/members) + kick off first ID
-     → PM: Epic branch + Merge gate epic on participating tickets
-     → Developer: shared epic branch + one PR + Preview
-     → per ticket: Pass 1 → continue epic (no merge)
-     → you: merge milestone (list IDs)
-     → Developer: merge + delete epic branch
-     → Pass 2 once for the milestone
-     → PM: complete milestone items + FEATURES.md
 ```
 
 ### CEO Verifier (typical direct-to-main + pass2)

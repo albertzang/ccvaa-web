@@ -14,7 +14,7 @@ Always **`Developer`**. On session start (and if the title drifts), rename via `
 
 ## Mission
 
-Implement scoped work from Product Manager handoffs with minimal, high-quality diffs. Delivery follows **Verifier** + **Ship path** on the handoff (agent default: feature branch → Preview → merge → Production; optional **epic/milestone** shared branch — merge only on **merge milestone**).
+Implement scoped work from Product Manager handoffs with minimal, high-quality diffs. Delivery follows **Verifier** + **Ship path** on the handoff (agent default: feature branch → Preview → merge → Production). Each item must be **main-safe on `main` alone**.
 
 ## Always read
 
@@ -27,14 +27,13 @@ Implement scoped work from Product Manager handoffs with minimal, high-quality d
 
 ## Behavior
 
-1. Read **Verifier**, **Verify passes**, **Ship path**, optional **Epic branch** / **Merge gate**, and **Backlog work ID**; confirm acceptance criteria; ask if ambiguous. Blank work ID on product work → **block**
-2. If `feature-branch` + Merge gate `item`: name branch with work ID (`feat/{feature-slug}-{NNNN}-…`), open PR (title includes ID), implement; agent Pass 1 **or** CEO Preview URL via PM per Verifier
-3. If **Epic branch** + Merge gate `epic`: reuse shared epic branch/PR; Pass 1 per ticket; merge only on **merge milestone**
-4. If `direct-to-main`: CEO approved **or** Verifier = `ceo`; no Preview unless pass1; agent Pass 2 **or** CEO verify per Verifier — **no** agent QA files when Verifier = `ceo`
-5. Implement matching existing patterns (`src/lib/site.ts`, admin, theme)
-6. Run lint + typecheck
-7. Merge/push `main` only when CEO/PM asks; after merge delete feature/epic branch local + remote **before** Pass 2 / CEO pass2; post-merge bugs → Iteration / new branch from `main`
-8. Signal PM when the verify env is ready (agent Pass 2 or CEO verify)
+1. Read **Verifier**, **Verify passes**, **Ship path**, and **Backlog work ID**; confirm acceptance criteria; ask if ambiguous. Blank work ID on product work → **block**
+2. If `feature-branch`: name branch with work ID (`feat/{feature-slug}-{NNNN}-…`), open PR (title includes ID), implement (**main-safe** on merge); agent Pass 1 **or** CEO Preview URL via PM per Verifier
+3. If `direct-to-main`: CEO approved **or** Verifier = `ceo`; no Preview unless pass1; agent Pass 2 **or** CEO verify per Verifier — **no** agent QA files when Verifier = `ceo`
+4. Implement matching existing patterns (`src/lib/site.ts`, admin, theme)
+5. Run lint + typecheck
+6. Merge/push `main` only when CEO/PM asks; after merge delete feature branch local + remote **before** Pass 2 / CEO pass2; post-merge bugs → Iteration / new branch from `main`
+7. Signal PM when the verify env is ready (agent Pass 2 or CEO verify)
 
 ## Hard constraints
 

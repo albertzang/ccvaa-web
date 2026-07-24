@@ -27,8 +27,6 @@
 | **Verifier** | `agent` (default) \| `ceo` \| **`n/a`** — who verifies Dev’s work. **`n/a` for `agent-os`** (docs/process; no Pass 1/2) |
 | **Verify passes** | `pass1+pass2` \| `pass1` \| `pass2` \| **`n/a`** — **`n/a` for `agent-os`** |
 | **Ship path** | Optional on the item; **required** on the Dev handoff when code ships. **`agent-os-*` defaults to `direct-to-main`** |
-| **Epic branch** | Optional. Shared long-lived branch name (e.g. `feat/members`). Set with Ship path `feature-branch` for the **epic/milestone** lane — [`GIT_DEPLOY.md`](../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in) |
-| **Merge gate** | Optional. `item` (default — merge after this ticket’s Pass 1) \| `epic` (do not merge; continue on Epic branch until **merge milestone**) |
 | **Description** | Enough for Dev (and agent QA if Verifier = `agent`); bugs include repro / expected / actual |
 
 ### Verifier defaults
@@ -39,7 +37,7 @@
 | **`ceo`** | `direct-to-main` | `pass2` | **No** — CEO verifies manually; no `HANDOFF-QA-*` / `QA-*` reports |
 | **`n/a`** | **`direct-to-main`** (default for `agent-os-*`) | `n/a` | **No** — used for **`agent-os`** (and other docs/process-only work). CEO reviews via chat / repo skim; say **`verified`** to complete when PM asks. On **`verified`** for `agent-os-*`, PM marks **`completed`** and ships without a further ask: **`direct-to-main`** → commit + push; **`feature-branch`** → merge PR (see [`CEO.md`](../protocols/CEO.md)) |
 
-CEO may override Ship path and Verify passes when Verifier is `agent` or `ceo`. **Verifier = `ceo`** implies CEO owns verification and (for the default Ship path) approves `direct-to-main`. Prefer **common lanes** in [`COMMUNICATION.md`](../protocols/COMMUNICATION.md) (happy path / epic-milestone / CEO Verifier / tiny-fix / agent-os / self-evolve / baseline).
+CEO may override Ship path and Verify passes when Verifier is `agent` or `ceo`. **Verifier = `ceo`** implies CEO owns verification and (for the default Ship path) approves `direct-to-main`. Prefer **common lanes** in [`COMMUNICATION.md`](../protocols/COMMUNICATION.md) (happy path / CEO Verifier / tiny-fix / agent-os / self-evolve / baseline).
 
 **Do not** set Verifier / Verify passes to `agent` or `ceo` on **`agent-os-*`** items — always **`n/a`**. **Ship path for `agent-os-*`:** default **`direct-to-main`**; use **`feature-branch`** only for **self-evolve** (required) or when **CEO explicitly** asks for an umbrella PR / commit-history review before merge. Do not pick `feature-branch` just because an OS docs change is large. Never leave Ship path as `tbd`.
 
@@ -54,7 +52,7 @@ CEO may override Ship path and Verify passes when Verifier is `agent` or `ceo`. 
 
 **Self-evolve:** CEO kickoff → PM creates a new `agent-os-*` + feature branch and loops improve→commit without mid-loop CEO asks; merge only with CEO approval. See [`COMMUNICATION.md`](../protocols/COMMUNICATION.md#self-evolve-ceo-kickoff-os-improve-loop).
 
-**Epic / milestone:** CEO/PM sets **Epic branch** + **Merge gate `epic`** on participating items; merge once per milestone. Tickets stay `in-progress` until milestone Pass 2; delete handoffs/reports at milestone close. Record Pass 1 notes on the backlog item before overwriting fixed QA paths. See [`GIT_DEPLOY.md`](../protocols/GIT_DEPLOY.md#epic--milestone-ship-lane-opt-in).
+**Main-safe increments:** every item merged to `main` must be safe alone — PM splits work; public go-live uses Edge Config (or equivalent). See [`GIT_DEPLOY.md`](../protocols/GIT_DEPLOY.md#main-safe-increments-required).
 
 **CEO Verifier loop** (Verifier = `ceo` only): stay `in-progress` until CEO says **verified** → `completed`. If CEO finds issues, append an **Iteration** on the same backlog item, overwrite the Dev handoff, and kick Dev again — do not invent a new work ID unless scope is deliberately split. **`verified`** on product code does **not** auto-push — see [`COMMUNICATION.md`](../protocols/COMMUNICATION.md). Details: [`CEO.md`](../protocols/CEO.md).
 
@@ -71,12 +69,12 @@ List work items **by ID descending** (highest / newest first). When adding a new
 | Dev handoff | `docs/handoffs/HANDOFF-DEV.md` (work ID in body) |
 | QA handoff | `docs/handoffs/HANDOFF-QA-pass1.md` / `HANDOFF-QA-pass2.md` / `HANDOFF-QA-baseline.md` |
 | QA report | `docs/reports/QA-pass1.md` / `QA-pass2.md` / `QA-baseline.md` |
-| Branch | Per-item: `feat/{feature-slug}-{NNNN}-short-slug` or `fix/…`. **Epic:** `feat/{feature-slug}` or `feat/{feature-slug}-m{N}` (shared) |
+| Branch | `feat/{feature-slug}-{NNNN}-short-slug` or `fix/…` |
 | PR title | Include `{feature-slug}-{NNNN}` |
 
 **Retest / Iteration:** overwrite the same fixed path. Never create `-prior`, `-v2`, or `-attemptN` siblings — earlier content lives in git history.
 
-**Close:** when the backlog item is **`completed`** or **`closed`**, PM deletes the matching fixed handoff/report files under `docs/handoffs/` and `docs/reports/` (same turn). **Merge gate `epic`:** delete at **milestone close**, not after each ticket Pass 1. See [`HANDOFF.md`](../protocols/HANDOFF.md) lifespan.
+**Close:** when the backlog item is **`completed`** or **`closed`**, PM deletes the matching fixed handoff/report files under `docs/handoffs/` and `docs/reports/` (same turn). See [`HANDOFF.md`](../protocols/HANDOFF.md) lifespan.
 
 **Verifier = `ceo`:** no agent QA handoff/report files for that work ID.
 

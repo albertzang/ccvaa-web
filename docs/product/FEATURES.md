@@ -140,7 +140,7 @@
 | DNS / email | Hover |
 | CI | lint, typecheck, build (GitHub Actions) |
 | Stack | Next.js App Router, React, Tailwind; admin auth = Hover mail-session; Members DB = Neon + Drizzle (`DATABASE_URL`); public feature flags = Vercel Edge Config |
-| Ship path | Feature branch → QA Preview → merge → cleanup → QA on `ccvaa-web.vercel.app` (Verifier = `agent`). **Epic/milestone (opt-in):** shared branch; Pass 1 per ticket; merge only on **merge milestone**. **Verifier = `ceo`:** CEO verifies (defaults: `direct-to-main` + Production pass2). Work IDs `{feature-slug}-{NNNN}` — [`BACKLOG.md`](BACKLOG.md). **Baseline** pass = Production audit with no PR. See `docs/protocols/GIT_DEPLOY.md`. CEO may manually check `ccvaa.ca`. |
+| Ship path | Feature branch → QA Preview → merge → cleanup → QA on `ccvaa-web.vercel.app` (Verifier = `agent`). Each item **main-safe on `main` alone**; public go-live via Edge Config. **Verifier = `ceo`:** CEO verifies (defaults: `direct-to-main` + Production pass2). Work IDs `{feature-slug}-{NNNN}` — [`BACKLOG.md`](BACKLOG.md). **Baseline** pass = Production audit with no PR. See `docs/protocols/GIT_DEPLOY.md`. CEO may manually check `ccvaa.ca`. |
 
 ### Important technical notes for Developer
 - Next.js 16: prefer `proxy.ts` over deprecated `middleware.ts`
@@ -163,6 +163,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-23 | **agent-os-0016:** main-safe increments — one ship lane; epic/milestone lane retired; Edge Config for public go-live; `agent-os-0003` closed |
 | 2026-07-23 | **agent-os-0015:** QA Pass 1 scratch hygiene — ephemeral local scripts/logs; delete with report; `.gitignore`; no commit unless maintained harness backlog |
 | 2026-07-23 | **agent-os-0013:** CEO talks only to PM; PM invokes Dev/QA (no CEO Dev/QA chats) |
 | 2026-07-18 | **Members epic milestone** merged to Production (PR #8); Pass 2 **ship confirmed** for `members-0001`–`0008`, `0014`–`0023`. Public Members remains behind Edge Config `production.members` (default Off) until CEO go-live (`members-0009`) |
