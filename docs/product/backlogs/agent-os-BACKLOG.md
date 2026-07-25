@@ -3,11 +3,46 @@
 **Feature:** Agent OS  
 **Slug:** `agent-os`  
 **Owner:** Product Manager  
-**Next ID:** `0017`
+**Next ID:** `0018`
 
 Canonical work IDs: `agent-os-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
 **Note:** All `agent-os-*` items use **Verifier = `n/a`**, **Verify passes = `n/a`**. Default **Ship path = `direct-to-main`**. Use **`feature-branch`** only when (1) **self-evolve** (required) or (2) CEO explicitly asks for an umbrella PR / commit-history review before merge. Do **not** set `feature-branch` merely because the OS change is large or multi-file — ordinary protocol/skill/doc encoding stays `direct-to-main`.
+
+---
+
+## agent-os-0017 — Extract Agent OS: core + extension layer
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `later` |
+| **Status** | `not-started` |
+| **Verifier** | `n/a` |
+| **Verify passes** | `n/a` |
+| **Ship path** | `feature-branch` |
+
+### Description
+
+Extract the in-repo Agent OS into a distributable package. A first attempt (npm CLI + `nextjs-agent-os-docs/` migration, `@albertzang/nextjs-agent-os-cli@0.0.16`) proved more complex than expected and was **reverted** on ccvaa-web (2026-07-24). Redesign before re-attempting.
+
+**Goals:**
+
+1. **OS core** — extract **client-agnostic** agent OS logic (roles, protocols, templates, skills, multi-agent rules, ship/verify defaults) into a reusable core.
+2. **OS extension layer** — extract **client-specific** agent OS logic (e.g. CCVAA Hover mail auth, Edge Config go-live, `ccvaa-dev-memory`, domain docs) into a well-defined extension structure with predictable paths and ownership.
+3. **Core-owned interface** — the OS core **owns the contract** between core and extension (config schema, hook points, merge/protected paths, upgrade behavior). Extensions plug in through that interface; clients do not fork core files in place.
+
+**Acceptance (when kicked off):**
+
+- [ ] Written design: core vs extension boundary, directory layout, config/manifest, upgrade story
+- [ ] ccvaa-web dogfoods core + CCVAA extension without losing product workflow
+- [ ] Living docs pruned — one source of truth per protocol; no competing in-repo + package copies
+
+**Out of scope (for this item):** Rewriting product feature backlogs or Members domain docs.
+
+### Overall
+
+- Logged 2026-07-24 after reverting staged npm-extraction migration. Upstream repo [github.com/albertzang/nextjs-agent-os](https://github.com/albertzang/nextjs-agent-os) may inform the redesign but is not adopted until this item is kicked off and verified.
 
 ---
 
