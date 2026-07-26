@@ -570,11 +570,9 @@ export function MembershipPanel({
         </div>
       ) : null}
 
-      {/* Absolute banner does not consume flow — pad so social proof / form clear it. */}
-      <div className={topBanner ? "pt-16 sm:pt-[4.25rem]" : undefined}>
-        {initialHeroCounts ? (
-          <MembershipSocialProof initialCounts={initialHeroCounts} />
-        ) : null}
+      {initialHeroCounts ? (
+        <MembershipSocialProof initialCounts={initialHeroCounts} />
+      ) : null}
 
       <form
         noValidate
@@ -780,7 +778,6 @@ export function MembershipPanel({
         >
           {loggingOut ? "Signing out…" : membershipContent.logoutLabel}
         </button>
-      </div>
       </div>
     </div>
   );
