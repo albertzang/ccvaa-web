@@ -50,7 +50,7 @@ type HeroGateCtasProps = {
 
 /**
  * Logged-out: Email [| Code] | Send/Verify under Sub/Join.
- * Verified: Sub/Join CTAs only (scroll to #membership) — unused when hero is compact ribbon.
+ * Verified: Sub/Join CTAs only (scroll to #membership) — unused when #hero is omitted.
  */
 export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
   const router = useRouter();

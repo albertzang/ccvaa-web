@@ -18,11 +18,11 @@ type HeroProps = {
   /** Show OTP gate in hero (logged-out). */
   showMembershipGate?: boolean;
   /**
-   * Verified member: compact hero under the nav so `#membership` gets the
-   * sticky-image frame. Logged-out keeps a tall, centered hero.
+   * Verified: no `#hero` section — sticky image + membership footer only.
+   * Logged-out: tall centered hero with gate.
    */
   compact?: boolean;
-  /** Membership section — only when verified (scrolls over sticky hero background). */
+  /** Membership section when verified (scrolls over sticky hero background). */
   footer?: ReactNode;
 };
 
@@ -56,25 +56,11 @@ export async function Hero({
       </div>
 
       <div className={`relative z-10 ${HERO_STAGE_PULL_CLASS}`}>
-        <section
-          id="hero"
-          className={
-            compact
-              ? "text-white"
-              : `flex ${HERO_STAGE_HEIGHT_CLASS} items-center text-white`
-          }
-        >
-          {compact ? (
-            /* Quiet brand ribbon — membership owns focus; counts live above the form. */
-            <div className="relative mx-auto w-full max-w-6xl select-none px-6 pt-20 pb-2 sm:pt-24 sm:pb-3">
-              <p className="text-[10px] font-medium uppercase tracking-widest text-cream/55">
-                {heroContent.eyebrow}
-              </p>
-              <h1 className="mt-1 max-w-xl font-display text-lg font-medium leading-snug tracking-tight text-cream/75 sm:text-xl">
-                {heroContent.headline}
-              </h1>
-            </div>
-          ) : (
+        {!compact ? (
+          <section
+            id="hero"
+            className={`flex ${HERO_STAGE_HEIGHT_CLASS} items-center text-white`}
+          >
             <div className="relative mx-auto w-full max-w-6xl select-none px-6 pt-20 pb-10 sm:pt-24 sm:pb-12">
               <p className="text-sm font-medium uppercase tracking-widest text-ocean-100/90">
                 {heroContent.eyebrow}
@@ -95,8 +81,8 @@ export async function Hero({
                 />
               ) : null}
             </div>
-          )}
-        </section>
+          </section>
+        ) : null}
 
         {footer}
       </div>
