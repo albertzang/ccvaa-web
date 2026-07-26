@@ -538,34 +538,38 @@ export function MembershipPanel({
   }
 
   return (
-    <div className="text-left">
+    <div className="relative">
+      {/* Nav-like glass under the portal; fades out on all sides into the hero. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -inset-x-5 -inset-y-4 rounded-3xl border border-white/10 bg-black/15 backdrop-blur-sm sm:-inset-x-8 sm:-inset-y-6 [-webkit-mask-image:linear-gradient(to_right,transparent_0%,black_14%,black_86%,transparent_100%),linear-gradient(to_bottom,transparent_0%,black_16%,black_84%,transparent_100%)] [-webkit-mask-composite:source-in] [mask-image:linear-gradient(to_right,transparent_0%,black_14%,black_86%,transparent_100%),linear-gradient(to_bottom,transparent_0%,black_16%,black_84%,transparent_100%)] [mask-composite:intersect]"
+      />
+      <div className="relative text-left">
       {topBanner ? (
-        <div className="absolute inset-x-0 top-0 z-10 pt-2.5 sm:pt-3.5">
-          <div className="mx-auto w-full max-w-6xl px-6">
-            <div
-              className={`relative mx-auto max-w-3xl rounded-lg py-2.5 pl-4 pr-10 text-sm font-medium shadow-lg sm:py-3 ${
+        <div className="absolute inset-x-0 top-0 z-10 -translate-y-[calc(100%+0.5rem)]">
+          <div
+            className={`relative rounded-lg py-2.5 pl-4 pr-10 text-sm font-medium shadow-lg sm:py-3 ${
+              topBanner.tone === "error"
+                ? "bg-coral-dark text-cream ring-1 ring-coral/70"
+                : "bg-cream text-ocean-950 ring-1 ring-ocean-200/60"
+            }`}
+            role={topBanner.tone === "error" ? "alert" : "status"}
+          >
+            <p>{topBanner.text}</p>
+            <button
+              type="button"
+              onClick={topBanner.dismiss}
+              className={`absolute right-2 top-1.5 inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 ${
                 topBanner.tone === "error"
-                  ? "bg-coral-dark text-cream ring-1 ring-coral/70"
-                  : "bg-cream text-ocean-950 ring-1 ring-ocean-200/60"
+                  ? "text-cream/80 hover:bg-cream/15 hover:text-cream focus-visible:ring-cream/60"
+                  : "text-ocean-800/70 hover:bg-ocean-900/10 hover:text-ocean-950 focus-visible:ring-ocean-400"
               }`}
-              role={topBanner.tone === "error" ? "alert" : "status"}
+              aria-label="Dismiss message"
             >
-              <p>{topBanner.text}</p>
-              <button
-                type="button"
-                onClick={topBanner.dismiss}
-                className={`absolute right-2 top-1.5 inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 ${
-                  topBanner.tone === "error"
-                    ? "text-cream/80 hover:bg-cream/15 hover:text-cream focus-visible:ring-cream/60"
-                    : "text-ocean-800/70 hover:bg-ocean-900/10 hover:text-ocean-950 focus-visible:ring-ocean-400"
-                }`}
-                aria-label="Dismiss message"
-              >
-                <span aria-hidden="true" className="text-lg leading-none">
-                  ×
-                </span>
-              </button>
-            </div>
+              <span aria-hidden="true" className="text-lg leading-none">
+                ×
+              </span>
+            </button>
           </div>
         </div>
       ) : null}
@@ -778,6 +782,7 @@ export function MembershipPanel({
         >
           {loggingOut ? "Signing out…" : membershipContent.logoutLabel}
         </button>
+      </div>
       </div>
     </div>
   );
