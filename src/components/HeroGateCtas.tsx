@@ -42,8 +42,8 @@ type HeroGateCtasProps = {
   initialCounts: HeroCounts;
   /** When false, only Sub/Join show (member already verified). */
   showGate: boolean;
-  /** Tighter CTA spacing when hero is compact (verified). */
-  compact?: boolean;
+  /** Quiet ghost CTAs for verified brand ribbon. */
+  quiet?: boolean;
 };
 
 /**
@@ -53,7 +53,7 @@ type HeroGateCtasProps = {
 export function HeroGateCtas({
   initialCounts,
   showGate,
-  compact = false,
+  quiet = false,
 }: HeroGateCtasProps) {
   const router = useRouter();
   const emailId = useId();
@@ -135,9 +135,10 @@ export function HeroGateCtas({
       <HeroCtas
         initialCounts={initialCounts}
         href="#membership"
+        quiet={quiet}
         className={
-          compact
-            ? "mt-4 flex flex-wrap items-center gap-x-4 gap-y-3"
+          quiet
+            ? "flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2"
             : "mt-8 flex flex-wrap items-center gap-x-5 gap-y-5"
         }
       />

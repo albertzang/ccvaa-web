@@ -63,51 +63,47 @@ export async function Hero({
               : `flex ${HERO_STAGE_HEIGHT_CLASS} items-center text-white`
           }
         >
-          <div
-            className={
-              compact
-                ? "relative mx-auto w-full max-w-6xl select-none px-6 pt-20 pb-3 sm:pt-24 sm:pb-4"
-                : "relative mx-auto w-full max-w-6xl select-none px-6 pt-20 pb-10 sm:pt-24 sm:pb-12"
-            }
-          >
-            <p
-              className={
-                compact
-                  ? "text-[11px] font-medium uppercase tracking-widest text-ocean-100/85"
-                  : "text-sm font-medium uppercase tracking-widest text-ocean-100/90"
-              }
-            >
-              {heroContent.eyebrow}
-            </p>
+          {compact ? (
+            /* Quiet brand ribbon — membership owns focus in the sticky frame. */
+            <div className="relative mx-auto flex w-full max-w-6xl select-none flex-col gap-3 px-6 pt-20 pb-2 sm:flex-row sm:items-end sm:justify-between sm:gap-6 sm:pt-24 sm:pb-3">
+              <div className="min-w-0">
+                <p className="text-[10px] font-medium uppercase tracking-widest text-cream/55">
+                  {heroContent.eyebrow}
+                </p>
+                <h1 className="mt-1 max-w-xl font-display text-lg font-medium leading-snug tracking-tight text-cream/75 sm:text-xl">
+                  {heroContent.headline}
+                </h1>
+              </div>
+              {counts ? (
+                <HeroGateCtas
+                  initialCounts={counts}
+                  showGate={false}
+                  quiet
+                />
+              ) : null}
+            </div>
+          ) : (
+            <div className="relative mx-auto w-full max-w-6xl select-none px-6 pt-20 pb-10 sm:pt-24 sm:pb-12">
+              <p className="text-sm font-medium uppercase tracking-widest text-ocean-100/90">
+                {heroContent.eyebrow}
+              </p>
 
-            <h1
-              className={
-                compact
-                  ? "mt-2 max-w-2xl font-display text-2xl font-semibold leading-snug tracking-tight sm:text-3xl"
-                  : "mt-4 max-w-3xl font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-6xl"
-              }
-            >
-              {heroContent.headline}
-            </h1>
+              <h1 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+                {heroContent.headline}
+              </h1>
 
-            <p
-              className={
-                compact
-                  ? "mt-2 max-w-xl text-sm leading-relaxed text-ocean-50/90 sm:text-base"
-                  : "mt-6 max-w-2xl text-lg leading-relaxed text-ocean-50/95 sm:text-xl"
-              }
-            >
-              {heroContent.subheadline}
-            </p>
+              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ocean-50/95 sm:text-xl">
+                {heroContent.subheadline}
+              </p>
 
-            {counts ? (
-              <HeroGateCtas
-                initialCounts={counts}
-                showGate={showMembershipGate}
-                compact={compact}
-              />
-            ) : null}
-          </div>
+              {counts ? (
+                <HeroGateCtas
+                  initialCounts={counts}
+                  showGate={showMembershipGate}
+                />
+              ) : null}
+            </div>
+          )}
         </section>
 
         {footer}
