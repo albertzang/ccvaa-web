@@ -168,7 +168,7 @@ export const membershipContent = {
   newsletterOnLabel: "Subscribed",
   newsletterOffLabel: "Not subscribed",
   perksComingSoon: "Membership perks coming soon…",
-  checkoutLabel: "Continue to checkout",
+  checkoutLabel: "Join",
   logoutLabel: "Sign out",
   profilePlanLabel: "Plan",
   profileAnniversaryLabel: "Anniversary",
