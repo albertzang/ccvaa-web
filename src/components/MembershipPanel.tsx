@@ -202,8 +202,6 @@ export function MembershipPanel({
   const emailDirty =
     verified &&
     email.trim().toLowerCase() !== savedEmail.trim().toLowerCase();
-  /** Email-change API path: dirty value or OTP already in flight. */
-  const emailChangeMode = verified && (emailDirty || codeSent);
 
   useEffect(() => {
     if (!joinedLanding) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { softReload } from "@/lib/members/soft-reload";
@@ -69,19 +69,26 @@ export function JoinForm({
     () => initialPlans?.plans.find((p) => p.available)?.id ?? "",
   );
   const [loading, setLoading] = useState(false);
+  const [prevInitialPlans, setPrevInitialPlans] = useState(initialPlans);
+  const [prevInitialPlansError, setPrevInitialPlansError] =
+    useState(initialPlansError);
 
-  // Soft refresh after checkout failure re-supplies server props — sync local state.
-  useEffect(() => {
+  // Soft refresh re-supplies server props — sync during render (not in an effect).
+  if (
+    initialPlans !== prevInitialPlans ||
+    initialPlansError !== prevInitialPlansError
+  ) {
+    setPrevInitialPlans(initialPlans);
+    setPrevInitialPlansError(initialPlansError);
     setPlans(initialPlans?.plans ?? null);
     setPlansError(initialPlansError);
-    setPlan((current) => {
-      const available = initialPlans?.plans.filter((p) => p.available) ?? [];
-      if (current && available.some((p) => p.id === current)) {
-        return current;
-      }
-      return available[0]?.id ?? "";
-    });
-  }, [initialPlans, initialPlansError]);
+    const available = initialPlans?.plans.filter((p) => p.available) ?? [];
+    setPlan((current) =>
+      current && available.some((p) => p.id === current)
+        ? current
+        : (available[0]?.id ?? ""),
+    );
+  }
 
   const reloadPlans = async () => {
     setPlansError(null);
