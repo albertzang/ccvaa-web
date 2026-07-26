@@ -217,7 +217,6 @@ export function MembershipPanel({
   );
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
-  const [emailChangeMode, setEmailChangeMode] = useState(false);
   const [message, setMessage] = useState<string | null>(() =>
     unsubLanding ? unsubMessage(unsubLanding) : null,
   );
@@ -250,18 +249,7 @@ export function MembershipPanel({
     verified &&
     email.trim().toLowerCase() !== savedEmail.trim().toLowerCase();
   /** Email-change API path: dirty value or OTP already in flight. */
-  const emailChangeActive = emailDirty || (verified && codeSent);
-
-  useEffect(() => {
-    if (!verified) {
-      return;
-    }
-    if (emailDirty) {
-      setEmailChangeMode(true);
-    } else if (!codeSent) {
-      setEmailChangeMode(false);
-    }
-  }, [emailDirty, codeSent, verified]);
+  const emailChangeMode = verified && (emailDirty || codeSent);
 
   useEffect(() => {
     if (!joinedLanding) {
@@ -503,7 +491,6 @@ export function MembershipPanel({
         setEmail(result.profile.email);
         setCode("");
         setCodeSent(false);
-        setEmailChangeMode(false);
         setMessage(result.message);
       } else {
         const result = await postJson<{
@@ -577,7 +564,6 @@ export function MembershipPanel({
       setEmail("");
       setCode("");
       setCodeSent(false);
-      setEmailChangeMode(false);
       lastSavedName.current = "";
       setMessage(null);
       router.refresh();
@@ -772,7 +758,6 @@ export function MembershipPanel({
                       disabled={loading}
                       onClick={() => {
                         clearFeedback();
-                        setEmailChangeMode(false);
                         setCodeSent(false);
                         setCode("");
                         setEmail(savedEmail);
@@ -836,7 +821,6 @@ export function MembershipPanel({
                     disabled={loading}
                     onClick={() => {
                       clearFeedback();
-                      setEmailChangeMode(false);
                       setCodeSent(false);
                       setCode("");
                       setEmail(savedEmail);

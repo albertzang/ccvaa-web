@@ -46,10 +46,15 @@ export function HeroCtas({
   className = "mt-8 flex flex-wrap items-center gap-x-5 gap-y-5",
 }: HeroCtasProps) {
   const [counts, setCounts] = useState(initialCounts);
-
-  useEffect(() => {
+  const [prevInitialCounts, setPrevInitialCounts] = useState(initialCounts);
+  if (
+    initialCounts.newsletterSubscribers !==
+      prevInitialCounts.newsletterSubscribers ||
+    initialCounts.paidMembers !== prevInitialCounts.paidMembers
+  ) {
+    setPrevInitialCounts(initialCounts);
     setCounts(initialCounts);
-  }, [initialCounts]);
+  }
 
   useEffect(() => {
     let cancelled = false;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 
@@ -61,11 +61,12 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
   const [codeSent, setCodeSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [gateVisible, setGateVisible] = useState(showGate);
-
-  useEffect(() => {
-    setGateVisible(showGate);
-  }, [showGate]);
+  /** Hide gate immediately after verify; clear once server `showGate` catches up. */
+  const [hideGateOptimistic, setHideGateOptimistic] = useState(false);
+  if (!showGate && hideGateOptimistic) {
+    setHideGateOptimistic(false);
+  }
+  const gateVisible = showGate && !hideGateOptimistic;
 
   const firstZodMessage = (parsed: {
     success: boolean;
@@ -121,7 +122,7 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
     setLoading(true);
     try {
       await postJson("/api/members/verify/verify", { email, code, name });
-      setGateVisible(false);
+      setHideGateOptimistic(true);
       router.refresh();
       window.setTimeout(() => {
         document.getElementById("membership")?.scrollIntoView({
