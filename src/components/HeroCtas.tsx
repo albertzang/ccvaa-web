@@ -33,17 +33,27 @@ function HeroCtaBadge({ value }: { value: number }) {
 const ctaBaseClass =
   "relative inline-flex min-h-12 min-w-[9.5rem] items-center justify-center rounded-full px-6 py-3 text-sm font-semibold tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream focus-visible:ring-offset-2 focus-visible:ring-offset-ocean-950";
 
+/** Logged-out gate: social-proof chips, not CTAs (email action is below). */
+const proofPillClass =
+  "relative inline-flex min-h-12 min-w-[9.5rem] cursor-default items-center justify-center rounded-full border border-cream/30 bg-black/25 px-6 py-3 text-sm font-semibold tracking-wide text-cream/90 backdrop-blur-sm";
+
 type HeroCtasProps = {
   initialCounts: HeroCounts;
-  /** Anchor for Sub/Join (`#hero` logged out, `#membership` when verified). */
+  /** Anchor for Sub/Join when interactive (`#membership` when verified). */
   href?: string;
   className?: string;
+  /**
+   * When false, render quiet non-button pills (open hero gate).
+   * When true, coral/outline links that scroll to `href`.
+   */
+  interactive?: boolean;
 };
 
 export function HeroCtas({
   initialCounts,
   href = "#membership",
   className = "mt-8 flex flex-wrap items-center gap-x-5 gap-y-5",
+  interactive = true,
 }: HeroCtasProps) {
   const [counts, setCounts] = useState(initialCounts);
   const [prevInitialCounts, setPrevInitialCounts] = useState(initialCounts);
@@ -89,12 +99,30 @@ export function HeroCtas({
     };
   }, []);
 
+  const subscribeLabel = `${heroContent.subscribeLabel}, ${exactCountFormatter.format(counts.newsletterSubscribers)} ${heroContent.newsletterCountLabel}`;
+  const joinLabel = `${heroContent.joinLabel}, ${exactCountFormatter.format(counts.paidMembers)} ${heroContent.paidMembersCountLabel}`;
+
+  if (!interactive) {
+    return (
+      <div className={className} role="group" aria-label="Community counts">
+        <span className={proofPillClass} aria-label={subscribeLabel}>
+          {heroContent.subscribeLabel}
+          <HeroCtaBadge value={counts.newsletterSubscribers} />
+        </span>
+        <span className={proofPillClass} aria-label={joinLabel}>
+          {heroContent.joinLabel}
+          <HeroCtaBadge value={counts.paidMembers} />
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div className={className}>
       <a
         href={href}
         className={`${ctaBaseClass} bg-coral text-white hover:bg-coral-dark`}
-        aria-label={`${heroContent.subscribeLabel}, ${exactCountFormatter.format(counts.newsletterSubscribers)} ${heroContent.newsletterCountLabel}`}
+        aria-label={subscribeLabel}
       >
         {heroContent.subscribeLabel}
         <HeroCtaBadge value={counts.newsletterSubscribers} />
@@ -102,7 +130,7 @@ export function HeroCtas({
       <a
         href={href}
         className={`${ctaBaseClass} border border-cream/55 bg-cream/15 text-cream backdrop-blur-sm hover:bg-cream/25`}
-        aria-label={`${heroContent.joinLabel}, ${exactCountFormatter.format(counts.paidMembers)} ${heroContent.paidMembersCountLabel}`}
+        aria-label={joinLabel}
       >
         {heroContent.joinLabel}
         <HeroCtaBadge value={counts.paidMembers} />

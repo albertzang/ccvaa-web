@@ -145,7 +145,7 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
       >
         <HeroCtas
           initialCounts={initialCounts}
-          href="#hero"
+          interactive={false}
           className="flex flex-wrap items-center gap-x-4 gap-y-3"
         />
         {error ? (
