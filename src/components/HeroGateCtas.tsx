@@ -17,10 +17,13 @@ const gateEmailSchema = z
   .max(320);
 
 const gateInputClass =
-  "h-12 w-full min-w-0 cursor-text rounded-full border border-ocean-200/80 bg-cream px-4 text-sm text-ocean-950 placeholder:text-ocean-500 shadow-sm transition-colors hover:border-ocean-400 focus:border-coral focus:outline-none focus:ring-2 focus:ring-coral/35";
+  "h-12 w-full min-w-0 cursor-text rounded-full border bg-cream px-4 text-sm text-ocean-950 placeholder:text-ocean-500 shadow-sm transition-colors focus:outline-none focus:ring-2";
 
+/** Default vs invalid borders are mutually exclusive so red shows without hover. */
+const gateInputOkClass =
+  "border-ocean-200/80 hover:border-ocean-400 focus:border-coral focus:ring-coral/35";
 const gateInputInvalidClass =
-  "border-red-500 hover:border-red-500 focus:border-red-500 focus:ring-red-500/40";
+  "border-red-500 focus:border-red-500 focus:ring-red-500/40";
 
 const gatePrimaryBtnClass =
   "inline-flex h-12 shrink-0 items-center justify-center rounded-full bg-coral px-5 text-sm font-semibold text-white transition-colors hover:bg-coral-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/70 disabled:opacity-60";
@@ -189,7 +192,9 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
               }}
               placeholder={membershipContent.emailPlaceholder}
               className={`${gateInputClass} ${
-                invalidField === "email" ? gateInputInvalidClass : ""
+                invalidField === "email"
+                  ? gateInputInvalidClass
+                  : gateInputOkClass
               }`}
             />
           </div>
@@ -218,7 +223,9 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
                 }}
                 placeholder={membershipContent.codePlaceholder}
                 className={`${gateInputClass} font-mono tracking-widest placeholder:font-sans placeholder:tracking-normal ${
-                  invalidField === "code" ? gateInputInvalidClass : ""
+                  invalidField === "code"
+                    ? gateInputInvalidClass
+                    : gateInputOkClass
                 }`}
               />
             </div>

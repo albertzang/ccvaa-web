@@ -147,10 +147,13 @@ function formatRenewal(isoDateTime: string): string {
 
 /** Logged-in: looks read-only until focused / clicked for in-place edit. Width from content. */
 const quietInputClass =
-  "box-border h-9 max-w-full min-w-[12ch] field-sizing-content w-auto cursor-text rounded-md border border-transparent bg-cream/10 px-2.5 text-sm leading-none text-cream/95 transition-colors placeholder:text-cream/40 hover:bg-cream/15 focus:border-white/30 focus:bg-cream/20 focus:outline-none focus:ring-0";
+  "box-border h-9 max-w-full min-w-[12ch] field-sizing-content w-auto cursor-text rounded-md border bg-cream/10 px-2.5 text-sm leading-none text-cream/95 transition-colors placeholder:text-cream/40 hover:bg-cream/15 focus:bg-cream/20 focus:outline-none";
 
+/** Default vs invalid borders are mutually exclusive — stacking lost to `border-transparent`. */
+const quietInputOkClass =
+  "border-transparent focus:border-white/30 focus:ring-0";
 const quietInputInvalidClass =
-  "border-red-400 hover:border-red-400 focus:border-red-400 focus:ring-1 focus:ring-red-400/50";
+  "border-red-400 ring-1 ring-red-400/55 focus:border-red-400 focus:ring-red-400/55";
 
 type InvalidField = "email" | "code";
 
@@ -541,7 +544,9 @@ export function MembershipPanel({
                 12,
               )}
               className={`${quietInputClass} ${
-                invalidField === "email" ? quietInputInvalidClass : ""
+                invalidField === "email"
+                  ? quietInputInvalidClass
+                  : quietInputOkClass
               }`}
             />
           </div>
@@ -569,7 +574,9 @@ export function MembershipPanel({
                 placeholder={membershipContent.codePlaceholder}
                 size={Math.max(code.length, 6)}
                 className={`${quietInputClass} min-w-[6ch] font-mono tracking-widest placeholder:font-sans placeholder:tracking-normal ${
-                  invalidField === "code" ? quietInputInvalidClass : ""
+                  invalidField === "code"
+                    ? quietInputInvalidClass
+                    : quietInputOkClass
                 }`}
               />
             </div>
