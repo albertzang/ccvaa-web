@@ -143,7 +143,12 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
           void handleSendCode();
         }}
       >
-        <HeroCtas initialCounts={initialCounts} interactive={false} />
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <HeroCtas initialCounts={initialCounts} interactive={false} />
+          <p className="font-display text-xs font-medium tracking-tight text-cream">
+            {membershipContent.gateHeadline}
+          </p>
+        </div>
         {error ? (
           <p
             className="w-fit max-w-full rounded-md bg-coral px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm ring-1 ring-cream/25"
@@ -229,9 +234,6 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
                 : membershipContent.sendCodeLabel}
           </button>
         </div>
-        <p className="font-display text-xs font-medium tracking-tight text-cream/90 sm:text-sm">
-          {membershipContent.gateHeadline}
-        </p>
       </form>
     </div>
   );
