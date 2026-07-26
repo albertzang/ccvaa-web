@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 
@@ -49,13 +49,19 @@ type HeroGateCtasProps = {
   initialCounts: HeroCounts;
   /** When false, only Sub/Join show (member already verified). */
   showGate: boolean;
+  /** API errors surface in the reserved slot above the hero eyebrow. */
+  onApiError?: (message: string | null) => void;
 };
 
 /**
  * Logged-out: Email [| Code] | Send/Verify under Sub/Join.
  * Verified: Sub/Join CTAs only (scroll to #membership) — unused when #hero is omitted.
  */
-export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
+export function HeroGateCtas({
+  initialCounts,
+  showGate,
+  onApiError,
+}: HeroGateCtasProps) {
   const router = useRouter();
   const emailId = useId();
   const codeId = useId();
@@ -66,8 +72,6 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
   const [loading, setLoading] = useState(false);
   /** Client validation — red outline on the field; no chip. */
   const [invalidField, setInvalidField] = useState<InvalidField | null>(null);
-  /** API / server errors only. */
-  const [error, setError] = useState<string | null>(null);
   /** Hide gate immediately after verify; clear once server `showGate` catches up. */
   const [hideGateOptimistic, setHideGateOptimistic] = useState(false);
   if (!showGate && hideGateOptimistic) {
@@ -75,12 +79,22 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
   }
   const gateVisible = showGate && !hideGateOptimistic;
 
+  const reportApiError = (message: string | null) => {
+    onApiError?.(message);
+  };
+
+  useEffect(() => {
+    if (!gateVisible) {
+      onApiError?.(null);
+    }
+  }, [gateVisible, onApiError]);
+
   const clearClientInvalid = () => {
     setInvalidField(null);
   };
 
   const handleSendCode = async () => {
-    setError(null);
+    reportApiError(null);
     clearClientInvalid();
     if (!gateEmailSchema.safeParse(email).success) {
       setInvalidField("email");
@@ -93,14 +107,16 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
       });
       setCodeSent(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not send code.");
+      reportApiError(
+        err instanceof Error ? err.message : "Could not send code.",
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const handleVerify = async () => {
-    setError(null);
+    reportApiError(null);
     clearClientInvalid();
     if (!gateEmailSchema.safeParse(email).success) {
       setInvalidField("email");
@@ -114,6 +130,7 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
     try {
       await postJson("/api/members/verify/verify", { email, code });
       setHideGateOptimistic(true);
+      reportApiError(null);
       router.refresh();
       window.setTimeout(() => {
         document.getElementById("membership")?.scrollIntoView({
@@ -122,7 +139,9 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
         });
       }, 150);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not verify code.");
+      reportApiError(
+        err instanceof Error ? err.message : "Could not verify code.",
+      );
     } finally {
       setLoading(false);
     }
@@ -155,14 +174,6 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
             {membershipContent.gateHeadline}
           </p>
         </div>
-        {error ? (
-          <p
-            className="w-fit max-w-full rounded-md bg-coral px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm ring-1 ring-cream/25"
-            role="alert"
-          >
-            {error}
-          </p>
-        ) : null}
         <div
           className={
             codeSent

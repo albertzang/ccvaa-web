@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 
-import { HeroGateCtas } from "@/components/HeroGateCtas";
+import { HeroLoggedOut } from "@/components/HeroLoggedOut";
 import { getHeroCounts } from "@/lib/members/hero-counts";
 import { heroContent } from "@/lib/site";
 
@@ -61,26 +61,26 @@ export async function Hero({
             id="hero"
             className={`flex ${HERO_STAGE_HEIGHT_CLASS} items-center text-white`}
           >
-            <div className="relative mx-auto w-full max-w-6xl select-none px-6 pt-20 pb-10 sm:pt-24 sm:pb-12">
-              <p className="text-sm font-medium uppercase tracking-widest text-ocean-100/90">
-                {heroContent.eyebrow}
-              </p>
+            {counts ? (
+              <HeroLoggedOut
+                initialCounts={counts}
+                showGate={showMembershipGate}
+              />
+            ) : (
+              <div className="relative mx-auto w-full max-w-6xl select-none px-6 pt-20 pb-10 sm:pt-24 sm:pb-12">
+                <p className="text-sm font-medium uppercase tracking-widest text-ocean-100/90">
+                  {heroContent.eyebrow}
+                </p>
 
-              <h1 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-                {heroContent.headline}
-              </h1>
+                <h1 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+                  {heroContent.headline}
+                </h1>
 
-              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ocean-50/95 sm:text-xl">
-                {heroContent.subheadline}
-              </p>
-
-              {counts ? (
-                <HeroGateCtas
-                  initialCounts={counts}
-                  showGate={showMembershipGate}
-                />
-              ) : null}
-            </div>
+                <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ocean-50/95 sm:text-xl">
+                  {heroContent.subheadline}
+                </p>
+              </div>
+            )}
           </section>
         ) : null}
 
