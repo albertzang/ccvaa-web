@@ -3,7 +3,7 @@
 **Feature:** Members  
 **Slug:** `members`  
 **Owner:** Product Manager  
-**Next ID:** `0024`
+**Next ID:** `0027`
 
 Canonical work IDs: `members-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
@@ -18,7 +18,7 @@ Two **orthogonal** axes (not one ladder of plans):
 
 **Membership plans:** Founding (one-time, capped, lifetime) → after cap, Join shows Lifetime (one-time, fee always higher than Founding) instead of Founding; Annual (yearly recurring) always offered alongside. Annual stores anniversary / next renewal from Stripe. Auth: email OTP (not admin Hover); no OAuth/passwords.
 
-**`#membership`:** after Hero, before About. Unverified → identity/OTP strip + glass gate. Verified → Name/email strip + newsletter toggle + Join Checkout or perks placeholder. Contact is inquiry-only.
+**`#membership`:** after Hero, before About. Unverified → identity/OTP strip + glass gate. Verified → email strip + newsletter toggle + Join Checkout or perks placeholder. Contact is inquiry-only. **Member display/legal name:** none — email is the public identity (`members-0025`); shipping/receipts collect name later if ever needed.
 
 **Homepage order:** Nav → Hero → `#membership` → About → Contact → Footer. Hero: Subscribe / Join + counters → both `#membership`.
 
@@ -38,7 +38,121 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 5. Then `next`: `0010` links → `0009` go-live (CEO); `later`: `0011`–`0013`
 6. Portal redesign — `0022` (CEO kickoff when ready)
 
-**Ship lane:** First Members milestone **merged to `main`** 2026-07-18 (PR #8) via epic branch `feat/members` (historical). Pass 2 **ship confirmed**. Remaining: `members-0009` (CEO go-live / Production flag), `0010` if still open, `0011`–`0013` later. **Future work:** main-safe increments per [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#main-safe-increments-required).
+**Ship lane:** First Members milestone **merged to `main`** 2026-07-18 (PR #8) via epic branch `feat/members` (historical). Pass 2 **ship confirmed**. Remaining: `members-0009` (CEO go-live / Production flag), `0010` if still open, `0011`–`0013` later; **`members-0026`** Stripe identity by customer id; **`members-0025`** remove Name; **`members-0024`** Annual cancel-at-period-end. **Future work:** main-safe increments per [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#main-safe-increments-required).
+
+---
+
+## members-0026 — Stripe identity: bind by Customer ID; sync email on change
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `next` |
+| **Status** | `not-started` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
+
+### Description
+
+**Problem:** Our member PK is `members.id`; email is changeable. Stripe renewals bind to **Customer / Subscription IDs**, but join/webhook paths often resolve the member by **email**, and email changes in Neon are not pushed to Stripe. That does not stop charges by itself, but it drifts receipts and can break activation / event matching or create duplicate Stripe customers on a later checkout.
+
+**Do:**
+1. Treat `stripe_customer_id` (and subscription id when Annual — align with `members-0024`) as the billing link; prefer it over email for webhook ↔ member resolution
+2. On verified email change: update the Stripe Customer’s email (fail closed / clear error if Stripe update fails when a customer id exists)
+3. Session Join Checkout: reuse existing `stripe_customer_id` when present instead of only `customer_email`
+4. Join activation / `checkout.session.completed`: resolve member by customer id when possible; email metadata as fallback only
+5. Document identity model in `docs/members/schema.md` (or FEATURES): Neon email = login; Stripe Customer ID = billing
+
+**Acceptance (draft):**
+- [ ] Email change updates Stripe Customer email when `stripe_customer_id` is set
+- [ ] Webhook/activation can match paid member without relying solely on email
+- [ ] Second checkout for an existing paid/verified member with a customer id does not create a duplicate customer unnecessarily
+- [ ] Annual renewals still charge after an email change (test mode)
+- [ ] Preview Pass 1 + Production Pass 2
+
+**Out of scope:** Customer Portal UI; cancel-at-period-end UX (`0024`); removing Name (`0025`); live-key go-live (`0009`).
+
+### Links
+
+- Source: CEO (2026-07-25)
+- Related: `members-0024` Annual cancel/renewal; `members-0004` Join/Stripe; profile email change
+
+---
+
+## members-0025 — Remove member Name field entirely (pre-production)
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `next` |
+| **Status** | `not-started` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
+
+### Description
+
+**Decision (CEO 2026-07-25):** CCVAA does not need member legal/display names for membership or newsletter. Name was only a courtesy label. Shipping/perks (if any) will collect name/address at fulfill time via a third-party vendor — not stored as standing member PII. Membership is **not live in Production** yet → **no backward compatibility**; hard-delete Name everywhere.
+
+**Remove completely:**
+1. DB: drop `members.name` (migration + Drizzle schema); update seeds
+2. Session / JWT / public profile types: no `name`
+3. APIs: verify, profile name PATCH, newsletter subscribe, join metadata — stop accepting/returning name; delete `personNameSchema` usage (and the schema module if unused)
+4. UI: `#membership` gate + logged-in strip — Email (+ OTP) only; no Name input/auto-save; admin roster — no name column/edit (search by email)
+5. Stripe Checkout metadata: email/plan only (or omit name; no `"Member"` placeholder required in product copy)
+6. Docs: FEATURES.md, schema.md, site copy — reflect email-only identity
+
+**Acceptance (draft):**
+- [ ] No Name field in public membership/newsletter UI or admin roster
+- [ ] No `name` on member row / session / profile API payloads
+- [ ] Verify + Join + newsletter flows work with email only
+- [ ] Fresh migrate/seed clean; Preview Pass 1 + Production Pass 2 (flag Off OK)
+
+**Out of scope:** Shipping/address collection; tax-receipt legal name; optional “display name” later; Production data migration/backfill (N/A — not released).
+
+### Links
+
+- Source: CEO product decision (2026-07-25) — option B, no compat
+- Related: `members-0017` (name required — superseded); `members-0006` / `0022` profile; `members-0003` newsletter
+
+---
+
+## members-0024 — Annual: cancel next renewal (keep access until period end)
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `next` |
+| **Status** | `not-started` |
+| **Verifier** | `agent` |
+| **Verify passes** | `pass1+pass2` |
+| **Ship path** | `feature-branch` |
+
+### Description
+
+Logged-in **Annual** members can stop the next auto-charge while keeping membership until the current period ends (`cancel_at_period_end`), from the `#membership` paid profile (not Founding/Lifetime).
+
+**Recommended approach (in-app, not Stripe Customer Portal):**
+1. Persist Stripe **subscription id** on the member (or resolve reliably from `stripe_customer_id`) at Join activation
+2. Session APIs: schedule cancel / resume renewal (undo before period end)
+3. Logged-in UI: show next renewal; primary action **Cancel renewal**; when scheduled, show **Access until &lt;date&gt; — won’t renew** + **Keep membership**
+4. Webhooks: `customer.subscription.updated` / `deleted` (and period end) sync DB — when access ends, membership becomes non-paid (`cancelled` / `none` per existing model); newsletter unchanged
+5. Fail closed without Stripe/session; Annual-only
+
+**Acceptance (draft):**
+- [ ] Annual member can cancel next auto-charge; access remains until `next_renewal_at` / Stripe period end
+- [ ] UI reflects scheduled cancel; member can resume before period end
+- [ ] After period end (webhook), Join/perks state matches non-paid; no further charges
+- [ ] Founding / Lifetime: no cancel-renewal controls
+- [ ] Preview Pass 1 + Production Pass 2 with Stripe test mode
+
+**Out of scope:** Stripe Customer Portal; payment-method / invoice history UI; refunds; Founding/Lifetime “cancel”; admin-initiated cancels (roster already separate).
+
+### Links
+
+- Source: CEO (2026-07-25)
+- Related: `members-0004` Join/Stripe; `members-0006` / `0022` profile renewal display; `members-0012` perks
 
 ---
 
