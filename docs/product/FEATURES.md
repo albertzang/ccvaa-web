@@ -164,6 +164,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-26 | **members-0025:** email-only identity live on `main` (PR #9) — drop Name; membership UX polish (MessageBanner, soft-reload recovery, verified glass portal); Pass 2 ship confirmed |
 | 2026-07-25 | **members-0025:** remove member Name everywhere — email-only identity (DB/session/APIs/UI/admin/Stripe metadata); drop `personNameSchema` + profile name PATCH |
 | 2026-07-25 | **agent-os-0003:** long-lived Staging = force-mirrored `main` → `https://ccvaa-web-git-staging-azang-projects.vercel.app`; Edge Config `preview`; Deployment Protection + Preview bypass |
 | 2026-07-25 | **public-homepage-0003:** sticky hero through membership; logged-out OTP+Sub/Join in Hero; `#membership`+nav after verify; glass/banners/copy polish; join return activates without waiting on webhook |

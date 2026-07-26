@@ -38,7 +38,7 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 5. Then `next`: `0010` links → `0009` go-live (CEO); `later`: `0011`–`0013`
 6. Portal redesign — `0022` (CEO kickoff when ready)
 
-**Ship lane:** First Members milestone **merged to `main`** 2026-07-18 (PR #8) via epic branch `feat/members` (historical). Pass 2 **ship confirmed**. Remaining: `members-0009` (CEO go-live / Production flag), `0010` if still open, `0011`–`0013` later; **`members-0026`** Stripe identity by customer id; **`members-0025`** remove Name; **`members-0024`** Annual cancel-at-period-end. **Future work:** main-safe increments per [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#main-safe-increments-required).
+**Ship lane:** First Members milestone **merged to `main`** 2026-07-18 (PR #8) via epic branch `feat/members` (historical). Pass 2 **ship confirmed**. **`members-0025`** Name removal shipped 2026-07-26 (PR #9). Remaining: `members-0009` (CEO go-live / Production flag), `0010` if still open, `0011`–`0013` later; **`members-0026`** Stripe identity by customer id; **`members-0024`** Annual cancel-at-period-end. **Future work:** main-safe increments per [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#main-safe-increments-required).
 
 ---
 
@@ -86,7 +86,7 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -113,16 +113,14 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 
 ### Overall
 
-- Kicked off 2026-07-25 (CEO). PR #9. Pass 1 **merge** — CEO held for layout: Hero email row too wide after Name removal.
-- **Iteration 2:** Hero OTP width; logged-out centered hero; verified = quiet brand ribbon + social proof line above membership form (`N subscribers · M members`).
-- **Iteration 3 (CEO):** Drop info banners; client validation → red input outline; unified dismissible `MessageBanner`. Logged-in banners: email send/verify only. Newsletter toggle / checkout / join-return failures → soft `router.refresh()` (no banner; join-return also strips return URL). Pruned flag-off `UnsubConfirmation`.
+- Shipped 2026-07-26: PR #9 merged (`099c661`); Pass 2 **ship confirmed** on Production (Members flag Off — flag-off path OK).
+- Pass 1 **merge** — CEO held for layout polish after Name removal (Iterations 2–3: verified glass portal, MessageBanner, soft-reload recovery, Join right-align).
 
 ### Links
 
 - Source: CEO product decision (2026-07-25) — option B, no compat
 - Related: `members-0017` (name required — superseded); `members-0006` / `0022` profile; `members-0003` newsletter
 - PR: https://github.com/albertzang/ccvaa-web/pull/9
-- Pass 1 report: `docs/reports/QA-pass1.md`
 
 ---
 
