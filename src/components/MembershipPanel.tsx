@@ -156,10 +156,10 @@ function unsubMessage(unsubLanding: UnsubLanding): string {
 
 /** Logged-in: looks read-only until focused / clicked for in-place edit. */
 const quietInputClass =
-  "w-full cursor-text rounded-md border border-transparent bg-transparent px-1.5 py-1 text-sm text-cream transition-colors placeholder:text-cream/35 hover:bg-white/5 focus:border-white/25 focus:bg-white/10 focus:outline-none focus:ring-0";
+  "w-full cursor-text rounded-md border border-transparent bg-cream/10 px-1.5 py-1 text-sm text-cream/95 transition-colors placeholder:text-cream/40 hover:bg-cream/15 focus:border-white/30 focus:bg-cream/20 focus:outline-none focus:ring-0";
 
 const quietLabelClass =
-  "mb-0.5 block text-[10px] font-medium uppercase tracking-wider text-cream/45";
+  "mb-0.5 block text-[10px] font-medium uppercase tracking-wider text-cream/65";
 
 /** Match quiet input height; primary = Enter default. */
 const glassPrimaryBtnClass =
@@ -542,7 +542,7 @@ export function MembershipPanel({
       {/* Nav-like glass under the portal; fades out on all sides into the hero. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-x-5 -inset-y-4 rounded-3xl border border-white/10 bg-black/15 backdrop-blur-sm sm:-inset-x-8 sm:-inset-y-6 [-webkit-mask-image:linear-gradient(to_right,transparent_0%,black_14%,black_86%,transparent_100%),linear-gradient(to_bottom,transparent_0%,black_16%,black_84%,transparent_100%)] [-webkit-mask-composite:source-in] [mask-image:linear-gradient(to_right,transparent_0%,black_14%,black_86%,transparent_100%),linear-gradient(to_bottom,transparent_0%,black_16%,black_84%,transparent_100%)] [mask-composite:intersect]"
+        className="pointer-events-none absolute -inset-x-5 -inset-y-4 rounded-3xl border border-white/12 bg-black/28 backdrop-blur-md sm:-inset-x-8 sm:-inset-y-6 [-webkit-mask-image:linear-gradient(to_right,transparent_0%,black_10%,black_90%,transparent_100%),linear-gradient(to_bottom,transparent_0%,black_12%,black_88%,transparent_100%)] [-webkit-mask-composite:source-in] [mask-image:linear-gradient(to_right,transparent_0%,black_10%,black_90%,transparent_100%),linear-gradient(to_bottom,transparent_0%,black_12%,black_88%,transparent_100%)] [mask-composite:intersect]"
       />
       <div className="relative text-left">
       {topBanner ? (
@@ -704,7 +704,7 @@ export function MembershipPanel({
               {membershipContent.newsletterToggleLabel}
             </p>
             {/* px/py match quiet inputs so label→value spacing & inset align with Email */}
-            <p className="px-1.5 py-1 text-sm leading-relaxed text-cream">
+            <p className="px-1.5 py-1 text-sm leading-relaxed text-cream/95">
               {membershipContent.newsletterToggleDescription}
             </p>
           </div>
