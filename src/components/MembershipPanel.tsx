@@ -693,12 +693,15 @@ export function MembershipPanel({
             initialPlansError={initialPlansError}
           />
         )}
+      </div>
 
+      {/* Bottom-right text link — mirrors social proof at top-right. */}
+      <div className="mt-5 flex min-h-5 items-center justify-end">
         <button
           type="button"
           onClick={() => void handleLogout()}
           disabled={loggingOut}
-          className={glassSecondaryBtnClass}
+          className="text-sm font-medium tracking-wide text-cream/75 underline decoration-cream/35 underline-offset-4 transition-colors hover:text-cream hover:decoration-cream/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/45 disabled:opacity-60"
         >
           {loggingOut ? "Signing out…" : membershipContent.logoutLabel}
         </button>
