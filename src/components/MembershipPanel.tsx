@@ -17,6 +17,10 @@ import {
 } from "@/lib/members/email-otp-client";
 import type { HeroCounts } from "@/lib/members/hero-counts";
 import { refreshHeroCounts } from "@/lib/members/refresh-hero-counts";
+import {
+  clearMembershipReturnUrl,
+  softReload,
+} from "@/lib/members/soft-reload";
 import { membershipContent } from "@/lib/site";
 
 export type MemberProfileSummary = {
@@ -221,23 +225,18 @@ export function MembershipPanel({
 
     let cancelled = false;
 
-    const clearJoinReturnUrl = () => {
-      // Drop joined/session_id so a soft refresh cannot re-enter this poll loop.
-      window.history.replaceState({}, "", "/#membership");
-    };
-
     const applyReadyProfile = (next: MemberProfileSummary) => {
       setProfile(next);
       setEmail(next.email);
-      clearJoinReturnUrl();
+      clearMembershipReturnUrl();
       if (next.plan !== "none") {
         refreshHeroCounts();
       }
     };
 
     const abandonJoinReturn = () => {
-      clearJoinReturnUrl();
-      router.refresh();
+      clearMembershipReturnUrl();
+      softReload(router);
     };
 
     const run = async () => {
@@ -355,7 +354,7 @@ export function MembershipPanel({
     } catch {
       // Switch stays on prior state (not optimistic). Soft refresh may drop an
       // expired session back to the hero gate; otherwise user can toggle again.
-      router.refresh();
+      softReload(router);
     } finally {
       setNewsletterBusy(false);
     }
@@ -380,7 +379,7 @@ export function MembershipPanel({
       setCodeSent(false);
       setInvalidField(null);
       setError(null);
-      router.refresh();
+      softReload(router);
     } catch {
       // Stay signed in; logout failures are rare — no nav banner.
     } finally {

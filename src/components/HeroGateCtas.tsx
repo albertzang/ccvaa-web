@@ -14,6 +14,7 @@ import {
   verifyGateEmailOtp,
   type OtpInvalidField,
 } from "@/lib/members/email-otp-client";
+import { softReload } from "@/lib/members/soft-reload";
 import { membershipContent } from "@/lib/site";
 
 const gateInputClass =
@@ -110,7 +111,7 @@ export function HeroGateCtas({
       await verifyGateEmailOtp(email, code);
       setHideGateOptimistic(true);
       reportApiError(null);
-      router.refresh();
+      softReload(router);
       window.setTimeout(() => {
         document.getElementById("membership")?.scrollIntoView({
           behavior: "smooth",

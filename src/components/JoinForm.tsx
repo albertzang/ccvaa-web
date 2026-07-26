@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { softReload } from "@/lib/members/soft-reload";
 import { membershipContent } from "@/lib/site";
 
 type JoinPlanId = "founding" | "lifetime" | "annual";
@@ -122,7 +123,7 @@ export function JoinForm({
       window.location.assign(result.checkoutUrl);
     } catch {
       setLoading(false);
-      router.refresh();
+      softReload(router);
     }
   };
 
