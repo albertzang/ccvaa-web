@@ -154,9 +154,9 @@ function unsubMessage(unsubLanding: UnsubLanding): string {
     : membershipContent.unsubLandingSuccess;
 }
 
-/** Logged-in: looks read-only until focused / clicked for in-place edit. */
+/** Logged-in: looks read-only until focused / clicked for in-place edit. Width from content. */
 const quietInputClass =
-  "box-border h-9 w-full cursor-text rounded-md border border-transparent bg-cream/10 px-2.5 text-sm leading-none text-cream/95 transition-colors placeholder:text-cream/40 hover:bg-cream/15 focus:border-white/30 focus:bg-cream/20 focus:outline-none focus:ring-0";
+  "box-border h-9 max-w-full min-w-[12ch] field-sizing-content w-auto cursor-text rounded-md border border-transparent bg-cream/10 px-2.5 text-sm leading-none text-cream/95 transition-colors placeholder:text-cream/40 hover:bg-cream/15 focus:border-white/30 focus:bg-cream/20 focus:outline-none focus:ring-0";
 
 const quietLabelClass =
   "mb-0.5 block text-[10px] font-medium uppercase tracking-wider text-cream/65";
@@ -586,31 +586,100 @@ export function MembershipPanel({
         }}
         className="flex w-full flex-col gap-3"
       >
-            <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3">
-              <label htmlFor={emailId} className={`col-span-2 ${quietLabelClass}`}>
+            <div>
+              <label htmlFor={emailId} className={quietLabelClass}>
                 Email
               </label>
-              <input
-                id={emailId}
-                type="email"
-                required
-                autoComplete="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder={membershipContent.emailPlaceholder}
-                className={`${quietInputClass} min-w-0`}
-              />
-              <div className="flex h-9 min-w-[11.5rem] flex-nowrap items-center justify-end gap-2">
-                {emailDirty && !codeSent ? (
-                  <>
+              <div className="flex w-full flex-wrap items-center gap-x-3 gap-y-2">
+                <input
+                  id={emailId}
+                  type="email"
+                  required
+                  autoComplete="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder={membershipContent.emailPlaceholder}
+                  size={Math.max(
+                    email.trim().length,
+                    membershipContent.emailPlaceholder.length,
+                    12,
+                  )}
+                  className={quietInputClass}
+                />
+                <div className="flex h-9 min-w-[11.5rem] flex-nowrap items-center justify-end gap-2">
+                  {emailDirty && !codeSent ? (
+                    <>
+                      <button
+                        type="submit"
+                        disabled={loading || !email.trim()}
+                        className={glassPrimaryBtnClass}
+                      >
+                        {loading
+                          ? "Sending…"
+                          : membershipContent.changeEmailLabel}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={loading}
+                        onClick={() => {
+                          clearFeedback();
+                          setCodeSent(false);
+                          setCode("");
+                          setEmail(savedEmail);
+                        }}
+                        className={glassSecondaryBtnClass}
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <span
+                        className={`${glassPrimaryBtnClass} invisible`}
+                        aria-hidden="true"
+                      >
+                        {membershipContent.changeEmailLabel}
+                      </span>
+                      <span
+                        className={`${glassSecondaryBtnClass} invisible`}
+                        aria-hidden="true"
+                      >
+                        Cancel
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {codeSent ? (
+              <div>
+                <label htmlFor={codeId} className={quietLabelClass}>
+                  Code
+                </label>
+                <div className="flex w-full flex-wrap items-center gap-x-3 gap-y-2">
+                  <input
+                    id={codeId}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="\d{6}"
+                    maxLength={6}
+                    required={codeSent}
+                    value={code}
+                    onChange={(event) => setCode(event.target.value)}
+                    placeholder={membershipContent.codePlaceholder}
+                    size={Math.max(code.length, 6)}
+                    className={`${quietInputClass} min-w-[6ch] font-mono tracking-widest placeholder:font-sans placeholder:tracking-normal`}
+                  />
+                  <div className="flex h-9 min-w-[11.5rem] flex-nowrap items-center justify-end gap-2">
                     <button
                       type="submit"
-                      disabled={loading || !email.trim()}
+                      disabled={loading}
                       className={glassPrimaryBtnClass}
                     >
                       {loading
-                        ? "Sending…"
-                        : membershipContent.changeEmailLabel}
+                        ? "Verifying…"
+                        : membershipContent.emailVerifyLabel}
                     </button>
                     <button
                       type="button"
@@ -625,69 +694,7 @@ export function MembershipPanel({
                     >
                       Cancel
                     </button>
-                  </>
-                ) : (
-                  <>
-                    <span
-                      className={`${glassPrimaryBtnClass} invisible`}
-                      aria-hidden="true"
-                    >
-                      {membershipContent.changeEmailLabel}
-                    </span>
-                    <span
-                      className={`${glassSecondaryBtnClass} invisible`}
-                      aria-hidden="true"
-                    >
-                      Cancel
-                    </span>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {codeSent ? (
-              <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3">
-                <label
-                  htmlFor={codeId}
-                  className={`col-span-2 ${quietLabelClass}`}
-                >
-                  Code
-                </label>
-                <input
-                  id={codeId}
-                  type="text"
-                  inputMode="numeric"
-                  pattern="\d{6}"
-                  maxLength={6}
-                  required={codeSent}
-                  value={code}
-                  onChange={(event) => setCode(event.target.value)}
-                  placeholder={membershipContent.codePlaceholder}
-                  className={`${quietInputClass} min-w-0 font-mono tracking-widest placeholder:font-sans placeholder:tracking-normal`}
-                />
-                <div className="flex h-9 min-w-[11.5rem] flex-nowrap items-center justify-end gap-2">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className={glassPrimaryBtnClass}
-                  >
-                    {loading
-                      ? "Verifying…"
-                      : membershipContent.emailVerifyLabel}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={loading}
-                    onClick={() => {
-                      clearFeedback();
-                      setCodeSent(false);
-                      setCode("");
-                      setEmail(savedEmail);
-                    }}
-                    className={glassSecondaryBtnClass}
-                  >
-                    Cancel
-                  </button>
+                  </div>
                 </div>
               </div>
             ) : null}
