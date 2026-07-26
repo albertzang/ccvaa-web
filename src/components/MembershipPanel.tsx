@@ -538,15 +538,9 @@ export function MembershipPanel({
   }
 
   return (
-    <div className="relative">
-      {/* Nav-like glass under the portal; fades out on all sides into the hero. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -inset-x-5 -inset-y-4 rounded-3xl border border-white/12 bg-black/28 backdrop-blur-md sm:-inset-x-8 sm:-inset-y-6 [-webkit-mask-image:linear-gradient(to_right,transparent_0%,black_10%,black_90%,transparent_100%),linear-gradient(to_bottom,transparent_0%,black_12%,black_88%,transparent_100%)] [-webkit-mask-composite:source-in] [mask-image:linear-gradient(to_right,transparent_0%,black_10%,black_90%,transparent_100%),linear-gradient(to_bottom,transparent_0%,black_12%,black_88%,transparent_100%)] [mask-composite:intersect]"
-      />
-      <div className="relative text-left">
+    <div className="relative rounded-3xl border border-white/12 bg-black/28 px-5 py-5 backdrop-blur-md sm:px-8 sm:py-6">
       {topBanner ? (
-        <div className="absolute inset-x-0 top-0 z-10 -translate-y-[calc(100%+0.5rem)]">
+        <div className="absolute inset-x-5 top-0 z-10 -translate-y-[calc(100%+0.5rem)] sm:inset-x-8">
           <div
             className={`relative rounded-lg py-2.5 pl-4 pr-10 text-sm font-medium shadow-lg sm:py-3 ${
               topBanner.tone === "error"
@@ -573,6 +567,8 @@ export function MembershipPanel({
           </div>
         </div>
       ) : null}
+
+      <div className="text-left">
 
       {initialHeroCounts ? (
         <MembershipSocialProof initialCounts={initialHeroCounts} />
