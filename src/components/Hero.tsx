@@ -32,7 +32,8 @@ export async function Hero({
   compact = false,
   footer,
 }: HeroProps) {
-  const counts = membersEnabled ? await getHeroCounts() : null;
+  const counts =
+    membersEnabled && !compact ? await getHeroCounts() : null;
 
   return (
     <div id="hero-stage" className={`relative ${HERO_STAGE_MIN_HEIGHT_CLASS}`}>
