@@ -143,8 +143,11 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
           void handleSendCode();
         }}
       >
-        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
           <HeroCtas initialCounts={initialCounts} interactive={false} />
+          <span className="text-cream/45" aria-hidden="true">
+            |
+          </span>
           <p className="font-display text-xs font-medium tracking-tight text-cream">
             {membershipContent.gateHeadline}
           </p>
