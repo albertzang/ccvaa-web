@@ -115,7 +115,7 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 
 - Kicked off 2026-07-25 (CEO). PR #9. Pass 1 **merge** — CEO held for layout: Hero email row too wide after Name removal.
 - **Iteration 2:** Hero OTP width; logged-out centered hero; verified = quiet brand ribbon + social proof line above membership form (`N subscribers · M members`).
-- **Iteration 3 (CEO):** Drop info banners; client validation → red input outline; unified dismissible `MessageBanner`. Logged-in banner minimum: email send/verify, newsletter toggle. Checkout + join-return failure/timeout → strip return URL + soft `router.refresh()` (no banner). Pruned flag-off `UnsubConfirmation`.
+- **Iteration 3 (CEO):** Drop info banners; client validation → red input outline; unified dismissible `MessageBanner`. Logged-in banners: email send/verify only. Newsletter toggle / checkout / join-return failures → soft `router.refresh()` (no banner; join-return also strips return URL). Pruned flag-off `UnsubConfirmation`.
 
 ### Links
 

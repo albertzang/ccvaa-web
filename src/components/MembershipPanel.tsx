@@ -187,7 +187,7 @@ export function MembershipPanel({
   const [invalidField, setInvalidField] = useState<OtpInvalidField | null>(
     null,
   );
-  /** Nav banner (minimal set): email send/verify, newsletter toggle. */
+  /** Nav banner (minimal set): email send/verify only. */
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [newsletterBusy, setNewsletterBusy] = useState(false);
@@ -352,12 +352,10 @@ export function MembershipPanel({
         newsletterStatus: result.status,
       });
       refreshHeroCounts();
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Could not update newsletter preference.",
-      );
+    } catch {
+      // Switch stays on prior state (not optimistic). Soft refresh may drop an
+      // expired session back to the hero gate; otherwise user can toggle again.
+      router.refresh();
     } finally {
       setNewsletterBusy(false);
     }
