@@ -173,7 +173,4 @@ export const membershipContent = {
   profilePlanLabel: "Plan",
   profileAnniversaryLabel: "Anniversary",
   profileNextRenewalLabel: "Next renewal",
-  /** Join-return failure or timeout — one catch-all under the nav. */
-  joinedReturnFailed:
-    "We couldn’t finish activating your membership. Refresh this page, or verify your email again from the homepage.",
 } as const;

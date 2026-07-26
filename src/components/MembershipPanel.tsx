@@ -187,15 +187,11 @@ export function MembershipPanel({
   const [invalidField, setInvalidField] = useState<OtpInvalidField | null>(
     null,
   );
-  /**
-   * Nav banner (minimal set): email send/verify, newsletter toggle,
-   * join-return — checkout failures soft-refresh instead.
-   */
+  /** Nav banner (minimal set): email send/verify, newsletter toggle. */
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [newsletterBusy, setNewsletterBusy] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
-  const [joinReturnError, setJoinReturnError] = useState<string | null>(null);
 
   const verified = Boolean(profile?.authenticated);
   const savedEmail = profile?.email ?? "";
@@ -225,19 +221,26 @@ export function MembershipPanel({
 
     let cancelled = false;
 
+    const clearJoinReturnUrl = () => {
+      // Drop joined/session_id so a soft refresh cannot re-enter this poll loop.
+      window.history.replaceState({}, "", "/#membership");
+    };
+
     const applyReadyProfile = (next: MemberProfileSummary) => {
       setProfile(next);
       setEmail(next.email);
-      // Drop joined/session_id from the URL — cookie + plan are the source of truth.
-      window.history.replaceState({}, "", "/#membership");
+      clearJoinReturnUrl();
       if (next.plan !== "none") {
         refreshHeroCounts();
       }
     };
 
-    const run = async () => {
-      setJoinReturnError(null);
+    const abandonJoinReturn = () => {
+      clearJoinReturnUrl();
+      router.refresh();
+    };
 
+    const run = async () => {
       for (let attempt = 0; attempt < SESSION_MAX_ATTEMPTS; attempt += 1) {
         if (cancelled) {
           return;
@@ -264,17 +267,17 @@ export function MembershipPanel({
               return;
             }
           }
-        } catch (err) {
+        } catch {
           if (cancelled) {
             return;
           }
-          setJoinReturnError(membershipContent.joinedReturnFailed);
+          abandonJoinReturn();
           return;
         }
         await new Promise((resolve) => setTimeout(resolve, SESSION_POLL_MS));
       }
       if (!cancelled) {
-        setJoinReturnError(membershipContent.joinedReturnFailed);
+        abandonJoinReturn();
       }
     };
 
@@ -282,7 +285,7 @@ export function MembershipPanel({
     return () => {
       cancelled = true;
     };
-  }, [joinedLanding, profile?.authenticated, profile?.plan]);
+  }, [joinedLanding, profile?.authenticated, profile?.plan, router]);
 
   const clearFeedback = () => {
     setInvalidField(null);
@@ -392,21 +395,16 @@ export function MembershipPanel({
     profile?.authenticated &&
     profile.plan !== "none";
 
-  const bannerMessage = error ?? joinReturnError;
-
   useEffect(() => {
-    if (!bannerMessage) {
+    if (!error) {
       onBanner?.(null);
       return;
     }
     onBanner?.({
-      text: bannerMessage,
-      dismiss: () => {
-        setError(null);
-        setJoinReturnError(null);
-      },
+      text: error,
+      dismiss: () => setError(null),
     });
-  }, [bannerMessage, onBanner]);
+  }, [error, onBanner]);
 
   // Gate OTP lives in Hero when logged out; this panel is verified-only.
   if (!verified) {
