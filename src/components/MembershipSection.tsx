@@ -2,7 +2,6 @@ import {
   MembershipPanel,
   type UnsubLanding,
 } from "@/components/MembershipPanel";
-import { MembershipSocialProof } from "@/components/MembershipSocialProof";
 import { type JoinPlansProps } from "@/components/JoinForm";
 import { getHeroCounts } from "@/lib/members/hero-counts";
 import { getJoinPlans } from "@/lib/members/join";
@@ -64,9 +63,6 @@ export async function MembershipSection({
     >
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-3xl">
-          {authenticated ? (
-            <MembershipSocialProof initialCounts={heroCounts} />
-          ) : null}
           <MembershipPanel
             joinedLanding={joinedLanding}
             unsubLanding={unsubLanding}
@@ -74,6 +70,7 @@ export async function MembershipSection({
             initialProfileError={initialProfileState.profileError}
             initialPlans={plansResult.ok ? plansResult.data : null}
             initialPlansError={plansResult.ok ? null : plansResult.message}
+            initialHeroCounts={authenticated ? heroCounts : null}
           />
         </div>
       </div>

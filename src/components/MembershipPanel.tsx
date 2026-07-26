@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 
 import { JoinForm, type JoinPlansProps } from "@/components/JoinForm";
+import { MembershipSocialProof } from "@/components/MembershipSocialProof";
+import type { HeroCounts } from "@/lib/members/hero-counts";
 import { refreshHeroCounts } from "@/lib/members/refresh-hero-counts";
 import { otpCodeSchema } from "@/lib/members/zod/otp";
 import { membershipContent } from "@/lib/site";
@@ -44,6 +46,7 @@ type MembershipPanelProps = {
   initialProfileError: string | null;
   initialPlans: JoinPlansProps | null;
   initialPlansError: string | null;
+  initialHeroCounts?: HeroCounts | null;
 };
 
 type ApiError = {
@@ -172,6 +175,7 @@ export function MembershipPanel({
   initialProfileError,
   initialPlans,
   initialPlansError,
+  initialHeroCounts = null,
 }: MembershipPanelProps) {
   const router = useRouter();
   const emailId = useId();
@@ -566,6 +570,12 @@ export function MembershipPanel({
         </div>
       ) : null}
 
+      {/* Absolute banner does not consume flow — pad so social proof / form clear it. */}
+      <div className={topBanner ? "pt-16 sm:pt-[4.25rem]" : undefined}>
+        {initialHeroCounts ? (
+          <MembershipSocialProof initialCounts={initialHeroCounts} />
+        ) : null}
+
       <form
         noValidate
         onSubmit={(event) => {
@@ -770,6 +780,7 @@ export function MembershipPanel({
         >
           {loggingOut ? "Signing out…" : membershipContent.logoutLabel}
         </button>
+      </div>
       </div>
     </div>
   );
