@@ -58,7 +58,7 @@ export async function MembershipSection({
   return (
     <section
       id="membership"
-      className="relative scroll-mt-24 pt-20 pb-10 sm:pt-24 sm:pb-14"
+      className="relative scroll-mt-24 pt-14 pb-10 sm:pt-16 sm:pb-14"
       aria-label="Membership"
     >
       <div className="mx-auto max-w-6xl px-6">
