@@ -42,13 +42,19 @@ type HeroGateCtasProps = {
   initialCounts: HeroCounts;
   /** When false, only Sub/Join show (member already verified). */
   showGate: boolean;
+  /** Tighter CTA spacing when hero is compact (verified). */
+  compact?: boolean;
 };
 
 /**
  * Logged-out: Email [| Code] | Send/Verify | Sub | Join (one row on lg+).
  * Verified: Sub | Join only (scroll to #membership).
  */
-export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
+export function HeroGateCtas({
+  initialCounts,
+  showGate,
+  compact = false,
+}: HeroGateCtasProps) {
   const router = useRouter();
   const emailId = useId();
   const codeId = useId();
@@ -125,7 +131,17 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
   };
 
   if (!gateVisible) {
-    return <HeroCtas initialCounts={initialCounts} href="#membership" />;
+    return (
+      <HeroCtas
+        initialCounts={initialCounts}
+        href="#membership"
+        className={
+          compact
+            ? "mt-4 flex flex-wrap items-center gap-x-4 gap-y-3"
+            : "mt-8 flex flex-wrap items-center gap-x-5 gap-y-5"
+        }
+      />
+    );
   }
 
   return (

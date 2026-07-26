@@ -110,6 +110,7 @@ export default async function Home({
         <Hero
           membersEnabled={membersEnabled}
           showMembershipGate={membersEnabled && !memberVerified}
+          compact={membersEnabled && memberVerified}
           footer={heroFooter}
         />
         <AboutSection />

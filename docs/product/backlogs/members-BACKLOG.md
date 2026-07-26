@@ -114,7 +114,7 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 ### Overall
 
 - Kicked off 2026-07-25 (CEO). PR #9. Pass 1 **merge** — CEO held for layout: Hero email row too wide after Name removal.
-- **Iteration 2:** constrain Hero OTP row (`max-w-md` / `max-w-xl` with code) so it doesn’t stretch under Sub/Join; vertically center hero copy in the sticky image frame (nav clearance).
+- **Iteration 2:** constrain Hero OTP row; center logged-out hero in image frame; **verified = compact hero** (smaller type, tight spacing, under nav) so `#membership` owns the sticky frame.
 
 ### Links
 

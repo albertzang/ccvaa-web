@@ -17,6 +17,11 @@ type HeroProps = {
   membersEnabled: boolean;
   /** Show OTP gate in hero (logged-out). */
   showMembershipGate?: boolean;
+  /**
+   * Verified member: compact hero under the nav so `#membership` gets the
+   * sticky-image frame. Logged-out keeps a tall, centered hero.
+   */
+  compact?: boolean;
   /** Membership section — only when verified (scrolls over sticky hero background). */
   footer?: ReactNode;
 };
@@ -24,6 +29,7 @@ type HeroProps = {
 export async function Hero({
   membersEnabled,
   showMembershipGate = false,
+  compact = false,
   footer,
 }: HeroProps) {
   const counts = membersEnabled ? await getHeroCounts() : null;
@@ -49,21 +55,48 @@ export async function Hero({
       </div>
 
       <div className={`relative z-10 ${HERO_STAGE_PULL_CLASS}`}>
-        {/* Match sticky image height so copy optically centers in the hero frame (below fixed nav). */}
         <section
           id="hero"
-          className={`flex ${HERO_STAGE_HEIGHT_CLASS} items-center text-white`}
+          className={
+            compact
+              ? "text-white"
+              : `flex ${HERO_STAGE_HEIGHT_CLASS} items-center text-white`
+          }
         >
-          <div className="relative mx-auto w-full max-w-6xl select-none px-6 pt-20 pb-10 sm:pt-24 sm:pb-12">
-            <p className="text-sm font-medium uppercase tracking-widest text-ocean-100/90">
+          <div
+            className={
+              compact
+                ? "relative mx-auto w-full max-w-6xl select-none px-6 pt-20 pb-3 sm:pt-24 sm:pb-4"
+                : "relative mx-auto w-full max-w-6xl select-none px-6 pt-20 pb-10 sm:pt-24 sm:pb-12"
+            }
+          >
+            <p
+              className={
+                compact
+                  ? "text-[11px] font-medium uppercase tracking-widest text-ocean-100/85"
+                  : "text-sm font-medium uppercase tracking-widest text-ocean-100/90"
+              }
+            >
               {heroContent.eyebrow}
             </p>
 
-            <h1 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+            <h1
+              className={
+                compact
+                  ? "mt-2 max-w-2xl font-display text-2xl font-semibold leading-snug tracking-tight sm:text-3xl"
+                  : "mt-4 max-w-3xl font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-6xl"
+              }
+            >
               {heroContent.headline}
             </h1>
 
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ocean-50/95 sm:text-xl">
+            <p
+              className={
+                compact
+                  ? "mt-2 max-w-xl text-sm leading-relaxed text-ocean-50/90 sm:text-base"
+                  : "mt-6 max-w-2xl text-lg leading-relaxed text-ocean-50/95 sm:text-xl"
+              }
+            >
               {heroContent.subheadline}
             </p>
 
@@ -71,6 +104,7 @@ export async function Hero({
               <HeroGateCtas
                 initialCounts={counts}
                 showGate={showMembershipGate}
+                compact={compact}
               />
             ) : null}
           </div>
