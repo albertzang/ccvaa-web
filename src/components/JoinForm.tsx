@@ -71,7 +71,6 @@ export function JoinForm({
     () => initialPlans?.plans.find((p) => p.available)?.id ?? "",
   );
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
-  const [plansBannerHidden, setPlansBannerHidden] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -79,20 +78,15 @@ export function JoinForm({
       return;
     }
     setCheckoutError(null);
-    setPlansBannerHidden(true);
   }, [errorClearNonce]);
 
+  // Banner only for checkout failures — plans load uses in-form Retry only.
   useEffect(() => {
-    setPlansBannerHidden(false);
-  }, [plansError]);
-
-  useEffect(() => {
-    onError?.(checkoutError ?? (plansBannerHidden ? null : plansError));
-  }, [checkoutError, plansError, plansBannerHidden, onError]);
+    onError?.(checkoutError);
+  }, [checkoutError, onError]);
 
   const reloadPlans = async () => {
     setPlansError(null);
-    setPlansBannerHidden(false);
     setCheckoutError(null);
     setLoading(true);
     try {

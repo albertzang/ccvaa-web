@@ -43,7 +43,6 @@ type MembershipPanelProps = {
   joinedLanding?: boolean;
   unsubLanding?: UnsubLanding;
   initialProfile: MemberProfileSummary | null;
-  initialProfileError: string | null;
   initialPlans: JoinPlansProps | null;
   initialPlansError: string | null;
   initialHeroCounts?: HeroCounts | null;
@@ -175,7 +174,6 @@ export function MembershipPanel({
   joinedLanding,
   unsubLanding,
   initialProfile,
-  initialProfileError,
   initialPlans,
   initialPlansError,
   initialHeroCounts = null,
@@ -202,15 +200,13 @@ export function MembershipPanel({
   const [codeSent, setCodeSent] = useState(false);
   /** Client field validation — red outline on the field (not a chip). */
   const [invalidField, setInvalidField] = useState<InvalidField | null>(null);
-  /** API / system errors only — top banner. */
-  const [error, setError] = useState<string | null>(() =>
-    unsubLanding?.kind === "invalid"
-      ? membershipContent.unsubLandingInvalid
-      : (initialProfileError ?? null),
-  );
+  /**
+   * Nav banner (minimal set): email send/verify, newsletter toggle,
+   * join-return, checkout — not profile/unsub/logout/plans-load.
+   */
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [newsletterBusy, setNewsletterBusy] = useState(false);
-  const [logoutError, setLogoutError] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
   const [joinReturnError, setJoinReturnError] = useState<string | null>(null);
   const [joinFormError, setJoinFormError] = useState<string | null>(null);
@@ -427,7 +423,6 @@ export function MembershipPanel({
   };
 
   const handleLogout = async () => {
-    setLogoutError(null);
     setLoggingOut(true);
     try {
       const response = await fetch("/api/members/login/logout", {
@@ -447,10 +442,8 @@ export function MembershipPanel({
       setInvalidField(null);
       setError(null);
       router.refresh();
-    } catch (err) {
-      setLogoutError(
-        err instanceof Error ? err.message : "Could not sign out.",
-      );
+    } catch {
+      // Stay signed in; logout failures are rare — no nav banner.
     } finally {
       setLoggingOut(false);
     }
@@ -461,8 +454,7 @@ export function MembershipPanel({
     profile?.authenticated &&
     profile.plan !== "none";
 
-  const bannerMessage =
-    error ?? joinReturnError ?? logoutError ?? joinFormError;
+  const bannerMessage = error ?? joinReturnError ?? joinFormError;
 
   useEffect(() => {
     if (!bannerMessage) {
@@ -474,7 +466,6 @@ export function MembershipPanel({
       dismiss: () => {
         setError(null);
         setJoinReturnError(null);
-        setLogoutError(null);
         setJoinFormError(null);
         setJoinErrorClearNonce((n) => n + 1);
       },

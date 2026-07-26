@@ -63,7 +63,6 @@ export async function MembershipSection({
         joinedLanding={joinedLanding}
         unsubLanding={unsubLanding}
         initialProfile={initialProfileState.profile}
-        initialProfileError={initialProfileState.profileError}
         initialPlans={plansResult.ok ? plansResult.data : null}
         initialPlansError={plansResult.ok ? null : plansResult.message}
         initialHeroCounts={authenticated ? heroCounts : null}

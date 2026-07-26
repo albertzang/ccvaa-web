@@ -16,7 +16,6 @@ type MembershipLoggedInProps = {
   joinedLanding?: boolean;
   unsubLanding?: UnsubLanding;
   initialProfile: MemberProfileSummary | null;
-  initialProfileError: string | null;
   initialPlans: JoinPlansProps | null;
   initialPlansError: string | null;
   initialHeroCounts: HeroCounts | null;
@@ -30,7 +29,6 @@ export function MembershipLoggedIn({
   joinedLanding,
   unsubLanding,
   initialProfile,
-  initialProfileError,
   initialPlans,
   initialPlansError,
   initialHeroCounts,
@@ -60,7 +58,6 @@ export function MembershipLoggedIn({
           joinedLanding={joinedLanding}
           unsubLanding={unsubLanding}
           initialProfile={initialProfile}
-          initialProfileError={initialProfileError}
           initialPlans={initialPlans}
           initialPlansError={initialPlansError}
           initialHeroCounts={initialHeroCounts}
