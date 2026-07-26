@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import type { HeroCounts } from "@/lib/members/hero-counts";
 import { HERO_COUNTS_REFRESH_EVENT } from "@/lib/members/refresh-hero-counts";
-import { heroContent, siteConfig } from "@/lib/site";
+import { heroContent, membershipContent, siteConfig } from "@/lib/site";
 
 const exactCountFormatter = new Intl.NumberFormat(siteConfig.locale);
 const compactCountFormatter = new Intl.NumberFormat(siteConfig.locale, {
@@ -102,20 +102,16 @@ export function HeroCtas({
     // Typography only — no pill chrome / badges (those read as buttons).
     return (
       <p
-        className="text-sm font-medium tracking-wide text-cream/75"
+        className="font-display text-base font-semibold tracking-tight text-cream sm:text-lg"
         aria-live="polite"
       >
-        <span className="text-cream/85">{heroContent.subscribeLabel}</span>
-        <span className="ml-1.5 tabular-nums text-cream/55">
-          {exactCountFormatter.format(counts.newsletterSubscribers)}
-        </span>
-        <span className="mx-2.5 text-cream/35" aria-hidden="true">
+        {exactCountFormatter.format(counts.newsletterSubscribers)}{" "}
+        {membershipContent.socialProofSubscribers}
+        <span className="mx-2 text-cream/50" aria-hidden="true">
           ·
         </span>
-        <span className="text-cream/85">{heroContent.joinLabel}</span>
-        <span className="ml-1.5 tabular-nums text-cream/55">
-          {exactCountFormatter.format(counts.paidMembers)}
-        </span>
+        {exactCountFormatter.format(counts.paidMembers)}{" "}
+        {membershipContent.socialProofMembers}
       </p>
     );
   }
