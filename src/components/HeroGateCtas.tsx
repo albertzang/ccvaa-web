@@ -213,7 +213,7 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
         </p>
         {error ? (
           <p
-            className="rounded-lg bg-coral-dark px-3 py-2 text-sm font-medium text-cream ring-1 ring-coral/70"
+            className="w-fit max-w-full rounded-md bg-coral-dark/45 px-2.5 py-1 text-xs font-medium text-cream/95 ring-1 ring-coral/40"
             role="alert"
           >
             {error}
