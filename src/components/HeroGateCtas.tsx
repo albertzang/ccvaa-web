@@ -147,77 +147,79 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
           href="#hero"
           className="flex flex-wrap items-center gap-x-4 gap-y-3"
         />
-        <div
-          className={
-            codeSent
-              ? "grid w-full max-w-xl grid-cols-1 items-end gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(6.5rem,7.5rem)_auto]"
-              : "grid w-full max-w-md grid-cols-1 items-end gap-3 sm:grid-cols-[minmax(0,1fr)_auto]"
-          }
-        >
-          <div className="min-w-0">
-            <label
-              htmlFor={emailId}
-              className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-cream"
-            >
-              Email
-            </label>
-            <input
-              id={emailId}
-              type="email"
-              required
-              autoComplete="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder={membershipContent.emailPlaceholder}
-              className={gateInputClass}
-            />
+        <div className="flex w-full flex-col gap-1.5">
+          {/* Fixed-height slot above Email — show/hide must not shift the gate. */}
+          <div className="flex min-h-5 items-center">
+            {error ? (
+              <p
+                className="w-fit max-w-full rounded-md bg-coral px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm ring-1 ring-cream/25"
+                role="alert"
+              >
+                {error}
+              </p>
+            ) : null}
           </div>
-          {codeSent ? (
+          <div
+            className={
+              codeSent
+                ? "grid w-full max-w-xl grid-cols-1 items-end gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(6.5rem,7.5rem)_auto]"
+                : "grid w-full max-w-md grid-cols-1 items-end gap-3 sm:grid-cols-[minmax(0,1fr)_auto]"
+            }
+          >
             <div className="min-w-0">
               <label
-                htmlFor={codeId}
+                htmlFor={emailId}
                 className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-cream"
               >
-                Code
+                Email
               </label>
               <input
-                id={codeId}
-                type="text"
-                inputMode="numeric"
-                pattern="\d{6}"
-                maxLength={6}
+                id={emailId}
+                type="email"
                 required
-                value={code}
-                onChange={(event) => setCode(event.target.value)}
-                placeholder={membershipContent.codePlaceholder}
-                className={`${gateInputClass} font-mono tracking-widest placeholder:font-sans placeholder:tracking-normal`}
+                autoComplete="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder={membershipContent.emailPlaceholder}
+                className={gateInputClass}
               />
             </div>
-          ) : null}
-          <button
-            type="submit"
-            disabled={loading || (!codeSent && !email.trim())}
-            className={`${gatePrimaryBtnClass} w-full sm:w-auto`}
-          >
-            {loading
-              ? codeSent
-                ? "Verifying…"
-                : "Sending…"
-              : codeSent
-                ? membershipContent.verifyEmailLabel
-                : membershipContent.sendCodeLabel}
-          </button>
-        </div>
-        {/* Fixed-height slot — show/hide must not shift the gate headline. */}
-        <div className="flex min-h-5 items-center">
-          {error ? (
-            <p
-              className="w-fit max-w-full rounded-md bg-coral px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm ring-1 ring-cream/25"
-              role="alert"
+            {codeSent ? (
+              <div className="min-w-0">
+                <label
+                  htmlFor={codeId}
+                  className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-cream"
+                >
+                  Code
+                </label>
+                <input
+                  id={codeId}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="\d{6}"
+                  maxLength={6}
+                  required
+                  value={code}
+                  onChange={(event) => setCode(event.target.value)}
+                  placeholder={membershipContent.codePlaceholder}
+                  className={`${gateInputClass} font-mono tracking-widest placeholder:font-sans placeholder:tracking-normal`}
+                />
+              </div>
+            ) : null}
+            <button
+              type="submit"
+              disabled={loading || (!codeSent && !email.trim())}
+              className={`${gatePrimaryBtnClass} w-full sm:w-auto`}
             >
-              {error}
-            </p>
-          ) : null}
+              {loading
+                ? codeSent
+                  ? "Verifying…"
+                  : "Sending…"
+                : codeSent
+                  ? membershipContent.verifyEmailLabel
+                  : membershipContent.sendCodeLabel}
+            </button>
+          </div>
         </div>
         <p className="font-display text-xs font-medium tracking-tight text-cream/90 sm:text-sm">
           {membershipContent.gateHeadline}
