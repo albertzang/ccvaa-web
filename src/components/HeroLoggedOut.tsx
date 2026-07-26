@@ -14,8 +14,7 @@ type HeroLoggedOutProps = {
 
 /**
  * Logged-out hero body: brand + membership gate.
- * API error chip sits in a reserved, centered slot just above the eyebrow
- * (inside existing top padding — does not change nav ↔ eyebrow spacing).
+ * API errors use the shared fixed chip under the navbar (`NavMessageBanner`).
  */
 export function HeroLoggedOut({
   initialCounts,

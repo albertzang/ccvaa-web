@@ -24,7 +24,7 @@ type MembershipLoggedInProps = {
 
 /**
  * Verified membership body: brand + glass panel.
- * API errors use the same nav-relative reserved banner slot as the logged-out hero gate.
+ * API errors use the shared fixed chip under the navbar (`NavMessageBanner`).
  */
 export function MembershipLoggedIn({
   joinedLanding,
