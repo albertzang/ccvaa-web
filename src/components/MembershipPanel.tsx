@@ -156,17 +156,17 @@ function unsubMessage(unsubLanding: UnsubLanding): string {
 
 /** Logged-in: looks read-only until focused / clicked for in-place edit. */
 const quietInputClass =
-  "w-full cursor-text rounded-md border border-transparent bg-cream/10 px-1.5 py-1 text-sm text-cream/95 transition-colors placeholder:text-cream/40 hover:bg-cream/15 focus:border-white/30 focus:bg-cream/20 focus:outline-none focus:ring-0";
+  "box-border h-9 w-full cursor-text rounded-md border border-transparent bg-cream/10 px-2.5 text-sm leading-none text-cream/95 transition-colors placeholder:text-cream/40 hover:bg-cream/15 focus:border-white/30 focus:bg-cream/20 focus:outline-none focus:ring-0";
 
 const quietLabelClass =
   "mb-0.5 block text-[10px] font-medium uppercase tracking-wider text-cream/65";
 
-/** Match quiet input height; primary = Enter default. */
+/** Same h-9 as quiet inputs; primary = Enter default. */
 const glassPrimaryBtnClass =
-  "inline-flex h-[34px] items-center justify-center rounded-full bg-cream px-3 text-xs font-semibold text-ocean-950 transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/60 disabled:opacity-60";
+  "inline-flex h-9 shrink-0 items-center justify-center rounded-full bg-cream px-3 text-xs font-semibold leading-none text-ocean-950 transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/60 disabled:opacity-60";
 
 const glassSecondaryBtnClass =
-  "inline-flex h-[34px] items-center justify-center rounded-full border border-cream/65 bg-transparent px-3 text-xs font-medium text-cream transition-colors hover:border-cream hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/45 disabled:opacity-60";
+  "inline-flex h-9 shrink-0 items-center justify-center rounded-full border border-cream/65 bg-transparent px-3 text-xs font-medium leading-none text-cream transition-colors hover:border-cream hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/45 disabled:opacity-60";
 
 export function MembershipPanel({
   joinedLanding,
@@ -586,7 +586,7 @@ export function MembershipPanel({
         }}
         className="flex w-full flex-col gap-3"
       >
-            <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-end gap-x-3">
+            <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3">
               <label htmlFor={emailId} className={`col-span-2 ${quietLabelClass}`}>
                 Email
               </label>
@@ -598,9 +598,9 @@ export function MembershipPanel({
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder={membershipContent.emailPlaceholder}
-                className={`${quietInputClass} w-full min-w-0`}
+                className={`${quietInputClass} min-w-0`}
               />
-              <div className="flex min-w-[11.5rem] flex-wrap items-center justify-end gap-2">
+              <div className="flex h-9 min-w-[11.5rem] flex-nowrap items-center justify-end gap-2">
                 {emailDirty && !codeSent ? (
                   <>
                     <button
@@ -646,7 +646,7 @@ export function MembershipPanel({
             </div>
 
             {codeSent ? (
-              <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-end gap-x-3">
+              <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3">
                 <label
                   htmlFor={codeId}
                   className={`col-span-2 ${quietLabelClass}`}
@@ -663,9 +663,9 @@ export function MembershipPanel({
                   value={code}
                   onChange={(event) => setCode(event.target.value)}
                   placeholder={membershipContent.codePlaceholder}
-                  className={`${quietInputClass} w-full min-w-0 font-mono tracking-widest placeholder:font-sans placeholder:tracking-normal`}
+                  className={`${quietInputClass} min-w-0 font-mono tracking-widest placeholder:font-sans placeholder:tracking-normal`}
                 />
-                <div className="flex min-w-[11.5rem] flex-wrap items-center justify-end gap-2">
+                <div className="flex h-9 min-w-[11.5rem] flex-nowrap items-center justify-end gap-2">
                   <button
                     type="submit"
                     disabled={loading}
