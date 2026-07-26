@@ -2,21 +2,22 @@
 
 import { useEffect, useId, useState } from "react";
 import { useRouter } from "next/navigation";
-import { z } from "zod";
 
 import { JoinForm, type JoinPlansProps } from "@/components/JoinForm";
 import { MembershipSocialProof } from "@/components/MembershipSocialProof";
+import {
+  getSendCodeInvalidField,
+  getVerifyCodeInvalidField,
+  otpSendErrorMessage,
+  otpVerifyErrorMessage,
+  postMembersJson,
+  startEmailChangeOtp,
+  verifyEmailChangeOtp,
+  type OtpInvalidField,
+} from "@/lib/members/email-otp-client";
 import type { HeroCounts } from "@/lib/members/hero-counts";
 import { refreshHeroCounts } from "@/lib/members/refresh-hero-counts";
-import { otpCodeSchema } from "@/lib/members/zod/otp";
 import { membershipContent } from "@/lib/site";
-
-const gateEmailSchema = z
-  .string()
-  .trim()
-  .min(1, "Enter your email.")
-  .email("Enter a valid email address.")
-  .max(320);
 
 export type MemberProfileSummary = {
   authenticated: true;
@@ -69,20 +70,6 @@ const PLAN_LABELS: Record<
   lifetime: "Lifetime",
   annual: "Annual",
 };
-
-async function postJson<T>(url: string, body: unknown): Promise<T> {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const data = (await response.json()) as T | ApiError;
-  if (!response.ok || (data as ApiError).ok === false) {
-    const err = data as ApiError;
-    throw new Error(err.message ?? "Request failed.");
-  }
-  return data as T;
-}
 
 async function postJoinSession(sessionId: string) {
   const response = await fetch("/api/members/join/session", {
@@ -158,8 +145,6 @@ const quietInputOkClass =
 const quietInputInvalidClass =
   "border-red-400 ring-1 ring-red-400/55 focus:border-red-400 focus:ring-red-400/55";
 
-type InvalidField = "email" | "code";
-
 const quietLabelClass =
   "mb-0.5 block text-[10px] font-medium uppercase tracking-wider text-cream/65";
 
@@ -199,7 +184,9 @@ export function MembershipPanel({
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
   /** Client field validation — red outline on the field (not a chip). */
-  const [invalidField, setInvalidField] = useState<InvalidField | null>(null);
+  const [invalidField, setInvalidField] = useState<OtpInvalidField | null>(
+    null,
+  );
   /**
    * Nav banner (minimal set): email send/verify, newsletter toggle,
    * join-return, checkout — not profile/unsub/logout/plans-load.
@@ -308,48 +295,20 @@ export function MembershipPanel({
     setError(null);
   };
 
-  /** Client checks → red outline on the field (form uses noValidate). */
-  const validateSendCode = (): boolean => {
-    if (!gateEmailSchema.safeParse(email).success) {
-      setInvalidField("email");
-      return false;
-    }
-    return true;
-  };
-
-  const validateVerifyCode = (): boolean => {
-    if (!gateEmailSchema.safeParse(email).success) {
-      setInvalidField("email");
-      return false;
-    }
-    if (!otpCodeSchema.safeParse(code).success) {
-      setInvalidField("code");
-      return false;
-    }
-    return true;
-  };
-
+  /** Same OTP client helpers as the logged-out hero gate (email-change endpoints). */
   const handleSendCode = async () => {
     clearFeedback();
-    if (!validateSendCode()) {
+    const invalid = getSendCodeInvalidField(email);
+    if (invalid) {
+      setInvalidField(invalid);
       return;
     }
     setLoading(true);
     try {
-      if (verified && emailChangeMode) {
-        await postJson<{ message: string }>(
-          "/api/members/profile/email/start",
-          { newEmail: email },
-        );
-        setCodeSent(true);
-      } else {
-        await postJson<{ message: string }>("/api/members/verify/start", {
-          email,
-        });
-        setCodeSent(true);
-      }
+      await startEmailChangeOtp(email);
+      setCodeSent(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not send code.");
+      setError(otpSendErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -357,38 +316,23 @@ export function MembershipPanel({
 
   const handleVerify = async () => {
     clearFeedback();
-    if (!validateVerifyCode()) {
+    const invalid = getVerifyCodeInvalidField(email, code);
+    if (invalid) {
+      setInvalidField(invalid);
       return;
     }
     setLoading(true);
     try {
-      if (verified && emailChangeMode) {
-        const result = await postJson<{
-          profile: MemberProfileSummary;
-          message: string;
-        }>("/api/members/profile/email/verify", {
-          newEmail: email,
-          code,
-        });
-        setProfile(result.profile);
-        setEmail(result.profile.email);
-        setCode("");
-        setCodeSent(false);
-      } else {
-        const result = await postJson<{
-          profile: MemberProfileSummary;
-          message: string;
-        }>("/api/members/verify/verify", {
-          email,
-          code,
-        });
-        setProfile(result.profile);
-        setEmail(result.profile.email);
-        setCode("");
-        setCodeSent(false);
-      }
+      const result = await verifyEmailChangeOtp<MemberProfileSummary>(
+        email,
+        code,
+      );
+      setProfile(result.profile);
+      setEmail(result.profile.email);
+      setCode("");
+      setCodeSent(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not verify code.");
+      setError(otpVerifyErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -402,7 +346,7 @@ export function MembershipPanel({
     setNewsletterBusy(true);
     setError(null);
     try {
-      const result = await postJson<{
+      const result = await postMembersJson<{
         status: "on" | "off";
         message: string;
       }>("/api/members/newsletter/preference", { status: next });

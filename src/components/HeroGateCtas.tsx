@@ -2,19 +2,19 @@
 
 import { useEffect, useId, useState } from "react";
 import { useRouter } from "next/navigation";
-import { z } from "zod";
 
 import { HeroCtas } from "@/components/HeroCtas";
 import type { HeroCounts } from "@/lib/members/hero-counts";
-import { otpCodeSchema } from "@/lib/members/zod/otp";
+import {
+  getSendCodeInvalidField,
+  getVerifyCodeInvalidField,
+  otpSendErrorMessage,
+  otpVerifyErrorMessage,
+  startGateEmailOtp,
+  verifyGateEmailOtp,
+  type OtpInvalidField,
+} from "@/lib/members/email-otp-client";
 import { membershipContent } from "@/lib/site";
-
-const gateEmailSchema = z
-  .string()
-  .trim()
-  .min(1, "Enter your email.")
-  .email("Enter a valid email address.")
-  .max(320);
 
 const gateInputClass =
   "h-12 w-full min-w-0 cursor-text rounded-full border bg-cream px-4 text-sm text-ocean-950 placeholder:text-ocean-500 shadow-sm transition-colors focus:outline-none focus:ring-2";
@@ -27,23 +27,6 @@ const gateInputInvalidClass =
 
 const gatePrimaryBtnClass =
   "inline-flex h-12 shrink-0 items-center justify-center rounded-full bg-coral px-5 text-sm font-semibold text-white transition-colors hover:bg-coral-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/70 disabled:opacity-60";
-
-type ApiError = { ok: false; code: string; message: string };
-type InvalidField = "email" | "code";
-
-async function postJson<T>(url: string, body: unknown): Promise<T> {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const data = (await response.json()) as T | ApiError;
-  if (!response.ok || (data as ApiError).ok === false) {
-    const err = data as ApiError;
-    throw new Error(err.message ?? "Request failed.");
-  }
-  return data as T;
-}
 
 type HeroGateCtasProps = {
   initialCounts: HeroCounts;
@@ -71,7 +54,9 @@ export function HeroGateCtas({
   const [codeSent, setCodeSent] = useState(false);
   const [loading, setLoading] = useState(false);
   /** Client validation — red outline on the field; no chip. */
-  const [invalidField, setInvalidField] = useState<InvalidField | null>(null);
+  const [invalidField, setInvalidField] = useState<OtpInvalidField | null>(
+    null,
+  );
   /** Hide gate immediately after verify; clear once server `showGate` catches up. */
   const [hideGateOptimistic, setHideGateOptimistic] = useState(false);
   if (!showGate && hideGateOptimistic) {
@@ -96,20 +81,17 @@ export function HeroGateCtas({
   const handleSendCode = async () => {
     reportApiError(null);
     clearClientInvalid();
-    if (!gateEmailSchema.safeParse(email).success) {
-      setInvalidField("email");
+    const invalid = getSendCodeInvalidField(email);
+    if (invalid) {
+      setInvalidField(invalid);
       return;
     }
     setLoading(true);
     try {
-      await postJson<{ message: string }>("/api/members/verify/start", {
-        email,
-      });
+      await startGateEmailOtp(email);
       setCodeSent(true);
     } catch (err) {
-      reportApiError(
-        err instanceof Error ? err.message : "Could not send code.",
-      );
+      reportApiError(otpSendErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -118,17 +100,14 @@ export function HeroGateCtas({
   const handleVerify = async () => {
     reportApiError(null);
     clearClientInvalid();
-    if (!gateEmailSchema.safeParse(email).success) {
-      setInvalidField("email");
-      return;
-    }
-    if (!otpCodeSchema.safeParse(code).success) {
-      setInvalidField("code");
+    const invalid = getVerifyCodeInvalidField(email, code);
+    if (invalid) {
+      setInvalidField(invalid);
       return;
     }
     setLoading(true);
     try {
-      await postJson("/api/members/verify/verify", { email, code });
+      await verifyGateEmailOtp(email, code);
       setHideGateOptimistic(true);
       reportApiError(null);
       router.refresh();
@@ -139,9 +118,7 @@ export function HeroGateCtas({
         });
       }, 150);
     } catch (err) {
-      reportApiError(
-        err instanceof Error ? err.message : "Could not verify code.",
-      );
+      reportApiError(otpVerifyErrorMessage(err));
     } finally {
       setLoading(false);
     }
