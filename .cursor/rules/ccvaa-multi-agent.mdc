@@ -30,6 +30,7 @@ CEO talks **only** to the **Product Manager**. Repo docs are the shared brain �
 - Dev: http://localhost:3000/
 - Preview: Vercel URL for the feature branch/PR (pre-merge; **Deployment Protection** — bypass via `.env.local`)
 - Production: https://ccvaa-web.vercel.app/ (`main` — QA Pass 2)
+- **Staging (demo/testing, not Pass 1/2):** https://ccvaa-web-git-staging-azang-projects.vercel.app — `staging` mirrors `main`; Edge Config `preview`; same bypass as Preview
 - **Out of agent flow:** https://ccvaa.ca/ — CEO manual only (DNS/cache)
 
 Default ship path: feature branch → QA Preview → merge → QA on `ccvaa-web.vercel.app`. Each item **main-safe on `main` alone** — `docs/protocols/GIT_DEPLOY.md`.

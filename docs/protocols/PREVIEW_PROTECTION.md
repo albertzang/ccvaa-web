@@ -2,9 +2,9 @@
 
 ## Decision
 
-**Preview** deployments use Vercel **Deployment Protection** (Vercel Authentication). Random visitors with a Preview URL hit a login wall. **Production** (`ccvaa-web.vercel.app`) stays reachable for agent QA Pass 2 / baseline without this bypass.
+**Preview** deployments use Vercel **Deployment Protection** (Vercel Authentication). Random visitors with a Preview URL hit a login wall. This includes the long-lived **Staging** alias (`https://ccvaa-web-git-staging-azang-projects.vercel.app` — same Preview protection + bypass). **Production** (`ccvaa-web.vercel.app`) stays reachable for agent QA Pass 2 / baseline without this bypass.
 
-Agents on this workstation bypass Preview protection using a secret stored only in **gitignored** `.env.local` — CEO does **not** paste the bypass each Pass 1.
+Agents on this workstation bypass Preview/Staging protection using a secret stored only in **gitignored** `.env.local` — CEO does **not** paste the bypass each visit.
 
 ## Secret
 
@@ -38,6 +38,7 @@ Documented empty key also in `.env.example` (no real secret).
 - **Preview URL** (exact) still required.
 - Note: “Preview is protection-bypassed via `.env.local` `VERCEL_AUTOMATION_BYPASS_SECRET`” — do **not** paste the secret into the handoff file. Browser Pass 1 uses both bypass + set-bypass-cookie (see above).
 - Production / baseline / Pass 2: bypass **not** required for `https://ccvaa-web.vercel.app/`.
+- Staging demos: same bypass as Preview (not an agent Pass 1/2 target by default).
 
 ## CEO one-time setup
 

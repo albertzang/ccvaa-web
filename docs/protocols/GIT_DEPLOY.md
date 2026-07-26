@@ -12,11 +12,19 @@
 
 | Name | URL | Who tests |
 |------|-----|-----------|
+| **Staging** | https://ccvaa-web-git-staging-azang-projects.vercel.app | Long-lived mirror of `main` for demos / shared testing (`agent-os-0003`). **Not** Pass 1 or Pass 2. |
 | **Public domain** | https://ccvaa.ca/ | **CEO only** (manual). Same Vercel Production deploy as `ccvaa-web.vercel.app`, but DNS/CDN/cache can lag or differ. Agents must **not** use `ccvaa.ca` for Pass 1 or Pass 2. |
 
-There is **no** long-lived staging site today. **Preview = pre-merge staging.**
+### Staging (long-lived demo / testing)
 
-**Preview access:** Previews use Vercel Deployment Protection. QA bypasses via `VERCEL_AUTOMATION_BYPASS_SECRET` in gitignored `.env.local`. **Browser Pass 1** needs both `x-vercel-protection-bypass` and `x-vercel-set-bypass-cookie=true` on the same navigation. Full rules: `docs/protocols/PREVIEW_PROTECTION.md`.
+- **Git:** branch `staging` — mirror of `main` only. Do **not** commit feature work on `staging`.
+- **Sync:** on every push to `main`, GitHub Action `.github/workflows/sync-staging.yml` force-pushes `main` → `staging`.
+- **Deploy:** Vercel Preview deploy (`VERCEL_ENV=preview`) → Edge Config **`preview`** bucket (same as PR Previews). Production flags stay independent.
+- **URL:** stable git-branch alias `https://ccvaa-web-git-staging-azang-projects.vercel.app` (no custom domain).
+- **Protection:** Deployment Protection on (Preview); bypass same as Pass 1 — `docs/protocols/PREVIEW_PROTECTION.md`.
+- **Agents:** do **not** use Staging for Pass 1 (use PR Preview) or Pass 2 (use Production) unless a handoff explicitly says otherwise.
+
+**Preview access:** Previews (incl. Staging) use Vercel Deployment Protection. QA bypasses via `VERCEL_AUTOMATION_BYPASS_SECRET` in gitignored `.env.local`. **Browser** needs both `x-vercel-protection-bypass` and `x-vercel-set-bypass-cookie=true` on the same navigation. Full rules: `docs/protocols/PREVIEW_PROTECTION.md`.
 
 ## Deployment retention (Vercel)
 
@@ -71,7 +79,7 @@ Set on the backlog item and Dev handoff. See [`docs/product/BACKLOG.md`](../prod
 | **`ceo`** | `direct-to-main` | `pass2` | CEO manually — **no** agent QA files |
 | **`n/a`** | **`direct-to-main`** (default for `agent-os-*`; `feature-branch` only for **self-evolve** or CEO-explicit umbrella PR) | `n/a` | **No** — **`agent-os`** / docs-process only; CEO reviews via chat |
 
-**Verify passes** may be `pass1+pass2`, `pass1` (Preview only), or `pass2` (Production only). Preview = pre-merge staging. **`agent-os-*` items always use Verifier / Verify passes = `n/a`**, and Ship path defaults to **`direct-to-main`** (do not leave `tbd`).
+**Verify passes** may be `pass1+pass2`, `pass1` (Preview only), or `pass2` (Production only). Pass 1 uses **PR Preview**; long-lived **Staging** is demos/testing only (see above). **`agent-os-*` items always use Verifier / Verify passes = `n/a`**, and Ship path defaults to **`direct-to-main`** (do not leave `tbd`).
 
 **Prefer common lanes** (see [`COMMUNICATION.md`](COMMUNICATION.md) — happy path / CEO Verifier / tiny-fix / agent-os / **self-evolve** / baseline). **Rare overrides** (e.g. `agent` + `direct-to-main`, agent `pass1`-only) need explicit CEO wording — do not invent them.
 

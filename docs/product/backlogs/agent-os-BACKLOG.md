@@ -61,7 +61,7 @@ Extract the in-repo Agent OS into a distributable package. A first attempt (npm 
 
 Simplify ship path to **one lane**: each backlog item must be **main-safe alone** (merge after Pass 1; Pass 2; close). Public go-live after merge uses **Edge Config** (or equivalent fail-closed gate), not a shared long-lived epic branch.
 
-**Retire:** epic/milestone lane (`Epic branch`, **Merge gate `epic`**, merge milestone, continue epic, milestone Pass 2 batching). **Close** `agent-os-0003` (long-lived staging) as superseded.
+**Retire:** epic/milestone lane (`Epic branch`, **Merge gate `epic`**, merge milestone, continue epic, milestone Pass 2 batching). Originally closed `agent-os-0003` (long-lived staging) as superseded by Preview — **0003 later reopened** for a demo/testing Staging URL (not epic lane).
 
 **Main-safe increment** (PM splits work; Dev verifies before merge):
 
@@ -75,7 +75,7 @@ Simplify ship path to **one lane**: each backlog item must be **main-safe alone*
 - [x] `GIT_DEPLOY.md`: main-safe rule; epic section removed
 - [x] `BACKLOG.md`, templates, `HANDOFF.md`, `COMMUNICATION.md`, `CEO.md`: epic fields/lane pruned
 - [x] Skills, rules, agents, `AGENTS.md`, `FEATURES.md` ship-path line updated
-- [x] `agent-os-0003` closed (superseded)
+- [x] `agent-os-0003` closed at ship time (superseded by Preview); **reopened 2026-07-25** for demo Staging URL — see `agent-os-0003`
 - [x] FEATURES changelog
 - [x] CEO **verified** → commit + push `main`
 
@@ -84,11 +84,12 @@ Simplify ship path to **one lane**: each backlog item must be **main-safe alone*
 ### Overall
 
 - Shipped 2026-07-23 on `main` (CEO **verified**). Replaces epic lane with main-safe + Edge Config for public go-live.
+- Note: closing 0003 was correct for “staging = epic branch”; CEO later reopened 0003 for a **stable demo URL** (orthogonal).
 
 ### Links
 
 - Supersedes epic encoding from `agent-os-0011` for **future** work (0011 item kept as history)
-- Closes `agent-os-0003`
+- Originally closed `agent-os-0003` (reopened later — see that item)
 
 ---
 
@@ -449,24 +450,53 @@ On CEO **`verified`** for any `agent-os-*` item, PM marks `completed` and ships 
 
 ---
 
-## agent-os-0003 — Optional long-lived staging branch/domain
+## agent-os-0003 — Long-lived staging endpoint (demo / testing)
 
 | Field | Value |
 |-------|--------|
 | **Type** | `task` |
-| **Priority** | `later` |
-| **Status** | `closed` |
+| **Priority** | `now` |
+| **Status** | `completed` |
 | **Verifier** | `n/a` |
 | **Verify passes** | `n/a` |
 | **Ship path** | `direct-to-main` |
 
 ### Description
 
-If Preview-per-PR is not enough, add a long-lived `staging` branch + dedicated domain. Until then Preview = staging (`docs/protocols/GIT_DEPLOY.md`).
+Provide a **stable, long-lived URL** for demos and shared testing (not ephemeral Preview-per-PR). Complements main-safe increments + Edge Config (`agent-os-0016`) — does **not** revive the retired epic/milestone lane.
+
+**CEO decisions (2026-07-25):**
+1. Priority: **`now`**
+2. Hostname: **Vercel alias only** (no custom domain) — git-branch Preview URL
+3. Content: **always mirror `main`**; Staging reads Edge Config **`preview`** (shared with PR Previews); Production stays on **`production`**
+4. Access: **Deployment Protection on**; same automation bypass as Preview (`.env.local` / `VERCEL_AUTOMATION_BYPASS_SECRET`)
+5. Sync: **Approach A** — GitHub Action on every `main` push force-pushes `main` → `staging` (`git push --force origin HEAD:staging`)
+
+**Implementation:**
+- Long-lived `staging` branch = mirror only (no feature work on it)
+- Stable URL: `https://ccvaa-web-git-staging-azang-projects.vercel.app` (`VERCEL_ENV=preview` → Edge Config `preview`)
+- Workflow: `.github/workflows/sync-staging.yml`
+- Protocols: Staging documented; **out of agent Pass 1/2** by default
+
+**Acceptance:**
+- [x] Staging git-branch URL live; Deployment Protection + bypass documented
+- [x] `sync-staging` Action force-pushes `main` → `staging` on every `main` push
+- [x] Staging reads Edge Config **`preview`**; Production reads **`production`**
+- [x] `GIT_DEPLOY.md`, `AGENTS.md`, FEATURES, `PREVIEW_PROTECTION.md`, shared rule updated
+
+**Out of scope:** Custom domain; replacing Preview for Pass 1; changing Production/`ccvaa.ca`; reviving epic Merge gate; new Edge Config `staging` item.
 
 ### Overall
 
-- **Closed 2026-07-23** — superseded by main-safe increments + Edge Config + Preview-per-PR (`agent-os-0016`). No long-lived staging branch planned.
+- Originally optional; **closed 2026-07-23** as superseded by Preview-per-PR + Edge Config (`agent-os-0016`).
+- **Reopened 2026-07-25** — long-lived demo/testing Staging URL. Kicked off approach A; CEO **verified** 2026-07-25 → ship `main`.
+
+### Links
+
+- Related: `agent-os-0016` (main-safe; Preview remains Pass 1)
+- Protocol: `docs/protocols/GIT_DEPLOY.md` (Staging section)
+- Bypass: `docs/protocols/PREVIEW_PROTECTION.md`
+- Workflow: `.github/workflows/sync-staging.yml`
 
 ---
 

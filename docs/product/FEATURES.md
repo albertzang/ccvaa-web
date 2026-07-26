@@ -115,7 +115,7 @@
 
 **Standing:** No Resend/ESP iframes; member auth = email OTP (no OAuth/passwords); homepage SPA anchors over separate marketing routes.
 
-**Public feature switch (members-0023, epic `feat/members`):** One shared Edge Config store has three top-level JSON-object items: `production = { "members": false }`, `preview = { "members": false }`, and `development = { "members": false }`. Future flags are sibling booleans in each object. The app reads the item matching `VERCEL_ENV` (`development` when local/unset) via `@vercel/edge-config`; missing/unknown environment, bucket, key, invalid value, read failure, or unset `EDGE_CONFIG` fails closed to Off. Flags are managed in the Vercel dashboard or by an external API — there is no Admin Console toggle or in-app write path, and the app needs only `EDGE_CONFIG`. **Production values are CEO/Admin-only; agents never flip Production.** CEO/Admin and agents may flip Preview/Development for testing and should restore Off afterward.
+**Public feature switch (members-0023, epic `feat/members`):** One shared Edge Config store has three top-level JSON-object items: `production = { "members": false }`, `preview = { "members": false }`, and `development = { "members": false }`. Future flags are sibling booleans in each object. The app reads the item matching `VERCEL_ENV` (`development` when local/unset) via `@vercel/edge-config`; missing/unknown environment, bucket, key, invalid value, read failure, or unset `EDGE_CONFIG` fails closed to Off. **Staging** (`staging` branch) is a Vercel Preview deploy, so it reads the **`preview`** bucket — flip `preview` to demo Staging without changing Production. Flags are managed in the Vercel dashboard or by an external API — there is no Admin Console toggle or in-app write path, and the app needs only `EDGE_CONFIG`. **Production values are CEO/Admin-only; agents never flip Production.** CEO/Admin and agents may flip Preview/Development for testing and should restore Off afterward.
 
 **Platform (members-0001, epic `feat/members`):** Drizzle schema on Neon — orthogonal `newsletter_status` vs `membership_plan`; OTP challenges; unsub tokens; `stripe_webhook_events` for Join idempotency. Annual plans use `membership_anniversary` + `next_renewal_at` (null for Founding/Lifetime). Shared Zod in `src/lib/members/zod/`. `GET /api/members/health` fails closed (503) without `DATABASE_URL` (Stripe/Resend status informational). Migrate/seed: `npm run db:migrate`, `npm run db:seed` (seeds non-Production only). Schema notes: [`docs/members/schema.md`](../members/schema.md).
 
@@ -137,8 +137,9 @@
 | Production | https://ccvaa-web.vercel.app/ (`main`) — agent QA Pass 2 |
 | Public domain | https://ccvaa.ca/ — **CEO manual only**; out of agent Dev/QA flow |
 | Preview | Per-branch/PR Vercel URL (pre-merge QA target) |
+| Staging | https://ccvaa-web-git-staging-azang-projects.vercel.app — long-lived `staging` = force-mirrored `main` (demo/testing); Vercel Preview → Edge Config `preview`; Deployment Protection + Preview bypass (`agent-os-0003`) |
 | DNS / email | Hover |
-| CI | lint, typecheck, build (GitHub Actions) |
+| CI | lint, typecheck, build; sync `main` → `staging` (GitHub Actions) |
 | Stack | Next.js App Router, React, Tailwind; admin auth = Hover mail-session; Members DB = Neon + Drizzle (`DATABASE_URL`); public feature flags = Vercel Edge Config |
 | Ship path | Feature branch → QA Preview → merge → cleanup → QA on `ccvaa-web.vercel.app` (Verifier = `agent`). Each item **main-safe on `main` alone**; public go-live via Edge Config. **Verifier = `ceo`:** CEO verifies (defaults: `direct-to-main` + Production pass2). Work IDs `{feature-slug}-{NNNN}` — [`BACKLOG.md`](BACKLOG.md). **Baseline** pass = Production audit with no PR. See `docs/protocols/GIT_DEPLOY.md`. CEO may manually check `ccvaa.ca`. |
 
@@ -163,6 +164,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-25 | **agent-os-0003:** long-lived Staging = force-mirrored `main` → `https://ccvaa-web-git-staging-azang-projects.vercel.app`; Edge Config `preview`; Deployment Protection + Preview bypass |
 | 2026-07-25 | **public-homepage-0003:** sticky hero through membership; logged-out OTP+Sub/Join in Hero; `#membership`+nav after verify; glass/banners/copy polish; join return activates without waiting on webhook |
 | 2026-07-23 | **agent-os-0016:** main-safe increments — one ship lane; epic/milestone lane retired; Edge Config for public go-live; `agent-os-0003` closed |
 | 2026-07-23 | **agent-os-0015:** QA Pass 1 scratch hygiene — ephemeral local scripts/logs; delete with report; `.gitignore`; no commit unless maintained harness backlog |

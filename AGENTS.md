@@ -67,7 +67,14 @@ Shared brain (not chat history):
 | Preview | Vercel URL for the PR/branch (from GitHub/Vercel) | Feature branch — **pre-merge** (Deployment Protection; QA bypass via `.env.local`) |
 | Production | https://ccvaa-web.vercel.app/ | `main` — QA Pass 2 and **baseline** |
 
-**CEO-only (out of agent flow):** https://ccvaa.ca/ — public domain; CEO handles manual testing (DNS/cache). Agents do not use it for Pass 1/2/baseline.
+**Out of agent Pass 1/2 (unless a handoff says otherwise):**
+
+| Name | URL | Tracks |
+|------|-----|--------|
+| Staging | https://ccvaa-web-git-staging-azang-projects.vercel.app | Long-lived `staging` branch = force-mirrored `main`; Vercel Preview → Edge Config `preview`; Deployment Protection + same bypass as Preview |
+| Public domain | https://ccvaa.ca/ | CEO manual only (DNS/cache) |
+
+Staging sync: `.github/workflows/sync-staging.yml` — see `docs/protocols/GIT_DEPLOY.md`.
 
 **Default ship path (Verifier = `agent`):** feature branch → QA on Dev (optional) + Preview (required) → merge to `main` → delete feature branch → QA Production smoke on `ccvaa-web.vercel.app`. Each item must be **main-safe on `main` alone**; public go-live via Edge Config — see `docs/protocols/GIT_DEPLOY.md`.
 **Verifier = `ceo`:** defaults to `direct-to-main` + CEO Production verify (`pass2`); no agent QA.  
