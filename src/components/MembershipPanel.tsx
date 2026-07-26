@@ -145,15 +145,6 @@ function formatRenewal(isoDateTime: string): string {
   }).format(date);
 }
 
-function unsubMessage(unsubLanding: UnsubLanding): string {
-  if (unsubLanding.kind === "invalid") {
-    return membershipContent.unsubLandingInvalid;
-  }
-  return unsubLanding.already
-    ? membershipContent.unsubLandingAlready
-    : membershipContent.unsubLandingSuccess;
-}
-
 /** Logged-in: looks read-only until focused / clicked for in-place edit. Width from content. */
 const quietInputClass =
   "box-border h-9 max-w-full min-w-[12ch] field-sizing-content w-auto cursor-text rounded-md border border-transparent bg-cream/10 px-2.5 text-sm leading-none text-cream/95 transition-colors placeholder:text-cream/40 hover:bg-cream/15 focus:border-white/30 focus:bg-cream/20 focus:outline-none focus:ring-0";
@@ -196,21 +187,19 @@ export function MembershipPanel({
   );
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
-  const [message, setMessage] = useState<string | null>(() =>
-    unsubLanding ? unsubMessage(unsubLanding) : null,
-  );
-  const [error, setError] = useState<string | null>(
-    initialProfileError ?? null,
+  /** Client field validation — reserved chip under the identity row (not top banner). */
+  const [fieldError, setFieldError] = useState<string | null>(null);
+  /** API / system errors only — top banner. */
+  const [error, setError] = useState<string | null>(() =>
+    unsubLanding?.kind === "invalid"
+      ? membershipContent.unsubLandingInvalid
+      : (initialProfileError ?? null),
   );
   const [loading, setLoading] = useState(false);
   const [newsletterBusy, setNewsletterBusy] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
-  const [joinReturnMessage, setJoinReturnMessage] = useState<string | null>(
-    null,
-  );
   const [joinReturnError, setJoinReturnError] = useState<string | null>(null);
-  const [establishingSession, setEstablishingSession] = useState(false);
 
   const verified = Boolean(profile?.authenticated);
   const savedEmail = profile?.email ?? "";
@@ -240,11 +229,9 @@ export function MembershipPanel({
 
     let cancelled = false;
 
-    const applyReadyProfile = (next: MemberProfileSummary, message: string) => {
+    const applyReadyProfile = (next: MemberProfileSummary) => {
       setProfile(next);
       setEmail(next.email);
-      setJoinReturnMessage(message);
-      setEstablishingSession(false);
       // Drop joined/session_id from the URL — cookie + plan are the source of truth.
       window.history.replaceState({}, "", "/#membership");
       if (next.plan !== "none") {
@@ -253,9 +240,7 @@ export function MembershipPanel({
     };
 
     const run = async () => {
-      setEstablishingSession(true);
       setJoinReturnError(null);
-      setJoinReturnMessage(membershipContent.joinedActivating);
 
       for (let attempt = 0; attempt < SESSION_MAX_ATTEMPTS; attempt += 1) {
         if (cancelled) {
@@ -268,10 +253,9 @@ export function MembershipPanel({
               return;
             }
             if (result.status === "ready") {
-              applyReadyProfile(result.profile, result.message);
+              applyReadyProfile(result.profile);
               return;
             }
-            setJoinReturnMessage(result.message);
           } else {
             // Landed on ?joined=1 without session_id: re-read DB plan so perks
             // appear once the webhook has activated.
@@ -280,10 +264,9 @@ export function MembershipPanel({
               return;
             }
             if (next.plan !== "none") {
-              applyReadyProfile(next, membershipContent.joinedSuccess);
+              applyReadyProfile(next);
               return;
             }
-            setJoinReturnMessage(membershipContent.joinedActivating);
           }
         } catch (err) {
           if (cancelled) {
@@ -294,13 +277,11 @@ export function MembershipPanel({
               ? err.message
               : "Could not open your membership session.",
           );
-          setEstablishingSession(false);
           return;
         }
         await new Promise((resolve) => setTimeout(resolve, SESSION_POLL_MS));
       }
       if (!cancelled) {
-        setEstablishingSession(false);
         setJoinReturnError(membershipContent.joinedSessionTimeout);
       }
     };
@@ -312,7 +293,7 @@ export function MembershipPanel({
   }, [joinedLanding, profile?.authenticated, profile?.plan]);
 
   const clearFeedback = () => {
-    setMessage(null);
+    setFieldError(null);
     setError(null);
   };
 
@@ -324,11 +305,11 @@ export function MembershipPanel({
       ? null
       : (parsed.error?.issues[0]?.message ?? "Please check the form.");
 
-  /** Client checks → top banner (form uses noValidate; no native tooltips). */
+  /** Client checks → reserved chip under identity row (form uses noValidate). */
   const validateSendCode = (): boolean => {
     const emailIssue = firstZodMessage(gateEmailSchema.safeParse(email));
     if (emailIssue) {
-      setError(emailIssue);
+      setFieldError(emailIssue);
       return false;
     }
     return true;
@@ -337,11 +318,11 @@ export function MembershipPanel({
   const validateVerifyCode = (): boolean => {
     const emailIssue = firstZodMessage(gateEmailSchema.safeParse(email));
     if (emailIssue) {
-      setError(emailIssue);
+      setFieldError(emailIssue);
       return false;
     }
     if (!otpCodeSchema.safeParse(code).success) {
-      setError(
+      setFieldError(
         code.trim()
           ? "Enter a 6-digit code."
           : membershipContent.verifyHint,
@@ -359,19 +340,16 @@ export function MembershipPanel({
     setLoading(true);
     try {
       if (verified && emailChangeMode) {
-        const result = await postJson<{ message: string }>(
+        await postJson<{ message: string }>(
           "/api/members/profile/email/start",
           { newEmail: email },
         );
         setCodeSent(true);
-        setMessage(result.message);
       } else {
-        const result = await postJson<{ message: string }>(
-          "/api/members/verify/start",
-          { email },
-        );
+        await postJson<{ message: string }>("/api/members/verify/start", {
+          email,
+        });
         setCodeSent(true);
-        setMessage(result.message);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send code.");
@@ -399,7 +377,6 @@ export function MembershipPanel({
         setEmail(result.profile.email);
         setCode("");
         setCodeSent(false);
-        setMessage(result.message);
       } else {
         const result = await postJson<{
           profile: MemberProfileSummary;
@@ -412,7 +389,6 @@ export function MembershipPanel({
         setEmail(result.profile.email);
         setCode("");
         setCodeSent(false);
-        setMessage(result.message);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not verify code.");
@@ -437,7 +413,6 @@ export function MembershipPanel({
         ...profile,
         newsletterStatus: result.status,
       });
-      setMessage(result.message);
       refreshHeroCounts();
     } catch (err) {
       setError(
@@ -468,7 +443,8 @@ export function MembershipPanel({
       setEmail("");
       setCode("");
       setCodeSent(false);
-      setMessage(null);
+      setFieldError(null);
+      setError(null);
       router.refresh();
     } catch (err) {
       setLogoutError(
@@ -484,53 +460,23 @@ export function MembershipPanel({
     profile?.authenticated &&
     profile.plan !== "none";
 
-  // Only show join banners from an active return flow (or API message).
-  // Bare `?joined=1` while logged-out must not claim "Thanks for joining".
-  const joinInfoText =
-    joinReturnMessage ??
-    (joinedLanding && !joinReturnError && establishingSession
-      ? membershipContent.joinedActivating
-      : null);
-
-  const messageIsError =
-    Boolean(message) &&
-    unsubLanding?.kind === "invalid" &&
-    message === membershipContent.unsubLandingInvalid;
-
-  /** One top-slot banner: errors first, then info. Absolute — does not joggle form. */
+  /** Top slot: API / join-return / logout / invalid-unsub errors only (no info toasts). */
   const topBanner = error
     ? {
         text: error,
-        tone: "error" as const,
         dismiss: () => setError(null),
       }
     : joinReturnError
       ? {
           text: joinReturnError,
-          tone: "error" as const,
           dismiss: () => setJoinReturnError(null),
         }
       : logoutError
         ? {
             text: logoutError,
-            tone: "error" as const,
             dismiss: () => setLogoutError(null),
           }
-        : message
-          ? {
-              text: message,
-              tone: messageIsError ? ("error" as const) : ("info" as const),
-              dismiss: () => setMessage(null),
-            }
-          : joinInfoText
-            ? {
-                text: joinInfoText,
-                tone: "info" as const,
-                dismiss: () => {
-                  setJoinReturnMessage(null);
-                },
-              }
-            : null;
+        : null;
 
   // Gate OTP lives in Hero when logged out; this panel is verified-only.
   if (!verified) {
@@ -542,22 +488,14 @@ export function MembershipPanel({
       {topBanner ? (
         <div className="absolute inset-x-5 top-0 z-10 -translate-y-[calc(100%+0.5rem)] sm:inset-x-8">
           <div
-            className={`relative rounded-lg py-2.5 pl-4 pr-10 text-sm font-medium shadow-lg sm:py-3 ${
-              topBanner.tone === "error"
-                ? "bg-coral-dark text-cream ring-1 ring-coral/70"
-                : "bg-cream text-ocean-950 ring-1 ring-ocean-200/60"
-            }`}
-            role={topBanner.tone === "error" ? "alert" : "status"}
+            className="relative rounded-lg bg-coral-dark py-2.5 pl-4 pr-10 text-sm font-medium text-cream shadow-lg ring-1 ring-coral/70 sm:py-3"
+            role="alert"
           >
             <p>{topBanner.text}</p>
             <button
               type="button"
               onClick={topBanner.dismiss}
-              className={`absolute right-2 top-1.5 inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 ${
-                topBanner.tone === "error"
-                  ? "text-cream/80 hover:bg-cream/15 hover:text-cream focus-visible:ring-cream/60"
-                  : "text-ocean-800/70 hover:bg-ocean-900/10 hover:text-ocean-950 focus-visible:ring-ocean-400"
-              }`}
+              className="absolute right-2 top-1.5 inline-flex h-7 w-7 items-center justify-center rounded-md text-cream/80 transition-colors hover:bg-cream/15 hover:text-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/60"
               aria-label="Dismiss message"
             >
               <span aria-hidden="true" className="text-lg leading-none">
@@ -597,7 +535,12 @@ export function MembershipPanel({
               required
               autoComplete="email"
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                if (fieldError) {
+                  setFieldError(null);
+                }
+              }}
               placeholder={membershipContent.emailPlaceholder}
               size={Math.max(
                 email.trim().length,
@@ -621,7 +564,12 @@ export function MembershipPanel({
                 maxLength={6}
                 required={codeSent}
                 value={code}
-                onChange={(event) => setCode(event.target.value)}
+                onChange={(event) => {
+                  setCode(event.target.value);
+                  if (fieldError) {
+                    setFieldError(null);
+                  }
+                }}
                 placeholder={membershipContent.codePlaceholder}
                 size={Math.max(code.length, 6)}
                 className={`${quietInputClass} min-w-[6ch] font-mono tracking-widest placeholder:font-sans placeholder:tracking-normal`}
@@ -660,6 +608,17 @@ export function MembershipPanel({
                 Cancel
               </button>
             </div>
+          ) : null}
+        </div>
+        {/* Fixed-height slot — match hero gate; show/hide must not shift the form. */}
+        <div className="mt-1.5 flex min-h-5 items-center">
+          {fieldError ? (
+            <p
+              className="w-fit max-w-full rounded-md bg-coral px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm ring-1 ring-cream/25"
+              role="alert"
+            >
+              {fieldError}
+            </p>
           ) : null}
         </div>
       </form>
