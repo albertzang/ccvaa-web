@@ -155,12 +155,22 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
           }
         >
           <div className="min-w-0">
-            <label
-              htmlFor={emailId}
-              className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-cream"
-            >
-              Email
-            </label>
+            <div className="mb-1 flex min-h-5 flex-wrap items-center gap-x-2 gap-y-1">
+              <label
+                htmlFor={emailId}
+                className="text-[10px] font-semibold uppercase tracking-wider text-cream"
+              >
+                Email
+              </label>
+              {error && !codeSent ? (
+                <p
+                  className="rounded-md bg-coral-dark/45 px-2 py-0.5 text-[10px] font-medium normal-case tracking-normal text-cream/95 ring-1 ring-coral/40"
+                  role="alert"
+                >
+                  {error}
+                </p>
+              ) : null}
+            </div>
             <input
               id={emailId}
               type="email"
@@ -174,12 +184,22 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
           </div>
           {codeSent ? (
             <div className="min-w-0">
-              <label
-                htmlFor={codeId}
-                className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-cream"
-              >
-                Code
-              </label>
+              <div className="mb-1 flex min-h-5 flex-wrap items-center gap-x-2 gap-y-1">
+                <label
+                  htmlFor={codeId}
+                  className="text-[10px] font-semibold uppercase tracking-wider text-cream"
+                >
+                  Code
+                </label>
+                {error ? (
+                  <p
+                    className="rounded-md bg-coral-dark/45 px-2 py-0.5 text-[10px] font-medium normal-case tracking-normal text-cream/95 ring-1 ring-coral/40"
+                    role="alert"
+                  >
+                    {error}
+                  </p>
+                ) : null}
+              </div>
               <input
                 id={codeId}
                 type="text"
@@ -211,14 +231,6 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
         <p className="font-display text-xs font-medium tracking-tight text-cream/90 sm:text-sm">
           {membershipContent.gateHeadline}
         </p>
-        {error ? (
-          <p
-            className="w-fit max-w-full rounded-md bg-coral-dark/45 px-2.5 py-1 text-xs font-medium text-cream/95 ring-1 ring-coral/40"
-            role="alert"
-          >
-            {error}
-          </p>
-        ) : null}
       </form>
     </div>
   );
