@@ -188,7 +188,7 @@ export function JoinForm({
           <button
             type="submit"
             disabled={loading || mode !== "session" || !plan}
-            className="rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/60 disabled:opacity-60"
+            className="ml-auto block w-fit rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/60 disabled:opacity-60"
           >
             {loading ? "Opening checkout…" : membershipContent.checkoutLabel}
           </button>
