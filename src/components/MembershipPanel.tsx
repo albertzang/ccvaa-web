@@ -149,6 +149,11 @@ function formatRenewal(isoDateTime: string): string {
 const quietInputClass =
   "box-border h-9 max-w-full min-w-[12ch] field-sizing-content w-auto cursor-text rounded-md border border-transparent bg-cream/10 px-2.5 text-sm leading-none text-cream/95 transition-colors placeholder:text-cream/40 hover:bg-cream/15 focus:border-white/30 focus:bg-cream/20 focus:outline-none focus:ring-0";
 
+const quietInputInvalidClass =
+  "border-red-400 hover:border-red-400 focus:border-red-400 focus:ring-1 focus:ring-red-400/50";
+
+type InvalidField = "email" | "code";
+
 const quietLabelClass =
   "mb-0.5 block text-[10px] font-medium uppercase tracking-wider text-cream/65";
 
@@ -187,8 +192,8 @@ export function MembershipPanel({
   );
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
-  /** Client field validation — reserved chip under the identity row (not top banner). */
-  const [fieldError, setFieldError] = useState<string | null>(null);
+  /** Client field validation — red outline on the field (not a chip). */
+  const [invalidField, setInvalidField] = useState<InvalidField | null>(null);
   /** API / system errors only — top banner. */
   const [error, setError] = useState<string | null>(() =>
     unsubLanding?.kind === "invalid"
@@ -293,40 +298,26 @@ export function MembershipPanel({
   }, [joinedLanding, profile?.authenticated, profile?.plan]);
 
   const clearFeedback = () => {
-    setFieldError(null);
+    setInvalidField(null);
     setError(null);
   };
 
-  const firstZodMessage = (parsed: {
-    success: boolean;
-    error?: { issues: { message: string }[] };
-  }) =>
-    parsed.success
-      ? null
-      : (parsed.error?.issues[0]?.message ?? "Please check the form.");
-
-  /** Client checks → reserved chip under identity row (form uses noValidate). */
+  /** Client checks → red outline on the field (form uses noValidate). */
   const validateSendCode = (): boolean => {
-    const emailIssue = firstZodMessage(gateEmailSchema.safeParse(email));
-    if (emailIssue) {
-      setFieldError(emailIssue);
+    if (!gateEmailSchema.safeParse(email).success) {
+      setInvalidField("email");
       return false;
     }
     return true;
   };
 
   const validateVerifyCode = (): boolean => {
-    const emailIssue = firstZodMessage(gateEmailSchema.safeParse(email));
-    if (emailIssue) {
-      setFieldError(emailIssue);
+    if (!gateEmailSchema.safeParse(email).success) {
+      setInvalidField("email");
       return false;
     }
     if (!otpCodeSchema.safeParse(code).success) {
-      setFieldError(
-        code.trim()
-          ? "Enter a 6-digit code."
-          : membershipContent.verifyHint,
-      );
+      setInvalidField("code");
       return false;
     }
     return true;
@@ -443,7 +434,7 @@ export function MembershipPanel({
       setEmail("");
       setCode("");
       setCodeSent(false);
-      setFieldError(null);
+      setInvalidField(null);
       setError(null);
       router.refresh();
     } catch (err) {
@@ -520,22 +511,11 @@ export function MembershipPanel({
         }}
         className="w-full"
       >
-        {/* Error (left) + social proof (right) — reserved height so show/hide doesn’t shift. */}
-        <div className="mb-1.5 flex min-h-5 items-center justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            {fieldError ? (
-              <p
-                className="w-fit max-w-full rounded-md bg-coral px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm ring-1 ring-cream/25"
-                role="alert"
-              >
-                {fieldError}
-              </p>
-            ) : null}
-          </div>
-          {initialHeroCounts ? (
+        {initialHeroCounts ? (
+          <div className="mb-1.5 flex min-h-5 items-center justify-end">
             <MembershipSocialProof initialCounts={initialHeroCounts} />
-          ) : null}
-        </div>
+          </div>
+        ) : null}
         <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
           <div className="min-w-0">
             <label htmlFor={emailId} className={quietLabelClass}>
@@ -547,10 +527,11 @@ export function MembershipPanel({
               required
               autoComplete="email"
               value={email}
+              aria-invalid={invalidField === "email"}
               onChange={(event) => {
                 setEmail(event.target.value);
-                if (fieldError) {
-                  setFieldError(null);
+                if (invalidField === "email") {
+                  setInvalidField(null);
                 }
               }}
               placeholder={membershipContent.emailPlaceholder}
@@ -559,7 +540,9 @@ export function MembershipPanel({
                 membershipContent.emailPlaceholder.length,
                 12,
               )}
-              className={quietInputClass}
+              className={`${quietInputClass} ${
+                invalidField === "email" ? quietInputInvalidClass : ""
+              }`}
             />
           </div>
 
@@ -576,15 +559,18 @@ export function MembershipPanel({
                 maxLength={6}
                 required={codeSent}
                 value={code}
+                aria-invalid={invalidField === "code"}
                 onChange={(event) => {
                   setCode(event.target.value);
-                  if (fieldError) {
-                    setFieldError(null);
+                  if (invalidField === "code") {
+                    setInvalidField(null);
                   }
                 }}
                 placeholder={membershipContent.codePlaceholder}
                 size={Math.max(code.length, 6)}
-                className={`${quietInputClass} min-w-[6ch] font-mono tracking-widest placeholder:font-sans placeholder:tracking-normal`}
+                className={`${quietInputClass} min-w-[6ch] font-mono tracking-widest placeholder:font-sans placeholder:tracking-normal ${
+                  invalidField === "code" ? quietInputInvalidClass : ""
+                }`}
               />
             </div>
           ) : null}
