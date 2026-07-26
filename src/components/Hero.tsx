@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 
-import { HeroGateCtas } from "@/components/HeroGateCtas";
+import { HeroLoggedOut } from "@/components/HeroLoggedOut";
 import { getHeroCounts } from "@/lib/members/hero-counts";
 import { heroContent } from "@/lib/site";
 
@@ -17,16 +17,23 @@ type HeroProps = {
   membersEnabled: boolean;
   /** Show OTP gate in hero (logged-out). */
   showMembershipGate?: boolean;
-  /** Membership section — only when verified (scrolls over sticky hero background). */
+  /**
+   * Verified: no `#hero` section — sticky image + membership footer only.
+   * Logged-out: tall centered hero with gate.
+   */
+  compact?: boolean;
+  /** Membership section when verified (scrolls over sticky hero background). */
   footer?: ReactNode;
 };
 
 export async function Hero({
   membersEnabled,
   showMembershipGate = false,
+  compact = false,
   footer,
 }: HeroProps) {
-  const counts = membersEnabled ? await getHeroCounts() : null;
+  const counts =
+    membersEnabled && !compact ? await getHeroCounts() : null;
 
   return (
     <div id="hero-stage" className={`relative ${HERO_STAGE_MIN_HEIGHT_CLASS}`}>
@@ -49,28 +56,33 @@ export async function Hero({
       </div>
 
       <div className={`relative z-10 ${HERO_STAGE_PULL_CLASS}`}>
-        <section id="hero" className="text-white">
-          <div className="relative mx-auto flex max-w-6xl select-none flex-col justify-center px-6 pb-10 pt-24 sm:pb-12 sm:pt-28">
-            <p className="text-sm font-medium uppercase tracking-widest text-ocean-100/90">
-              {heroContent.eyebrow}
-            </p>
-
-            <h1 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-              {heroContent.headline}
-            </h1>
-
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ocean-50/95 sm:text-xl">
-              {heroContent.subheadline}
-            </p>
-
+        {!compact ? (
+          <section
+            id="hero"
+            className={`flex ${HERO_STAGE_HEIGHT_CLASS} items-center text-white`}
+          >
             {counts ? (
-              <HeroGateCtas
+              <HeroLoggedOut
                 initialCounts={counts}
                 showGate={showMembershipGate}
               />
-            ) : null}
-          </div>
-        </section>
+            ) : (
+              <div className="relative mx-auto w-full max-w-6xl select-none px-6 pt-20 pb-10 sm:pt-24 sm:pb-12">
+                <p className="text-sm font-medium uppercase tracking-widest text-ocean-100/90">
+                  {heroContent.eyebrow}
+                </p>
+
+                <h1 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+                  {heroContent.headline}
+                </h1>
+
+                <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ocean-50/95 sm:text-xl">
+                  {heroContent.subheadline}
+                </p>
+              </div>
+            )}
+          </section>
+        ) : null}
 
         {footer}
       </div>

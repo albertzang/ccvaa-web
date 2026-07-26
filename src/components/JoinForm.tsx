@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
+import { softReload } from "@/lib/members/soft-reload";
 import { membershipContent } from "@/lib/site";
 
 type JoinPlanId = "founding" | "lifetime" | "annual";
@@ -42,7 +44,6 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 
 type JoinFormProps = {
   mode?: "public" | "session";
-  joinedLanding?: boolean;
   initialPlans: JoinPlansProps | null;
   initialPlansError: string | null;
 };
@@ -50,13 +51,14 @@ type JoinFormProps = {
 /**
  * Session mode: plan picker → Stripe Checkout (identity from verified session).
  * Public mode retained for legacy OTP join path (unused by portal UI).
+ * Checkout failures soft-refresh the page (no nav banner) so plans/profile can catch up.
  */
 export function JoinForm({
   mode = "public",
-  joinedLanding,
   initialPlans,
   initialPlansError,
 }: JoinFormProps) {
+  const router = useRouter();
   const [plans, setPlans] = useState<JoinPlanOffer[] | null>(
     initialPlans?.plans ?? null,
   );
@@ -66,14 +68,27 @@ export function JoinForm({
   const [plan, setPlan] = useState<JoinPlanId | "">(
     () => initialPlans?.plans.find((p) => p.available)?.id ?? "",
   );
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [prevInitialPlans, setPrevInitialPlans] = useState(initialPlans);
+  const [prevInitialPlansError, setPrevInitialPlansError] =
+    useState(initialPlansError);
 
-  const clearFeedback = () => {
-    setMessage(null);
-    setError(null);
-  };
+  // Soft refresh re-supplies server props — sync during render (not in an effect).
+  if (
+    initialPlans !== prevInitialPlans ||
+    initialPlansError !== prevInitialPlansError
+  ) {
+    setPrevInitialPlans(initialPlans);
+    setPrevInitialPlansError(initialPlansError);
+    setPlans(initialPlans?.plans ?? null);
+    setPlansError(initialPlansError);
+    const available = initialPlans?.plans.filter((p) => p.available) ?? [];
+    setPlan((current) =>
+      current && available.some((p) => p.id === current)
+        ? current
+        : (available[0]?.id ?? ""),
+    );
+  }
 
   const reloadPlans = async () => {
     setPlansError(null);
@@ -99,9 +114,7 @@ export function JoinForm({
 
   const handleCheckout = async (event: React.FormEvent) => {
     event.preventDefault();
-    clearFeedback();
     if (!plan) {
-      setError("Choose a membership plan.");
       return;
     }
     setLoading(true);
@@ -115,56 +128,27 @@ export function JoinForm({
         },
       );
       window.location.assign(result.checkoutUrl);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Could not open checkout.",
-      );
+    } catch {
       setLoading(false);
+      softReload(router);
     }
   };
 
   return (
-    <div className="rounded-2xl border border-ocean-200/70 bg-white/70 p-5 text-left sm:p-6">
-      {joinedLanding ? (
-        <p
-          className="rounded-lg bg-white px-4 py-3 text-sm text-ocean-700"
-          role="status"
-        >
-          {membershipContent.joinedSuccess}
-        </p>
-      ) : null}
-
-      {message ? (
-        <p
-          className="mt-3 rounded-lg bg-ocean-50 px-4 py-3 text-sm text-ocean-700"
-          role="status"
-        >
-          {message}
-        </p>
-      ) : null}
-
-      {error || plansError ? (
-        <p
-          className="mt-3 rounded-lg bg-coral-dark px-4 py-3 text-sm font-medium text-cream shadow-md ring-1 ring-coral/70"
-          role="alert"
-        >
-          {error ?? plansError}
-        </p>
-      ) : null}
-
+    <div className="text-left">
       {plansError ? (
         <button
           type="button"
           onClick={() => void reloadPlans()}
           disabled={loading}
-          className="mt-3 text-sm font-medium text-ocean-700 underline decoration-ocean-300 underline-offset-4 hover:text-ocean-900 disabled:opacity-60"
+          className="mb-4 text-sm font-medium text-cream/80 underline decoration-cream/40 underline-offset-4 hover:text-cream disabled:opacity-60"
         >
           Retry loading plans
         </button>
       ) : null}
 
       {plans ? (
-        <form onSubmit={handleCheckout} className="mt-4 space-y-4">
+        <form onSubmit={handleCheckout} className="space-y-4">
           <fieldset>
             <legend className="sr-only">Choose a plan</legend>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -173,8 +157,8 @@ export function JoinForm({
                   key={offer.id}
                   className={`flex h-full cursor-pointer flex-col rounded-xl border px-4 py-3 text-left transition-colors ${
                     plan === offer.id
-                      ? "border-ocean-500 bg-ocean-50 ring-1 ring-ocean-500"
-                      : "border-ocean-200 bg-white hover:border-ocean-300"
+                      ? "border-cream/55 bg-white/12 ring-1 ring-cream/35"
+                      : "border-white/15 bg-transparent hover:border-white/30 hover:bg-white/5"
                   }`}
                 >
                   <input
@@ -186,14 +170,14 @@ export function JoinForm({
                     className="sr-only"
                   />
                   <span className="flex flex-wrap items-baseline justify-between gap-2">
-                    <span className="font-display font-semibold text-ocean-900">
+                    <span className="font-display font-semibold text-cream">
                       {offer.label}
                     </span>
-                    <span className="text-sm font-medium text-ocean-700">
+                    <span className="text-sm font-medium text-cream/85">
                       {offer.feeLabel}
                     </span>
                   </span>
-                  <span className="mt-1 block text-sm text-ocean-600">
+                  <span className="mt-1 block text-sm text-cream/70">
                     {offer.description}
                   </span>
                 </label>
@@ -203,8 +187,8 @@ export function JoinForm({
 
           <button
             type="submit"
-            disabled={loading || mode !== "session"}
-            className="rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/60 disabled:opacity-60"
+            disabled={loading || mode !== "session" || !plan}
+            className="ml-auto block w-fit rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/60 disabled:opacity-60"
           >
             {loading ? "Opening checkout…" : membershipContent.checkoutLabel}
           </button>

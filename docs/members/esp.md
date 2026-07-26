@@ -27,7 +27,7 @@ https://ccvaa-web.vercel.app/?unsub=seed-unsub-annual-member#membership
 - Landing redeems the token server-side (idempotent — safe to reload).
 - Sets `newsletter_status` to `off` only — **never** changes `membership_plan` or `membership_status`.
 - Establishes/resumes a **verified member session** for the token’s member and opens `#membership` in verified state with the newsletter toggle **off**.
-- Invalid/expired token: clear message on `#membership` without a verified session.
+- Invalid/expired token: lands on `#membership` without a verified session (no separate flag-off confirmation card — Members On is required for the public portal).
 - In-portal toggle (while verified): on/off with **no** additional OTP; membership untouched.
 - ESP sync stub runs on redeem / toggle when `ESP_API_KEY` + `ESP_LIST_ID` are set (no-op until `members-0009`).
 

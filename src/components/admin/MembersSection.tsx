@@ -85,7 +85,6 @@ function formatDateTime(value: string | null): string {
 }
 
 type EditDraft = {
-  name: string;
   newsletterStatus: NewsletterStatus;
   membershipPlan: MembershipPlan;
   membershipStatus: MembershipStatus;
@@ -95,7 +94,6 @@ type EditDraft = {
 
 function memberToDraft(member: AdminRosterMember): EditDraft {
   return {
-    name: member.name ?? "",
     newsletterStatus: member.newsletterStatus,
     membershipPlan: member.membershipPlan,
     membershipStatus: member.membershipStatus,
@@ -194,7 +192,6 @@ export function MembersSection({ hidden = false }: MembersSectionProps) {
     setEditError(null);
 
     const payload: Record<string, unknown> = {
-      name: editDraft.name.trim() || null,
       newsletterStatus: editDraft.newsletterStatus,
       membershipPlan: editDraft.membershipPlan,
       membershipStatus: editDraft.membershipStatus,
@@ -290,7 +287,7 @@ export function MembersSection({ hidden = false }: MembersSectionProps) {
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search name or email"
+            placeholder="Search by email"
             className="w-full rounded-lg border border-ocean-200 bg-white px-3 py-2 text-sm text-ocean-900 placeholder:text-ocean-400 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-200"
           />
         </div>
@@ -352,7 +349,6 @@ export function MembersSection({ hidden = false }: MembersSectionProps) {
         <table className="min-w-full text-left text-sm">
           <thead className="border-b border-ocean-100 bg-ocean-50/80 text-xs uppercase tracking-wide text-ocean-600">
             <tr>
-              <th className="px-3 py-2.5 font-medium">Name</th>
               <th className="px-3 py-2.5 font-medium">Email</th>
               <th className="px-3 py-2.5 font-medium">Plan</th>
               <th className="px-3 py-2.5 font-medium">Status</th>
@@ -368,7 +364,7 @@ export function MembersSection({ hidden = false }: MembersSectionProps) {
             {!loading && members.length === 0 && (
               <tr>
                 <td
-                  colSpan={8}
+                  colSpan={7}
                   className="px-3 py-8 text-center text-ocean-500"
                 >
                   {error ? "Roster unavailable." : "No members match these filters."}
@@ -377,7 +373,6 @@ export function MembersSection({ hidden = false }: MembersSectionProps) {
             )}
             {members.map((member) => (
               <tr key={member.id} className="text-ocean-800">
-                <td className="px-3 py-2.5">{member.name ?? "—"}</td>
                 <td className="px-3 py-2.5 font-mono text-xs sm:text-sm">
                   {member.email}
                 </td>
@@ -444,18 +439,6 @@ export function MembersSection({ hidden = false }: MembersSectionProps) {
             <p className="mt-1 text-sm text-ocean-600">{editingMember.email}</p>
 
             <div className="mt-4 grid gap-3">
-              <label className="grid gap-1 text-sm">
-                <span className="font-medium text-ocean-700">Name</span>
-                <input
-                  type="text"
-                  value={editDraft.name}
-                  onChange={(event) =>
-                    setEditDraft({ ...editDraft, name: event.target.value })
-                  }
-                  className="rounded-lg border border-ocean-200 px-3 py-2 text-ocean-900 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-200"
-                />
-              </label>
-
               <label className="grid gap-1 text-sm">
                 <span className="font-medium text-ocean-700">Newsletter</span>
                 <select

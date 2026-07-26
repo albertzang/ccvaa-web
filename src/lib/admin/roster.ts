@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, ilike, or, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, type SQL } from "drizzle-orm";
 
 import { getMembersDb } from "@/db/client";
 import { members } from "@/db/schema";
@@ -62,7 +62,6 @@ function rowToRosterMember(row: typeof members.$inferSelect): AdminRosterMember 
   return {
     id: row.id,
     email: row.email,
-    name: row.name,
     newsletterStatus: row.newsletterStatus,
     newsletterConfirmedAt: formatTimestamp(row.newsletterConfirmedAt),
     membershipPlan: row.membershipPlan,
@@ -83,9 +82,7 @@ function buildListFilters(
 
   if (query.q) {
     const pattern = `%${query.q.replace(/[%_\\]/g, "\\$&")}%`;
-    clauses.push(
-      or(ilike(members.email, pattern), ilike(members.name, pattern))!,
-    );
+    clauses.push(ilike(members.email, pattern));
   }
 
   if (query.plan !== "all") {
@@ -186,9 +183,6 @@ export async function updateAdminRosterMember(memberId: string, input: unknown) 
       updatedAt: new Date(),
     };
 
-    if (patch.name !== undefined) {
-      updates.name = patch.name;
-    }
     if (patch.newsletterStatus !== undefined) {
       updates.newsletterStatus = patch.newsletterStatus;
     }

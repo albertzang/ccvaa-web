@@ -18,13 +18,11 @@ import type { NewsletterStatus } from "@/lib/members/zod/newsletter";
 import {
   profileEmailChangeStartSchema,
   profileEmailChangeVerifySchema,
-  profileNameUpdateSchema,
 } from "@/lib/members/zod/profile";
 
 export type MemberProfile = {
   memberId: string;
   email: string;
-  name: string | null;
   plan: MembershipPlan;
   newsletterStatus: NewsletterStatus;
   membershipAnniversary: string | null;
@@ -83,7 +81,6 @@ function formatRenewal(value: Date | null): string | null {
 function rowToProfile(row: {
   id: string;
   email: string;
-  name: string | null;
   membershipPlan: MembershipPlan;
   newsletterStatus: NewsletterStatus;
   membershipAnniversary: string | Date | null;
@@ -95,7 +92,6 @@ function rowToProfile(row: {
   return {
     memberId: row.id,
     email: row.email,
-    name: row.name,
     plan,
     newsletterStatus: row.newsletterStatus,
     membershipAnniversary: isAnnual
@@ -112,7 +108,6 @@ async function loadMemberById(memberId: string) {
       .select({
         id: members.id,
         email: members.email,
-        name: members.name,
         membershipPlan: members.membershipPlan,
         newsletterStatus: members.newsletterStatus,
         membershipAnniversary: members.membershipAnniversary,
@@ -151,7 +146,6 @@ export function toPublicMemberProfile(
     authenticated: true as const,
     memberId: profile.memberId,
     email: profile.email,
-    name: profile.name,
     plan: profile.plan,
     newsletterStatus: profile.newsletterStatus,
     membershipAnniversary: profile.membershipAnniversary,
@@ -165,7 +159,6 @@ async function refreshSessionAfterProfileUpdate(profile: MemberProfile) {
   const { token, expiresAt, payload } = createMemberSessionToken({
     memberId: profile.memberId,
     email: profile.email,
-    name: profile.name,
     plan: profile.plan,
   });
   return {
@@ -175,35 +168,6 @@ async function refreshSessionAfterProfileUpdate(profile: MemberProfile) {
     session: toPublicMemberProfile(profile, payload.exp),
     publicSession: toPublicMemberSession(payload),
   };
-}
-
-/** Updates display name for the signed-in member. */
-export async function updateMemberProfileName(
-  session: MemberSessionPayload,
-  input: unknown,
-) {
-  requireDatabaseUrl();
-  const parsed = profileNameUpdateSchema.parse(input);
-  const row = await loadMemberById(session.memberId);
-  if (!row) {
-    throw new MembersProfileError(
-      "MEMBERS_PROFILE_NOT_FOUND",
-      "No member record found for this session.",
-    );
-  }
-
-  const db = getMembersDb();
-  try {
-    await db
-      .update(members)
-      .set({ name: parsed.name, updatedAt: new Date() })
-      .where(eq(members.id, session.memberId));
-  } catch (error) {
-    throw new MembersDbError("Failed to update member name.", { cause: error });
-  }
-
-  const profile = rowToProfile({ ...row, name: parsed.name });
-  return refreshSessionAfterProfileUpdate(profile);
 }
 
 async function assertEmailAvailable(email: string, memberId: string) {

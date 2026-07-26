@@ -58,7 +58,6 @@ async function main() {
   console.log(`Seeding members data (${getMembersRuntimeEnv()})…`);
 
   const newsletterOnlyId = await upsertMember(SEED_EMAILS.newsletterOnly, {
-    name: "Newsletter Only",
     newsletterStatus: "on",
     newsletterConfirmedAt: new Date("2025-01-01T12:00:00.000Z"),
     membershipPlan: "none",
@@ -68,7 +67,6 @@ async function main() {
   });
 
   await upsertMember(SEED_EMAILS.founding, {
-    name: "Founding Member",
     newsletterStatus: "off",
     membershipPlan: "founding",
     membershipStatus: "active",
@@ -77,7 +75,6 @@ async function main() {
   });
 
   await upsertMember(SEED_EMAILS.lifetime, {
-    name: "Lifetime Member",
     newsletterStatus: "on",
     newsletterConfirmedAt: new Date("2025-02-01T12:00:00.000Z"),
     membershipPlan: "lifetime",
@@ -87,7 +84,6 @@ async function main() {
   });
 
   const annualId = await upsertMember(SEED_EMAILS.annual, {
-    name: "Annual Member",
     newsletterStatus: "on",
     newsletterConfirmedAt: new Date("2025-03-01T12:00:00.000Z"),
     membershipPlan: "annual",
@@ -96,7 +92,6 @@ async function main() {
     nextRenewalAt: new Date(SEED_ANNUAL_NEXT_RENEWAL),
     stripeCustomerId: "cus_seed_annual_test",
   });
-
   const db = getMembersDb();
 
   await db.insert(otpChallenges).values({

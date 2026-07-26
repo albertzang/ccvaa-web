@@ -51,7 +51,6 @@ export async function GET(request: Request) {
       const { token: sessionToken, expiresAt } = createMemberSessionToken({
         memberId: result.memberId,
         email: result.email,
-        name: result.name,
         plan: result.plan,
       });
       setMemberSessionCookieOnResponse(response, sessionToken, expiresAt);

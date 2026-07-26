@@ -15,6 +15,13 @@
       "when": 1752522000000,
       "tag": "0001_stripe_webhooks",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1753492800000,
+      "tag": "0002_drop_members_name",
+      "breakpoints": true
     }
   ]
 }

@@ -5,7 +5,6 @@ CREATE TYPE "public"."otp_purpose" AS ENUM('login', 'email_verify', 'newsletter_
 CREATE TABLE "members" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"email" text NOT NULL,
-	"name" text,
 	"newsletter_status" "newsletter_status" DEFAULT 'off' NOT NULL,
 	"newsletter_confirmed_at" timestamp with time zone,
 	"membership_plan" "membership_plan" DEFAULT 'none' NOT NULL,

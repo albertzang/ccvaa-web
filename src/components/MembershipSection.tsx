@@ -1,8 +1,7 @@
-import {
-  MembershipPanel,
-  type UnsubLanding,
-} from "@/components/MembershipPanel";
 import { type JoinPlansProps } from "@/components/JoinForm";
+import { MembershipLoggedIn } from "@/components/MembershipLoggedIn";
+import type { UnsubLanding } from "@/components/MembershipPanel";
+import { getHeroCounts } from "@/lib/members/hero-counts";
 import { getJoinPlans } from "@/lib/members/join";
 import { loadInitialMemberProfile } from "@/lib/members/load-member-profile";
 
@@ -43,9 +42,10 @@ export async function MembershipSection({
   joinedLanding,
   unsubLanding,
 }: MembershipSectionProps) {
-  const [plansResult, initialProfileState] = await Promise.all([
+  const [plansResult, initialProfileState, heroCounts] = await Promise.all([
     loadPlansForJoin(),
     loadInitialMemberProfile(),
+    getHeroCounts(),
   ]);
 
   const authenticated = Boolean(initialProfileState.profile?.authenticated);
@@ -56,21 +56,17 @@ export async function MembershipSection({
   return (
     <section
       id="membership"
-      className="relative scroll-mt-24 py-14 sm:py-20"
+      className="relative scroll-mt-24 text-white"
       aria-label="Membership"
     >
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="mx-auto max-w-3xl">
-          <MembershipPanel
-            joinedLanding={joinedLanding}
-            unsubLanding={unsubLanding}
-            initialProfile={initialProfileState.profile}
-            initialProfileError={initialProfileState.profileError}
-            initialPlans={plansResult.ok ? plansResult.data : null}
-            initialPlansError={plansResult.ok ? null : plansResult.message}
-          />
-        </div>
-      </div>
+      <MembershipLoggedIn
+        joinedLanding={joinedLanding}
+        unsubLanding={unsubLanding}
+        initialProfile={initialProfileState.profile}
+        initialPlans={plansResult.ok ? plansResult.data : null}
+        initialPlansError={plansResult.ok ? null : plansResult.message}
+        initialHeroCounts={authenticated ? heroCounts : null}
+      />
     </section>
   );
 }

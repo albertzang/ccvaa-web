@@ -13,7 +13,6 @@ import type { MembershipPlan } from "@/lib/members/zod/membership";
 export type MemberSessionPayload = {
   memberId: string;
   email: string;
-  name: string | null;
   /** Paid plan or `none` for verified email without paid membership. */
   plan: MembershipPlan;
   exp: number;
@@ -127,7 +126,6 @@ function decodeSessionToken(token: string, secret: string): MemberSessionPayload
   return {
     memberId: payload.memberId,
     email: payload.email.trim().toLowerCase(),
-    name: typeof payload.name === "string" ? payload.name : null,
     plan: payload.plan,
     exp: payload.exp,
   };
@@ -148,7 +146,6 @@ function cookieOptions(expires: Date) {
 export function createMemberSessionToken(input: {
   memberId: string;
   email: string;
-  name: string | null;
   plan: MembershipPlan;
 }): { token: string; expiresAt: Date; payload: MemberSessionPayload } {
   const secret = requireMemberSessionSecret();
@@ -156,7 +153,6 @@ export function createMemberSessionToken(input: {
   const payload: MemberSessionPayload = {
     memberId: input.memberId,
     email: input.email.trim().toLowerCase(),
-    name: input.name,
     plan: input.plan,
     exp: expiresAt.getTime(),
   };
@@ -241,7 +237,6 @@ export function toPublicMemberSession(payload: MemberSessionPayload) {
     authenticated: true as const,
     memberId: payload.memberId,
     email: payload.email,
-    name: payload.name,
     plan: payload.plan,
     expiresAt: new Date(payload.exp).toISOString(),
     /** Explicit: member cookie never authorizes `/admin`. */

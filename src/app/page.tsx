@@ -9,7 +9,6 @@ import { MembershipSection } from "@/components/MembershipSection";
 import type { UnsubLanding } from "@/components/MembershipPanel";
 import { isFeatureEnabled } from "@/lib/flags/read";
 import { loadInitialMemberProfile } from "@/lib/members/load-member-profile";
-import { membershipContent } from "@/lib/site";
 
 function resolveUnsubLandingFromStatus(
   status: string | undefined,
@@ -28,32 +27,6 @@ function resolveUnsubLandingFromStatus(
     };
   }
   return { kind: "invalid" };
-}
-
-function UnsubConfirmation({ landing }: { landing: UnsubLanding }) {
-  const message =
-    landing.kind === "invalid"
-      ? membershipContent.unsubLandingInvalid
-      : landing.already
-        ? membershipContent.unsubLandingAlready
-        : membershipContent.unsubLandingSuccess;
-
-  return (
-    <section
-      id="membership"
-      className="scroll-mt-24 py-14 sm:py-20"
-      aria-label="Newsletter preference"
-    >
-      <div className="mx-auto max-w-3xl px-6">
-        <div className="rounded-2xl border border-ocean-200 bg-white p-6 text-ocean-800 shadow-sm">
-          <h2 className="font-display text-2xl font-semibold text-ocean-900">
-            Newsletter preference
-          </h2>
-          <p className="mt-3 text-sm leading-relaxed">{message}</p>
-        </div>
-      </div>
-    </section>
-  );
 }
 
 export default async function Home({
@@ -91,13 +64,12 @@ export default async function Home({
     : { profile: null, profileError: null };
   const memberVerified = Boolean(profileState.profile?.authenticated);
 
+  // When Members is Off, no public membership/unsub UI (flag goes away after go-live).
   const heroFooter = membersEnabled ? (
     <MembershipSection
       joinedLanding={joinedLanding}
       unsubLanding={unsubLanding}
     />
-  ) : unsubLanding ? (
-    <UnsubConfirmation landing={unsubLanding} />
   ) : null;
 
   return (
@@ -110,6 +82,7 @@ export default async function Home({
         <Hero
           membersEnabled={membersEnabled}
           showMembershipGate={membersEnabled && !memberVerified}
+          compact={membersEnabled && memberVerified}
           footer={heroFooter}
         />
         <AboutSection />

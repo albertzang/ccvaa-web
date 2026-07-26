@@ -1,27 +1,32 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useRouter } from "next/navigation";
-import { z } from "zod";
 
 import { JoinForm, type JoinPlansProps } from "@/components/JoinForm";
+import { MembershipSocialProof } from "@/components/MembershipSocialProof";
+import {
+  getSendCodeInvalidField,
+  getVerifyCodeInvalidField,
+  otpSendErrorMessage,
+  otpVerifyErrorMessage,
+  postMembersJson,
+  startEmailChangeOtp,
+  verifyEmailChangeOtp,
+  type OtpInvalidField,
+} from "@/lib/members/email-otp-client";
+import type { HeroCounts } from "@/lib/members/hero-counts";
 import { refreshHeroCounts } from "@/lib/members/refresh-hero-counts";
-import { otpCodeSchema } from "@/lib/members/zod/otp";
-import { personNameSchema } from "@/lib/members/zod/person-name";
+import {
+  clearMembershipReturnUrl,
+  softReload,
+} from "@/lib/members/soft-reload";
 import { membershipContent } from "@/lib/site";
-
-const gateEmailSchema = z
-  .string()
-  .trim()
-  .min(1, "Enter your email.")
-  .email("Enter a valid email address.")
-  .max(320);
 
 export type MemberProfileSummary = {
   authenticated: true;
   memberId: string;
   email: string;
-  name: string | null;
   plan: "none" | "founding" | "lifetime" | "annual";
   newsletterStatus: "off" | "pending" | "on";
   membershipAnniversary: string | null;
@@ -43,9 +48,13 @@ type MembershipPanelProps = {
   joinedLanding?: boolean;
   unsubLanding?: UnsubLanding;
   initialProfile: MemberProfileSummary | null;
-  initialProfileError: string | null;
   initialPlans: JoinPlansProps | null;
   initialPlansError: string | null;
+  initialHeroCounts?: HeroCounts | null;
+  /** Shared nav-relative banner (HeroLoggedOut / MembershipLoggedIn slot). */
+  onBanner?: (
+    banner: { text: string; dismiss: () => void } | null,
+  ) => void;
 };
 
 type ApiError = {
@@ -56,7 +65,6 @@ type ApiError = {
 
 const SESSION_POLL_MS = 1500;
 const SESSION_MAX_ATTEMPTS = 8;
-const NAME_SAVE_DEBOUNCE_MS = 600;
 
 const PLAN_LABELS: Record<
   Exclude<MemberProfileSummary["plan"], "none">,
@@ -66,34 +74,6 @@ const PLAN_LABELS: Record<
   lifetime: "Lifetime",
   annual: "Annual",
 };
-
-async function postJson<T>(url: string, body: unknown): Promise<T> {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const data = (await response.json()) as T | ApiError;
-  if (!response.ok || (data as ApiError).ok === false) {
-    const err = data as ApiError;
-    throw new Error(err.message ?? "Request failed.");
-  }
-  return data as T;
-}
-
-async function patchJson<T>(url: string, body: unknown): Promise<T> {
-  const response = await fetch(url, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const data = (await response.json()) as T | ApiError;
-  if (!response.ok || (data as ApiError).ok === false) {
-    const err = data as ApiError;
-    throw new Error(err.message ?? "Request failed.");
-  }
-  return data as T;
-}
 
 async function postJoinSession(sessionId: string) {
   const response = await fetch("/api/members/join/session", {
@@ -159,39 +139,36 @@ function formatRenewal(isoDateTime: string): string {
   }).format(date);
 }
 
-function unsubMessage(unsubLanding: UnsubLanding): string {
-  if (unsubLanding.kind === "invalid") {
-    return membershipContent.unsubLandingInvalid;
-  }
-  return unsubLanding.already
-    ? membershipContent.unsubLandingAlready
-    : membershipContent.unsubLandingSuccess;
-}
-
-/** Logged-in: looks read-only until focused / clicked for in-place edit. */
+/** Logged-in: looks read-only until focused / clicked for in-place edit. Width from content. */
 const quietInputClass =
-  "w-full cursor-text rounded-md border border-transparent bg-transparent px-1.5 py-1 text-sm text-cream transition-colors placeholder:text-cream/35 hover:bg-white/5 focus:border-white/25 focus:bg-white/10 focus:outline-none focus:ring-0";
+  "box-border h-9 max-w-full min-w-[12ch] field-sizing-content w-auto cursor-text rounded-md border bg-cream/10 px-2.5 text-sm leading-none text-cream/95 transition-colors placeholder:text-cream/40 hover:bg-cream/15 focus:bg-cream/20 focus:outline-none";
+
+/** Default vs invalid borders are mutually exclusive — stacking lost to `border-transparent`. */
+const quietInputOkClass =
+  "border-transparent focus:border-white/30 focus:ring-0";
+const quietInputInvalidClass =
+  "border-red-400 ring-1 ring-red-400/55 focus:border-red-400 focus:ring-red-400/55";
 
 const quietLabelClass =
-  "mb-0.5 block text-[10px] font-medium uppercase tracking-wider text-cream/45";
+  "mb-0.5 block text-[10px] font-medium uppercase tracking-wider text-cream/65";
 
-/** Match quiet input height; primary = Enter default. */
+/** Same h-9 as quiet inputs; primary = Enter default. */
 const glassPrimaryBtnClass =
-  "inline-flex h-[34px] items-center justify-center rounded-full bg-cream px-3 text-xs font-semibold text-ocean-950 transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/60 disabled:opacity-60";
+  "inline-flex h-9 shrink-0 items-center justify-center rounded-full bg-cream px-3 text-xs font-semibold leading-none text-ocean-950 transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/60 disabled:opacity-60";
 
 const glassSecondaryBtnClass =
-  "inline-flex h-[34px] items-center justify-center rounded-full border border-cream/65 bg-transparent px-3 text-xs font-medium text-cream transition-colors hover:border-cream hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/45 disabled:opacity-60";
+  "inline-flex h-9 shrink-0 items-center justify-center rounded-full border border-cream/65 bg-transparent px-3 text-xs font-medium leading-none text-cream transition-colors hover:border-cream hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/45 disabled:opacity-60";
 
 export function MembershipPanel({
   joinedLanding,
   unsubLanding,
   initialProfile,
-  initialProfileError,
   initialPlans,
   initialPlansError,
+  initialHeroCounts = null,
+  onBanner,
 }: MembershipPanelProps) {
   const router = useRouter();
-  const nameId = useId();
   const emailId = useId();
   const codeId = useId();
   const toggleId = useId();
@@ -200,13 +177,6 @@ export function MembershipPanel({
     () =>
       initialProfile ??
       (unsubLanding?.kind === "success" ? unsubLanding.profile ?? null : null),
-  );
-  const [name, setName] = useState(
-    () =>
-      initialProfile?.name?.trim() ??
-      (unsubLanding?.kind === "success"
-        ? unsubLanding.profile?.name?.trim() ?? ""
-        : ""),
   );
   const [email, setEmail] = useState(
     () =>
@@ -217,39 +187,21 @@ export function MembershipPanel({
   );
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
-  const [message, setMessage] = useState<string | null>(() =>
-    unsubLanding ? unsubMessage(unsubLanding) : null,
-  );
-  const [error, setError] = useState<string | null>(
-    initialProfileError ?? null,
-  );
-  const [loading, setLoading] = useState(false);
-  const [nameSaveState, setNameSaveState] = useState<
-    "idle" | "saving" | "saved" | "error"
-  >("idle");
-  const [newsletterBusy, setNewsletterBusy] = useState(false);
-  const [logoutError, setLogoutError] = useState<string | null>(null);
-  const [loggingOut, setLoggingOut] = useState(false);
-  const [joinReturnMessage, setJoinReturnMessage] = useState<string | null>(
+  /** Client field validation — red outline on the field (not a chip). */
+  const [invalidField, setInvalidField] = useState<OtpInvalidField | null>(
     null,
   );
-  const [joinReturnError, setJoinReturnError] = useState<string | null>(null);
-  const [establishingSession, setEstablishingSession] = useState(false);
+  /** Nav banner (minimal set): email send/verify only. */
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [newsletterBusy, setNewsletterBusy] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
-  const nameSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastSavedName = useRef(
-    initialProfile?.name?.trim() ??
-      (unsubLanding?.kind === "success"
-        ? unsubLanding.profile?.name?.trim() ?? ""
-        : ""),
-  );
   const verified = Boolean(profile?.authenticated);
   const savedEmail = profile?.email ?? "";
   const emailDirty =
     verified &&
     email.trim().toLowerCase() !== savedEmail.trim().toLowerCase();
-  /** Email-change API path: dirty value or OTP already in flight. */
-  const emailChangeMode = verified && (emailDirty || codeSent);
 
   useEffect(() => {
     if (!joinedLanding) {
@@ -271,25 +223,21 @@ export function MembershipPanel({
 
     let cancelled = false;
 
-    const applyReadyProfile = (next: MemberProfileSummary, message: string) => {
+    const applyReadyProfile = (next: MemberProfileSummary) => {
       setProfile(next);
-      setName(next.name?.trim() ?? "");
       setEmail(next.email);
-      lastSavedName.current = next.name?.trim() ?? "";
-      setJoinReturnMessage(message);
-      setEstablishingSession(false);
-      // Drop joined/session_id from the URL — cookie + plan are the source of truth.
-      window.history.replaceState({}, "", "/#membership");
+      clearMembershipReturnUrl();
       if (next.plan !== "none") {
         refreshHeroCounts();
       }
     };
 
-    const run = async () => {
-      setEstablishingSession(true);
-      setJoinReturnError(null);
-      setJoinReturnMessage(membershipContent.joinedActivating);
+    const abandonJoinReturn = () => {
+      clearMembershipReturnUrl();
+      softReload(router);
+    };
 
+    const run = async () => {
       for (let attempt = 0; attempt < SESSION_MAX_ATTEMPTS; attempt += 1) {
         if (cancelled) {
           return;
@@ -301,10 +249,9 @@ export function MembershipPanel({
               return;
             }
             if (result.status === "ready") {
-              applyReadyProfile(result.profile, result.message);
+              applyReadyProfile(result.profile);
               return;
             }
-            setJoinReturnMessage(result.message);
           } else {
             // Landed on ?joined=1 without session_id: re-read DB plan so perks
             // appear once the webhook has activated.
@@ -313,28 +260,21 @@ export function MembershipPanel({
               return;
             }
             if (next.plan !== "none") {
-              applyReadyProfile(next, membershipContent.joinedSuccess);
+              applyReadyProfile(next);
               return;
             }
-            setJoinReturnMessage(membershipContent.joinedActivating);
           }
-        } catch (err) {
+        } catch {
           if (cancelled) {
             return;
           }
-          setJoinReturnError(
-            err instanceof Error
-              ? err.message
-              : "Could not open your membership session.",
-          );
-          setEstablishingSession(false);
+          abandonJoinReturn();
           return;
         }
         await new Promise((resolve) => setTimeout(resolve, SESSION_POLL_MS));
       }
       if (!cancelled) {
-        setEstablishingSession(false);
-        setJoinReturnError(membershipContent.joinedSessionTimeout);
+        abandonJoinReturn();
       }
     };
 
@@ -342,131 +282,27 @@ export function MembershipPanel({
     return () => {
       cancelled = true;
     };
-  }, [joinedLanding, profile?.authenticated, profile?.plan]);
-
-  useEffect(() => {
-    if (!verified) {
-      return;
-    }
-
-    const trimmed = name.trim();
-    if (!trimmed || trimmed === lastSavedName.current) {
-      return;
-    }
-
-    if (nameSaveTimer.current) {
-      clearTimeout(nameSaveTimer.current);
-    }
-
-    nameSaveTimer.current = setTimeout(() => {
-      void (async () => {
-        setNameSaveState("saving");
-        setError(null);
-        try {
-          const result = await patchJson<{
-            profile: MemberProfileSummary;
-            message: string;
-          }>("/api/members/profile/name", { name: trimmed });
-          setProfile(result.profile);
-          lastSavedName.current = result.profile.name?.trim() ?? trimmed;
-          setNameSaveState("saved");
-          window.setTimeout(() => setNameSaveState("idle"), 2000);
-        } catch (err) {
-          setNameSaveState("error");
-          setError(
-            err instanceof Error
-              ? err.message
-              : membershipContent.nameSaveErrorLabel,
-          );
-        }
-      })();
-    }, NAME_SAVE_DEBOUNCE_MS);
-
-    return () => {
-      if (nameSaveTimer.current) {
-        clearTimeout(nameSaveTimer.current);
-      }
-    };
-  }, [name, verified]);
+  }, [joinedLanding, profile?.authenticated, profile?.plan, router]);
 
   const clearFeedback = () => {
-    setMessage(null);
+    setInvalidField(null);
     setError(null);
   };
 
-  const firstZodMessage = (parsed: {
-    success: boolean;
-    error?: { issues: { message: string }[] };
-  }) =>
-    parsed.success
-      ? null
-      : (parsed.error?.issues[0]?.message ?? "Please check the form.");
-
-  /** Client checks → top banner (form uses noValidate; no native tooltips). */
-  const validateSendCode = (): boolean => {
-    if (!verified) {
-      const nameIssue = firstZodMessage(personNameSchema.safeParse(name));
-      if (nameIssue) {
-        setError(nameIssue);
-        return false;
-      }
-    }
-    const emailIssue = firstZodMessage(gateEmailSchema.safeParse(email));
-    if (emailIssue) {
-      setError(emailIssue);
-      return false;
-    }
-    return true;
-  };
-
-  const validateVerifyCode = (): boolean => {
-    if (!verified) {
-      const nameIssue = firstZodMessage(personNameSchema.safeParse(name));
-      if (nameIssue) {
-        setError(nameIssue);
-        return false;
-      }
-    }
-    const emailIssue = firstZodMessage(gateEmailSchema.safeParse(email));
-    if (emailIssue) {
-      setError(emailIssue);
-      return false;
-    }
-    if (!otpCodeSchema.safeParse(code).success) {
-      setError(
-        code.trim()
-          ? "Enter a 6-digit code."
-          : membershipContent.verifyHint,
-      );
-      return false;
-    }
-    return true;
-  };
-
+  /** Same OTP client helpers as the logged-out hero gate (email-change endpoints). */
   const handleSendCode = async () => {
     clearFeedback();
-    if (!validateSendCode()) {
+    const invalid = getSendCodeInvalidField(email);
+    if (invalid) {
+      setInvalidField(invalid);
       return;
     }
     setLoading(true);
     try {
-      if (verified && emailChangeMode) {
-        const result = await postJson<{ message: string }>(
-          "/api/members/profile/email/start",
-          { newEmail: email },
-        );
-        setCodeSent(true);
-        setMessage(result.message);
-      } else {
-        const result = await postJson<{ message: string }>(
-          "/api/members/verify/start",
-          { email },
-        );
-        setCodeSent(true);
-        setMessage(result.message);
-      }
+      await startEmailChangeOtp(email);
+      setCodeSent(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not send code.");
+      setError(otpSendErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -474,43 +310,23 @@ export function MembershipPanel({
 
   const handleVerify = async () => {
     clearFeedback();
-    if (!validateVerifyCode()) {
+    const invalid = getVerifyCodeInvalidField(email, code);
+    if (invalid) {
+      setInvalidField(invalid);
       return;
     }
     setLoading(true);
     try {
-      if (verified && emailChangeMode) {
-        const result = await postJson<{
-          profile: MemberProfileSummary;
-          message: string;
-        }>("/api/members/profile/email/verify", {
-          newEmail: email,
-          code,
-        });
-        setProfile(result.profile);
-        setEmail(result.profile.email);
-        setCode("");
-        setCodeSent(false);
-        setMessage(result.message);
-      } else {
-        const result = await postJson<{
-          profile: MemberProfileSummary;
-          message: string;
-        }>("/api/members/verify/verify", {
-          email,
-          code,
-          name,
-        });
-        setProfile(result.profile);
-        setName(result.profile.name?.trim() ?? name);
-        setEmail(result.profile.email);
-        lastSavedName.current = result.profile.name?.trim() ?? name.trim();
-        setCode("");
-        setCodeSent(false);
-        setMessage(result.message);
-      }
+      const result = await verifyEmailChangeOtp<MemberProfileSummary>(
+        email,
+        code,
+      );
+      setProfile(result.profile);
+      setEmail(result.profile.email);
+      setCode("");
+      setCodeSent(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not verify code.");
+      setError(otpVerifyErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -524,7 +340,7 @@ export function MembershipPanel({
     setNewsletterBusy(true);
     setError(null);
     try {
-      const result = await postJson<{
+      const result = await postMembersJson<{
         status: "on" | "off";
         message: string;
       }>("/api/members/newsletter/preference", { status: next });
@@ -532,21 +348,17 @@ export function MembershipPanel({
         ...profile,
         newsletterStatus: result.status,
       });
-      setMessage(result.message);
       refreshHeroCounts();
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Could not update newsletter preference.",
-      );
+    } catch {
+      // Switch stays on prior state (not optimistic). Soft refresh may drop an
+      // expired session back to the hero gate; otherwise user can toggle again.
+      softReload(router);
     } finally {
       setNewsletterBusy(false);
     }
   };
 
   const handleLogout = async () => {
-    setLogoutError(null);
     setLoggingOut(true);
     try {
       const response = await fetch("/api/members/login/logout", {
@@ -560,17 +372,14 @@ export function MembershipPanel({
         throw new Error(data.message ?? "Could not sign out.");
       }
       setProfile(null);
-      setName("");
       setEmail("");
       setCode("");
       setCodeSent(false);
-      lastSavedName.current = "";
-      setMessage(null);
-      router.refresh();
-    } catch (err) {
-      setLogoutError(
-        err instanceof Error ? err.message : "Could not sign out.",
-      );
+      setInvalidField(null);
+      setError(null);
+      softReload(router);
+    } catch {
+      // Stay signed in; logout failures are rare — no nav banner.
     } finally {
       setLoggingOut(false);
     }
@@ -581,53 +390,16 @@ export function MembershipPanel({
     profile?.authenticated &&
     profile.plan !== "none";
 
-  // Only show join banners from an active return flow (or API message).
-  // Bare `?joined=1` while logged-out must not claim "Thanks for joining".
-  const joinInfoText =
-    joinReturnMessage ??
-    (joinedLanding && !joinReturnError && establishingSession
-      ? membershipContent.joinedActivating
-      : null);
-
-  const messageIsError =
-    Boolean(message) &&
-    unsubLanding?.kind === "invalid" &&
-    message === membershipContent.unsubLandingInvalid;
-
-  /** One top-slot banner: errors first, then info. Absolute — does not joggle form. */
-  const topBanner = error
-    ? {
-        text: error,
-        tone: "error" as const,
-        dismiss: () => setError(null),
-      }
-    : joinReturnError
-      ? {
-          text: joinReturnError,
-          tone: "error" as const,
-          dismiss: () => setJoinReturnError(null),
-        }
-      : logoutError
-        ? {
-            text: logoutError,
-            tone: "error" as const,
-            dismiss: () => setLogoutError(null),
-          }
-        : message
-          ? {
-              text: message,
-              tone: messageIsError ? ("error" as const) : ("info" as const),
-              dismiss: () => setMessage(null),
-            }
-          : joinInfoText
-            ? {
-                text: joinInfoText,
-                tone: "info" as const,
-                dismiss: () => {
-                  setJoinReturnMessage(null);
-                },
-              }
-            : null;
+  useEffect(() => {
+    if (!error) {
+      onBanner?.(null);
+      return;
+    }
+    onBanner?.({
+      text: error,
+      dismiss: () => setError(null),
+    });
+  }, [error, onBanner]);
 
   // Gate OTP lives in Hero when logged out; this panel is verified-only.
   if (!verified) {
@@ -635,37 +407,8 @@ export function MembershipPanel({
   }
 
   return (
-    <div className="text-left">
-      {topBanner ? (
-        <div className="absolute inset-x-0 top-0 z-10 pt-2.5 sm:pt-3.5">
-          <div className="mx-auto w-full max-w-6xl px-6">
-            <div
-              className={`relative mx-auto max-w-3xl rounded-lg py-2.5 pl-4 pr-10 text-sm font-medium shadow-lg sm:py-3 ${
-                topBanner.tone === "error"
-                  ? "bg-coral-dark text-cream ring-1 ring-coral/70"
-                  : "bg-cream text-ocean-950 ring-1 ring-ocean-200/60"
-              }`}
-              role={topBanner.tone === "error" ? "alert" : "status"}
-            >
-              <p>{topBanner.text}</p>
-              <button
-                type="button"
-                onClick={topBanner.dismiss}
-                className={`absolute right-2 top-1.5 inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 ${
-                  topBanner.tone === "error"
-                    ? "text-cream/80 hover:bg-cream/15 hover:text-cream focus-visible:ring-cream/60"
-                    : "text-ocean-800/70 hover:bg-ocean-900/10 hover:text-ocean-950 focus-visible:ring-ocean-400"
-                }`}
-                aria-label="Dismiss message"
-              >
-                <span aria-hidden="true" className="text-lg leading-none">
-                  ×
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+    <div className="relative rounded-3xl border border-white/12 bg-black/28 px-5 py-5 backdrop-blur-md sm:px-8 sm:py-6">
+      <div className="text-left">
 
       <form
         noValidate
@@ -677,161 +420,109 @@ export function MembershipPanel({
           }
           void handleSendCode();
         }}
-        className="flex w-full flex-col gap-3"
+        className="w-full"
       >
-            {/* Shared 2-col template: inputs align; actions right-justified */}
-            <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-end gap-x-3">
-              <div className="col-span-2 mb-0.5 flex items-baseline justify-between gap-2">
-                <label
-                  htmlFor={nameId}
-                  className="text-[10px] font-medium uppercase tracking-wider text-cream/45"
-                >
-                  Name
-                </label>
-                <span
-                  className={`shrink-0 text-[11px] text-cream/60 ${
-                    nameSaveState === "idle" ? "invisible" : ""
-                  }`}
-                  aria-live="polite"
-                >
-                  {nameSaveState === "saving"
-                    ? membershipContent.nameSavingLabel
-                    : nameSaveState === "saved"
-                      ? membershipContent.nameSavedLabel
-                      : nameSaveState === "error"
-                        ? membershipContent.nameSaveErrorLabel
-                        : "\u00a0"}
-                </span>
-              </div>
-              <input
-                id={nameId}
-                type="text"
-                required
-                autoComplete="name"
-                maxLength={200}
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                placeholder={membershipContent.namePlaceholder}
-                className={`${quietInputClass} w-full min-w-0`}
-              />
-              <div
-                className="flex min-w-[11.5rem] justify-end gap-2"
-                aria-hidden="true"
-              >
-                <span className={`${glassPrimaryBtnClass} invisible`}>
-                  {membershipContent.changeEmailLabel}
-                </span>
-                <span className={`${glassSecondaryBtnClass} invisible`}>
-                  Cancel
-                </span>
-              </div>
-            </div>
+        {initialHeroCounts ? (
+          <div className="mb-1.5 flex min-h-5 items-center justify-end">
+            <MembershipSocialProof initialCounts={initialHeroCounts} />
+          </div>
+        ) : null}
+        <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
+          <div className="min-w-0">
+            <label htmlFor={emailId} className={quietLabelClass}>
+              Email
+            </label>
+            <input
+              id={emailId}
+              type="email"
+              required
+              autoComplete="email"
+              value={email}
+              aria-invalid={invalidField === "email"}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                if (invalidField === "email") {
+                  setInvalidField(null);
+                }
+              }}
+              placeholder={membershipContent.emailPlaceholder}
+              size={Math.max(
+                email.trim().length,
+                membershipContent.emailPlaceholder.length,
+                12,
+              )}
+              className={`${quietInputClass} ${
+                invalidField === "email"
+                  ? quietInputInvalidClass
+                  : quietInputOkClass
+              }`}
+            />
+          </div>
 
-            <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-end gap-x-3">
-              <label htmlFor={emailId} className={`col-span-2 ${quietLabelClass}`}>
-                Email
+          {codeSent ? (
+            <div className="min-w-0">
+              <label htmlFor={codeId} className={quietLabelClass}>
+                Code
               </label>
               <input
-                id={emailId}
-                type="email"
-                required
-                autoComplete="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder={membershipContent.emailPlaceholder}
-                className={`${quietInputClass} w-full min-w-0`}
+                id={codeId}
+                type="text"
+                inputMode="numeric"
+                pattern="\d{6}"
+                maxLength={6}
+                required={codeSent}
+                value={code}
+                aria-invalid={invalidField === "code"}
+                onChange={(event) => {
+                  setCode(event.target.value);
+                  if (invalidField === "code") {
+                    setInvalidField(null);
+                  }
+                }}
+                placeholder={membershipContent.codePlaceholder}
+                size={Math.max(code.length, 6)}
+                className={`${quietInputClass} min-w-[6ch] font-mono tracking-widest placeholder:font-sans placeholder:tracking-normal ${
+                  invalidField === "code"
+                    ? quietInputInvalidClass
+                    : quietInputOkClass
+                }`}
               />
-              <div className="flex min-w-[11.5rem] flex-wrap items-center justify-end gap-2">
-                {emailDirty && !codeSent ? (
-                  <>
-                    <button
-                      type="submit"
-                      disabled={loading || !email.trim()}
-                      className={glassPrimaryBtnClass}
-                    >
-                      {loading
-                        ? "Sending…"
-                        : membershipContent.changeEmailLabel}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={loading}
-                      onClick={() => {
-                        clearFeedback();
-                        setCodeSent(false);
-                        setCode("");
-                        setEmail(savedEmail);
-                      }}
-                      className={glassSecondaryBtnClass}
-                    >
-                      Cancel
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <span
-                      className={`${glassPrimaryBtnClass} invisible`}
-                      aria-hidden="true"
-                    >
-                      {membershipContent.changeEmailLabel}
-                    </span>
-                    <span
-                      className={`${glassSecondaryBtnClass} invisible`}
-                      aria-hidden="true"
-                    >
-                      Cancel
-                    </span>
-                  </>
-                )}
-              </div>
             </div>
+          ) : null}
 
-            {codeSent ? (
-              <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-end gap-x-3">
-                <label
-                  htmlFor={codeId}
-                  className={`col-span-2 ${quietLabelClass}`}
-                >
-                  Code
-                </label>
-                <input
-                  id={codeId}
-                  type="text"
-                  inputMode="numeric"
-                  pattern="\d{6}"
-                  maxLength={6}
-                  required={codeSent}
-                  value={code}
-                  onChange={(event) => setCode(event.target.value)}
-                  placeholder={membershipContent.codePlaceholder}
-                  className={`${quietInputClass} w-full min-w-0 font-mono tracking-widest placeholder:font-sans placeholder:tracking-normal`}
-                />
-                <div className="flex min-w-[11.5rem] flex-wrap items-center justify-end gap-2">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className={glassPrimaryBtnClass}
-                  >
-                    {loading
-                      ? "Verifying…"
-                      : membershipContent.emailVerifyLabel}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={loading}
-                    onClick={() => {
-                      clearFeedback();
-                      setCodeSent(false);
-                      setCode("");
-                      setEmail(savedEmail);
-                    }}
-                    className={glassSecondaryBtnClass}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : null}
+          {emailDirty || codeSent ? (
+            <div className="flex h-9 flex-nowrap items-center gap-2 pb-px">
+              <button
+                type="submit"
+                disabled={
+                  loading || (!codeSent && !email.trim())
+                }
+                className={glassPrimaryBtnClass}
+              >
+                {loading
+                  ? codeSent
+                    ? "Verifying…"
+                    : "Sending…"
+                  : codeSent
+                    ? membershipContent.emailVerifyLabel
+                    : membershipContent.changeEmailLabel}
+              </button>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => {
+                  clearFeedback();
+                  setCodeSent(false);
+                  setCode("");
+                  setEmail(savedEmail);
+                }}
+                className={glassSecondaryBtnClass}
+              >
+                Cancel
+              </button>
+            </div>
+          ) : null}
+        </div>
       </form>
 
       <div className="mt-5 space-y-4">
@@ -840,8 +531,8 @@ export function MembershipPanel({
             <p className={quietLabelClass}>
               {membershipContent.newsletterToggleLabel}
             </p>
-            {/* px/py match quiet inputs so label→value spacing & inset align with Name/Email */}
-            <p className="px-1.5 py-1 text-sm leading-relaxed text-cream">
+            {/* px/py match quiet inputs so label→value spacing & inset align with Email */}
+            <p className="px-1.5 py-1 text-sm leading-relaxed text-cream/95">
               {membershipContent.newsletterToggleDescription}
             </p>
           </div>
@@ -879,46 +570,49 @@ export function MembershipPanel({
         </div>
 
         {isPaidMember && profile ? (
-          <div className="rounded-2xl border border-ocean-200/70 bg-white/70 p-5 sm:p-6">
-            <p className="text-xs font-medium uppercase tracking-wide text-ocean-500">
+          <div>
+            <p className={quietLabelClass}>
               {membershipContent.profilePlanLabel}
             </p>
-            <p className="mt-1 font-display text-lg font-semibold text-ocean-900">
+            <p className="font-display text-lg font-semibold text-cream">
               {PLAN_LABELS[profile.plan as Exclude<MemberProfileSummary["plan"], "none">]}
             </p>
             {profile.plan === "annual" && profile.membershipAnniversary ? (
-              <p className="mt-2 text-xs text-ocean-600">
+              <p className="mt-2 text-xs text-cream/70">
                 {membershipContent.profileAnniversaryLabel}:{" "}
                 {formatAnniversary(profile.membershipAnniversary)}
               </p>
             ) : null}
             {profile.plan === "annual" && profile.nextRenewalAt ? (
-              <p className="mt-0.5 text-xs text-ocean-600">
+              <p className="mt-0.5 text-xs text-cream/70">
                 {membershipContent.profileNextRenewalLabel}:{" "}
                 {formatRenewal(profile.nextRenewalAt)}
               </p>
             ) : null}
-            <p className="mt-4 text-sm text-ocean-700">
+            <p className="mt-4 text-sm text-cream/85">
               {membershipContent.perksComingSoon}
             </p>
           </div>
         ) : (
           <JoinForm
             mode="session"
-            joinedLanding={false}
             initialPlans={initialPlans}
             initialPlansError={initialPlansError}
           />
         )}
+      </div>
 
+      {/* Bottom-right text link — mirrors social proof at top-right. */}
+      <div className="mt-5 flex min-h-5 items-center justify-end">
         <button
           type="button"
           onClick={() => void handleLogout()}
           disabled={loggingOut}
-          className={glassSecondaryBtnClass}
+          className="text-sm font-medium tracking-wide text-cream/75 underline decoration-cream/35 underline-offset-4 transition-colors hover:text-cream hover:decoration-cream/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/45 disabled:opacity-60"
         >
           {loggingOut ? "Signing out…" : membershipContent.logoutLabel}
         </button>
+      </div>
       </div>
     </div>
   );

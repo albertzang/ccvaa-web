@@ -56,7 +56,6 @@ export function isMembersLoginError(
 type ActiveMemberRow = {
   id: string;
   email: string;
-  name: string | null;
   membershipPlan: MembershipPlan;
 };
 
@@ -69,7 +68,6 @@ async function findActivePaidMember(
       .select({
         id: members.id,
         email: members.email,
-        name: members.name,
         membershipPlan: members.membershipPlan,
       })
       .from(members)
@@ -158,7 +156,6 @@ export async function verifyMemberLogin(
   const { token, expiresAt, payload } = createMemberSessionToken({
     memberId: member.id,
     email: member.email,
-    name: member.name,
     plan: member.membershipPlan,
   });
 

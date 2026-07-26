@@ -85,8 +85,8 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 | Field | Value |
 |-------|--------|
 | **Type** | `task` |
-| **Priority** | `next` |
-| **Status** | `not-started` |
+| **Priority** | `now` |
+| **Status** | `in-progress` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -99,22 +99,30 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 1. DB: drop `members.name` (migration + Drizzle schema); update seeds
 2. Session / JWT / public profile types: no `name`
 3. APIs: verify, profile name PATCH, newsletter subscribe, join metadata — stop accepting/returning name; delete `personNameSchema` usage (and the schema module if unused)
-4. UI: `#membership` gate + logged-in strip — Email (+ OTP) only; no Name input/auto-save; admin roster — no name column/edit (search by email)
+4. UI: Hero OTP gate + `#membership` verified strip — Email (+ OTP) only; no Name input/auto-save; admin roster — no name column/edit (search by email)
 5. Stripe Checkout metadata: email/plan only (or omit name; no `"Member"` placeholder required in product copy)
 6. Docs: FEATURES.md, schema.md, site copy — reflect email-only identity
 
-**Acceptance (draft):**
-- [ ] No Name field in public membership/newsletter UI or admin roster
+**Acceptance:**
+- [ ] No Name field in public membership/newsletter UI (Hero gate + membership) or admin roster
 - [ ] No `name` on member row / session / profile API payloads
 - [ ] Verify + Join + newsletter flows work with email only
 - [ ] Fresh migrate/seed clean; Preview Pass 1 + Production Pass 2 (flag Off OK)
 
 **Out of scope:** Shipping/address collection; tax-receipt legal name; optional “display name” later; Production data migration/backfill (N/A — not released).
 
+### Overall
+
+- Kicked off 2026-07-25 (CEO). PR #9. Pass 1 **merge** — CEO held for layout: Hero email row too wide after Name removal.
+- **Iteration 2:** Hero OTP width; logged-out centered hero; verified = quiet brand ribbon + social proof line above membership form (`N subscribers · M members`).
+- **Iteration 3 (CEO):** Drop info banners; client validation → red input outline; unified dismissible `MessageBanner`. Logged-in banners: email send/verify only. Newsletter toggle / checkout / join-return failures → soft `router.refresh()` (no banner; join-return also strips return URL). Pruned flag-off `UnsubConfirmation`.
+
 ### Links
 
 - Source: CEO product decision (2026-07-25) — option B, no compat
 - Related: `members-0017` (name required — superseded); `members-0006` / `0022` profile; `members-0003` newsletter
+- PR: https://github.com/albertzang/ccvaa-web/pull/9
+- Pass 1 report: `docs/reports/QA-pass1.md`
 
 ---
 
