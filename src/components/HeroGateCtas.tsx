@@ -42,19 +42,13 @@ type HeroGateCtasProps = {
   initialCounts: HeroCounts;
   /** When false, only Sub/Join show (member already verified). */
   showGate: boolean;
-  /** Quiet ghost CTAs for verified brand ribbon. */
-  quiet?: boolean;
 };
 
 /**
- * Logged-out: Email [| Code] | Send/Verify | Sub | Join (one row on lg+).
- * Verified: Sub | Join only (scroll to #membership).
+ * Logged-out: Email [| Code] | Send/Verify under Sub/Join.
+ * Verified: Sub/Join CTAs only (scroll to #membership) — unused when hero is compact ribbon.
  */
-export function HeroGateCtas({
-  initialCounts,
-  showGate,
-  quiet = false,
-}: HeroGateCtasProps) {
+export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
   const router = useRouter();
   const emailId = useId();
   const codeId = useId();
@@ -131,18 +125,7 @@ export function HeroGateCtas({
   };
 
   if (!gateVisible) {
-    return (
-      <HeroCtas
-        initialCounts={initialCounts}
-        href="#membership"
-        quiet={quiet}
-        className={
-          quiet
-            ? "flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2"
-            : "mt-8 flex flex-wrap items-center gap-x-5 gap-y-5"
-        }
-      />
-    );
+    return <HeroCtas initialCounts={initialCounts} href="#membership" />;
   }
 
   return (

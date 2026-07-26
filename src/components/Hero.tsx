@@ -64,23 +64,14 @@ export async function Hero({
           }
         >
           {compact ? (
-            /* Quiet brand ribbon — membership owns focus in the sticky frame. */
-            <div className="relative mx-auto flex w-full max-w-6xl select-none flex-col gap-3 px-6 pt-20 pb-2 sm:flex-row sm:items-end sm:justify-between sm:gap-6 sm:pt-24 sm:pb-3">
-              <div className="min-w-0">
-                <p className="text-[10px] font-medium uppercase tracking-widest text-cream/55">
-                  {heroContent.eyebrow}
-                </p>
-                <h1 className="mt-1 max-w-xl font-display text-lg font-medium leading-snug tracking-tight text-cream/75 sm:text-xl">
-                  {heroContent.headline}
-                </h1>
-              </div>
-              {counts ? (
-                <HeroGateCtas
-                  initialCounts={counts}
-                  showGate={false}
-                  quiet
-                />
-              ) : null}
+            /* Quiet brand ribbon — membership owns focus; counts live above the form. */
+            <div className="relative mx-auto w-full max-w-6xl select-none px-6 pt-20 pb-2 sm:pt-24 sm:pb-3">
+              <p className="text-[10px] font-medium uppercase tracking-widest text-cream/55">
+                {heroContent.eyebrow}
+              </p>
+              <h1 className="mt-1 max-w-xl font-display text-lg font-medium leading-snug tracking-tight text-cream/75 sm:text-xl">
+                {heroContent.headline}
+              </h1>
             </div>
           ) : (
             <div className="relative mx-auto w-full max-w-6xl select-none px-6 pt-20 pb-10 sm:pt-24 sm:pb-12">

@@ -151,6 +151,8 @@ export const contactContent = {
 
 export const membershipContent = {
   gateHeadline: "Verify your email to unlock the newsletter and membership.",
+  socialProofSubscribers: "subscribers",
+  socialProofMembers: "members",
   sendCodeLabel: "Send code",
   verifyEmailLabel: "Verify email",
   verifyHint: "Enter the 6-digit code we emailed you.",

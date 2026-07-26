@@ -2,7 +2,9 @@ import {
   MembershipPanel,
   type UnsubLanding,
 } from "@/components/MembershipPanel";
+import { MembershipSocialProof } from "@/components/MembershipSocialProof";
 import { type JoinPlansProps } from "@/components/JoinForm";
+import { getHeroCounts } from "@/lib/members/hero-counts";
 import { getJoinPlans } from "@/lib/members/join";
 import { loadInitialMemberProfile } from "@/lib/members/load-member-profile";
 
@@ -43,9 +45,10 @@ export async function MembershipSection({
   joinedLanding,
   unsubLanding,
 }: MembershipSectionProps) {
-  const [plansResult, initialProfileState] = await Promise.all([
+  const [plansResult, initialProfileState, heroCounts] = await Promise.all([
     loadPlansForJoin(),
     loadInitialMemberProfile(),
+    getHeroCounts(),
   ]);
 
   const authenticated = Boolean(initialProfileState.profile?.authenticated);
@@ -56,11 +59,14 @@ export async function MembershipSection({
   return (
     <section
       id="membership"
-      className="relative scroll-mt-24 py-14 sm:py-20"
+      className="relative scroll-mt-24 py-10 sm:py-14"
       aria-label="Membership"
     >
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-3xl">
+          {authenticated ? (
+            <MembershipSocialProof initialCounts={heroCounts} />
+          ) : null}
           <MembershipPanel
             joinedLanding={joinedLanding}
             unsubLanding={unsubLanding}

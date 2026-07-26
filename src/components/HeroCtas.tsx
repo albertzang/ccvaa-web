@@ -17,20 +17,10 @@ function formatCompactCount(value: number): string {
   return compactCountFormatter.format(value);
 }
 
-function HeroCtaBadge({
-  value,
-  quiet = false,
-}: {
-  value: number;
-  quiet?: boolean;
-}) {
+function HeroCtaBadge({ value }: { value: number }) {
   return (
     <span
-      className={
-        quiet
-          ? "absolute -right-1.5 -top-1.5 inline-flex h-5 min-w-5 max-w-[2.25rem] shrink-0 items-center justify-center overflow-hidden rounded-full bg-ocean-950/90 px-1 text-[9px] font-semibold tabular-nums lining-nums leading-none text-cream/90 ring-1 ring-cream/50"
-          : "absolute -right-2 -top-2 inline-flex h-7 min-w-7 max-w-[2.85rem] shrink-0 items-center justify-center overflow-hidden rounded-full bg-ocean-950 px-1 text-[10px] font-semibold tabular-nums lining-nums leading-none text-cream ring-2 ring-cream/90"
-      }
+      className="absolute -right-2 -top-2 inline-flex h-7 min-w-7 max-w-[2.85rem] shrink-0 items-center justify-center overflow-hidden rounded-full bg-ocean-950 px-1 text-[10px] font-semibold tabular-nums lining-nums leading-none text-cream ring-2 ring-cream/90"
       aria-hidden="true"
     >
       <span className="block max-w-full truncate text-center">
@@ -43,26 +33,17 @@ function HeroCtaBadge({
 const ctaBaseClass =
   "relative inline-flex min-h-12 min-w-[9.5rem] items-center justify-center rounded-full px-6 py-3 text-sm font-semibold tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream focus-visible:ring-offset-2 focus-visible:ring-offset-ocean-950";
 
-/** Informative-only chips (verified ribbon) — original coral/cream, lighter, not links. */
-const chipSubscribeClass =
-  "relative inline-flex min-h-9 min-w-0 cursor-default items-center justify-center rounded-full bg-coral/55 px-4 py-1.5 text-xs font-semibold tracking-wide text-white/90";
-const chipJoinClass =
-  "relative inline-flex min-h-9 min-w-0 cursor-default items-center justify-center rounded-full border border-cream/40 bg-cream/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-cream/80 backdrop-blur-sm";
-
 type HeroCtasProps = {
   initialCounts: HeroCounts;
   /** Anchor for Sub/Join (`#hero` logged out, `#membership` when verified). */
   href?: string;
   className?: string;
-  /** Verified ribbon: lighter non-clickable count chips (not CTAs). */
-  quiet?: boolean;
 };
 
 export function HeroCtas({
   initialCounts,
   href = "#membership",
   className = "mt-8 flex flex-wrap items-center gap-x-5 gap-y-5",
-  quiet = false,
 }: HeroCtasProps) {
   const [counts, setCounts] = useState(initialCounts);
   const [prevInitialCounts, setPrevInitialCounts] = useState(initialCounts);
@@ -108,30 +89,12 @@ export function HeroCtas({
     };
   }, []);
 
-  const subscribeLabel = `${heroContent.subscribeLabel}, ${exactCountFormatter.format(counts.newsletterSubscribers)} ${heroContent.newsletterCountLabel}`;
-  const joinLabel = `${heroContent.joinLabel}, ${exactCountFormatter.format(counts.paidMembers)} ${heroContent.paidMembersCountLabel}`;
-
-  if (quiet) {
-    return (
-      <div className={className} role="group" aria-label="Community counts">
-        <span className={chipSubscribeClass} aria-label={subscribeLabel}>
-          {heroContent.subscribeLabel}
-          <HeroCtaBadge value={counts.newsletterSubscribers} quiet />
-        </span>
-        <span className={chipJoinClass} aria-label={joinLabel}>
-          {heroContent.joinLabel}
-          <HeroCtaBadge value={counts.paidMembers} quiet />
-        </span>
-      </div>
-    );
-  }
-
   return (
     <div className={className}>
       <a
         href={href}
         className={`${ctaBaseClass} bg-coral text-white hover:bg-coral-dark`}
-        aria-label={subscribeLabel}
+        aria-label={`${heroContent.subscribeLabel}, ${exactCountFormatter.format(counts.newsletterSubscribers)} ${heroContent.newsletterCountLabel}`}
       >
         {heroContent.subscribeLabel}
         <HeroCtaBadge value={counts.newsletterSubscribers} />
@@ -139,7 +102,7 @@ export function HeroCtas({
       <a
         href={href}
         className={`${ctaBaseClass} border border-cream/55 bg-cream/15 text-cream backdrop-blur-sm hover:bg-cream/25`}
-        aria-label={joinLabel}
+        aria-label={`${heroContent.joinLabel}, ${exactCountFormatter.format(counts.paidMembers)} ${heroContent.paidMembersCountLabel}`}
       >
         {heroContent.joinLabel}
         <HeroCtaBadge value={counts.paidMembers} />
