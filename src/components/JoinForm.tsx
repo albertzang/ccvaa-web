@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { membershipContent } from "@/lib/site";
 
@@ -44,23 +45,19 @@ type JoinFormProps = {
   mode?: "public" | "session";
   initialPlans: JoinPlansProps | null;
   initialPlansError: string | null;
-  /** Surface API errors on the shared nav banner (not an in-form chip). */
-  onError?: (message: string | null) => void;
-  /** Increment to clear banner-related errors after dismiss (keeps Retry if plans failed). */
-  errorClearNonce?: number;
 };
 
 /**
  * Session mode: plan picker → Stripe Checkout (identity from verified session).
  * Public mode retained for legacy OTP join path (unused by portal UI).
+ * Checkout failures soft-refresh the page (no nav banner) so plans/profile can catch up.
  */
 export function JoinForm({
   mode = "public",
   initialPlans,
   initialPlansError,
-  onError,
-  errorClearNonce = 0,
 }: JoinFormProps) {
+  const router = useRouter();
   const [plans, setPlans] = useState<JoinPlanOffer[] | null>(
     initialPlans?.plans ?? null,
   );
@@ -70,24 +67,23 @@ export function JoinForm({
   const [plan, setPlan] = useState<JoinPlanId | "">(
     () => initialPlans?.plans.find((p) => p.available)?.id ?? "",
   );
-  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Soft refresh after checkout failure re-supplies server props — sync local state.
   useEffect(() => {
-    if (errorClearNonce < 1) {
-      return;
-    }
-    setCheckoutError(null);
-  }, [errorClearNonce]);
-
-  // Banner only for checkout failures — plans load uses in-form Retry only.
-  useEffect(() => {
-    onError?.(checkoutError);
-  }, [checkoutError, onError]);
+    setPlans(initialPlans?.plans ?? null);
+    setPlansError(initialPlansError);
+    setPlan((current) => {
+      const available = initialPlans?.plans.filter((p) => p.available) ?? [];
+      if (current && available.some((p) => p.id === current)) {
+        return current;
+      }
+      return available[0]?.id ?? "";
+    });
+  }, [initialPlans, initialPlansError]);
 
   const reloadPlans = async () => {
     setPlansError(null);
-    setCheckoutError(null);
     setLoading(true);
     try {
       const data = await fetchJson<{ ok: true } & JoinPlansProps>(
@@ -113,7 +109,6 @@ export function JoinForm({
     if (!plan) {
       return;
     }
-    setCheckoutError(null);
     setLoading(true);
     try {
       const result = await fetchJson<{ checkoutUrl: string }>(
@@ -125,11 +120,9 @@ export function JoinForm({
         },
       );
       window.location.assign(result.checkoutUrl);
-    } catch (err) {
-      setCheckoutError(
-        err instanceof Error ? err.message : "Could not open checkout.",
-      );
+    } catch {
       setLoading(false);
+      router.refresh();
     }
   };
 

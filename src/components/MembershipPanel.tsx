@@ -189,15 +189,13 @@ export function MembershipPanel({
   );
   /**
    * Nav banner (minimal set): email send/verify, newsletter toggle,
-   * join-return, checkout — not profile/unsub/logout/plans-load.
+   * join-return — checkout failures soft-refresh instead.
    */
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [newsletterBusy, setNewsletterBusy] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [joinReturnError, setJoinReturnError] = useState<string | null>(null);
-  const [joinFormError, setJoinFormError] = useState<string | null>(null);
-  const [joinErrorClearNonce, setJoinErrorClearNonce] = useState(0);
 
   const verified = Boolean(profile?.authenticated);
   const savedEmail = profile?.email ?? "";
@@ -398,7 +396,7 @@ export function MembershipPanel({
     profile?.authenticated &&
     profile.plan !== "none";
 
-  const bannerMessage = error ?? joinReturnError ?? joinFormError;
+  const bannerMessage = error ?? joinReturnError;
 
   useEffect(() => {
     if (!bannerMessage) {
@@ -410,8 +408,6 @@ export function MembershipPanel({
       dismiss: () => {
         setError(null);
         setJoinReturnError(null);
-        setJoinFormError(null);
-        setJoinErrorClearNonce((n) => n + 1);
       },
     });
   }, [bannerMessage, onBanner]);
@@ -613,8 +609,6 @@ export function MembershipPanel({
             mode="session"
             initialPlans={initialPlans}
             initialPlansError={initialPlansError}
-            onError={setJoinFormError}
-            errorClearNonce={joinErrorClearNonce}
           />
         )}
       </div>
