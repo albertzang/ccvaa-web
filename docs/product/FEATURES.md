@@ -164,6 +164,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-26 | **members-0027:** OTP verify soft-reload gap — no Sub/Join flash; gate slot stays invisible so brand copy does not jump |
 | 2026-07-26 | **members-0025:** email-only identity live on `main` (PR #9) — drop Name; membership UX polish (MessageBanner, soft-reload recovery, verified glass portal); Pass 2 ship confirmed |
 | 2026-07-25 | **members-0025:** remove member Name everywhere — email-only identity (DB/session/APIs/UI/admin/Stripe metadata); drop `personNameSchema` + profile name PATCH |
 | 2026-07-25 | **agent-os-0003:** long-lived Staging = force-mirrored `main` → `https://ccvaa-web-git-staging-azang-projects.vercel.app`; Edge Config `preview`; Deployment Protection + Preview bypass |

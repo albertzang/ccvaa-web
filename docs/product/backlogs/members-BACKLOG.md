@@ -3,7 +3,7 @@
 **Feature:** Members  
 **Slug:** `members`  
 **Owner:** Product Manager  
-**Next ID:** `0027`
+**Next ID:** `0028`
 
 Canonical work IDs: `members-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
 
@@ -39,6 +39,35 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 6. Portal redesign — `0022` (CEO kickoff when ready)
 
 **Ship lane:** First Members milestone **merged to `main`** 2026-07-18 (PR #8) via epic branch `feat/members` (historical). Pass 2 **ship confirmed**. **`members-0025`** Name removal shipped 2026-07-26 (PR #9). Remaining: `members-0009` (CEO go-live / Production flag), `0010` if still open, `0011`–`0013` later; **`members-0026`** Stripe identity by customer id; **`members-0024`** Annual cancel-at-period-end. **Future work:** main-safe increments per [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#main-safe-increments-required).
+
+---
+
+## members-0027 — OTP verify flash: Sub/Join pills during soft reload
+
+| Field | Value |
+|-------|--------|
+| **Type** | `bug` |
+| **Priority** | `now` |
+| **Status** | `completed` |
+| **Source** | `ceo` |
+| **Verifier** | `ceo` |
+| **Verify passes** | `pass2` |
+| **Ship path** | `direct-to-main` |
+
+### Description
+
+**Summary:** After membership OTP verify, during `router.refresh()` there is a brief flash of the interactive Sub/Join pill buttons with count badges — a view that was removed from the steady-state verified UI.
+
+**Severity:** medium (visual / UX regression on login)
+
+### Overall
+
+- Shipped 2026-07-26 (CEO **verified**). Soft-reload gap: open gate stays mounted `invisible` (no Sub/Join flash, brand copy does not jump). Verified compact layout unchanged.
+
+### Links
+
+- Source: CEO (2026-07-26)
+- Related: `members-0025` membership UX; `src/components/HeroGateCtas.tsx`
 
 ---
 

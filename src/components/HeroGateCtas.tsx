@@ -31,7 +31,7 @@ const gatePrimaryBtnClass =
 
 type HeroGateCtasProps = {
   initialCounts: HeroCounts;
-  /** When false, only Sub/Join show (member already verified). */
+  /** When false, render nothing under the brand block (verified compact omits `#hero`). */
   showGate: boolean;
   /** API errors surface in the reserved slot above the hero eyebrow. */
   onApiError?: (message: string | null) => void;
@@ -39,7 +39,8 @@ type HeroGateCtasProps = {
 
 /**
  * Logged-out: Email [| Code] | Send/Verify under Sub/Join.
- * Verified: Sub/Join CTAs only (scroll to #membership) — unused when #hero is omitted.
+ * After OTP verify: keep open-gate layout space (`invisible`) until soft-reload;
+ * when gate is off: null. Verified steady state omits `#hero` entirely (compact).
  */
 export function HeroGateCtas({
   initialCounts,
@@ -125,17 +126,29 @@ export function HeroGateCtas({
     }
   };
 
-  if (!gateVisible) {
-    return <HeroCtas initialCounts={initialCounts} href="#membership" />;
+  // Gate off (verified compact / `#hero` omitted): unmount. Soft-reload gap keeps
+  // open-gate markup for layout space — visually hidden, not interactive.
+  if (!showGate) {
+    return null;
   }
 
   return (
-    <div className="mt-8">
+    <div
+      className={
+        hideGateOptimistic
+          ? "mt-8 invisible pointer-events-none"
+          : "mt-8"
+      }
+      aria-hidden={hideGateOptimistic || undefined}
+    >
       <form
         noValidate
         className="flex w-full flex-col gap-4"
         onSubmit={(event) => {
           event.preventDefault();
+          if (hideGateOptimistic) {
+            return;
+          }
           if (codeSent) {
             void handleVerify();
             return;
