@@ -124,28 +124,22 @@ export function JoinForm({
   };
 
   return (
-    <div className="rounded-2xl border border-ocean-200/70 bg-white/70 p-5 text-left sm:p-6">
+    <div className="text-left">
       {joinedLanding ? (
-        <p
-          className="rounded-lg bg-white px-4 py-3 text-sm text-ocean-700"
-          role="status"
-        >
+        <p className="text-sm text-cream/85" role="status">
           {membershipContent.joinedSuccess}
         </p>
       ) : null}
 
       {message ? (
-        <p
-          className="mt-3 rounded-lg bg-ocean-50 px-4 py-3 text-sm text-ocean-700"
-          role="status"
-        >
+        <p className="mt-3 text-sm text-cream/85" role="status">
           {message}
         </p>
       ) : null}
 
       {error || plansError ? (
         <p
-          className="mt-3 rounded-lg bg-coral-dark px-4 py-3 text-sm font-medium text-cream shadow-md ring-1 ring-coral/70"
+          className="mt-3 w-fit max-w-full rounded-md bg-coral px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm ring-1 ring-cream/25"
           role="alert"
         >
           {error ?? plansError}
@@ -157,14 +151,14 @@ export function JoinForm({
           type="button"
           onClick={() => void reloadPlans()}
           disabled={loading}
-          className="mt-3 text-sm font-medium text-ocean-700 underline decoration-ocean-300 underline-offset-4 hover:text-ocean-900 disabled:opacity-60"
+          className="mt-3 text-sm font-medium text-cream/80 underline decoration-cream/40 underline-offset-4 hover:text-cream disabled:opacity-60"
         >
           Retry loading plans
         </button>
       ) : null}
 
       {plans ? (
-        <form onSubmit={handleCheckout} className="mt-4 space-y-4">
+        <form onSubmit={handleCheckout} className="space-y-4">
           <fieldset>
             <legend className="sr-only">Choose a plan</legend>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -173,8 +167,8 @@ export function JoinForm({
                   key={offer.id}
                   className={`flex h-full cursor-pointer flex-col rounded-xl border px-4 py-3 text-left transition-colors ${
                     plan === offer.id
-                      ? "border-ocean-500 bg-ocean-50 ring-1 ring-ocean-500"
-                      : "border-ocean-200 bg-white hover:border-ocean-300"
+                      ? "border-cream/55 bg-white/12 ring-1 ring-cream/35"
+                      : "border-white/15 bg-transparent hover:border-white/30 hover:bg-white/5"
                   }`}
                 >
                   <input
@@ -186,14 +180,14 @@ export function JoinForm({
                     className="sr-only"
                   />
                   <span className="flex flex-wrap items-baseline justify-between gap-2">
-                    <span className="font-display font-semibold text-ocean-900">
+                    <span className="font-display font-semibold text-cream">
                       {offer.label}
                     </span>
-                    <span className="text-sm font-medium text-ocean-700">
+                    <span className="text-sm font-medium text-cream/85">
                       {offer.feeLabel}
                     </span>
                   </span>
-                  <span className="mt-1 block text-sm text-ocean-600">
+                  <span className="mt-1 block text-sm text-cream/70">
                     {offer.description}
                   </span>
                 </label>

@@ -669,26 +669,26 @@ export function MembershipPanel({
         </div>
 
         {isPaidMember && profile ? (
-          <div className="rounded-2xl border border-ocean-200/70 bg-white/70 p-5 sm:p-6">
-            <p className="text-xs font-medium uppercase tracking-wide text-ocean-500">
+          <div>
+            <p className={quietLabelClass}>
               {membershipContent.profilePlanLabel}
             </p>
-            <p className="mt-1 font-display text-lg font-semibold text-ocean-900">
+            <p className="font-display text-lg font-semibold text-cream">
               {PLAN_LABELS[profile.plan as Exclude<MemberProfileSummary["plan"], "none">]}
             </p>
             {profile.plan === "annual" && profile.membershipAnniversary ? (
-              <p className="mt-2 text-xs text-ocean-600">
+              <p className="mt-2 text-xs text-cream/70">
                 {membershipContent.profileAnniversaryLabel}:{" "}
                 {formatAnniversary(profile.membershipAnniversary)}
               </p>
             ) : null}
             {profile.plan === "annual" && profile.nextRenewalAt ? (
-              <p className="mt-0.5 text-xs text-ocean-600">
+              <p className="mt-0.5 text-xs text-cream/70">
                 {membershipContent.profileNextRenewalLabel}:{" "}
                 {formatRenewal(profile.nextRenewalAt)}
               </p>
             ) : null}
-            <p className="mt-4 text-sm text-ocean-700">
+            <p className="mt-4 text-sm text-cream/85">
               {membershipContent.perksComingSoon}
             </p>
           </div>
