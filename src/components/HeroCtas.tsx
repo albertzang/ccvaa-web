@@ -33,17 +33,13 @@ function HeroCtaBadge({ value }: { value: number }) {
 const ctaBaseClass =
   "relative inline-flex min-h-12 min-w-[9.5rem] items-center justify-center rounded-full px-6 py-3 text-sm font-semibold tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream focus-visible:ring-offset-2 focus-visible:ring-offset-ocean-950";
 
-/** Logged-out gate: social-proof chips, not CTAs (email action is below). */
-const proofPillClass =
-  "relative inline-flex min-h-12 min-w-[9.5rem] cursor-default items-center justify-center rounded-full border border-cream/30 bg-black/25 px-6 py-3 text-sm font-semibold tracking-wide text-cream/90 backdrop-blur-sm";
-
 type HeroCtasProps = {
   initialCounts: HeroCounts;
   /** Anchor for Sub/Join when interactive (`#membership` when verified). */
   href?: string;
   className?: string;
   /**
-   * When false, render quiet non-button pills (open hero gate).
+   * When false, plain social-proof text (open hero gate — not clickable).
    * When true, coral/outline links that scroll to `href`.
    */
   interactive?: boolean;
@@ -103,17 +99,24 @@ export function HeroCtas({
   const joinLabel = `${heroContent.joinLabel}, ${exactCountFormatter.format(counts.paidMembers)} ${heroContent.paidMembersCountLabel}`;
 
   if (!interactive) {
+    // Typography only — no pill chrome / badges (those read as buttons).
     return (
-      <div className={className} role="group" aria-label="Community counts">
-        <span className={proofPillClass} aria-label={subscribeLabel}>
-          {heroContent.subscribeLabel}
-          <HeroCtaBadge value={counts.newsletterSubscribers} />
+      <p
+        className="text-sm font-medium tracking-wide text-cream/75"
+        aria-live="polite"
+      >
+        <span className="text-cream/85">{heroContent.subscribeLabel}</span>
+        <span className="ml-1.5 tabular-nums text-cream/55">
+          {exactCountFormatter.format(counts.newsletterSubscribers)}
         </span>
-        <span className={proofPillClass} aria-label={joinLabel}>
-          {heroContent.joinLabel}
-          <HeroCtaBadge value={counts.paidMembers} />
+        <span className="mx-2.5 text-cream/35" aria-hidden="true">
+          ·
         </span>
-      </div>
+        <span className="text-cream/85">{heroContent.joinLabel}</span>
+        <span className="ml-1.5 tabular-nums text-cream/55">
+          {exactCountFormatter.format(counts.paidMembers)}
+        </span>
+      </p>
     );
   }
 

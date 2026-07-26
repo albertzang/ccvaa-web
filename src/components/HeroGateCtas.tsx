@@ -143,11 +143,7 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
           void handleSendCode();
         }}
       >
-        <HeroCtas
-          initialCounts={initialCounts}
-          interactive={false}
-          className="flex flex-wrap items-center gap-x-4 gap-y-3"
-        />
+        <HeroCtas initialCounts={initialCounts} interactive={false} />
         {error ? (
           <p
             className="w-fit max-w-full rounded-md bg-coral px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm ring-1 ring-cream/25"
