@@ -49,10 +49,10 @@ export function MembershipLoggedIn({
 
       <div className="mx-auto max-w-3xl">
         <div className="mb-5 select-none sm:mb-6">
-          <p className="text-[10px] font-medium uppercase tracking-widest text-cream/55">
+          <p className="text-[10px] font-medium uppercase tracking-widest text-cream/85">
             {heroContent.eyebrow}
           </p>
-          <h1 className="mt-1 max-w-xl font-display text-lg font-medium leading-snug tracking-tight text-cream/75 sm:text-xl">
+          <h1 className="mt-1 max-w-xl font-display text-lg font-medium leading-snug tracking-tight text-cream sm:text-xl">
             {heroContent.headline}
           </h1>
         </div>
