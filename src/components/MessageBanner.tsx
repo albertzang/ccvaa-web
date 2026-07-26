@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 /** Gap between header bottom edge and the banner chip. */
 const BANNER_GAP_PX = 12;
 
-type NavMessageBannerProps = {
+type MessageBannerProps = {
   message: string | null;
   onDismiss?: () => void;
 };
@@ -14,10 +14,7 @@ type NavMessageBannerProps = {
  * Centered dismissible API chip, fixed just below the site header.
  * Top offset tracks live header height so it never sits under the nav.
  */
-export function NavMessageBanner({
-  message,
-  onDismiss,
-}: NavMessageBannerProps) {
+export function MessageBanner({ message, onDismiss }: MessageBannerProps) {
   const [topPx, setTopPx] = useState(84);
 
   useEffect(() => {

@@ -173,32 +173,7 @@ export const membershipContent = {
   profilePlanLabel: "Plan",
   profileAnniversaryLabel: "Anniversary",
   profileNextRenewalLabel: "Next renewal",
-  joinedSuccess:
-    "Thanks for joining. Your membership session is ready.",
-  joinedActivating:
-    "Payment received — activating your membership and signing you in…",
-  joinedSessionTimeout:
-    "Membership may still be activating. Refresh this page, or verify your email again.",
-  unsubLandingSuccess:
-    "You have been unsubscribed from the CCVAA newsletter.",
-  unsubLandingAlready: "You were already unsubscribed.",
-  unsubLandingInvalid: "This unsubscribe link is invalid or has expired.",
-} as const;
-
-export const newsletterContent = {
-  title: "Newsletter",
-  description:
-    "Occasional updates on exhibitions, programs, and community news.",
-  subscribeLabel: "Subscribe",
-  unsubscribeLabel: "Unsubscribe",
-  emailPlaceholder: "you@example.com",
-  codePlaceholder: "6-digit code",
-  consentNote:
-    "By subscribing you consent to email from CCVAA (CASL). Unsubscribe anytime.",
-  pendingNote:
-    "Enter the 6-digit code we emailed you to confirm.",
-  unsubLandingSuccess:
-    "You have been unsubscribed from the CCVAA newsletter.",
-  unsubLandingAlready: "You were already unsubscribed.",
-  unsubLandingInvalid: "This unsubscribe link is invalid or has expired.",
+  /** Join-return failure or timeout — one catch-all under the nav. */
+  joinedReturnFailed:
+    "We couldn’t finish activating your membership. Refresh this page, or verify your email again from the homepage.",
 } as const;

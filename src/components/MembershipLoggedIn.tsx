@@ -8,7 +8,7 @@ import {
   type UnsubLanding,
 } from "@/components/MembershipPanel";
 import { type JoinPlansProps } from "@/components/JoinForm";
-import { NavMessageBanner } from "@/components/NavMessageBanner";
+import { MessageBanner } from "@/components/MessageBanner";
 import type { HeroCounts } from "@/lib/members/hero-counts";
 import { heroContent } from "@/lib/site";
 
@@ -23,7 +23,7 @@ type MembershipLoggedInProps = {
 
 /**
  * Verified membership body: brand + glass panel.
- * API errors use the shared fixed chip under the navbar (`NavMessageBanner`).
+ * API errors use the shared fixed chip under the navbar (`MessageBanner`).
  */
 export function MembershipLoggedIn({
   joinedLanding,
@@ -40,7 +40,7 @@ export function MembershipLoggedIn({
 
   return (
     <div className="relative mx-auto w-full max-w-6xl px-6 pt-28 pb-10 sm:pt-32 sm:pb-14">
-      <NavMessageBanner
+      <MessageBanner
         message={banner?.text ?? null}
         onDismiss={banner?.dismiss}
       />

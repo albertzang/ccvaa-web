@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { HeroGateCtas } from "@/components/HeroGateCtas";
-import { NavMessageBanner } from "@/components/NavMessageBanner";
+import { MessageBanner } from "@/components/MessageBanner";
 import type { HeroCounts } from "@/lib/members/hero-counts";
 import { heroContent } from "@/lib/site";
 
@@ -14,7 +14,7 @@ type HeroLoggedOutProps = {
 
 /**
  * Logged-out hero body: brand + membership gate.
- * API errors use the shared fixed chip under the navbar (`NavMessageBanner`).
+ * API errors use the shared fixed chip under the navbar (`MessageBanner`).
  */
 export function HeroLoggedOut({
   initialCounts,
@@ -24,7 +24,7 @@ export function HeroLoggedOut({
 
   return (
     <div className="relative mx-auto w-full max-w-6xl select-none px-6 pt-20 pb-10 sm:pt-24 sm:pb-12">
-      <NavMessageBanner
+      <MessageBanner
         message={apiError}
         onDismiss={() => setApiError(null)}
       />

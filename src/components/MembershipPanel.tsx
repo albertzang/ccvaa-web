@@ -268,17 +268,13 @@ export function MembershipPanel({
           if (cancelled) {
             return;
           }
-          setJoinReturnError(
-            err instanceof Error
-              ? err.message
-              : "Could not open your membership session.",
-          );
+          setJoinReturnError(membershipContent.joinedReturnFailed);
           return;
         }
         await new Promise((resolve) => setTimeout(resolve, SESSION_POLL_MS));
       }
       if (!cancelled) {
-        setJoinReturnError(membershipContent.joinedSessionTimeout);
+        setJoinReturnError(membershipContent.joinedReturnFailed);
       }
     };
 
