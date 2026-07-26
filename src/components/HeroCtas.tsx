@@ -43,15 +43,18 @@ function HeroCtaBadge({
 const ctaBaseClass =
   "relative inline-flex min-h-12 min-w-[9.5rem] items-center justify-center rounded-full px-6 py-3 text-sm font-semibold tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream focus-visible:ring-offset-2 focus-visible:ring-offset-ocean-950";
 
-const ctaQuietClass =
-  "relative inline-flex min-h-9 min-w-0 items-center justify-center rounded-full border border-cream/35 bg-cream/10 px-4 py-1.5 text-xs font-medium tracking-wide text-cream/85 backdrop-blur-sm transition-colors hover:border-cream/50 hover:bg-cream/15 hover:text-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/50 focus-visible:ring-offset-2 focus-visible:ring-offset-ocean-950";
+/** Informative-only chips (verified ribbon) — original coral/cream, lighter, not links. */
+const chipSubscribeClass =
+  "relative inline-flex min-h-9 min-w-0 cursor-default items-center justify-center rounded-full bg-coral/55 px-4 py-1.5 text-xs font-semibold tracking-wide text-white/90";
+const chipJoinClass =
+  "relative inline-flex min-h-9 min-w-0 cursor-default items-center justify-center rounded-full border border-cream/40 bg-cream/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-cream/80 backdrop-blur-sm";
 
 type HeroCtasProps = {
   initialCounts: HeroCounts;
   /** Anchor for Sub/Join (`#hero` logged out, `#membership` when verified). */
   href?: string;
   className?: string;
-  /** Secondary ghost CTAs for verified quiet-ribbon hero. */
+  /** Verified ribbon: lighter non-clickable count chips (not CTAs). */
   quiet?: boolean;
 };
 
@@ -105,34 +108,41 @@ export function HeroCtas({
     };
   }, []);
 
+  const subscribeLabel = `${heroContent.subscribeLabel}, ${exactCountFormatter.format(counts.newsletterSubscribers)} ${heroContent.newsletterCountLabel}`;
+  const joinLabel = `${heroContent.joinLabel}, ${exactCountFormatter.format(counts.paidMembers)} ${heroContent.paidMembersCountLabel}`;
+
+  if (quiet) {
+    return (
+      <div className={className} role="group" aria-label="Community counts">
+        <span className={chipSubscribeClass} aria-label={subscribeLabel}>
+          {heroContent.subscribeLabel}
+          <HeroCtaBadge value={counts.newsletterSubscribers} quiet />
+        </span>
+        <span className={chipJoinClass} aria-label={joinLabel}>
+          {heroContent.joinLabel}
+          <HeroCtaBadge value={counts.paidMembers} quiet />
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div className={className}>
       <a
         href={href}
-        className={
-          quiet
-            ? ctaQuietClass
-            : `${ctaBaseClass} bg-coral text-white hover:bg-coral-dark`
-        }
-        aria-label={`${heroContent.subscribeLabel}, ${exactCountFormatter.format(counts.newsletterSubscribers)} ${heroContent.newsletterCountLabel}`}
+        className={`${ctaBaseClass} bg-coral text-white hover:bg-coral-dark`}
+        aria-label={subscribeLabel}
       >
         {heroContent.subscribeLabel}
-        <HeroCtaBadge
-          value={counts.newsletterSubscribers}
-          quiet={quiet}
-        />
+        <HeroCtaBadge value={counts.newsletterSubscribers} />
       </a>
       <a
         href={href}
-        className={
-          quiet
-            ? ctaQuietClass
-            : `${ctaBaseClass} border border-cream/55 bg-cream/15 text-cream backdrop-blur-sm hover:bg-cream/25`
-        }
-        aria-label={`${heroContent.joinLabel}, ${exactCountFormatter.format(counts.paidMembers)} ${heroContent.paidMembersCountLabel}`}
+        className={`${ctaBaseClass} border border-cream/55 bg-cream/15 text-cream backdrop-blur-sm hover:bg-cream/25`}
+        aria-label={joinLabel}
       >
         {heroContent.joinLabel}
-        <HeroCtaBadge value={counts.paidMembers} quiet={quiet} />
+        <HeroCtaBadge value={counts.paidMembers} />
       </a>
     </div>
   );
