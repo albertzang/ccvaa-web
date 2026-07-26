@@ -46,6 +46,8 @@ type JoinFormProps = {
   initialPlansError: string | null;
   /** Surface API errors on the shared nav banner (not an in-form chip). */
   onError?: (message: string | null) => void;
+  /** Increment to clear banner-related errors after dismiss (keeps Retry if plans failed). */
+  errorClearNonce?: number;
 };
 
 /**
@@ -57,6 +59,7 @@ export function JoinForm({
   initialPlans,
   initialPlansError,
   onError,
+  errorClearNonce = 0,
 }: JoinFormProps) {
   const [plans, setPlans] = useState<JoinPlanOffer[] | null>(
     initialPlans?.plans ?? null,
@@ -68,14 +71,28 @@ export function JoinForm({
     () => initialPlans?.plans.find((p) => p.available)?.id ?? "",
   );
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [plansBannerHidden, setPlansBannerHidden] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    onError?.(checkoutError ?? plansError);
-  }, [checkoutError, plansError, onError]);
+    if (errorClearNonce < 1) {
+      return;
+    }
+    setCheckoutError(null);
+    setPlansBannerHidden(true);
+  }, [errorClearNonce]);
+
+  useEffect(() => {
+    setPlansBannerHidden(false);
+  }, [plansError]);
+
+  useEffect(() => {
+    onError?.(checkoutError ?? (plansBannerHidden ? null : plansError));
+  }, [checkoutError, plansError, plansBannerHidden, onError]);
 
   const reloadPlans = async () => {
     setPlansError(null);
+    setPlansBannerHidden(false);
     setCheckoutError(null);
     setLoading(true);
     try {

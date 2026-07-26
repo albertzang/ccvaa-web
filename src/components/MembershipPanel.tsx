@@ -48,7 +48,9 @@ type MembershipPanelProps = {
   initialPlansError: string | null;
   initialHeroCounts?: HeroCounts | null;
   /** Shared nav-relative banner (HeroLoggedOut / MembershipLoggedIn slot). */
-  onBanner?: (message: string | null) => void;
+  onBanner?: (
+    banner: { text: string; dismiss: () => void } | null,
+  ) => void;
 };
 
 type ApiError = {
@@ -212,6 +214,7 @@ export function MembershipPanel({
   const [loggingOut, setLoggingOut] = useState(false);
   const [joinReturnError, setJoinReturnError] = useState<string | null>(null);
   const [joinFormError, setJoinFormError] = useState<string | null>(null);
+  const [joinErrorClearNonce, setJoinErrorClearNonce] = useState(0);
 
   const verified = Boolean(profile?.authenticated);
   const savedEmail = profile?.email ?? "";
@@ -462,7 +465,20 @@ export function MembershipPanel({
     error ?? joinReturnError ?? logoutError ?? joinFormError;
 
   useEffect(() => {
-    onBanner?.(bannerMessage);
+    if (!bannerMessage) {
+      onBanner?.(null);
+      return;
+    }
+    onBanner?.({
+      text: bannerMessage,
+      dismiss: () => {
+        setError(null);
+        setJoinReturnError(null);
+        setLogoutError(null);
+        setJoinFormError(null);
+        setJoinErrorClearNonce((n) => n + 1);
+      },
+    });
   }, [bannerMessage, onBanner]);
 
   // Gate OTP lives in Hero when logged out; this panel is verified-only.
@@ -663,6 +679,7 @@ export function MembershipPanel({
             initialPlans={initialPlans}
             initialPlansError={initialPlansError}
             onError={setJoinFormError}
+            errorClearNonce={joinErrorClearNonce}
           />
         )}
       </div>

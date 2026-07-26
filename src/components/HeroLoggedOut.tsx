@@ -24,7 +24,10 @@ export function HeroLoggedOut({
 
   return (
     <div className="relative mx-auto w-full max-w-6xl select-none px-6 pt-20 pb-10 sm:pt-24 sm:pb-12">
-      <NavMessageBanner message={apiError} />
+      <NavMessageBanner
+        message={apiError}
+        onDismiss={() => setApiError(null)}
+      />
 
       <p className="text-sm font-medium uppercase tracking-widest text-ocean-100/90">
         {heroContent.eyebrow}

@@ -35,11 +35,17 @@ export function MembershipLoggedIn({
   initialPlansError,
   initialHeroCounts,
 }: MembershipLoggedInProps) {
-  const [banner, setBanner] = useState<string | null>(null);
+  const [banner, setBanner] = useState<{
+    text: string;
+    dismiss: () => void;
+  } | null>(null);
 
   return (
-    <div className="relative mx-auto w-full max-w-6xl px-6 pt-20 pb-10 sm:pt-24 sm:pb-14">
-      <NavMessageBanner message={banner} />
+    <div className="relative mx-auto w-full max-w-6xl px-6 pt-28 pb-10 sm:pt-32 sm:pb-14">
+      <NavMessageBanner
+        message={banner?.text ?? null}
+        onDismiss={banner?.dismiss}
+      />
 
       <div className="mx-auto max-w-3xl">
         <div className="mb-5 select-none sm:mb-6">
