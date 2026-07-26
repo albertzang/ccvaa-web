@@ -49,8 +49,12 @@ export async function Hero({
       </div>
 
       <div className={`relative z-10 ${HERO_STAGE_PULL_CLASS}`}>
-        <section id="hero" className="text-white">
-          <div className="relative mx-auto flex max-w-6xl select-none flex-col justify-center px-6 pb-10 pt-24 sm:pb-12 sm:pt-28">
+        {/* Match sticky image height so copy optically centers in the hero frame (below fixed nav). */}
+        <section
+          id="hero"
+          className={`flex ${HERO_STAGE_HEIGHT_CLASS} items-center text-white`}
+        >
+          <div className="relative mx-auto w-full max-w-6xl select-none px-6 pt-20 pb-10 sm:pt-24 sm:pb-12">
             <p className="text-sm font-medium uppercase tracking-widest text-ocean-100/90">
               {heroContent.eyebrow}
             </p>
