@@ -64,7 +64,7 @@ export function MembershipSocialProof({
 
   return (
     <p
-      className="mb-5 text-sm font-medium tracking-wide text-cream/75"
+      className="shrink-0 text-right text-sm font-medium tracking-wide text-cream/75"
       aria-live="polite"
     >
       {text}

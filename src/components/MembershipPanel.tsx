@@ -508,10 +508,6 @@ export function MembershipPanel({
 
       <div className="text-left">
 
-      {initialHeroCounts ? (
-        <MembershipSocialProof initialCounts={initialHeroCounts} />
-      ) : null}
-
       <form
         noValidate
         onSubmit={(event) => {
@@ -524,15 +520,20 @@ export function MembershipPanel({
         }}
         className="w-full"
       >
-        {/* Fixed-height slot above Email — show/hide must not shift the form. */}
-        <div className="mb-1.5 flex min-h-5 items-center">
-          {fieldError ? (
-            <p
-              className="w-fit max-w-full rounded-md bg-coral px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm ring-1 ring-cream/25"
-              role="alert"
-            >
-              {fieldError}
-            </p>
+        {/* Error (left) + social proof (right) — reserved height so show/hide doesn’t shift. */}
+        <div className="mb-1.5 flex min-h-5 items-center justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            {fieldError ? (
+              <p
+                className="w-fit max-w-full rounded-md bg-coral px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm ring-1 ring-cream/25"
+                role="alert"
+              >
+                {fieldError}
+              </p>
+            ) : null}
+          </div>
+          {initialHeroCounts ? (
+            <MembershipSocialProof initialCounts={initialHeroCounts} />
           ) : null}
         </div>
         <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
