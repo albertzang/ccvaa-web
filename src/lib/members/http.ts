@@ -170,7 +170,9 @@ export function handleMembersApiError(error: unknown) {
           ? 409
           : error.code === "MEMBERS_PROFILE_SAME_EMAIL"
             ? 400
-            : 503;
+            : error.code === "MEMBERS_PROFILE_STRIPE_EMAIL_SYNC_FAILED"
+              ? 502
+              : 503;
     return membersApiError(error.code, error.message, status);
   }
 

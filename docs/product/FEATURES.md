@@ -121,11 +121,11 @@
 
 **Newsletter (members-0003 / portal `members-0022`, epic `feat/members`):** Preference lives on `#membership` after email verify. First verify defaults newsletter **off** (CASL). Session toggle on/off requires no OTP. Token unsub `/?unsub=<token>#membership` (idempotent; newsletter off + verified session + toggle UI off; membership unchanged). ESP sync stub in `src/lib/members/esp.ts` — footer URL: [`docs/members/esp.md`](../members/esp.md). APIs: `POST /api/members/newsletter/preference` (session), legacy subscribe/confirm/unsub routes retained for tooling.
 
-**Join / Stripe (members-0004 + portal `members-0022`, epic `feat/members`):** Verified session → plan picker → `POST /api/members/join/checkout` → Stripe Checkout (test keys on Dev/Preview). Success return includes Stripe `session_id`; `POST /api/members/join/session` mints httpOnly member cookie (**members-0014**). Pre-cap Founding+Annual; post-cap Lifetime+Annual. Env: `STRIPE_*`, `MEMBERSHIP_FOUNDING_CAP`, fee cents (Lifetime > Founding enforced). Webhook: `POST /api/members/webhooks/stripe`. Live keys: `members-0009`.
+**Join / Stripe (members-0004 + portal `members-0022`, epic `feat/members`):** Verified session → plan picker → `POST /api/members/join/checkout` → Stripe Checkout (test keys on Dev/Preview). Success return includes Stripe `session_id`; `POST /api/members/join/session` mints httpOnly member cookie (**members-0014**). Pre-cap Founding+Annual; post-cap Lifetime+Annual. Env: `STRIPE_*`, `MEMBERSHIP_FOUNDING_CAP`, fee cents (Lifetime > Founding enforced). Webhook: `POST /api/members/webhooks/stripe`. Billing binds to **Stripe Customer ID** (`stripe_customer_id`); Neon `email` is login only — Checkout reuses `customer` when set; activation/webhook resolve customer id first (`members-0026`). Live keys: `members-0009`.
 
 **Member auth (members-0005 / portal `members-0022`, epic `feat/members`):** Email verify OTP (`purpose=email_verify`) upserts `members` and mints httpOnly `ccvaa_member_session` bound to Member ID UUID (plan may be `none`). 7-day TTL. Logout clears cookie only (does not touch Hover admin). APIs: `POST /api/members/verify/{start,verify}`, `POST /api/members/login/logout`. **Never grants `/admin`.**
 
-**Member profile (members-0006 / portal `members-0022`, epic `feat/members`; name removed `members-0025`):** Verified strip — email change requires `email_verify` OTP on the new address; Annual shows read-only anniversary / next renewal; paid members see perks placeholder (`members-0012`). APIs: `GET /api/members/profile`, `POST /api/members/profile/email/{start,verify}`.
+**Member profile (members-0006 / portal `members-0022`, epic `feat/members`; name removed `members-0025`):** Verified strip — email change requires `email_verify` OTP on the new address; when `stripe_customer_id` is set, Stripe Customer email syncs first (fail closed — `members-0026`); Annual shows read-only anniversary / next renewal; paid members see perks placeholder (`members-0012`). APIs: `GET /api/members/profile`, `POST /api/members/profile/email/{start,verify}`.
 
 ---
 
@@ -164,6 +164,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-26 | **members-0026:** Stripe billing binds to Customer ID — Checkout reuses `customer`; webhook/activation resolve customer id first; profile email change syncs Stripe Customer (fail closed); Neon email = login |
 | 2026-07-26 | **members-0027:** OTP verify soft-reload gap — no Sub/Join flash; gate slot stays invisible so brand copy does not jump |
 | 2026-07-26 | **members-0025:** email-only identity live on `main` (PR #9) — drop Name; membership UX polish (MessageBanner, soft-reload recovery, verified glass portal); Pass 2 ship confirmed |
 | 2026-07-25 | **members-0025:** remove member Name everywhere — email-only identity (DB/session/APIs/UI/admin/Stripe metadata); drop `personNameSchema` + profile name PATCH |

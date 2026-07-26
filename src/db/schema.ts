@@ -38,8 +38,8 @@ export const otpPurposeEnum = pgEnum("otp_purpose", [
 ]);
 
 /**
- * Member record — email is the only identity (no name). Newsletter and membership
- * are separate columns (not one tier ladder).
+ * Member record — email is login identity (no name); `stripeCustomerId` is billing.
+ * Newsletter and membership are separate columns (not one tier ladder).
  *
  * Annual plans: `membershipAnniversary` (calendar anchor from Stripe) and `nextRenewalAt`
  * are set from Stripe subscription data. Founding and Lifetime keep both null.

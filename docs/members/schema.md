@@ -2,7 +2,15 @@
 
 Neon + Drizzle schema for the Members platform. Newsletter and membership are **orthogonal** columns on the same person record — not one tier ladder.
 
-**Identity:** `members.id` (UUID) is the primary key; `email` is unique and is the only public identity. There is **no** member name column (`members-0025`).
+## Identity model
+
+| Field | Role |
+|-------|------|
+| `members.id` (UUID) | Primary key |
+| `email` | **Login identity** — unique; OTP verify / session; the only public identity (no name column — `members-0025`) |
+| `stripe_customer_id` | **Billing identity** — Stripe Customer ID; Join Checkout reuses it when set; webhook/activation resolve by customer id first, email as fallback (`members-0026`) |
+
+When a paid member changes login email (profile OTP verify), Neon updates only after `stripe.customers.update` succeeds for the bound Customer (fail closed). Email is not the Stripe billing key.
 
 ## Tables
 
@@ -47,6 +55,8 @@ See `.env.example` — `DATABASE_URL` (Neon), `RESEND_API_KEY` + `RESEND_FROM_EM
 - Endpoint: `POST /api/members/webhooks/stripe`
 - Dedupe: insert into `stripe_webhook_events` on `event.id` before side effects
 - Activates membership on `checkout.session.completed`; Founding seat claim is race-safe (cap check in SQL)
+- Member resolution: `stripe_customer_id` first when Checkout `customer` is present; metadata / `customer_email` fallback
+- Checkout create: pass Stripe `customer` when the Neon row already has `stripe_customer_id`; otherwise `customer_email`
 
 ## OTP challenges
 
