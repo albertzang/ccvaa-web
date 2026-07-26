@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { HeroGateCtas } from "@/components/HeroGateCtas";
+import { NavMessageBanner } from "@/components/NavMessageBanner";
 import type { HeroCounts } from "@/lib/members/hero-counts";
 import { heroContent } from "@/lib/site";
 
@@ -24,19 +25,7 @@ export function HeroLoggedOut({
 
   return (
     <div className="relative mx-auto w-full max-w-6xl select-none px-6 pt-20 pb-10 sm:pt-24 sm:pb-12">
-      <div
-        className="absolute inset-x-6 top-20 z-10 flex min-h-5 -translate-y-full items-center justify-center sm:top-24"
-        aria-live="polite"
-      >
-        {apiError ? (
-          <p
-            className="w-fit max-w-full rounded-md bg-coral px-2 py-0.5 text-center text-[10px] font-semibold text-white shadow-sm ring-1 ring-cream/25"
-            role="alert"
-          >
-            {apiError}
-          </p>
-        ) : null}
-      </div>
+      <NavMessageBanner message={apiError} />
 
       <p className="text-sm font-medium uppercase tracking-widest text-ocean-100/90">
         {heroContent.eyebrow}

@@ -47,6 +47,8 @@ type MembershipPanelProps = {
   initialPlans: JoinPlansProps | null;
   initialPlansError: string | null;
   initialHeroCounts?: HeroCounts | null;
+  /** Shared nav-relative banner (HeroLoggedOut / MembershipLoggedIn slot). */
+  onBanner?: (message: string | null) => void;
 };
 
 type ApiError = {
@@ -175,6 +177,7 @@ export function MembershipPanel({
   initialPlans,
   initialPlansError,
   initialHeroCounts = null,
+  onBanner,
 }: MembershipPanelProps) {
   const router = useRouter();
   const emailId = useId();
@@ -208,6 +211,7 @@ export function MembershipPanel({
   const [logoutError, setLogoutError] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
   const [joinReturnError, setJoinReturnError] = useState<string | null>(null);
+  const [joinFormError, setJoinFormError] = useState<string | null>(null);
 
   const verified = Boolean(profile?.authenticated);
   const savedEmail = profile?.email ?? "";
@@ -454,23 +458,12 @@ export function MembershipPanel({
     profile?.authenticated &&
     profile.plan !== "none";
 
-  /** Top slot: API / join-return / logout / invalid-unsub errors only (no info toasts). */
-  const topBanner = error
-    ? {
-        text: error,
-        dismiss: () => setError(null),
-      }
-    : joinReturnError
-      ? {
-          text: joinReturnError,
-          dismiss: () => setJoinReturnError(null),
-        }
-      : logoutError
-        ? {
-            text: logoutError,
-            dismiss: () => setLogoutError(null),
-          }
-        : null;
+  const bannerMessage =
+    error ?? joinReturnError ?? logoutError ?? joinFormError;
+
+  useEffect(() => {
+    onBanner?.(bannerMessage);
+  }, [bannerMessage, onBanner]);
 
   // Gate OTP lives in Hero when logged out; this panel is verified-only.
   if (!verified) {
@@ -479,27 +472,6 @@ export function MembershipPanel({
 
   return (
     <div className="relative rounded-3xl border border-white/12 bg-black/28 px-5 py-5 backdrop-blur-md sm:px-8 sm:py-6">
-      {topBanner ? (
-        <div className="absolute inset-x-5 top-0 z-10 -translate-y-[calc(100%+0.5rem)] sm:inset-x-8">
-          <div
-            className="relative rounded-lg bg-coral-dark py-2.5 pl-4 pr-10 text-sm font-medium text-cream shadow-lg ring-1 ring-coral/70 sm:py-3"
-            role="alert"
-          >
-            <p>{topBanner.text}</p>
-            <button
-              type="button"
-              onClick={topBanner.dismiss}
-              className="absolute right-2 top-1.5 inline-flex h-7 w-7 items-center justify-center rounded-md text-cream/80 transition-colors hover:bg-cream/15 hover:text-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/60"
-              aria-label="Dismiss message"
-            >
-              <span aria-hidden="true" className="text-lg leading-none">
-                ×
-              </span>
-            </button>
-          </div>
-        </div>
-      ) : null}
-
       <div className="text-left">
 
       <form
@@ -688,9 +660,9 @@ export function MembershipPanel({
         ) : (
           <JoinForm
             mode="session"
-            joinedLanding={false}
             initialPlans={initialPlans}
             initialPlansError={initialPlansError}
+            onError={setJoinFormError}
           />
         )}
       </div>

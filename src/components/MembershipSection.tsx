@@ -1,12 +1,9 @@
-import {
-  MembershipPanel,
-  type UnsubLanding,
-} from "@/components/MembershipPanel";
 import { type JoinPlansProps } from "@/components/JoinForm";
+import { MembershipLoggedIn } from "@/components/MembershipLoggedIn";
+import type { UnsubLanding } from "@/components/MembershipPanel";
 import { getHeroCounts } from "@/lib/members/hero-counts";
 import { getJoinPlans } from "@/lib/members/join";
 import { loadInitialMemberProfile } from "@/lib/members/load-member-profile";
-import { heroContent } from "@/lib/site";
 
 type MembershipSectionProps = {
   joinedLanding?: boolean;
@@ -59,31 +56,18 @@ export async function MembershipSection({
   return (
     <section
       id="membership"
-      className="relative scroll-mt-24 pt-20 pb-10 text-white sm:pt-24 sm:pb-14"
+      className="relative scroll-mt-24 text-white"
       aria-label="Membership"
     >
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="mx-auto max-w-3xl">
-          {/* Quiet brand intro — verified has no #hero; copy sits above the glass. */}
-          <div className="mb-5 select-none sm:mb-6">
-            <p className="text-[10px] font-medium uppercase tracking-widest text-cream/55">
-              {heroContent.eyebrow}
-            </p>
-            <h1 className="mt-1 max-w-xl font-display text-lg font-medium leading-snug tracking-tight text-cream/75 sm:text-xl">
-              {heroContent.headline}
-            </h1>
-          </div>
-          <MembershipPanel
-            joinedLanding={joinedLanding}
-            unsubLanding={unsubLanding}
-            initialProfile={initialProfileState.profile}
-            initialProfileError={initialProfileState.profileError}
-            initialPlans={plansResult.ok ? plansResult.data : null}
-            initialPlansError={plansResult.ok ? null : plansResult.message}
-            initialHeroCounts={authenticated ? heroCounts : null}
-          />
-        </div>
-      </div>
+      <MembershipLoggedIn
+        joinedLanding={joinedLanding}
+        unsubLanding={unsubLanding}
+        initialProfile={initialProfileState.profile}
+        initialProfileError={initialProfileState.profileError}
+        initialPlans={plansResult.ok ? plansResult.data : null}
+        initialPlansError={plansResult.ok ? null : plansResult.message}
+        initialHeroCounts={authenticated ? heroCounts : null}
+      />
     </section>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { membershipContent } from "@/lib/site";
 
@@ -42,9 +42,10 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 
 type JoinFormProps = {
   mode?: "public" | "session";
-  joinedLanding?: boolean;
   initialPlans: JoinPlansProps | null;
   initialPlansError: string | null;
+  /** Surface API errors on the shared nav banner (not an in-form chip). */
+  onError?: (message: string | null) => void;
 };
 
 /**
@@ -53,9 +54,9 @@ type JoinFormProps = {
  */
 export function JoinForm({
   mode = "public",
-  joinedLanding,
   initialPlans,
   initialPlansError,
+  onError,
 }: JoinFormProps) {
   const [plans, setPlans] = useState<JoinPlanOffer[] | null>(
     initialPlans?.plans ?? null,
@@ -66,17 +67,16 @@ export function JoinForm({
   const [plan, setPlan] = useState<JoinPlanId | "">(
     () => initialPlans?.plans.find((p) => p.available)?.id ?? "",
   );
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const clearFeedback = () => {
-    setMessage(null);
-    setError(null);
-  };
+  useEffect(() => {
+    onError?.(checkoutError ?? plansError);
+  }, [checkoutError, plansError, onError]);
 
   const reloadPlans = async () => {
     setPlansError(null);
+    setCheckoutError(null);
     setLoading(true);
     try {
       const data = await fetchJson<{ ok: true } & JoinPlansProps>(
@@ -99,11 +99,10 @@ export function JoinForm({
 
   const handleCheckout = async (event: React.FormEvent) => {
     event.preventDefault();
-    clearFeedback();
     if (!plan) {
-      setError("Choose a membership plan.");
       return;
     }
+    setCheckoutError(null);
     setLoading(true);
     try {
       const result = await fetchJson<{ checkoutUrl: string }>(
@@ -116,7 +115,7 @@ export function JoinForm({
       );
       window.location.assign(result.checkoutUrl);
     } catch (err) {
-      setError(
+      setCheckoutError(
         err instanceof Error ? err.message : "Could not open checkout.",
       );
       setLoading(false);
@@ -125,33 +124,12 @@ export function JoinForm({
 
   return (
     <div className="text-left">
-      {joinedLanding ? (
-        <p className="text-sm text-cream/85" role="status">
-          {membershipContent.joinedSuccess}
-        </p>
-      ) : null}
-
-      {message ? (
-        <p className="mt-3 text-sm text-cream/85" role="status">
-          {message}
-        </p>
-      ) : null}
-
-      {error || plansError ? (
-        <p
-          className="mt-3 w-fit max-w-full rounded-md bg-coral px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm ring-1 ring-cream/25"
-          role="alert"
-        >
-          {error ?? plansError}
-        </p>
-      ) : null}
-
       {plansError ? (
         <button
           type="button"
           onClick={() => void reloadPlans()}
           disabled={loading}
-          className="mt-3 text-sm font-medium text-cream/80 underline decoration-cream/40 underline-offset-4 hover:text-cream disabled:opacity-60"
+          className="mb-4 text-sm font-medium text-cream/80 underline decoration-cream/40 underline-offset-4 hover:text-cream disabled:opacity-60"
         >
           Retry loading plans
         </button>
@@ -197,7 +175,7 @@ export function JoinForm({
 
           <button
             type="submit"
-            disabled={loading || mode !== "session"}
+            disabled={loading || mode !== "session" || !plan}
             className="rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral/60 disabled:opacity-60"
           >
             {loading ? "Opening checkout…" : membershipContent.checkoutLabel}
