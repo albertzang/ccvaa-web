@@ -150,8 +150,8 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
         <div
           className={
             codeSent
-              ? "grid w-full grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(6.5rem,7.5rem)_auto]"
-              : "grid w-full grid-cols-1 items-end gap-3 sm:grid-cols-[minmax(0,1.2fr)_auto] lg:grid-cols-[minmax(0,1.2fr)_auto]"
+              ? "grid w-full max-w-xl grid-cols-1 items-end gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(6.5rem,7.5rem)_auto]"
+              : "grid w-full max-w-md grid-cols-1 items-end gap-3 sm:grid-cols-[minmax(0,1fr)_auto]"
           }
         >
           <div className="min-w-0">
