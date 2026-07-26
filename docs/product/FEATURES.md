@@ -19,30 +19,29 @@
 **Page order (top → bottom):** Nav → Hero → Membership (`#membership`, when enabled) → About (`#about`) → Contact (`#contact`) → Footer.
 
 ### Header / nav
-- Fixed overlay header; style switches when scrolling past hero
+- Fixed overlay header; style switches when leaving the sticky hero stage (hero + membership when present)
 - Brush wordmark logos: `logo-ondark.png` (hero) / `logo-onlight.png` (scrolled)
 - Subtitle: “Visual Arts Association”
-- Nav anchors: Membership (`#membership`), About (`#about`), Contact (`#contact`)
+- Nav anchors: Membership (`#membership`, **only when verified**), About (`#about`), Contact (`#contact`)
 
 ### Hero
-- Full-bleed coastal hero image (`hero-background.webp`)
-- Eyebrow, headline, subheadline from `src/lib/site.ts`
+- Full-bleed coastal hero image (`hero-background.webp`); sticky while verified `#membership` scrolls over it; stage min-height prevents bleed into About
+- Eyebrow, headline, subheadline from `src/lib/site.ts`; hero copy is content-height (not full image tall)
 - Text is non-selectable
-- **Subscribe** and **Join** both anchor to `#membership` (verified-email portal)
-- Cohesive coastal CTA pair: shared dimensions/typography/radius/focus; Subscribe = solid coral; Join = cream glass; both use the same ocean-950/cream counter badge treatment
-- Live counts as compact (`K`/`M`/`B`) circle badges (newsletter `on` / paid `active`); exact counts in CTA `aria-label`
-- Counts stub to `0` when `DATABASE_URL` / members DB unavailable; homepage still loads (`members-0007`)
-- The Members feature switch hides both CTAs and counter badges when Off
+- **Logged out (Members On):** row 1 = Subscribe / Join count CTAs; row 2 = Name | Email [| Code] | Send/Verify; gate headline under the form
+- **Verified:** Subscribe / Join only (anchor `#membership`); live counts refresh after newsletter toggle / join activation
+- Cohesive coastal CTA pair: Subscribe = solid coral; Join = cream glass; ocean-950/cream compact (`K`/`M`/`B`) badges; exact counts in `aria-label`
+- Counts stub to `0` when members DB unavailable; Members feature switch hides CTAs when Off
 
 ### Membership (`#membership`)
-- After Hero, before About — compact verified-email portal (no Join | Sign-in tabs)
-- **Unverified:** Name + Email + Send code / OTP strip (stacked on mobile) over branded glass gate copy (“Verify your email…”, “One code…”)
-- **Verified:** same strip for Name auto-save + email change (re-OTP); session subject = Member ID UUID; newsletter toggle (default **off** on first verify; on/off without OTP while session active); non-members → Stripe Checkout plans; active paid → “Membership perks coming soon…”
-- Plans: **Founding** (capped one-time) while seats remain → then **Lifetime** (one-time, fee always > Founding); **Annual** always offered
-- Checkout return `/?joined=1&session_id=…#membership` auto-establishes member session
-- One-click `/?unsub=<token>#membership` → newsletter off + verified session + toggle off (idempotent); invalid token shows clear message without faking verification
-- APIs: `POST /api/members/verify/{start,verify}`, `POST /api/members/newsletter/preference` (session), `POST /api/members/join/checkout` (session), plus `join/plans`, `join/session`, Stripe webhook, profile name/email. Fail closed without Stripe/`DATABASE_URL`/session secrets.
-- Generic Edge Config flag `members` gates the public portal and user-initiated member APIs. Missing/unreadable/unset config is Off. Stripe webhooks, unsubscribe redeem/landing, admin, health/logout, and ESP hooks remain live.
+- **Only after email OTP verify** (section + nav hidden when logged out)
+- Verified strip: Name auto-save + email change (re-OTP); newsletter toggle (default **off**; on/off without OTP while session active); non-members → Stripe Checkout; paid → perks placeholder
+- Plans: **Founding** (capped one-time) while seats remain → then **Lifetime**; **Annual** always offered (short plan copy; seats remaining on Founding card)
+- Checkout return carries `session_id`; client activates membership (webhook backstop); strips `joined`/`session_id` from URL after success; cookie + plan are truth
+- Top banners: info (cream) / error (coral-dark); dismissible; form `noValidate` → banner field errors
+- One-click unsub → `#membership` + verified session when applicable
+- APIs: verify, newsletter preference, join checkout/session/plans, profile, Stripe webhook, `GET /api/members/hero-counts`. Fail closed without Stripe/`DATABASE_URL`/session secrets.
+- Edge Config `members` gates public portal + user-initiated member APIs (webhooks/unsub/admin stay live)
 
 ### About (`#about`)
 - Intro paragraphs
@@ -111,8 +110,9 @@
 | **UI** | `#membership` toggle after verify; ESP unsub → `#membership` + verified session | `#membership` Join Checkout or perks placeholder after verify |
 | **Count** | Anyone with newsletter on | Active paid plans |
 
-**Hero:** Subscribe / Join cohesive coastal CTA pair with compact (`K`/`M`/`B`) badges → both `#membership`.
+**Hero / membership:** Logged-out OTP + Sub/Join in Hero; `#membership` only after verify.  
 **Stack:** Neon + Drizzle + Zod · Stripe · Resend · ESP · Mailosaur. Admin roster (`0008`); Resend/ESP new-tab links (`0010`); later: in-admin blast, member perks, impersonation.  
+
 **Standing:** No Resend/ESP iframes; member auth = email OTP (no OAuth/passwords); homepage SPA anchors over separate marketing routes.
 
 **Public feature switch (members-0023, epic `feat/members`):** One shared Edge Config store has three top-level JSON-object items: `production = { "members": false }`, `preview = { "members": false }`, and `development = { "members": false }`. Future flags are sibling booleans in each object. The app reads the item matching `VERCEL_ENV` (`development` when local/unset) via `@vercel/edge-config`; missing/unknown environment, bucket, key, invalid value, read failure, or unset `EDGE_CONFIG` fails closed to Off. Flags are managed in the Vercel dashboard or by an external API — there is no Admin Console toggle or in-app write path, and the app needs only `EDGE_CONFIG`. **Production values are CEO/Admin-only; agents never flip Production.** CEO/Admin and agents may flip Preview/Development for testing and should restore Off afterward.
@@ -163,6 +163,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-25 | **public-homepage-0003:** sticky hero through membership; logged-out OTP+Sub/Join in Hero; `#membership`+nav after verify; glass/banners/copy polish; join return activates without waiting on webhook |
 | 2026-07-23 | **agent-os-0016:** main-safe increments — one ship lane; epic/milestone lane retired; Edge Config for public go-live; `agent-os-0003` closed |
 | 2026-07-23 | **agent-os-0015:** QA Pass 1 scratch hygiene — ephemeral local scripts/logs; delete with report; `.gitignore`; no commit unless maintained harness backlog |
 | 2026-07-23 | **agent-os-0013:** CEO talks only to PM; PM invokes Dev/QA (no CEO Dev/QA chats) |

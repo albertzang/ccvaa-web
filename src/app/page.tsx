@@ -8,6 +8,7 @@ import { Hero } from "@/components/Hero";
 import { MembershipSection } from "@/components/MembershipSection";
 import type { UnsubLanding } from "@/components/MembershipPanel";
 import { isFeatureEnabled } from "@/lib/flags/read";
+import { loadInitialMemberProfile } from "@/lib/members/load-member-profile";
 import { membershipContent } from "@/lib/site";
 
 function resolveUnsubLandingFromStatus(
@@ -40,7 +41,7 @@ function UnsubConfirmation({ landing }: { landing: UnsubLanding }) {
   return (
     <section
       id="membership"
-      className="scroll-mt-24 bg-ocean-50/80 py-14 sm:py-20"
+      className="scroll-mt-24 py-14 sm:py-20"
       aria-label="Newsletter preference"
     >
       <div className="mx-auto max-w-3xl px-6">
@@ -85,19 +86,32 @@ export default async function Home({
   const joinedLanding = joinedRaw === "1";
   const membersEnabled = await isFeatureEnabled("members");
 
+  const profileState = membersEnabled
+    ? await loadInitialMemberProfile()
+    : { profile: null, profileError: null };
+  const memberVerified = Boolean(profileState.profile?.authenticated);
+
+  const heroFooter = membersEnabled ? (
+    <MembershipSection
+      joinedLanding={joinedLanding}
+      unsubLanding={unsubLanding}
+    />
+  ) : unsubLanding ? (
+    <UnsubConfirmation landing={unsubLanding} />
+  ) : null;
+
   return (
     <>
-      <Header membersEnabled={membersEnabled} />
+      <Header
+        membersEnabled={membersEnabled}
+        showMembershipNav={memberVerified}
+      />
       <main>
-        <Hero membersEnabled={membersEnabled} />
-        {membersEnabled ? (
-          <MembershipSection
-            joinedLanding={joinedLanding}
-            unsubLanding={unsubLanding}
-          />
-        ) : (
-          unsubLanding && <UnsubConfirmation landing={unsubLanding} />
-        )}
+        <Hero
+          membersEnabled={membersEnabled}
+          showMembershipGate={membersEnabled && !memberVerified}
+          footer={heroFooter}
+        />
         <AboutSection />
         <ContactSection />
       </main>

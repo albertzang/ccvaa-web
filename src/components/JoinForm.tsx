@@ -69,12 +69,6 @@ export function JoinForm({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [seatsNote, setSeatsNote] = useState<string | null>(() => {
-    if (!initialPlans) return null;
-    return initialPlans.offeringOneTime === "founding"
-      ? `${initialPlans.foundingSeatsRemaining} of ${initialPlans.foundingCap} Founding seats remaining.`
-      : "Founding seats are full — Lifetime and Annual are available.";
-  });
 
   const clearFeedback = () => {
     setMessage(null);
@@ -89,11 +83,6 @@ export function JoinForm({
         "/api/members/join/plans",
       );
       setPlans(data.plans);
-      setSeatsNote(
-        data.offeringOneTime === "founding"
-          ? `${data.foundingSeatsRemaining} of ${data.foundingCap} Founding seats remaining.`
-          : "Founding seats are full — Lifetime and Annual are available.",
-      );
       const firstAvailable = data.plans.find((p) => p.available);
       setPlan((current) => current || firstAvailable?.id || "");
     } catch (err) {
@@ -145,12 +134,6 @@ export function JoinForm({
         </p>
       ) : null}
 
-      {seatsNote && !plansError ? (
-        <p className={`${joinedLanding ? "mt-3" : ""} text-xs text-ocean-500`}>
-          {seatsNote}
-        </p>
-      ) : null}
-
       {message ? (
         <p
           className="mt-3 rounded-lg bg-ocean-50 px-4 py-3 text-sm text-ocean-700"
@@ -162,7 +145,7 @@ export function JoinForm({
 
       {error || plansError ? (
         <p
-          className="mt-3 rounded-lg bg-coral/10 px-4 py-3 text-sm text-coral-dark"
+          className="mt-3 rounded-lg bg-coral-dark px-4 py-3 text-sm font-medium text-cream shadow-md ring-1 ring-coral/70"
           role="alert"
         >
           {error ?? plansError}
@@ -217,8 +200,6 @@ export function JoinForm({
               ))}
             </div>
           </fieldset>
-
-          <p className="text-xs text-ocean-500">{membershipContent.consentNote}</p>
 
           <button
             type="submit"

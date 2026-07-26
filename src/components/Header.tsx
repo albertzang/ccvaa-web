@@ -4,22 +4,33 @@ import { useEffect, useState } from "react";
 import { BrandMark } from "@/components/BrandMark";
 import { navigation } from "@/lib/site";
 
-export function Header({ membersEnabled }: { membersEnabled: boolean }) {
+export function Header({
+  membersEnabled,
+  showMembershipNav = false,
+}: {
+  membersEnabled: boolean;
+  /** Membership nav only after OTP verify (section exists). */
+  showMembershipNav?: boolean;
+}) {
   const [overHero, setOverHero] = useState(true);
-  const visibleNavigation = membersEnabled
-    ? navigation
-    : navigation.filter((item) => item.href !== "#membership");
+  const visibleNavigation = navigation.filter((item) => {
+    if (item.href !== "#membership") {
+      return true;
+    }
+    return membersEnabled && showMembershipNav;
+  });
 
   useEffect(() => {
-    const hero = document.getElementById("hero");
-    if (!hero) return;
+    // Whole sticky stage (hero + membership) so nav glass stays dark until About.
+    const stage = document.getElementById("hero-stage");
+    if (!stage) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => setOverHero(entry.isIntersecting),
       { threshold: 0, rootMargin: "-72px 0px 0px 0px" },
     );
 
-    observer.observe(hero);
+    observer.observe(stage);
     return () => observer.disconnect();
   }, []);
 

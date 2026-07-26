@@ -234,7 +234,7 @@ export async function confirmNewsletterSubscription(
     email,
     status: "on",
     message:
-      "You are subscribed to the CCVAA newsletter. This is separate from paid membership.",
+      "You are subscribed to the CCVAA newsletter.",
   };
 }
 
@@ -276,7 +276,7 @@ export async function unsubscribeFromNewsletter(
       status: "off",
       outcome: "unknown",
       message:
-        "We could not find a newsletter subscription for that email. Your paid membership, if any, is unchanged.",
+        "We could not find a newsletter subscription for that email.",
       membershipUnchanged: true,
     };
   }
@@ -287,7 +287,7 @@ export async function unsubscribeFromNewsletter(
       status: "off",
       outcome: "already_off",
       message:
-        "You are already unsubscribed from the newsletter. Your paid membership, if any, is unchanged.",
+        "You are already unsubscribed from the newsletter.",
       membershipUnchanged: true,
     };
   }
@@ -311,7 +311,7 @@ export async function unsubscribeFromNewsletter(
     status: "off",
     outcome: "unsubscribed",
     message:
-      "You have been unsubscribed from the newsletter. Your paid membership, if any, is unchanged.",
+      "You have been unsubscribed from the newsletter.",
     membershipUnchanged: true,
   };
 }
@@ -366,7 +366,7 @@ export async function updateNewsletterPreferenceForSession(
       },
       membershipUnchanged: true,
       message:
-        "You are subscribed to the CCVAA newsletter. This is separate from paid membership.",
+        "You are subscribed to the CCVAA newsletter.",
     };
   }
 
@@ -392,7 +392,7 @@ export async function updateNewsletterPreferenceForSession(
     },
     membershipUnchanged: true,
     message:
-      "You are unsubscribed from the newsletter. Your paid membership, if any, is unchanged.",
+      "You are unsubscribed from the CCVAA newsletter.",
   };
 }
 

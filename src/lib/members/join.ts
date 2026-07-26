@@ -93,7 +93,8 @@ export class MembersJoinError extends Error {
     | "MEMBERS_ALREADY_MEMBER"
     | "MEMBERS_FOUNDING_FULL"
     | "MEMBERS_STRIPE_ERROR"
-    | "MEMBERS_JOIN_CHECKOUT_INVALID";
+    | "MEMBERS_JOIN_CHECKOUT_INVALID"
+    | "MEMBERS_JOIN_ACTIVATION_FAILED";
 
   constructor(code: MembersJoinError["code"], message: string) {
     super(message);
@@ -167,8 +168,7 @@ function buildPlanOffers(
   const founding: JoinPlanOffer = {
     id: "founding",
     label: "Founding",
-    description:
-      "One-time founding membership while seats remain. Lifetime access at the founding rate.",
+    description: `${remaining} of ${config.foundingCap} seats left. One-time lifetime access.`,
     feeCents: config.foundingFeeCents,
     feeLabel: formatFeeCad(config.foundingFeeCents),
     interval: "one_time",
@@ -178,8 +178,7 @@ function buildPlanOffers(
   const lifetime: JoinPlanOffer = {
     id: "lifetime",
     label: "Lifetime",
-    description:
-      "One-time lifetime membership. Fee is always higher than Founding.",
+    description: "One-time lifetime access.",
     feeCents: config.lifetimeFeeCents,
     feeLabel: formatFeeCad(config.lifetimeFeeCents),
     interval: "one_time",
@@ -189,7 +188,7 @@ function buildPlanOffers(
   const annual: JoinPlanOffer = {
     id: "annual",
     label: "Annual",
-    description: "Renews yearly. Anniversary and next renewal come from Stripe.",
+    description: "Renews yearly at your anniversary.",
     feeCents: config.annualFeeCents,
     feeLabel: `${formatFeeCad(config.annualFeeCents)} / year`,
     interval: "year",
@@ -494,31 +493,57 @@ export async function establishMemberSessionFromCheckout(
   }
 
   const db = getMembersDb();
-  const rows = await db
-    .select({
-      id: members.id,
-      email: members.email,
-      name: members.name,
-      membershipPlan: members.membershipPlan,
-      membershipStatus: members.membershipStatus,
-    })
-    .from(members)
-    .where(
-      and(
-        eq(members.email, email),
-        eq(members.membershipStatus, "active"),
-        ne(members.membershipPlan, "none"),
-      ),
-    )
-    .limit(1);
 
-  const member = rows[0];
+  const loadActivePaidMember = async () => {
+    const rows = await db
+      .select({
+        id: members.id,
+        email: members.email,
+        name: members.name,
+        membershipPlan: members.membershipPlan,
+        membershipStatus: members.membershipStatus,
+      })
+      .from(members)
+      .where(
+        and(
+          eq(members.email, email),
+          eq(members.membershipStatus, "active"),
+          ne(members.membershipPlan, "none"),
+        ),
+      )
+      .limit(1);
+    return rows[0] ?? null;
+  };
+
+  let member = await loadActivePaidMember();
+
   if (!member || member.membershipPlan === "none") {
-    return {
-      status: "pending",
-      message:
-        "Payment received — activating your membership. This usually takes a few seconds.",
-    };
+    // Webhooks are often delayed or unavailable on local Dev. Fulfill from the
+    // paid Checkout session (same path as checkout.session.completed); webhook
+    // retries stay idempotent via the activate* helpers.
+    try {
+      await handleCheckoutSessionCompleted(checkout);
+    } catch (error) {
+      console.error(
+        "Join return: activate from Checkout session failed:",
+        error,
+      );
+      throw new MembersJoinError(
+        "MEMBERS_JOIN_ACTIVATION_FAILED",
+        error instanceof Error
+          ? error.message
+          : "Payment was received but membership could not be activated.",
+      );
+    }
+    member = await loadActivePaidMember();
+  }
+
+  if (!member || member.membershipPlan === "none") {
+    // Founding cap race refunds in the activator and leaves plan unset.
+    throw new MembersJoinError(
+      "MEMBERS_JOIN_ACTIVATION_FAILED",
+      "Payment was received but membership could not be activated. If you were charged for a Founding seat that just filled, a refund may be in progress — contact us or try Annual/Lifetime.",
+    );
   }
 
   const { token, expiresAt, payload } = createMemberSessionToken({

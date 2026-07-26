@@ -1,18 +1,10 @@
 import {
   MembershipPanel,
-  type MemberProfileSummary,
   type UnsubLanding,
 } from "@/components/MembershipPanel";
 import { type JoinPlansProps } from "@/components/JoinForm";
 import { getJoinPlans } from "@/lib/members/join";
-import {
-  getMemberProfileForSession,
-  toPublicMemberProfile,
-} from "@/lib/members/profile";
-import {
-  readMemberSession,
-  toPublicMemberSession,
-} from "@/lib/members/session";
+import { loadInitialMemberProfile } from "@/lib/members/load-member-profile";
 
 type MembershipSectionProps = {
   joinedLanding?: boolean;
@@ -46,50 +38,25 @@ async function loadPlansForJoin(): Promise<
   }
 }
 
-async function loadInitialProfile(): Promise<{
-  profile: MemberProfileSummary | null;
-  profileError: string | null;
-}> {
-  const payload = await readMemberSession();
-  if (!payload) {
-    return { profile: null, profileError: null };
-  }
-
-  try {
-    const memberProfile = await getMemberProfileForSession(payload);
-    return {
-      profile: toPublicMemberProfile(memberProfile, payload.exp),
-      profileError: null,
-    };
-  } catch (error) {
-    return {
-      profile: {
-        ...toPublicMemberSession(payload),
-        newsletterStatus: "off",
-        membershipAnniversary: null,
-        nextRenewalAt: null,
-      },
-      profileError:
-        error instanceof Error
-          ? error.message
-          : "Could not load your membership profile.",
-    };
-  }
-}
-
+/** Verified-session membership portal only (gate lives in Hero when logged out). */
 export async function MembershipSection({
   joinedLanding,
   unsubLanding,
 }: MembershipSectionProps) {
   const [plansResult, initialProfileState] = await Promise.all([
     loadPlansForJoin(),
-    loadInitialProfile(),
+    loadInitialMemberProfile(),
   ]);
+
+  const authenticated = Boolean(initialProfileState.profile?.authenticated);
+  if (!authenticated && !unsubLanding) {
+    return null;
+  }
 
   return (
     <section
       id="membership"
-      className="scroll-mt-24 bg-ocean-50/80 py-14 sm:py-20"
+      className="relative scroll-mt-24 py-14 sm:py-20"
       aria-label="Membership"
     >
       <div className="mx-auto max-w-6xl px-6">

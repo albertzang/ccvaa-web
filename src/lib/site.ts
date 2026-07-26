@@ -54,7 +54,7 @@ export const heroContent = {
 } as const;
 
 export const aboutContent = {
-  title: "About CCVAA",
+  title: "About",
   paragraphs: [
     "Coast to Coast Visual Arts Association (CCVAA) is a registered non-profit society in British Columbia, dedicated to advancing visual arts across Canada.",
     "We bring artists, educators, and communities together through exhibitions, education, and cultural programming — from local workshops to coast-to-coast collaboration.",
@@ -142,7 +142,7 @@ export const boardContent = {
 } as const;
 
 export const contactContent = {
-  title: "Contact us",
+  title: "Contact",
   description:
     "Interested in partnering, volunteering, or learning more about our programs? We would love to hear from you.",
   emailLabel: "Email",
@@ -151,8 +151,6 @@ export const contactContent = {
 
 export const membershipContent = {
   gateHeadline: "Verify your email to unlock the newsletter and membership.",
-  gateSupport:
-    "One code. Then subscribe, join, or both — on your terms.",
   sendCodeLabel: "Send code",
   verifyEmailLabel: "Verify email",
   verifyHint: "Enter the 6-digit code we emailed you.",
@@ -168,13 +166,11 @@ export const membershipContent = {
   emailVerifyHint: "Enter the 6-digit code we sent to your new address.",
   newsletterToggleLabel: "Newsletter",
   newsletterToggleDescription:
-    "Occasional updates on exhibitions, programs, and community news. Separate from paid membership (CASL).",
+    "Occasional updates on exhibitions, programs, and community news.",
   newsletterOnLabel: "Subscribed",
   newsletterOffLabel: "Not subscribed",
   perksComingSoon: "Membership perks coming soon…",
   checkoutLabel: "Continue to checkout",
-  consentNote:
-    "Membership is separate from the newsletter. You can change either anytime while verified.",
   logoutLabel: "Sign out",
   profilePlanLabel: "Plan",
   profileAnniversaryLabel: "Anniversary",
@@ -186,9 +182,8 @@ export const membershipContent = {
   joinedSessionTimeout:
     "Membership may still be activating. Refresh this page, or verify your email again.",
   unsubLandingSuccess:
-    "You have been unsubscribed from the CCVAA newsletter. Your paid membership, if any, is unchanged.",
-  unsubLandingAlready:
-    "You were already unsubscribed. Your paid membership, if any, is unchanged.",
+    "You have been unsubscribed from the CCVAA newsletter.",
+  unsubLandingAlready: "You were already unsubscribed.",
   unsubLandingInvalid: "This unsubscribe link is invalid or has expired.",
 } as const;
 
@@ -202,12 +197,11 @@ export const newsletterContent = {
   namePlaceholder: "Your name",
   codePlaceholder: "6-digit code",
   consentNote:
-    "By subscribing you consent to email from CCVAA (CASL). Unsubscribe anytime. Not a membership.",
+    "By subscribing you consent to email from CCVAA (CASL). Unsubscribe anytime.",
   pendingNote:
     "Enter the 6-digit code we emailed you to confirm.",
   unsubLandingSuccess:
-    "You have been unsubscribed from the CCVAA newsletter. Your paid membership, if any, is unchanged.",
-  unsubLandingAlready:
-    "You were already unsubscribed. Your paid membership, if any, is unchanged.",
+    "You have been unsubscribed from the CCVAA newsletter.",
+  unsubLandingAlready: "You were already unsubscribed.",
   unsubLandingInvalid: "This unsubscribe link is invalid or has expired.",
 } as const;

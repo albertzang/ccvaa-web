@@ -3,9 +3,41 @@
 **Feature:** Public Homepage  
 **Slug:** `public-homepage`  
 **Owner:** Product Manager  
-**Next ID:** `0003`  
+**Next ID:** `0004`
 
 Canonical work IDs: `public-homepage-NNNN`. Schema: [`../BACKLOG.md`](../BACKLOG.md).
+
+---
+
+## public-homepage-0003 — Umbrella: public homepage UI tweaks
+
+| Field | Value |
+|-------|--------|
+| **Type** | `task` |
+| **Priority** | `now` |
+| **Status** | `completed` |
+| **Verifier** | `ceo` |
+| **Verify passes** | `pass2` |
+| **Ship path** | `direct-to-main` |
+
+### Description
+
+Umbrella CEO-driven public homepage polish. Shipped as one squashed `main` commit after CEO complete/`verified`.
+
+**Shipped scope:**
+- About / Contact headings shortened; sticky hero stage through membership; hero copy content-height
+- Logged-out: OTP + Sub/Join in Hero (Sub/Join row then OTP row); no Membership nav/section until verify
+- Verified `#membership`: quiet identity fields, newsletter toggle, join/perks, banners, hero counter refresh
+- Join return activates membership without waiting solely on webhook; strip `joined` query after success
+- Plan/newsletter copy cleanup; founding seats on Founding card
+
+### Overall
+
+- CEO complete 2026-07-25 → squash + push `main`. Production smoke: https://ccvaa-web.vercel.app/
+
+### Links
+
+- FEATURES.md: Public site (`/`)
 
 ---
 
