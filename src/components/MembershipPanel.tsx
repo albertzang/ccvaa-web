@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 
 import { JoinForm, type JoinPlansProps } from "@/components/JoinForm";
 import { refreshHeroCounts } from "@/lib/members/refresh-hero-counts";
 import { otpCodeSchema } from "@/lib/members/zod/otp";
-import { personNameSchema } from "@/lib/members/zod/person-name";
 import { membershipContent } from "@/lib/site";
 
 const gateEmailSchema = z
@@ -21,7 +20,6 @@ export type MemberProfileSummary = {
   authenticated: true;
   memberId: string;
   email: string;
-  name: string | null;
   plan: "none" | "founding" | "lifetime" | "annual";
   newsletterStatus: "off" | "pending" | "on";
   membershipAnniversary: string | null;
@@ -56,7 +54,6 @@ type ApiError = {
 
 const SESSION_POLL_MS = 1500;
 const SESSION_MAX_ATTEMPTS = 8;
-const NAME_SAVE_DEBOUNCE_MS = 600;
 
 const PLAN_LABELS: Record<
   Exclude<MemberProfileSummary["plan"], "none">,
@@ -70,20 +67,6 @@ const PLAN_LABELS: Record<
 async function postJson<T>(url: string, body: unknown): Promise<T> {
   const response = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const data = (await response.json()) as T | ApiError;
-  if (!response.ok || (data as ApiError).ok === false) {
-    const err = data as ApiError;
-    throw new Error(err.message ?? "Request failed.");
-  }
-  return data as T;
-}
-
-async function patchJson<T>(url: string, body: unknown): Promise<T> {
-  const response = await fetch(url, {
-    method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
@@ -191,7 +174,6 @@ export function MembershipPanel({
   initialPlansError,
 }: MembershipPanelProps) {
   const router = useRouter();
-  const nameId = useId();
   const emailId = useId();
   const codeId = useId();
   const toggleId = useId();
@@ -200,13 +182,6 @@ export function MembershipPanel({
     () =>
       initialProfile ??
       (unsubLanding?.kind === "success" ? unsubLanding.profile ?? null : null),
-  );
-  const [name, setName] = useState(
-    () =>
-      initialProfile?.name?.trim() ??
-      (unsubLanding?.kind === "success"
-        ? unsubLanding.profile?.name?.trim() ?? ""
-        : ""),
   );
   const [email, setEmail] = useState(
     () =>
@@ -224,9 +199,6 @@ export function MembershipPanel({
     initialProfileError ?? null,
   );
   const [loading, setLoading] = useState(false);
-  const [nameSaveState, setNameSaveState] = useState<
-    "idle" | "saving" | "saved" | "error"
-  >("idle");
   const [newsletterBusy, setNewsletterBusy] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -236,13 +208,6 @@ export function MembershipPanel({
   const [joinReturnError, setJoinReturnError] = useState<string | null>(null);
   const [establishingSession, setEstablishingSession] = useState(false);
 
-  const nameSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastSavedName = useRef(
-    initialProfile?.name?.trim() ??
-      (unsubLanding?.kind === "success"
-        ? unsubLanding.profile?.name?.trim() ?? ""
-        : ""),
-  );
   const verified = Boolean(profile?.authenticated);
   const savedEmail = profile?.email ?? "";
   const emailDirty =
@@ -273,9 +238,7 @@ export function MembershipPanel({
 
     const applyReadyProfile = (next: MemberProfileSummary, message: string) => {
       setProfile(next);
-      setName(next.name?.trim() ?? "");
       setEmail(next.email);
-      lastSavedName.current = next.name?.trim() ?? "";
       setJoinReturnMessage(message);
       setEstablishingSession(false);
       // Drop joined/session_id from the URL — cookie + plan are the source of truth.
@@ -344,51 +307,6 @@ export function MembershipPanel({
     };
   }, [joinedLanding, profile?.authenticated, profile?.plan]);
 
-  useEffect(() => {
-    if (!verified) {
-      return;
-    }
-
-    const trimmed = name.trim();
-    if (!trimmed || trimmed === lastSavedName.current) {
-      return;
-    }
-
-    if (nameSaveTimer.current) {
-      clearTimeout(nameSaveTimer.current);
-    }
-
-    nameSaveTimer.current = setTimeout(() => {
-      void (async () => {
-        setNameSaveState("saving");
-        setError(null);
-        try {
-          const result = await patchJson<{
-            profile: MemberProfileSummary;
-            message: string;
-          }>("/api/members/profile/name", { name: trimmed });
-          setProfile(result.profile);
-          lastSavedName.current = result.profile.name?.trim() ?? trimmed;
-          setNameSaveState("saved");
-          window.setTimeout(() => setNameSaveState("idle"), 2000);
-        } catch (err) {
-          setNameSaveState("error");
-          setError(
-            err instanceof Error
-              ? err.message
-              : membershipContent.nameSaveErrorLabel,
-          );
-        }
-      })();
-    }, NAME_SAVE_DEBOUNCE_MS);
-
-    return () => {
-      if (nameSaveTimer.current) {
-        clearTimeout(nameSaveTimer.current);
-      }
-    };
-  }, [name, verified]);
-
   const clearFeedback = () => {
     setMessage(null);
     setError(null);
@@ -404,13 +322,6 @@ export function MembershipPanel({
 
   /** Client checks → top banner (form uses noValidate; no native tooltips). */
   const validateSendCode = (): boolean => {
-    if (!verified) {
-      const nameIssue = firstZodMessage(personNameSchema.safeParse(name));
-      if (nameIssue) {
-        setError(nameIssue);
-        return false;
-      }
-    }
     const emailIssue = firstZodMessage(gateEmailSchema.safeParse(email));
     if (emailIssue) {
       setError(emailIssue);
@@ -420,13 +331,6 @@ export function MembershipPanel({
   };
 
   const validateVerifyCode = (): boolean => {
-    if (!verified) {
-      const nameIssue = firstZodMessage(personNameSchema.safeParse(name));
-      if (nameIssue) {
-        setError(nameIssue);
-        return false;
-      }
-    }
     const emailIssue = firstZodMessage(gateEmailSchema.safeParse(email));
     if (emailIssue) {
       setError(emailIssue);
@@ -499,12 +403,9 @@ export function MembershipPanel({
         }>("/api/members/verify/verify", {
           email,
           code,
-          name,
         });
         setProfile(result.profile);
-        setName(result.profile.name?.trim() ?? name);
         setEmail(result.profile.email);
-        lastSavedName.current = result.profile.name?.trim() ?? name.trim();
         setCode("");
         setCodeSent(false);
         setMessage(result.message);
@@ -560,11 +461,9 @@ export function MembershipPanel({
         throw new Error(data.message ?? "Could not sign out.");
       }
       setProfile(null);
-      setName("");
       setEmail("");
       setCode("");
       setCodeSent(false);
-      lastSavedName.current = "";
       setMessage(null);
       router.refresh();
     } catch (err) {
@@ -679,54 +578,6 @@ export function MembershipPanel({
         }}
         className="flex w-full flex-col gap-3"
       >
-            {/* Shared 2-col template: inputs align; actions right-justified */}
-            <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-end gap-x-3">
-              <div className="col-span-2 mb-0.5 flex items-baseline justify-between gap-2">
-                <label
-                  htmlFor={nameId}
-                  className="text-[10px] font-medium uppercase tracking-wider text-cream/45"
-                >
-                  Name
-                </label>
-                <span
-                  className={`shrink-0 text-[11px] text-cream/60 ${
-                    nameSaveState === "idle" ? "invisible" : ""
-                  }`}
-                  aria-live="polite"
-                >
-                  {nameSaveState === "saving"
-                    ? membershipContent.nameSavingLabel
-                    : nameSaveState === "saved"
-                      ? membershipContent.nameSavedLabel
-                      : nameSaveState === "error"
-                        ? membershipContent.nameSaveErrorLabel
-                        : "\u00a0"}
-                </span>
-              </div>
-              <input
-                id={nameId}
-                type="text"
-                required
-                autoComplete="name"
-                maxLength={200}
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                placeholder={membershipContent.namePlaceholder}
-                className={`${quietInputClass} w-full min-w-0`}
-              />
-              <div
-                className="flex min-w-[11.5rem] justify-end gap-2"
-                aria-hidden="true"
-              >
-                <span className={`${glassPrimaryBtnClass} invisible`}>
-                  {membershipContent.changeEmailLabel}
-                </span>
-                <span className={`${glassSecondaryBtnClass} invisible`}>
-                  Cancel
-                </span>
-              </div>
-            </div>
-
             <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-end gap-x-3">
               <label htmlFor={emailId} className={`col-span-2 ${quietLabelClass}`}>
                 Email
@@ -840,7 +691,7 @@ export function MembershipPanel({
             <p className={quietLabelClass}>
               {membershipContent.newsletterToggleLabel}
             </p>
-            {/* px/py match quiet inputs so label→value spacing & inset align with Name/Email */}
+            {/* px/py match quiet inputs so label→value spacing & inset align with Email */}
             <p className="px-1.5 py-1 text-sm leading-relaxed text-cream">
               {membershipContent.newsletterToggleDescription}
             </p>

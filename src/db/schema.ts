@@ -38,7 +38,8 @@ export const otpPurposeEnum = pgEnum("otp_purpose", [
 ]);
 
 /**
- * Person record — newsletter and membership are separate columns (not one tier ladder).
+ * Member record — email is the only identity (no name). Newsletter and membership
+ * are separate columns (not one tier ladder).
  *
  * Annual plans: `membershipAnniversary` (calendar anchor from Stripe) and `nextRenewalAt`
  * are set from Stripe subscription data. Founding and Lifetime keep both null.
@@ -48,7 +49,6 @@ export const members = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     email: text("email").notNull().unique(),
-    name: text("name"),
     newsletterStatus: newsletterStatusEnum("newsletter_status")
       .notNull()
       .default("off"),

@@ -2,13 +2,15 @@
 
 Neon + Drizzle schema for the Members platform. Newsletter and membership are **orthogonal** columns on the same person record — not one tier ladder.
 
+**Identity:** `members.id` (UUID) is the primary key; `email` is unique and is the only public identity. There is **no** member name column (`members-0025`).
+
 ## Tables
 
 | Table | Purpose |
 |-------|---------|
-| `members` | Person identity; newsletter + membership axes |
+| `members` | Email identity; newsletter + membership axes |
 | `otp_challenges` | DB-backed OTP for login / email verify / newsletter confirm |
-| `unsub_tokens` | Tokenized newsletter unsubscribe (`/?unsub=<token>#contact`) |
+| `unsub_tokens` | Tokenized newsletter unsubscribe (`/?unsub=<token>#membership`) |
 | `stripe_webhook_events` | Idempotent Stripe webhook processing (`event.id` PK) |
 
 ## Annual renewal fields

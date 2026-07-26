@@ -60,7 +60,6 @@ export type UnsubTokenRedeemResult = {
   alreadyUnsubscribed: boolean;
   membershipUnchanged: true;
   memberId: string;
-  name: string | null;
   plan: MembershipPlan;
 };
 
@@ -84,10 +83,7 @@ async function findMemberByEmail(email: string) {
   }, "Failed to look up newsletter preference.");
 }
 
-async function upsertMemberForNewsletter(
-  email: string,
-  name: string,
-): Promise<string> {
+async function upsertMemberForNewsletter(email: string): Promise<string> {
   return withMembersDbError(async () => {
     const db = getMembersDb();
     const existing = await findMemberByEmail(email);
@@ -96,7 +92,6 @@ async function upsertMemberForNewsletter(
       await db
         .update(members)
         .set({
-          name,
           newsletterStatus: "pending",
           newsletterConfirmedAt: null,
           updatedAt: new Date(),
@@ -109,7 +104,6 @@ async function upsertMemberForNewsletter(
       .insert(members)
       .values({
         email,
-        name,
         newsletterStatus: "pending",
       })
       .returning({ id: members.id });
@@ -189,7 +183,7 @@ export async function subscribeToNewsletter(
     );
   }
 
-  await upsertMemberForNewsletter(email, parsed.name);
+  await upsertMemberForNewsletter(email);
   await sendNewsletterConfirmOtp(email);
 
   return {
@@ -414,7 +408,6 @@ export async function redeemUnsubToken(
         usedAt: unsubTokens.usedAt,
         memberId: unsubTokens.memberId,
         email: members.email,
-        name: members.name,
         membershipPlan: members.membershipPlan,
         newsletterStatus: members.newsletterStatus,
       })
@@ -462,7 +455,6 @@ export async function redeemUnsubToken(
     alreadyUnsubscribed: alreadyOff,
     membershipUnchanged: true,
     memberId: row.memberId,
-    name: row.name,
     plan: row.membershipPlan,
   };
 }

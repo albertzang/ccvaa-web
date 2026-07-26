@@ -48,7 +48,6 @@ const isoDateTimeSchema = z
 
 export const adminRosterUpdateSchema = z
   .object({
-    name: z.string().trim().min(1).max(200).nullable().optional(),
     newsletterStatus: newsletterStatusSchema.optional(),
     membershipPlan: membershipPlanSchema.optional(),
     membershipStatus: membershipStatusSchema.optional(),
@@ -57,7 +56,6 @@ export const adminRosterUpdateSchema = z
   })
   .refine(
     (value) =>
-      value.name !== undefined ||
       value.newsletterStatus !== undefined ||
       value.membershipPlan !== undefined ||
       value.membershipStatus !== undefined ||
@@ -101,7 +99,6 @@ export type AdminRosterUpdateInput = z.infer<typeof adminRosterUpdateSchema>;
 export const adminRosterMemberSchema = z.object({
   id: z.string().uuid(),
   email: z.string().email(),
-  name: z.string().nullable(),
   newsletterStatus: newsletterStatusSchema,
   newsletterConfirmedAt: z.string().datetime().nullable(),
   membershipPlan: membershipPlanSchema,

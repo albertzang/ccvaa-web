@@ -7,7 +7,6 @@ import { z } from "zod";
 import { HeroCtas } from "@/components/HeroCtas";
 import type { HeroCounts } from "@/lib/members/hero-counts";
 import { otpCodeSchema } from "@/lib/members/zod/otp";
-import { personNameSchema } from "@/lib/members/zod/person-name";
 import { membershipContent } from "@/lib/site";
 
 const gateEmailSchema = z
@@ -46,16 +45,14 @@ type HeroGateCtasProps = {
 };
 
 /**
- * Logged-out: Name | Email [| Code] | Send/Verify | Sub | Join (one row on lg+).
+ * Logged-out: Email [| Code] | Send/Verify | Sub | Join (one row on lg+).
  * Verified: Sub | Join only (scroll to #membership).
  */
 export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
   const router = useRouter();
-  const nameId = useId();
   const emailId = useId();
   const codeId = useId();
 
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
@@ -78,11 +75,6 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
 
   const handleSendCode = async () => {
     setError(null);
-    const nameIssue = firstZodMessage(personNameSchema.safeParse(name));
-    if (nameIssue) {
-      setError(nameIssue);
-      return;
-    }
     const emailIssue = firstZodMessage(gateEmailSchema.safeParse(email));
     if (emailIssue) {
       setError(emailIssue);
@@ -103,11 +95,6 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
 
   const handleVerify = async () => {
     setError(null);
-    const nameIssue = firstZodMessage(personNameSchema.safeParse(name));
-    if (nameIssue) {
-      setError(nameIssue);
-      return;
-    }
     const emailIssue = firstZodMessage(gateEmailSchema.safeParse(email));
     if (emailIssue) {
       setError(emailIssue);
@@ -121,7 +108,7 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
     }
     setLoading(true);
     try {
-      await postJson("/api/members/verify/verify", { email, code, name });
+      await postJson("/api/members/verify/verify", { email, code });
       setHideGateOptimistic(true);
       router.refresh();
       window.setTimeout(() => {
@@ -163,29 +150,10 @@ export function HeroGateCtas({ initialCounts, showGate }: HeroGateCtasProps) {
         <div
           className={
             codeSent
-              ? "grid w-full grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_minmax(6.5rem,7.5rem)_auto]"
-              : "grid w-full grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_auto]"
+              ? "grid w-full grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(6.5rem,7.5rem)_auto]"
+              : "grid w-full grid-cols-1 items-end gap-3 sm:grid-cols-[minmax(0,1.2fr)_auto] lg:grid-cols-[minmax(0,1.2fr)_auto]"
           }
         >
-          <div className="min-w-0">
-            <label
-              htmlFor={nameId}
-              className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-cream"
-            >
-              Name
-            </label>
-            <input
-              id={nameId}
-              type="text"
-              required
-              autoComplete="name"
-              maxLength={200}
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder={membershipContent.namePlaceholder}
-              className={gateInputClass}
-            />
-          </div>
           <div className="min-w-0">
             <label
               htmlFor={emailId}

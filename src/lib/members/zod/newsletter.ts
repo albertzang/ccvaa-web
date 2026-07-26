@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-import { personNameSchema } from "@/lib/members/zod/person-name";
-
 export const newsletterStatusSchema = z.enum(["off", "pending", "on"]);
 
 export type NewsletterStatus = z.infer<typeof newsletterStatusSchema>;
@@ -15,7 +13,6 @@ export type NewsletterPreference = z.infer<typeof newsletterPreferenceSchema>;
 
 export const newsletterSubscribeInputSchema = z.object({
   email: z.string().trim().email().max(320),
-  name: personNameSchema,
 });
 
 export type NewsletterSubscribeInput = z.infer<

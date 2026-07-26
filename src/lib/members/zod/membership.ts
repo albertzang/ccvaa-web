@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-import { personNameSchema } from "@/lib/members/zod/person-name";
-
 export const membershipPlanSchema = z.enum([
   "none",
   "founding",
@@ -47,7 +45,6 @@ export type JoinPlanId = z.infer<typeof joinPlanIdSchema>;
 
 export const joinMembershipInputSchema = z.object({
   email: z.string().trim().email().max(320),
-  name: personNameSchema,
   plan: joinPlanIdSchema,
   newsletterOptIn: z.boolean().optional().default(false),
 });

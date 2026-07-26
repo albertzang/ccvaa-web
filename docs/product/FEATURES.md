@@ -1,7 +1,7 @@
 # CCVAA Web — Feature Inventory
 
 > **Owner:** Product Manager agent  
-> **Updated:** 2026-07-17  
+> **Updated:** 2026-07-25  
 > Keep this document current whenever features ship or change. Work-to-do: [`BACKLOG.md`](BACKLOG.md).
 
 ## Product summary
@@ -28,14 +28,14 @@
 - Full-bleed coastal hero image (`hero-background.webp`); sticky while verified `#membership` scrolls over it; stage min-height prevents bleed into About
 - Eyebrow, headline, subheadline from `src/lib/site.ts`; hero copy is content-height (not full image tall)
 - Text is non-selectable
-- **Logged out (Members On):** row 1 = Subscribe / Join count CTAs; row 2 = Name | Email [| Code] | Send/Verify; gate headline under the form
+- **Logged out (Members On):** row 1 = Subscribe / Join count CTAs; row 2 = Email [| Code] | Send/Verify; gate headline under the form
 - **Verified:** Subscribe / Join only (anchor `#membership`); live counts refresh after newsletter toggle / join activation
 - Cohesive coastal CTA pair: Subscribe = solid coral; Join = cream glass; ocean-950/cream compact (`K`/`M`/`B`) badges; exact counts in `aria-label`
 - Counts stub to `0` when members DB unavailable; Members feature switch hides CTAs when Off
 
 ### Membership (`#membership`)
 - **Only after email OTP verify** (section + nav hidden when logged out)
-- Verified strip: Name auto-save + email change (re-OTP); newsletter toggle (default **off**; on/off without OTP while session active); non-members → Stripe Checkout; paid → perks placeholder
+- Verified strip: Email (+ change with re-OTP); newsletter toggle (default **off**; on/off without OTP while session active); non-members → Stripe Checkout; paid → perks placeholder. Identity is **email-only** (no member name)
 - Plans: **Founding** (capped one-time) while seats remain → then **Lifetime**; **Annual** always offered (short plan copy; seats remaining on Founding card)
 - Checkout return carries `session_id`; client activates membership (webhook backstop); strips `joined`/`session_id` from URL after success; cookie + plan are truth
 - Top banners: info (cream) / error (coral-dark); dismissible; form `noValidate` → banner field errors
@@ -87,8 +87,8 @@
 
 ### Members roster
 - Mail-session gated roster at **Members** (same Hover login as Webmail)
-- List / search by name or email; **plan** and **newsletter** filters are separate axes
-- Table shows plan, membership status, newsletter flag; **Annual** rows show anniversary date and next renewal
+- List / search by email; **plan** and **newsletter** filters are separate axes
+- Table shows email, plan, membership status, newsletter flag; **Annual** rows show anniversary date and next renewal (no name column)
 - Edit (modal + confirm) and delete (confirm dialog); mutations validated with Zod; API routes under `/api/admin/members`
 - Fail closed when `DATABASE_URL` is missing or Neon schema is unmigrated (503) — UI shows error state
 
@@ -117,7 +117,7 @@
 
 **Public feature switch (members-0023, epic `feat/members`):** One shared Edge Config store has three top-level JSON-object items: `production = { "members": false }`, `preview = { "members": false }`, and `development = { "members": false }`. Future flags are sibling booleans in each object. The app reads the item matching `VERCEL_ENV` (`development` when local/unset) via `@vercel/edge-config`; missing/unknown environment, bucket, key, invalid value, read failure, or unset `EDGE_CONFIG` fails closed to Off. **Staging** (`staging` branch) is a Vercel Preview deploy, so it reads the **`preview`** bucket — flip `preview` to demo Staging without changing Production. Flags are managed in the Vercel dashboard or by an external API — there is no Admin Console toggle or in-app write path, and the app needs only `EDGE_CONFIG`. **Production values are CEO/Admin-only; agents never flip Production.** CEO/Admin and agents may flip Preview/Development for testing and should restore Off afterward.
 
-**Platform (members-0001, epic `feat/members`):** Drizzle schema on Neon — orthogonal `newsletter_status` vs `membership_plan`; OTP challenges; unsub tokens; `stripe_webhook_events` for Join idempotency. Annual plans use `membership_anniversary` + `next_renewal_at` (null for Founding/Lifetime). Shared Zod in `src/lib/members/zod/`. `GET /api/members/health` fails closed (503) without `DATABASE_URL` (Stripe/Resend status informational). Migrate/seed: `npm run db:migrate`, `npm run db:seed` (seeds non-Production only). Schema notes: [`docs/members/schema.md`](../members/schema.md).
+**Platform (members-0001, epic `feat/members`):** Drizzle schema on Neon — orthogonal `newsletter_status` vs `membership_plan`; OTP challenges; unsub tokens; `stripe_webhook_events` for Join idempotency. Annual plans use `membership_anniversary` + `next_renewal_at` (null for Founding/Lifetime). Member identity is email-only (`members-0025` — no `name` column). Shared Zod in `src/lib/members/zod/`. `GET /api/members/health` fails closed (503) without `DATABASE_URL` (Stripe/Resend status informational). Migrate/seed: `npm run db:migrate`, `npm run db:seed` (seeds non-Production only). Schema notes: [`docs/members/schema.md`](../members/schema.md).
 
 **Newsletter (members-0003 / portal `members-0022`, epic `feat/members`):** Preference lives on `#membership` after email verify. First verify defaults newsletter **off** (CASL). Session toggle on/off requires no OTP. Token unsub `/?unsub=<token>#membership` (idempotent; newsletter off + verified session + toggle UI off; membership unchanged). ESP sync stub in `src/lib/members/esp.ts` — footer URL: [`docs/members/esp.md`](../members/esp.md). APIs: `POST /api/members/newsletter/preference` (session), legacy subscribe/confirm/unsub routes retained for tooling.
 
@@ -125,7 +125,7 @@
 
 **Member auth (members-0005 / portal `members-0022`, epic `feat/members`):** Email verify OTP (`purpose=email_verify`) upserts `members` and mints httpOnly `ccvaa_member_session` bound to Member ID UUID (plan may be `none`). 7-day TTL. Logout clears cookie only (does not touch Hover admin). APIs: `POST /api/members/verify/{start,verify}`, `POST /api/members/login/logout`. **Never grants `/admin`.**
 
-**Member profile (members-0006 / portal `members-0022`, epic `feat/members`):** Verified strip — Name debounced auto-save; email change requires `email_verify` OTP on the new address; Annual shows read-only anniversary / next renewal; paid members see perks placeholder (`members-0012`). APIs: `GET /api/members/profile`, `PATCH /api/members/profile/name`, `POST /api/members/profile/email/{start,verify}`.
+**Member profile (members-0006 / portal `members-0022`, epic `feat/members`; name removed `members-0025`):** Verified strip — email change requires `email_verify` OTP on the new address; Annual shows read-only anniversary / next renewal; paid members see perks placeholder (`members-0012`). APIs: `GET /api/members/profile`, `POST /api/members/profile/email/{start,verify}`.
 
 ---
 
@@ -164,6 +164,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-25 | **members-0025:** remove member Name everywhere — email-only identity (DB/session/APIs/UI/admin/Stripe metadata); drop `personNameSchema` + profile name PATCH |
 | 2026-07-25 | **agent-os-0003:** long-lived Staging = force-mirrored `main` → `https://ccvaa-web-git-staging-azang-projects.vercel.app`; Edge Config `preview`; Deployment Protection + Preview bypass |
 | 2026-07-25 | **public-homepage-0003:** sticky hero through membership; logged-out OTP+Sub/Join in Hero; `#membership`+nav after verify; glass/banners/copy polish; join return activates without waiting on webhook |
 | 2026-07-23 | **agent-os-0016:** main-safe increments — one ship lane; epic/milestone lane retired; Edge Config for public go-live; `agent-os-0003` closed |

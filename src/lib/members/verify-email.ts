@@ -28,7 +28,7 @@ import type { MembershipPlan } from "@/lib/members/zod/membership";
 
 /**
  * Starts email verification for the membership portal gate.
- * Does not upsert yet — name is held client-side until confirm.
+ * Does not upsert yet — member row is created on confirm.
  */
 export async function startEmailVerification(
   input: VerifyEmailStartInput | unknown,
@@ -68,7 +68,6 @@ export async function confirmEmailVerification(
 
   const parsed = verifyEmailConfirmInputSchema.parse(input);
   const email = parsed.email.trim().toLowerCase();
-  const name = parsed.name;
 
   await verifyDeliveredOtp({
     email,
@@ -76,12 +75,11 @@ export async function confirmEmailVerification(
     code: parsed.code,
   });
 
-  const member = await upsertVerifiedMember({ email, name });
+  const member = await upsertVerifiedMember({ email });
 
   const { token, expiresAt, payload } = createMemberSessionToken({
     memberId: member.id,
     email: member.email,
-    name: member.name,
     plan: member.membershipPlan,
   });
 
@@ -97,13 +95,9 @@ export async function confirmEmailVerification(
   };
 }
 
-async function upsertVerifiedMember(input: {
-  email: string;
-  name: string;
-}): Promise<{
+async function upsertVerifiedMember(input: { email: string }): Promise<{
   id: string;
   email: string;
-  name: string | null;
   membershipPlan: MembershipPlan;
 }> {
   return withMembersDbError(async () => {
@@ -112,7 +106,6 @@ async function upsertVerifiedMember(input: {
       .select({
         id: members.id,
         email: members.email,
-        name: members.name,
         membershipPlan: members.membershipPlan,
       })
       .from(members)
@@ -125,12 +118,11 @@ async function upsertVerifiedMember(input: {
     if (row) {
       await db
         .update(members)
-        .set({ name: input.name, updatedAt: now })
+        .set({ updatedAt: now })
         .where(eq(members.id, row.id));
       return {
         id: row.id,
         email: row.email,
-        name: input.name,
         membershipPlan: row.membershipPlan,
       };
     }
@@ -139,7 +131,6 @@ async function upsertVerifiedMember(input: {
       .insert(members)
       .values({
         email: input.email,
-        name: input.name,
         newsletterStatus: "off",
         membershipPlan: "none",
         membershipStatus: "none",
@@ -147,7 +138,6 @@ async function upsertVerifiedMember(input: {
       .returning({
         id: members.id,
         email: members.email,
-        name: members.name,
         membershipPlan: members.membershipPlan,
       });
 

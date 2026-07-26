@@ -332,7 +332,6 @@ export async function verifyJoinAndCreateCheckout(
     cancel_url: `${origin}/#membership`,
     metadata: {
       email,
-      name: parsed.name.trim(),
       plan: parsed.plan,
       newsletterOptIn: parsed.newsletterOptIn ? "true" : "false",
     },
@@ -398,7 +397,6 @@ export async function createJoinCheckoutForSession(
   }
 
   const email = session.email;
-  const name = (session.name ?? existing?.name ?? "").trim() || "Member";
   const origin = getAppOrigin(options?.requestOrigin);
   const stripe = getStripeClient();
   const priceId = priceIdForPlan(config, parsed.plan);
@@ -412,7 +410,6 @@ export async function createJoinCheckoutForSession(
     cancel_url: `${origin}/#membership`,
     metadata: {
       email,
-      name,
       plan: parsed.plan,
       newsletterOptIn: "false",
     },
@@ -499,7 +496,6 @@ export async function establishMemberSessionFromCheckout(
       .select({
         id: members.id,
         email: members.email,
-        name: members.name,
         membershipPlan: members.membershipPlan,
         membershipStatus: members.membershipStatus,
       })
@@ -549,7 +545,6 @@ export async function establishMemberSessionFromCheckout(
   const { token, expiresAt, payload } = createMemberSessionToken({
     memberId: member.id,
     email: member.email,
-    name: member.name,
     plan: member.membershipPlan,
   });
 
@@ -594,7 +589,6 @@ function rowsFromExecute(result: unknown): unknown[] {
  */
 async function activateFoundingMembership(params: {
   email: string;
-  name: string;
   stripeCustomerId: string | null;
   foundingCap: number;
 }): Promise<"activated" | "cap_full"> {
@@ -612,7 +606,6 @@ async function activateFoundingMembership(params: {
       )
       UPDATE members AS m
       SET
-        name = ${params.name},
         membership_plan = 'founding',
         membership_status = 'active',
         membership_anniversary = NULL,
@@ -636,7 +629,6 @@ async function activateFoundingMembership(params: {
     )
     INSERT INTO members (
       email,
-      name,
       membership_plan,
       membership_status,
       membership_anniversary,
@@ -648,7 +640,6 @@ async function activateFoundingMembership(params: {
     )
     SELECT
       ${params.email},
-      ${params.name},
       'founding',
       'active',
       NULL,
@@ -666,7 +657,6 @@ async function activateFoundingMembership(params: {
 
 async function activateNonFoundingMembership(params: {
   email: string;
-  name: string;
   plan: "lifetime" | "annual";
   stripeCustomerId: string | null;
   membershipAnniversary: string | null;
@@ -680,7 +670,6 @@ async function activateNonFoundingMembership(params: {
     await db
       .update(members)
       .set({
-        name: params.name,
         membershipPlan: params.plan,
         membershipStatus: "active",
         membershipAnniversary: params.membershipAnniversary,
@@ -694,7 +683,6 @@ async function activateNonFoundingMembership(params: {
 
   await db.insert(members).values({
     email: params.email,
-    name: params.name,
     membershipPlan: params.plan,
     membershipStatus: "active",
     membershipAnniversary: params.membershipAnniversary,
@@ -740,7 +728,6 @@ async function handleCheckoutSessionCompleted(
   const email = (session.metadata?.email ?? session.customer_email ?? "")
     .trim()
     .toLowerCase();
-  const name = (session.metadata?.name ?? "").trim() || "Member";
   const plan = session.metadata?.plan as JoinPlanId | undefined;
   const newsletterOptIn = session.metadata?.newsletterOptIn === "true";
 
@@ -762,7 +749,6 @@ async function handleCheckoutSessionCompleted(
   if (plan === "founding") {
     const result = await activateFoundingMembership({
       email,
-      name,
       stripeCustomerId,
       foundingCap: config.foundingCap,
     });
@@ -777,7 +763,6 @@ async function handleCheckoutSessionCompleted(
   } else if (plan === "lifetime") {
     await activateNonFoundingMembership({
       email,
-      name,
       plan: "lifetime",
       stripeCustomerId,
       membershipAnniversary: null,
@@ -819,7 +804,6 @@ async function handleCheckoutSessionCompleted(
 
     await activateNonFoundingMembership({
       email,
-      name,
       plan: "annual",
       stripeCustomerId,
       membershipAnniversary,
