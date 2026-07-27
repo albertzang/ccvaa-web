@@ -38,7 +38,7 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 5. Then `next`: `0010` links → `0009` go-live (CEO); `later`: `0011`–`0013`
 6. Portal redesign — `0022` (CEO kickoff when ready)
 
-**Ship lane:** First Members milestone **merged to `main`** 2026-07-18 (PR #8) via epic branch `feat/members` (historical). Pass 2 **ship confirmed**. **`members-0025`** Name removal shipped 2026-07-26 (PR #9). Remaining: `members-0009` (CEO go-live / Production flag), `0010` if still open, `0011`–`0013` later; **`members-0026`** Stripe identity by customer id; **`members-0024`** Annual cancel-at-period-end. **Future work:** main-safe increments per [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#main-safe-increments-required).
+**Ship lane:** First Members milestone **merged to `main`** 2026-07-18 (PR #8) via epic branch `feat/members` (historical). Pass 2 **ship confirmed**. **`members-0025`** Name removal (PR #9) and **`members-0026`** Stripe Customer ID binding (PR #10) shipped 2026-07-26. Remaining: `members-0009` (CEO go-live / Production flag), `0010` if still open, `0011`–`0013` later; **`members-0024`** Annual cancel-at-period-end. **Future work:** main-safe increments per [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#main-safe-increments-required).
 
 ---
 
@@ -76,36 +76,27 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 | Field | Value |
 |-------|--------|
 | **Type** | `task` |
-| **Priority** | `next` |
-| **Status** | `not-started` |
+| **Priority** | `now` |
+| **Status** | `completed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
 
 ### Description
 
-**Problem:** Our member PK is `members.id`; email is changeable. Stripe renewals bind to **Customer / Subscription IDs**, but join/webhook paths often resolve the member by **email**, and email changes in Neon are not pushed to Stripe. That does not stop charges by itself, but it drifts receipts and can break activation / event matching or create duplicate Stripe customers on a later checkout.
+**Problem:** Our member PK is `members.id`; email is changeable. Stripe renewals bind to **Customer / Subscription IDs**, but join/webhook paths often resolved the member by **email**, and email changes in Neon were not pushed to Stripe.
 
-**Do:**
-1. Treat `stripe_customer_id` (and subscription id when Annual — align with `members-0024`) as the billing link; prefer it over email for webhook ↔ member resolution
-2. On verified email change: update the Stripe Customer’s email (fail closed / clear error if Stripe update fails when a customer id exists)
-3. Session Join Checkout: reuse existing `stripe_customer_id` when present instead of only `customer_email`
-4. Join activation / `checkout.session.completed`: resolve member by customer id when possible; email metadata as fallback only
-5. Document identity model in `docs/members/schema.md` (or FEATURES): Neon email = login; Stripe Customer ID = billing
+**Shipped:** Billing binds to `stripe_customer_id`; Checkout reuses Stripe `customer`; activation/webhook prefer customer id; profile email OTP verify syncs Stripe Customer email first (fail closed). Neon email = login.
 
-**Acceptance (draft):**
-- [ ] Email change updates Stripe Customer email when `stripe_customer_id` is set
-- [ ] Webhook/activation can match paid member without relying solely on email
-- [ ] Second checkout for an existing paid/verified member with a customer id does not create a duplicate customer unnecessarily
-- [ ] Annual renewals still charge after an email change (test mode)
-- [ ] Preview Pass 1 + Production Pass 2
+### Overall
 
-**Out of scope:** Customer Portal UI; cancel-at-period-end UX (`0024`); removing Name (`0025`); live-key go-live (`0009`).
+- Shipped 2026-07-26: PR #10 merged (`654e8a8`); Pass 1 **merge**; CEO Preview **verified** email sync; Pass 2 **ship confirmed** (Members flag Off on Production — OK).
 
 ### Links
 
 - Source: CEO (2026-07-25)
 - Related: `members-0024` Annual cancel/renewal; `members-0004` Join/Stripe; profile email change
+- PR: https://github.com/albertzang/ccvaa-web/pull/10
 
 ---
 
