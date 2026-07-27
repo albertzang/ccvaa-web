@@ -225,6 +225,45 @@ async function findMemberByEmail(email: string) {
   return rows[0] ?? null;
 }
 
+async function findMemberByStripeCustomerId(stripeCustomerId: string) {
+  const db = getMembersDb();
+  const rows = await db
+    .select()
+    .from(members)
+    .where(eq(members.stripeCustomerId, stripeCustomerId))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+/**
+ * Prefer Stripe Customer ID for billing-linked resolution; email is login + fallback.
+ */
+async function resolveMemberForActivation(params: {
+  email: string;
+  stripeCustomerId: string | null;
+}) {
+  if (params.stripeCustomerId) {
+    const byCustomer = await findMemberByStripeCustomerId(
+      params.stripeCustomerId,
+    );
+    if (byCustomer) {
+      return byCustomer;
+    }
+  }
+  return findMemberByEmail(params.email);
+}
+
+/** Reuse existing Stripe Customer when bound; otherwise let Checkout create via email. */
+function checkoutCustomerFields(
+  email: string,
+  stripeCustomerId: string | null | undefined,
+): { customer: string } | { customer_email: string } {
+  if (stripeCustomerId) {
+    return { customer: stripeCustomerId };
+  }
+  return { customer_email: email };
+}
+
 function assertPlanOffered(plan: JoinPlanId, offers: JoinPlansResult): void {
   const match = offers.plans.find((p) => p.id === plan && p.available);
   if (!match) {
@@ -327,7 +366,7 @@ export async function verifyJoinAndCreateCheckout(
   const session = await stripe.checkout.sessions.create({
     mode,
     line_items: [{ price: priceId, quantity: 1 }],
-    customer_email: email,
+    ...checkoutCustomerFields(email, existing?.stripeCustomerId),
     success_url: `${origin}/?joined=1&session_id={CHECKOUT_SESSION_ID}#membership`,
     cancel_url: `${origin}/#membership`,
     metadata: {
@@ -405,7 +444,7 @@ export async function createJoinCheckoutForSession(
   const checkout = await stripe.checkout.sessions.create({
     mode,
     line_items: [{ price: priceId, quantity: 1 }],
-    customer_email: email,
+    ...checkoutCustomerFields(email, existing?.stripeCustomerId),
     success_url: `${origin}/?joined=1&session_id={CHECKOUT_SESSION_ID}#membership`,
     cancel_url: `${origin}/#membership`,
     metadata: {
@@ -482,7 +521,12 @@ export async function establishMemberSessionFromCheckout(
   const email = (checkout.metadata?.email ?? checkout.customer_email ?? "")
     .trim()
     .toLowerCase();
-  if (!email) {
+  const stripeCustomerId =
+    typeof checkout.customer === "string"
+      ? checkout.customer
+      : (checkout.customer?.id ?? null);
+
+  if (!email && !stripeCustomerId) {
     throw new MembersJoinError(
       "MEMBERS_JOIN_CHECKOUT_INVALID",
       "Checkout session is missing membership email metadata.",
@@ -492,6 +536,32 @@ export async function establishMemberSessionFromCheckout(
   const db = getMembersDb();
 
   const loadActivePaidMember = async () => {
+    if (stripeCustomerId) {
+      const byCustomer = await db
+        .select({
+          id: members.id,
+          email: members.email,
+          membershipPlan: members.membershipPlan,
+          membershipStatus: members.membershipStatus,
+        })
+        .from(members)
+        .where(
+          and(
+            eq(members.stripeCustomerId, stripeCustomerId),
+            eq(members.membershipStatus, "active"),
+            ne(members.membershipPlan, "none"),
+          ),
+        )
+        .limit(1);
+      if (byCustomer[0]) {
+        return byCustomer[0];
+      }
+    }
+
+    if (!email) {
+      return null;
+    }
+
     const rows = await db
       .select({
         id: members.id,
@@ -594,7 +664,10 @@ async function activateFoundingMembership(params: {
 }): Promise<"activated" | "cap_full"> {
   const db = getMembersDb();
   const now = new Date();
-  const existing = await findMemberByEmail(params.email);
+  const existing = await resolveMemberForActivation({
+    email: params.email,
+    stripeCustomerId: params.stripeCustomerId,
+  });
 
   if (existing) {
     const claimed = await db.execute(sql`
@@ -664,7 +737,10 @@ async function activateNonFoundingMembership(params: {
 }): Promise<void> {
   const db = getMembersDb();
   const now = new Date();
-  const existing = await findMemberByEmail(params.email);
+  const existing = await resolveMemberForActivation({
+    email: params.email,
+    stripeCustomerId: params.stripeCustomerId,
+  });
 
   if (existing) {
     await db
@@ -725,12 +801,17 @@ async function handleCheckoutSessionCompleted(
   session: Stripe.Checkout.Session,
 ): Promise<void> {
   const config = requireStripeJoinConfig();
+  const stripeCustomerId =
+    typeof session.customer === "string"
+      ? session.customer
+      : (session.customer?.id ?? null);
   const email = (session.metadata?.email ?? session.customer_email ?? "")
     .trim()
     .toLowerCase();
   const plan = session.metadata?.plan as JoinPlanId | undefined;
   const newsletterOptIn = session.metadata?.newsletterOptIn === "true";
 
+  // Prefer customer-id resolution later; email still required for insert / newsletter.
   if (!email || !plan || !["founding", "lifetime", "annual"].includes(plan)) {
     throw new MembersDbError(
       "Stripe checkout session missing email/plan metadata.",
@@ -740,11 +821,6 @@ async function handleCheckoutSessionCompleted(
   if (session.payment_status && session.payment_status !== "paid") {
     return;
   }
-
-  const stripeCustomerId =
-    typeof session.customer === "string"
-      ? session.customer
-      : (session.customer?.id ?? null);
 
   if (plan === "founding") {
     const result = await activateFoundingMembership({

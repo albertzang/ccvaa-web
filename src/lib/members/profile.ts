@@ -13,6 +13,7 @@ import {
   toPublicMemberSession,
   type MemberSessionPayload,
 } from "@/lib/members/session";
+import { getStripeClient } from "@/lib/members/stripe";
 import type { MembershipPlan } from "@/lib/members/zod/membership";
 import type { NewsletterStatus } from "@/lib/members/zod/newsletter";
 import {
@@ -34,7 +35,8 @@ export class MembersProfileError extends Error {
     | "MEMBERS_PROFILE_UNAVAILABLE"
     | "MEMBERS_PROFILE_NOT_FOUND"
     | "MEMBERS_PROFILE_EMAIL_TAKEN"
-    | "MEMBERS_PROFILE_SAME_EMAIL";
+    | "MEMBERS_PROFILE_SAME_EMAIL"
+    | "MEMBERS_PROFILE_STRIPE_EMAIL_SYNC_FAILED";
 
   constructor(
     code: MembersProfileError["code"],
@@ -112,6 +114,7 @@ async function loadMemberById(memberId: string) {
         newsletterStatus: members.newsletterStatus,
         membershipAnniversary: members.membershipAnniversary,
         nextRenewalAt: members.nextRenewalAt,
+        stripeCustomerId: members.stripeCustomerId,
       })
       .from(members)
       .where(eq(members.id, memberId))
@@ -120,6 +123,29 @@ async function loadMemberById(memberId: string) {
     return rows[0] ?? null;
   } catch (error) {
     throw new MembersDbError("Failed to load member profile.", { cause: error });
+  }
+}
+
+/**
+ * When the member has a Stripe Customer ID, billing email must track login email.
+ * Fail closed: do not change Neon email if Stripe update fails or Stripe is unavailable.
+ */
+async function syncStripeCustomerEmail(
+  stripeCustomerId: string,
+  newEmail: string,
+): Promise<void> {
+  try {
+    const stripe = getStripeClient();
+    await stripe.customers.update(stripeCustomerId, { email: newEmail });
+  } catch (error) {
+    if (isMembersProfileError(error)) {
+      throw error;
+    }
+    throw new MembersProfileError(
+      "MEMBERS_PROFILE_STRIPE_EMAIL_SYNC_FAILED",
+      "Could not update your billing email with Stripe. Your login email was not changed. Try again later.",
+      { cause: error },
+    );
   }
 }
 
@@ -261,6 +287,10 @@ export async function verifyMemberProfileEmailChange(
   });
 
   await assertEmailAvailable(newEmail, session.memberId);
+
+  if (row.stripeCustomerId) {
+    await syncStripeCustomerEmail(row.stripeCustomerId, newEmail);
+  }
 
   const db = getMembersDb();
   try {
