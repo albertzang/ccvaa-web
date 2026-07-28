@@ -238,9 +238,18 @@ async function resolveMemberForActivation(params: {
 function checkoutCustomerFields(
   email: string,
   stripeCustomerId: string | null | undefined,
-): { customer: string } | { customer_email: string } {
+  mode: "payment" | "subscription",
+):
+  | { customer: string }
+  | { customer_email: string; customer_creation?: "always" } {
   if (stripeCustomerId) {
     return { customer: stripeCustomerId };
+  }
+  // Payment-mode Checkout defaults to customer_creation: if_required and often
+  // leaves session.customer null — then stripe_customer_id never persists and
+  // Manage billing fails. Force a Customer for Founding/Lifetime one-time pays.
+  if (mode === "payment") {
+    return { customer_email: email, customer_creation: "always" };
   }
   return { customer_email: email };
 }
@@ -339,7 +348,7 @@ export async function verifyJoinAndCreateCheckout(
   const session = await stripe.checkout.sessions.create({
     mode,
     line_items: [{ price: priceId, quantity: 1 }],
-    ...checkoutCustomerFields(email, existing?.stripeCustomerId),
+    ...checkoutCustomerFields(email, existing?.stripeCustomerId, mode),
     success_url: `${origin}/?joined=1&session_id={CHECKOUT_SESSION_ID}#membership`,
     cancel_url: `${origin}/#membership`,
     metadata: {
@@ -405,7 +414,7 @@ export async function createJoinCheckoutForSession(
   const checkout = await stripe.checkout.sessions.create({
     mode,
     line_items: [{ price: priceId, quantity: 1 }],
-    ...checkoutCustomerFields(email, existing?.stripeCustomerId),
+    ...checkoutCustomerFields(email, existing?.stripeCustomerId, mode),
     success_url: `${origin}/?joined=1&session_id={CHECKOUT_SESSION_ID}#membership`,
     cancel_url: `${origin}/#membership`,
     metadata: {
