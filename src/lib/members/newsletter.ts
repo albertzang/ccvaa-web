@@ -1,11 +1,7 @@
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 import { getMembersDb } from "@/db/client";
-import { members, unsubTokens } from "@/db/schema";
-import {
-  sendNewsletterConfirmOtp,
-  verifyNewsletterConfirmOtp,
-} from "@/lib/members/confirm";
+import { members } from "@/db/schema";
 import { generateUnsubToken } from "@/lib/members/crypto";
 import {
   MembersDbError,
@@ -13,33 +9,18 @@ import {
 } from "@/lib/members/errors";
 import { syncNewsletterToEsp } from "@/lib/members/esp";
 import {
-  isResendConfigured,
-  MembersEmailError,
-} from "@/lib/members/resend";
+  getCurrentMembership,
+  sessionPlanFromMembership,
+} from "@/lib/members/memberships";
 import type { MemberSessionPayload } from "@/lib/members/session";
 import type { MembershipPlan } from "@/lib/members/zod/membership";
 import {
-  newsletterConfirmInputSchema,
   newsletterLookupInputSchema,
   newsletterSessionPreferenceSchema,
-  newsletterSubscribeInputSchema,
   newsletterUnsubscribeInputSchema,
   type NewsletterPreference,
-  type NewsletterSubscribeInput,
 } from "@/lib/members/zod/newsletter";
 import { unsubTokenRedeemInputSchema } from "@/lib/members/zod/unsub-token";
-
-export type NewsletterSubscribeResult = {
-  email: string;
-  status: "pending";
-  message: string;
-};
-
-export type NewsletterConfirmResult = {
-  email: string;
-  status: "on";
-  message: string;
-};
 
 export type NewsletterUnsubscribeOutcome =
   | "unsubscribed"
@@ -83,73 +64,37 @@ async function findMemberByEmail(email: string) {
   }, "Failed to look up newsletter preference.");
 }
 
-async function upsertMemberForNewsletter(email: string): Promise<string> {
-  return withMembersDbError(async () => {
-    const db = getMembersDb();
-    const existing = await findMemberByEmail(email);
-
-    if (existing) {
-      await db
-        .update(members)
-        .set({
-          newsletterStatus: "pending",
-          newsletterConfirmedAt: null,
-          updatedAt: new Date(),
-        })
-        .where(eq(members.id, existing.id));
-      return existing.id;
-    }
-
-    const inserted = await db
-      .insert(members)
-      .values({
-        email,
-        newsletterStatus: "pending",
-      })
-      .returning({ id: members.id });
-
-    const row = inserted[0];
-    if (!row) {
-      throw new MembersDbError("Failed to create member record for newsletter.");
-    }
-    return row.id;
-  }, "Failed to update newsletter subscription.");
-}
-
+/** Ensures a lifelong unsub token on the member row; returns the token. */
 async function ensureUnsubToken(memberId: string): Promise<string> {
   return withMembersDbError(async () => {
     const db = getMembersDb();
     const existing = await db
-      .select({ token: unsubTokens.token })
-      .from(unsubTokens)
-      .where(
-        and(eq(unsubTokens.memberId, memberId), isNull(unsubTokens.usedAt)),
-      )
+      .select({ unsubToken: members.unsubToken })
+      .from(members)
+      .where(eq(members.id, memberId))
       .limit(1);
 
-    if (existing[0]) {
-      return existing[0].token;
+    const current = existing[0]?.unsubToken;
+    if (current) {
+      return current;
     }
 
     const token = generateUnsubToken();
-    await db.insert(unsubTokens).values({ memberId, token });
+    await db
+      .update(members)
+      .set({ unsubToken: token, updatedAt: new Date() })
+      .where(eq(members.id, memberId));
     return token;
   }, "Failed to create newsletter unsubscribe token.");
 }
 
 function toNewsletterPreference(
-  row: Pick<
-    typeof members.$inferSelect,
-    "newsletterStatus" | "newsletterConfirmedAt"
-  >,
+  status: "off" | "on",
 ): NewsletterPreference {
-  return {
-    status: row.newsletterStatus,
-    confirmedAt: row.newsletterConfirmedAt,
-  };
+  return { status };
 }
 
-/** Counts confirmed newsletter subscribers (`status = on`). Pending does not count. */
+/** Counts confirmed newsletter subscribers (`status = on`). */
 export async function countNewsletterSubscribers(): Promise<number> {
   return withMembersDbError(async () => {
     const db = getMembersDb();
@@ -159,77 +104,6 @@ export async function countNewsletterSubscribers(): Promise<number> {
       .where(eq(members.newsletterStatus, "on"));
     return rows[0]?.count ?? 0;
   }, "Failed to count newsletter subscribers.");
-}
-
-/** Starts double opt-in: upserts member as pending and sends confirm OTP via Resend. */
-export async function subscribeToNewsletter(
-  input: NewsletterSubscribeInput,
-): Promise<NewsletterSubscribeResult> {
-  const parsed = newsletterSubscribeInputSchema.parse(input);
-  const email = parsed.email.trim().toLowerCase();
-
-  if (!isResendConfigured()) {
-    throw new MembersEmailError(
-      "MEMBERS_EMAIL_UNAVAILABLE",
-      "RESEND_API_KEY / RESEND_FROM_EMAIL are not configured. Newsletter subscribe is unavailable.",
-    );
-  }
-
-  const member = await findMemberByEmail(email);
-  if (member?.newsletterStatus === "on") {
-    throw new MembersNewsletterError(
-      "MEMBERS_NEWSLETTER_ALREADY_SUBSCRIBED",
-      "This email is already subscribed to our newsletter. Use Unsubscribe if you want to leave the list.",
-    );
-  }
-
-  await upsertMemberForNewsletter(email);
-  await sendNewsletterConfirmOtp(email);
-
-  return {
-    email,
-    status: "pending",
-    message:
-      "Check your email for a 6-digit confirmation code. You are not subscribed until you confirm.",
-  };
-}
-
-/** Confirms double opt-in OTP and activates newsletter preference. */
-export async function confirmNewsletterSubscription(
-  input: unknown,
-): Promise<NewsletterConfirmResult> {
-  const parsed = newsletterConfirmInputSchema.parse(input);
-  const email = parsed.email.trim().toLowerCase();
-
-  await verifyNewsletterConfirmOtp({ email, code: parsed.code });
-
-  const member = await findMemberByEmail(email);
-  if (!member) {
-    throw new MembersDbError("Member record not found after OTP verification.");
-  }
-
-  const now = new Date();
-  await withMembersDbError(async () => {
-    const db = getMembersDb();
-    await db
-      .update(members)
-      .set({
-        newsletterStatus: "on",
-        newsletterConfirmedAt: now,
-        updatedAt: now,
-      })
-      .where(eq(members.id, member.id));
-  }, "Failed to confirm newsletter subscription.");
-
-  await ensureUnsubToken(member.id);
-  await syncNewsletterToEsp({ email, status: "on" });
-
-  return {
-    email,
-    status: "on",
-    message:
-      "You are subscribed to the CCVAA newsletter.",
-  };
 }
 
 /** Returns newsletter preference for an email (manage flow). */
@@ -243,13 +117,13 @@ export async function lookupNewsletterPreference(
   if (!member) {
     return {
       email,
-      preference: { status: "off", confirmedAt: null },
+      preference: { status: "off" },
     };
   }
 
   return {
     email,
-    preference: toNewsletterPreference(member),
+    preference: toNewsletterPreference(member.newsletterStatus),
   };
 }
 
@@ -312,7 +186,7 @@ export async function unsubscribeFromNewsletter(
 
 /**
  * Session-authenticated newsletter on/off. No OTP while the verified session is active.
- * Turning on sets confirmedAt (CASL consent via verified email). Never changes membership.
+ * Never changes membership.
  */
 export async function updateNewsletterPreferenceForSession(
   session: MemberSessionPayload,
@@ -342,7 +216,6 @@ export async function updateNewsletterPreferenceForSession(
         .update(members)
         .set({
           newsletterStatus: "on",
-          newsletterConfirmedAt: member.newsletterConfirmedAt ?? now,
           updatedAt: now,
         })
         .where(eq(members.id, member.id));
@@ -354,10 +227,7 @@ export async function updateNewsletterPreferenceForSession(
     return {
       email: member.email,
       status: "on",
-      preference: {
-        status: "on",
-        confirmedAt: member.newsletterConfirmedAt ?? now,
-      },
+      preference: { status: "on" },
       membershipUnchanged: true,
       message:
         "You are subscribed to the CCVAA newsletter.",
@@ -380,10 +250,7 @@ export async function updateNewsletterPreferenceForSession(
   return {
     email: member.email,
     status: "off",
-    preference: {
-      status: "off",
-      confirmedAt: member.newsletterConfirmedAt,
-    },
+    preference: { status: "off" },
     membershipUnchanged: true,
     message:
       "You are unsubscribed from the CCVAA newsletter.",
@@ -391,9 +258,8 @@ export async function updateNewsletterPreferenceForSession(
 }
 
 /**
- * Redeems a tokenized unsubscribe link (`/?unsub=<token>#membership`).
+ * Redeems a lifelong unsubscribe token (`/?unsub=<token>#membership`).
  * Idempotent — safe to reload. Never changes membership.
- * Returns member identity so the page can establish a verified session.
  */
 export async function redeemUnsubToken(
   input: unknown,
@@ -404,16 +270,12 @@ export async function redeemUnsubToken(
     const db = getMembersDb();
     const tokenRows = await db
       .select({
-        tokenId: unsubTokens.id,
-        usedAt: unsubTokens.usedAt,
-        memberId: unsubTokens.memberId,
+        memberId: members.id,
         email: members.email,
-        membershipPlan: members.membershipPlan,
         newsletterStatus: members.newsletterStatus,
       })
-      .from(unsubTokens)
-      .innerJoin(members, eq(unsubTokens.memberId, members.id))
-      .where(eq(unsubTokens.token, parsed.token))
+      .from(members)
+      .where(eq(members.unsubToken, parsed.token))
       .limit(1);
     return tokenRows[0] ?? null;
   }, "Failed to redeem newsletter unsubscribe token.");
@@ -439,15 +301,7 @@ export async function redeemUnsubToken(
     await syncNewsletterToEsp({ email: row.email, status: "off" });
   }
 
-  if (!row.usedAt) {
-    await withMembersDbError(async () => {
-      const db = getMembersDb();
-      await db
-        .update(unsubTokens)
-        .set({ usedAt: now })
-        .where(eq(unsubTokens.id, row.tokenId));
-    }, "Failed to mark unsubscribe token used.");
-  }
+  const current = await getCurrentMembership(row.memberId);
 
   return {
     email: row.email,
@@ -455,13 +309,13 @@ export async function redeemUnsubToken(
     alreadyUnsubscribed: alreadyOff,
     membershipUnchanged: true,
     memberId: row.memberId,
-    plan: row.membershipPlan,
+    plan: sessionPlanFromMembership(current),
   };
 }
 
 /**
  * Activates newsletter after an already-verified email (e.g. Join metadata).
- * Does not send a second confirm mail.
+ * Does not send a confirm mail.
  */
 export async function activateNewsletterFromVerifiedEmail(
   email: string,
@@ -479,7 +333,6 @@ export async function activateNewsletterFromVerifiedEmail(
       .update(members)
       .set({
         newsletterStatus: "on",
-        newsletterConfirmedAt: now,
         updatedAt: now,
       })
       .where(eq(members.id, member.id));
@@ -490,9 +343,7 @@ export async function activateNewsletterFromVerifiedEmail(
 }
 
 export class MembersNewsletterError extends Error {
-  readonly code:
-    | "MEMBERS_UNSUB_INVALID"
-    | "MEMBERS_NEWSLETTER_ALREADY_SUBSCRIBED";
+  readonly code: "MEMBERS_UNSUB_INVALID";
 
   constructor(code: MembersNewsletterError["code"], message: string) {
     super(message);

@@ -13,10 +13,6 @@ import {
   MembersJoinError,
 } from "@/lib/members/join";
 import {
-  isMembersLoginError,
-  MembersLoginError,
-} from "@/lib/members/login";
-import {
   isMembersNewsletterError,
   MembersNewsletterError,
 } from "@/lib/members/newsletter";
@@ -129,7 +125,7 @@ export function handleMembersApiError(error: unknown) {
     isMembersNewsletterError(error)
   ) {
     const status =
-      error.code === "MEMBERS_NEWSLETTER_ALREADY_SUBSCRIBED" ? 409 : 400;
+      error.code === "MEMBERS_UNSUB_INVALID" ? 400 : 400;
     return membersApiError(error.code, error.message, status);
   }
 
@@ -147,15 +143,6 @@ export function handleMembersApiError(error: unknown) {
               : error.code === "MEMBERS_JOIN_ACTIVATION_FAILED"
                 ? 409
                 : 502;
-    return membersApiError(error.code, error.message, status);
-  }
-
-  if (
-    error instanceof MembersLoginError ||
-    isMembersLoginError(error)
-  ) {
-    const status =
-      error.code === "MEMBERS_LOGIN_NOT_ELIGIBLE" ? 404 : 503;
     return membersApiError(error.code, error.message, status);
   }
 

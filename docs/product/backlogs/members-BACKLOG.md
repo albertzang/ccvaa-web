@@ -13,10 +13,10 @@ Two **orthogonal** axes (not one ladder of plans):
 
 | Axis | What it is | Plans / states | Primary UI |
 |------|------------|----------------|------------|
-| **Newsletter** | Mailing-list opt-in | On / off (verified-session toggle; default off on first verify) | `#membership` |
-| **Membership** | Paid association (Stripe) | Founding · Lifetime · Annual · none | `#membership` |
+| **Newsletter** | Mailing-list opt-in | On / off only (verified-session toggle; default off). Pruned mid-state in `members-0024`. | `#membership` |
+| **Membership** | Paid association (Stripe) | Founding · Lifetime · Annual as rows in **`memberships`** (`members-0024`); UI shows **current** only | `#membership` |
 
-**Membership plans:** Founding (one-time, capped, lifetime) → after cap, Join shows Lifetime (one-time, fee always higher than Founding) instead of Founding; Annual (yearly recurring) always offered alongside. Annual stores anniversary / next renewal from Stripe. Auth: email OTP (not admin Hover); no OAuth/passwords.
+**Membership plans:** Founding (one-time, capped) → after cap, Join shows Lifetime (one-time, fee > Founding); Annual (yearly recurring) always offered. Periods live on **`memberships`** (Stripe subscription id for Annual; Customer id on `members`). Auth: email OTP (not admin Hover); no OAuth/passwords.
 
 **`#membership`:** after Hero, before About. Unverified → identity/OTP strip + glass gate. Verified → email strip + newsletter toggle + Join Checkout or perks placeholder. Contact is inquiry-only. **Member display/legal name:** none — email is the public identity (`members-0025`); shipping/receipts collect name later if ever needed.
 
@@ -38,7 +38,7 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 5. Then `next`: `0010` links → `0009` go-live (CEO); `later`: `0011`–`0013`
 6. Portal redesign — `0022` (CEO kickoff when ready)
 
-**Ship lane:** First Members milestone **merged to `main`** 2026-07-18 (PR #8) via epic branch `feat/members` (historical). Pass 2 **ship confirmed**. **`members-0025`** Name removal (PR #9) and **`members-0026`** Stripe Customer ID binding (PR #10) shipped 2026-07-26. Remaining: `members-0009` (CEO go-live / Production flag), `0010` if still open, `0011`–`0013` later; **`members-0024`** Annual cancel-at-period-end. **Future work:** main-safe increments per [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#main-safe-increments-required).
+**Ship lane:** First Members milestone **merged to `main`** 2026-07-18 (PR #8) via epic branch `feat/members` (historical). Pass 2 **ship confirmed**. **`members-0025`** Name removal (PR #9) and **`members-0026`** Stripe Customer ID binding (PR #10) shipped 2026-07-26. Remaining: `members-0009` (CEO go-live / Production flag), `0010` if still open, `0011`–`0013` later; **`members-0024`** memberships table + Stripe Customer portal + newsletter/OTP prune (not started). **Future work:** main-safe increments per [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#main-safe-increments-required).
 
 ---
 
@@ -144,41 +144,126 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 
 ---
 
-## members-0024 — Annual: cancel next renewal (keep access until period end)
+## members-0024 — Memberships table + Stripe Customer portal + newsletter/OTP prune
 
 | Field | Value |
 |-------|--------|
 | **Type** | `task` |
-| **Priority** | `next` |
-| **Status** | `not-started` |
+| **Priority** | `now` |
+| **Status** | `in-progress` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
 
 ### Description
 
-Logged-in **Annual** members can stop the next auto-charge while keeping membership until the current period ends (`cancel_at_period_end`), from the `#membership` paid profile (not Founding/Lifetime).
+Pre-Production hard-delete OK. Kicked off 2026-07-27 (CEO).
 
-**Recommended approach (in-app, not Stripe Customer Portal):**
-1. Persist Stripe **subscription id** on the member (or resolve reliably from `stripe_customer_id`) at Join activation
-2. Session APIs: schedule cancel / resume renewal (undo before period end)
-3. Logged-in UI: show next renewal; primary action **Cancel renewal**; when scheduled, show **Access until &lt;date&gt; — won’t renew** + **Keep membership**
-4. Webhooks: `customer.subscription.updated` / `deleted` (and period end) sync DB — when access ends, membership becomes non-paid (`cancelled` / `none` per existing model); newsletter unchanged
-5. Fail closed without Stripe/session; Annual-only
+**Goals:** (1) Paid history in `memberships`, identity/newsletter on `members`. (2) **Stripe Customer portal** (`billingPortal.sessions`) for any member with `stripe_customer_id` (invoices/history; Annual cancel/renew in portal) — no in-app cancel/resume. (3) Prune newsletter mid-state, OTP purpose, and `unsub_tokens`.
 
-**Acceptance (draft):**
-- [ ] Annual member can cancel next auto-charge; access remains until `next_renewal_at` / Stripe period end
-- [ ] UI reflects scheduled cancel; member can resume before period end
-- [ ] After period end (webhook), Join/perks state matches non-paid; no further charges
-- [ ] Founding / Lifetime: no cancel-renewal controls
-- [ ] Preview Pass 1 + Production Pass 2 with Stripe test mode
+**Product rules:**
+- UI = **current** membership only; no history list; no “Member since”
+- Copy: **Annual until {current_period_end}** / **Lifetime** / **Founding** (+ won’t-renew / past_due from Neon)
+- **Manage billing** → Stripe Customer portal when `members.stripe_customer_id` is set (any paid member: Annual, Founding, Lifetime, incl. ex-Annual). Invoices/receipts/history live on the Customer; Annual cancel/renew still only in portal
+- Newsletter-only (no Customer yet): **no** portal button
+- `past_due`: perks **off**; no Join; portal is the fix path
+- `cancelled` / no paid row: Join (new `sub_…` + new `memberships` row)
+- Stripe = billing SoT; Neon = read cache (Checkout + subscription webhooks). No Stripe on every page load
 
-**Out of scope:** Stripe Customer Portal; payment-method / invoice history UI; refunds; Founding/Lifetime “cancel”; admin-initiated cancels (roster already separate).
+#### A) Schema — `memberships` + prune
+
+**`members` keeps:** `id`, `email`, `newsletter_status` (`off`\|`on`), `unsub_token` (nullable unique, lifelong), `stripe_customer_id`, timestamps.  
+**Drop from `members`:** all membership_* columns, `newsletter_confirmed_at`, `pending`.
+
+**`memberships` (new):** `id`, `member_id` (FK), `plan` (`founding`\|`lifetime`\|`annual`), `status` (`active`\|`past_due`\|`cancelled`), `stripe_subscription_id` (Annual; null one-time), `current_period_end`, `cancel_at_period_end` (webhook mirror only), `created_at`, `updated_at`. ≤1 `active`/`past_due` per member.
+
+**`otp_challenges`:** drop `purpose` / `otp_purpose` enum.  
+**Drop table `unsub_tokens`.**  
+**`stripe_webhook_events`:** unchanged.
+
+**Also remove:** legacy newsletter subscribe/confirm OTP paths; `/api/members/login/start` + `verify` (keep logout/session). Live OTP = gate + profile email-change only.
+
+#### B) Stripe Customer portal (any member with `stripe_customer_id`)
+
+1. API: `billingPortal.sessions.create` for `stripe_customer_id`, return → `/#membership`; fail closed if missing customer / Stripe down
+2. UI: **Manage billing** whenever the member has a Stripe Customer (Founding / Lifetime / Annual, including ex-Annual now on one-time plans) — invoices, receipts, and prior Annual history
+3. Portal (Stripe-hosted): payment method, invoices; for **current Annual** also cancel/renew at period end (configure in Dashboard)
+4. Webhooks sync Neon so Annual copy (`past_due`, won’t-renew, cancelled) stays correct after return
+5. No portal for newsletter-only (no `stripe_customer_id` yet)
+6. Document Stripe Dashboard Customer portal settings (test now; live at go-live)
+
+#### C) App rewires
+
+Join activation / subscription webhooks → write `memberships`. Profile, Join CTA, admin roster, paid counts, perks gating → **current** row (`active` = perks on; `past_due`/`cancelled`/none = perks off). Unsub redeem → `members.unsub_token`. Update FEATURES + `docs/members/schema.md`.
+
+### Target schema (after ship)
+
+**Enums:** `newsletter_status(off, on)` · `membership_plan(founding, lifetime, annual)` · `membership_status(active, past_due, cancelled)` · *(no `otp_purpose`)*
+
+#### `members`
+| Column | Notes |
+|--------|--------|
+| `id` | UUID PK |
+| `email` | unique login |
+| `newsletter_status` | `off` \| `on` |
+| `unsub_token` | nullable unique, lifelong |
+| `stripe_customer_id` | durable `cus_…` |
+| `created_at` / `updated_at` | |
+
+#### `memberships`
+| Column | Notes |
+|--------|--------|
+| `id` | UUID PK |
+| `member_id` | FK → `members` |
+| `plan` | founding \| lifetime \| annual |
+| `status` | active \| past_due \| cancelled |
+| `stripe_subscription_id` | Annual; null for one-time |
+| `current_period_end` | timestamptz; null for Founding/Lifetime |
+| `cancel_at_period_end` | bool; webhook mirror |
+| `created_at` / `updated_at` | |
+
+#### `otp_challenges`
+| Column | Notes |
+|--------|--------|
+| `id`, `email`, `code_hash`, `expires_at`, `attempt_count`, `consumed_at`, `created_at` | no `purpose` |
+
+#### `stripe_webhook_events`
+| Column | Notes |
+|--------|--------|
+| `id`, `type`, `processed_at` | unchanged |
+
+**Removed:** `unsub_tokens`; membership columns / `newsletter_confirmed_at` / `pending` on `members`; `otp_challenges.purpose`.
+
+### Dev action plan
+
+1. Migration(s): create `memberships`; alter `members` / `otp_challenges`; drop `unsub_tokens` + obsolete enums/columns; backfill not required (pre-prod)
+2. Rewire Join + Stripe subscription webhooks → `memberships`; thin portal-session API
+3. Logged-in UI: plan copy + **Manage billing** if `stripe_customer_id`; `past_due` perks off; no in-app cancel
+4. Newsletter/OTP/unsub prune; admin roster/counts use current membership
+5. Docs (schema.md, FEATURES); Stripe Customer portal config notes for CEO
+6. PR → Pass 1 Preview → merge → Pass 2 Production
+
+### Acceptance
+
+- [ ] Target schema + docs
+- [ ] Annual until {date} / Lifetime / Founding; no Member since; no history UI
+- [ ] Manage billing (Customer portal) whenever `stripe_customer_id` set — Annual, Founding, Lifetime (test); no in-app cancel/resume
+- [ ] Newsletter-only: no portal button
+- [ ] past_due: perks off; no Join; portal path works
+- [ ] Webhooks keep Neon in sync after portal actions
+- [ ] Newsletter/OTP/unsub prune complete
+- [ ] Pass 1 + Pass 2
+
+### Out of scope
+
+In-app Annual cancel/resume; member-facing membership history UI; Member since; in-app invoice browser (portal covers receipts); refunds; admin cancels; ESP go-live (`0009`); consent/email-change audit logs.
 
 ### Links
 
-- Source: CEO (2026-07-25)
-- Related: `members-0004` Join/Stripe; `members-0006` / `0022` profile renewal display; `members-0012` perks
+- Source: CEO (2026-07-25…27; Customer portal–first Annual)
+- Related: `members-0004`, `members-0012`, `members-0026`, newsletter `0003`/`0015`
+- Dev handoff: `docs/handoffs/HANDOFF-DEV.md`
+- Overall: Kicked off 2026-07-27 — feature branch + Pass 1/2
 
 ---
 

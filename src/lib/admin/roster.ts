@@ -1,18 +1,30 @@
-import { and, asc, count, desc, eq, ilike, type SQL } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  ilike,
+  inArray,
+  isNull,
+  type SQL,
+} from "drizzle-orm";
 
 import { getMembersDb } from "@/db/client";
-import { members } from "@/db/schema";
+import { members, memberships } from "@/db/schema";
 import { withMembersDbError } from "@/lib/members/errors";
 import { requireDatabaseUrl } from "@/lib/members/env";
 import {
-  assertAnnualRenewalConsistency,
-  type MembershipPlan,
-} from "@/lib/members/zod/membership";
+  cancelCurrentMemberships,
+  getCurrentMembership,
+  upsertCurrentMembership,
+} from "@/lib/members/memberships";
 import {
   adminRosterListQuerySchema,
   adminRosterUpdateSchema,
   type AdminRosterMember,
 } from "@/lib/members/zod/admin-roster";
+import type { PaidMembershipPlan } from "@/lib/members/zod/membership";
 
 export class AdminRosterError extends Error {
   readonly code: "ADMIN_ROSTER_NOT_FOUND" | "ADMIN_ROSTER_INVALID";
@@ -43,33 +55,36 @@ export function isAdminRosterError(error: unknown): error is AdminRosterError {
   );
 }
 
-function formatAnniversary(value: string | Date | null): string | null {
-  if (value === null) {
-    return null;
-  }
-  if (value instanceof Date) {
-    return value.toISOString().slice(0, 10);
-  }
-  return value;
-}
-
 function formatTimestamp(value: Date | null): string | null {
   return value ? value.toISOString() : null;
 }
 
-function rowToRosterMember(row: typeof members.$inferSelect): AdminRosterMember {
-  const isAnnual = row.membershipPlan === "annual";
+type RosterRow = {
+  id: string;
+  email: string;
+  newsletterStatus: "off" | "on";
+  stripeCustomerId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  membershipPlan: PaidMembershipPlan | null;
+  membershipStatus: "active" | "past_due" | "cancelled" | null;
+  currentPeriodEnd: Date | null;
+  cancelAtPeriodEnd: boolean | null;
+};
+
+function rowToRosterMember(row: RosterRow): AdminRosterMember {
+  const plan = row.membershipPlan ?? "none";
+  const status = row.membershipStatus ?? "none";
   return {
     id: row.id,
     email: row.email,
     newsletterStatus: row.newsletterStatus,
-    newsletterConfirmedAt: formatTimestamp(row.newsletterConfirmedAt),
-    membershipPlan: row.membershipPlan,
-    membershipStatus: row.membershipStatus,
-    membershipAnniversary: isAnnual
-      ? formatAnniversary(row.membershipAnniversary)
-      : null,
-    nextRenewalAt: isAnnual ? formatTimestamp(row.nextRenewalAt) : null,
+    membershipPlan: plan,
+    membershipStatus: status,
+    currentPeriodEnd:
+      plan === "annual" ? formatTimestamp(row.currentPeriodEnd) : null,
+    cancelAtPeriodEnd: row.cancelAtPeriodEnd ?? false,
+    stripeCustomerId: row.stripeCustomerId,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -85,8 +100,10 @@ function buildListFilters(
     clauses.push(ilike(members.email, pattern));
   }
 
-  if (query.plan !== "all") {
-    clauses.push(eq(members.membershipPlan, query.plan));
+  if (query.plan === "none") {
+    clauses.push(isNull(memberships.id));
+  } else if (query.plan !== "all") {
+    clauses.push(eq(memberships.plan, query.plan));
   }
 
   if (query.newsletter !== "all") {
@@ -109,14 +126,32 @@ export async function listAdminRoster(input: unknown) {
   return withMembersDbError(async () => {
     const db = getMembersDb();
 
+    const currentJoin = and(
+      eq(memberships.memberId, members.id),
+      inArray(memberships.status, ["active", "past_due"]),
+    );
+
     const [totalRow] = await db
       .select({ total: count() })
       .from(members)
+      .leftJoin(memberships, currentJoin)
       .where(where);
 
     const rows = await db
-      .select()
+      .select({
+        id: members.id,
+        email: members.email,
+        newsletterStatus: members.newsletterStatus,
+        stripeCustomerId: members.stripeCustomerId,
+        createdAt: members.createdAt,
+        updatedAt: members.updatedAt,
+        membershipPlan: memberships.plan,
+        membershipStatus: memberships.status,
+        currentPeriodEnd: memberships.currentPeriodEnd,
+        cancelAtPeriodEnd: memberships.cancelAtPeriodEnd,
+      })
       .from(members)
+      .leftJoin(memberships, currentJoin)
       .where(where)
       .orderBy(desc(members.updatedAt), asc(members.email))
       .limit(query.limit)
@@ -141,14 +176,7 @@ async function loadMemberById(memberId: string) {
   return rows[0] ?? null;
 }
 
-function resolveUpdatedPlan(
-  current: MembershipPlan,
-  patch: ReturnType<typeof adminRosterUpdateSchema.parse>,
-): MembershipPlan {
-  return patch.membershipPlan ?? current;
-}
-
-/** Updates a roster member. Validates annual renewal consistency on the resulting plan. */
+/** Updates a roster member identity/newsletter and/or current membership row. */
 export async function updateAdminRosterMember(memberId: string, input: unknown) {
   requireDatabaseUrl();
   const patch = adminRosterUpdateSchema.parse(input);
@@ -162,67 +190,84 @@ export async function updateAdminRosterMember(memberId: string, input: unknown) 
       );
     }
 
-    const nextPlan = resolveUpdatedPlan(existing.membershipPlan, patch);
-    const nextAnniversary =
-      patch.membershipAnniversary !== undefined
-        ? patch.membershipAnniversary
-        : formatAnniversary(existing.membershipAnniversary);
-    const nextRenewal =
-      patch.nextRenewalAt !== undefined
-        ? patch.nextRenewalAt
-        : formatTimestamp(existing.nextRenewalAt);
-
-    assertAnnualRenewalConsistency(nextPlan, {
-      membershipAnniversary: nextAnniversary
-        ? new Date(nextAnniversary)
-        : null,
-      nextRenewalAt: nextRenewal ? new Date(nextRenewal) : null,
-    });
-
-    const updates: Partial<typeof members.$inferInsert> = {
-      updatedAt: new Date(),
-    };
+    const db = getMembersDb();
+    const now = new Date();
 
     if (patch.newsletterStatus !== undefined) {
-      updates.newsletterStatus = patch.newsletterStatus;
-    }
-    if (patch.membershipPlan !== undefined) {
-      updates.membershipPlan = patch.membershipPlan;
-    }
-    if (patch.membershipStatus !== undefined) {
-      updates.membershipStatus = patch.membershipStatus;
+      await db
+        .update(members)
+        .set({ newsletterStatus: patch.newsletterStatus, updatedAt: now })
+        .where(eq(members.id, memberId));
     }
 
-    if (nextPlan === "annual") {
-      if (patch.membershipAnniversary !== undefined) {
-        updates.membershipAnniversary = patch.membershipAnniversary;
+    const clearingPlan =
+      patch.membershipPlan === "none" || patch.membershipStatus === "none";
+
+    if (clearingPlan) {
+      await cancelCurrentMemberships(memberId);
+    } else if (
+      patch.membershipPlan !== undefined ||
+      patch.membershipStatus !== undefined ||
+      patch.currentPeriodEnd !== undefined ||
+      patch.cancelAtPeriodEnd !== undefined
+    ) {
+      const current = await getCurrentMembership(memberId);
+      const nextPlan =
+        patch.membershipPlan && patch.membershipPlan !== "none"
+          ? patch.membershipPlan
+          : current?.plan;
+      const nextStatus =
+        patch.membershipStatus && patch.membershipStatus !== "none"
+          ? patch.membershipStatus
+          : (current?.status ?? "active");
+
+      if (!nextPlan) {
+        throw new AdminRosterError(
+          "ADMIN_ROSTER_INVALID",
+          "Set a membership plan when assigning membership status.",
+        );
       }
-      if (patch.nextRenewalAt !== undefined) {
-        updates.nextRenewalAt = patch.nextRenewalAt
-          ? new Date(patch.nextRenewalAt)
-          : null;
-      }
-    } else {
-      updates.membershipAnniversary = null;
-      updates.nextRenewalAt = null;
+
+      await upsertCurrentMembership({
+        memberId,
+        plan: nextPlan,
+        status: nextStatus,
+        currentPeriodEnd:
+          nextPlan === "annual"
+            ? patch.currentPeriodEnd !== undefined
+              ? patch.currentPeriodEnd
+                ? new Date(patch.currentPeriodEnd)
+                : null
+              : (current?.currentPeriodEnd ?? null)
+            : null,
+        cancelAtPeriodEnd:
+          patch.cancelAtPeriodEnd !== undefined
+            ? patch.cancelAtPeriodEnd
+            : (current?.cancelAtPeriodEnd ?? false),
+        stripeSubscriptionId: current?.stripeSubscriptionId ?? null,
+      });
     }
 
-    const db = getMembersDb();
-    const updated = await db
-      .update(members)
-      .set(updates)
-      .where(eq(members.id, memberId))
-      .returning();
-
-    const row = updated[0];
-    if (!row) {
+    const refreshed = await loadMemberById(memberId);
+    if (!refreshed) {
       throw new AdminRosterError(
         "ADMIN_ROSTER_NOT_FOUND",
         "Member not found.",
       );
     }
-
-    return rowToRosterMember(row);
+    const current = await getCurrentMembership(memberId);
+    return rowToRosterMember({
+      id: refreshed.id,
+      email: refreshed.email,
+      newsletterStatus: refreshed.newsletterStatus,
+      stripeCustomerId: refreshed.stripeCustomerId,
+      createdAt: refreshed.createdAt,
+      updatedAt: refreshed.updatedAt,
+      membershipPlan: current?.plan ?? null,
+      membershipStatus: current?.status ?? null,
+      currentPeriodEnd: current?.currentPeriodEnd ?? null,
+      cancelAtPeriodEnd: current?.cancelAtPeriodEnd ?? null,
+    });
   }, "Failed to update member.");
 }
 

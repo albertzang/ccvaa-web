@@ -171,6 +171,8 @@ export const membershipContent = {
   checkoutLabel: "Join",
   logoutLabel: "Sign out",
   profilePlanLabel: "Plan",
-  profileAnniversaryLabel: "Anniversary",
-  profileNextRenewalLabel: "Next renewal",
+  manageBillingLabel: "Manage billing",
+  pastDueMessage:
+    "Payment past due — update your payment method in Manage billing to restore membership perks.",
+  wontRenewMessage: "Won’t renew at period end.",
 } as const;

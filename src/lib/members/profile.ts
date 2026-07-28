@@ -9,6 +9,12 @@ import {
 import { requireDatabaseUrl } from "@/lib/members/env";
 import { MembersDbError } from "@/lib/members/errors";
 import {
+  canJoinMembership,
+  getCurrentMembership,
+  perksActive,
+  sessionPlanFromMembership,
+} from "@/lib/members/memberships";
+import {
   createMemberSessionToken,
   toPublicMemberSession,
   type MemberSessionPayload,
@@ -25,9 +31,13 @@ export type MemberProfile = {
   memberId: string;
   email: string;
   plan: MembershipPlan;
+  membershipStatus: "none" | "active" | "past_due" | "cancelled";
   newsletterStatus: NewsletterStatus;
-  membershipAnniversary: string | null;
-  nextRenewalAt: string | null;
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+  stripeCustomerId: string | null;
+  perksActive: boolean;
+  canJoin: boolean;
 };
 
 export class MembersProfileError extends Error {
@@ -66,41 +76,8 @@ export function isMembersProfileError(
   );
 }
 
-function formatAnniversary(value: string | Date | null): string | null {
-  if (value === null) {
-    return null;
-  }
-  if (value instanceof Date) {
-    return value.toISOString().slice(0, 10);
-  }
-  return value;
-}
-
-function formatRenewal(value: Date | null): string | null {
+function formatPeriodEnd(value: Date | null): string | null {
   return value ? value.toISOString() : null;
-}
-
-function rowToProfile(row: {
-  id: string;
-  email: string;
-  membershipPlan: MembershipPlan;
-  newsletterStatus: NewsletterStatus;
-  membershipAnniversary: string | Date | null;
-  nextRenewalAt: Date | null;
-}): MemberProfile {
-  const plan = row.membershipPlan;
-  const isAnnual = plan === "annual";
-
-  return {
-    memberId: row.id,
-    email: row.email,
-    plan,
-    newsletterStatus: row.newsletterStatus,
-    membershipAnniversary: isAnnual
-      ? formatAnniversary(row.membershipAnniversary)
-      : null,
-    nextRenewalAt: isAnnual ? formatRenewal(row.nextRenewalAt) : null,
-  };
 }
 
 async function loadMemberById(memberId: string) {
@@ -110,10 +87,7 @@ async function loadMemberById(memberId: string) {
       .select({
         id: members.id,
         email: members.email,
-        membershipPlan: members.membershipPlan,
         newsletterStatus: members.newsletterStatus,
-        membershipAnniversary: members.membershipAnniversary,
-        nextRenewalAt: members.nextRenewalAt,
         stripeCustomerId: members.stripeCustomerId,
       })
       .from(members)
@@ -124,6 +98,30 @@ async function loadMemberById(memberId: string) {
   } catch (error) {
     throw new MembersDbError("Failed to load member profile.", { cause: error });
   }
+}
+
+async function buildProfile(row: {
+  id: string;
+  email: string;
+  newsletterStatus: NewsletterStatus;
+  stripeCustomerId: string | null;
+}): Promise<MemberProfile> {
+  const current = await getCurrentMembership(row.id);
+  const plan = sessionPlanFromMembership(current);
+
+  return {
+    memberId: row.id,
+    email: row.email,
+    plan,
+    membershipStatus: current?.status ?? "none",
+    newsletterStatus: row.newsletterStatus,
+    currentPeriodEnd:
+      plan === "annual" ? formatPeriodEnd(current?.currentPeriodEnd ?? null) : null,
+    cancelAtPeriodEnd: current?.cancelAtPeriodEnd ?? false,
+    stripeCustomerId: row.stripeCustomerId,
+    perksActive: perksActive(current),
+    canJoin: canJoinMembership(current),
+  };
 }
 
 /**
@@ -161,7 +159,7 @@ export async function getMemberProfileForSession(
       "No member record found for this session.",
     );
   }
-  return rowToProfile(row);
+  return buildProfile(row);
 }
 
 export function toPublicMemberProfile(
@@ -173,9 +171,13 @@ export function toPublicMemberProfile(
     memberId: profile.memberId,
     email: profile.email,
     plan: profile.plan,
+    membershipStatus: profile.membershipStatus,
     newsletterStatus: profile.newsletterStatus,
-    membershipAnniversary: profile.membershipAnniversary,
-    nextRenewalAt: profile.nextRenewalAt,
+    currentPeriodEnd: profile.currentPeriodEnd,
+    cancelAtPeriodEnd: profile.cancelAtPeriodEnd,
+    stripeCustomerId: profile.stripeCustomerId,
+    perksActive: profile.perksActive,
+    canJoin: profile.canJoin,
     expiresAt: new Date(sessionExp).toISOString(),
     grantsAdmin: false as const,
   };
@@ -221,7 +223,7 @@ async function assertEmailAvailable(email: string, memberId: string) {
   }
 }
 
-/** Sends email_verify OTP to the new address before changing identity email. */
+/** Sends email OTP to the new address before changing identity email. */
 export async function startMemberProfileEmailChange(
   session: MemberSessionPayload,
   input: unknown,
@@ -282,7 +284,6 @@ export async function verifyMemberProfileEmailChange(
 
   await verifyDeliveredOtp({
     email: newEmail,
-    purpose: "email_verify",
     code: parsed.code,
   });
 
@@ -302,6 +303,6 @@ export async function verifyMemberProfileEmailChange(
     throw new MembersDbError("Failed to update member email.", { cause: error });
   }
 
-  const profile = rowToProfile({ ...row, email: newEmail });
+  const profile = await buildProfile({ ...row, email: newEmail });
   return refreshSessionAfterProfileUpdate(profile);
 }

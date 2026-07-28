@@ -2,14 +2,12 @@ import { config } from "dotenv";
 import { resolve } from "node:path";
 
 import { deliverOtp, verifyDeliveredOtp } from "@/lib/members/confirm";
-import { otpPurposeSchema } from "@/lib/members/zod/otp";
 
 config({ path: resolve(process.cwd(), ".env.local") });
 config({ path: resolve(process.cwd(), ".env") });
 
 function parseArgs(argv: string[]) {
   let email: string | undefined;
-  let purpose: string | undefined;
   let code: string | undefined;
   let verify = false;
 
@@ -17,8 +15,6 @@ function parseArgs(argv: string[]) {
     const arg = argv[i];
     if (arg === "--email" && argv[i + 1]) {
       email = argv[++i];
-    } else if (arg === "--purpose" && argv[i + 1]) {
-      purpose = argv[++i];
     } else if (arg === "--code" && argv[i + 1]) {
       code = argv[++i];
     } else if (arg === "--verify") {
@@ -29,23 +25,22 @@ function parseArgs(argv: string[]) {
     }
   }
 
-  return { email, purpose, code, verify };
+  return { email, code, verify };
 }
 
 function printHelp() {
   console.log(`Usage:
   Send OTP via Resend (requires DATABASE_URL + RESEND_* in .env.local):
-    npm run members:send-otp-test -- --email user@SERVER_ID.mailosaur.net --purpose login
+    npm run members:send-otp-test -- --email user@SERVER_ID.mailosaur.net
 
   Verify OTP locally:
-    npm run members:send-otp-test -- --verify --email user@example.com --purpose login --code 123456
+    npm run members:send-otp-test -- --verify --email user@example.com --code 123456
 
-  --purpose: login | email_verify | newsletter_confirm
   See docs/members/mailosaur-qa.md for Mailosaur setup.`);
 }
 
 async function main() {
-  const { email, purpose, code, verify } = parseArgs(process.argv.slice(2));
+  const { email, code, verify } = parseArgs(process.argv.slice(2));
 
   if (!email) {
     console.error("Missing --email");
@@ -54,31 +49,21 @@ async function main() {
   }
 
   if (verify) {
-    if (!purpose || !code) {
-      console.error("--verify requires --purpose and --code");
+    if (!code) {
+      console.error("--verify requires --code");
       process.exit(1);
     }
-    const parsedPurpose = otpPurposeSchema.parse(purpose);
     const result = await verifyDeliveredOtp({
       email,
-      purpose: parsedPurpose,
       code,
     });
     console.log("OTP verified:", result);
     return;
   }
 
-  if (!purpose) {
-    console.error("Missing --purpose");
-    printHelp();
-    process.exit(1);
-  }
-
-  const parsedPurpose = otpPurposeSchema.parse(purpose);
-  const result = await deliverOtp({ email, purpose: parsedPurpose });
+  const result = await deliverOtp({ email });
   console.log("OTP sent:");
   console.log(`  to:        ${result.email}`);
-  console.log(`  purpose:   ${result.purpose}`);
   console.log(`  expires:   ${result.expiresAt.toISOString()}`);
   console.log(`  messageId: ${result.messageId}`);
   console.log("");

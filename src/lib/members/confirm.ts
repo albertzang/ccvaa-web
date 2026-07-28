@@ -6,14 +6,12 @@ import {
 import { sendOtpEmail } from "@/lib/members/resend";
 import {
   otpVerifyInputSchema,
-  type OtpPurpose,
   type OtpVerifyInput,
 } from "@/lib/members/zod/otp";
 import { requireDatabaseUrl } from "@/lib/members/env";
 
 export type DeliverOtpResult = {
   email: string;
-  purpose: OtpPurpose;
   expiresAt: Date;
   messageId: string;
 };
@@ -24,63 +22,34 @@ export type DeliverOtpResult = {
  */
 export async function deliverOtp(input: {
   email: string;
-  purpose: OtpPurpose;
 }): Promise<DeliverOtpResult> {
   requireDatabaseUrl();
 
   const email = input.email.trim().toLowerCase();
-  const { code, expiresAt } = await createOtpChallenge({
-    email,
-    purpose: input.purpose,
-  });
+  const { code, expiresAt } = await createOtpChallenge({ email });
 
   const { id: messageId } = await sendOtpEmail({
     to: email,
-    purpose: input.purpose,
     code,
     expiresAt,
   });
 
   return {
     email,
-    purpose: input.purpose,
     expiresAt,
     messageId,
   };
 }
 
-/** Newsletter double opt-in — sends a 6-digit confirm code via Resend. */
-export async function sendNewsletterConfirmOtp(
-  email: string,
-): Promise<DeliverOtpResult> {
-  return deliverOtp({ email, purpose: "newsletter_confirm" });
-}
-
-/** Member login OTP — used by members-0005+. */
-export async function sendLoginOtp(email: string): Promise<DeliverOtpResult> {
-  return deliverOtp({ email, purpose: "login" });
-}
-
-/** Verifies member login OTP after send. */
-export async function verifyLoginOtp(
-  input: Pick<OtpVerifyInput, "email" | "code">,
-): Promise<VerifyOtpChallengeResult> {
-  return verifyDeliveredOtp({
-    email: input.email,
-    purpose: "login",
-    code: input.code,
-  });
-}
-
-/** Email re-verification during join or profile update — used by members-0004/0006+. */
+/** Email verification for gate, Join, or profile email change. */
 export async function sendEmailVerifyOtp(
   email: string,
 ): Promise<DeliverOtpResult> {
-  return deliverOtp({ email, purpose: "email_verify" });
+  return deliverOtp({ email });
 }
 
 /**
- * Verifies a submitted OTP for any purpose. Shared by login, email verify, and newsletter confirm.
+ * Verifies a submitted OTP for the email. Shared by gate, Join, and profile email change.
  */
 export async function verifyDeliveredOtp(
   input: OtpVerifyInput,
@@ -88,15 +57,4 @@ export async function verifyDeliveredOtp(
   requireDatabaseUrl();
   otpVerifyInputSchema.parse(input);
   return verifyOtpChallenge(input);
-}
-
-/** Verifies newsletter confirm OTP after double opt-in send. */
-export async function verifyNewsletterConfirmOtp(
-  input: Pick<OtpVerifyInput, "email" | "code">,
-): Promise<VerifyOtpChallengeResult> {
-  return verifyDeliveredOtp({
-    email: input.email,
-    purpose: "newsletter_confirm",
-    code: input.code,
-  });
 }

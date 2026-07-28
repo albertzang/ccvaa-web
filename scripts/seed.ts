@@ -3,16 +3,16 @@ import { eq } from "drizzle-orm";
 import { resolve } from "node:path";
 
 import { getMembersDb } from "@/db/client";
-import { members, otpChallenges, unsubTokens } from "@/db/schema";
+import { members, memberships, otpChallenges } from "@/db/schema";
 import { hashOtpCode } from "@/lib/members/crypto";
+import { generateUnsubToken } from "@/lib/members/crypto";
 import { canRunMembersSeeds, getMembersRuntimeEnv } from "@/lib/members/env";
 
 config({ path: resolve(process.cwd(), ".env.local") });
 config({ path: resolve(process.cwd(), ".env") });
 
-/** Fixed anniversary for QA — Annual seed member renews on this calendar date. */
-export const SEED_ANNUAL_ANNIVERSARY = "2025-03-15";
-export const SEED_ANNUAL_NEXT_RENEWAL = "2026-03-15T00:00:00.000Z";
+/** Fixed period end for QA — Annual seed member. */
+export const SEED_ANNUAL_PERIOD_END = "2026-03-15T00:00:00.000Z";
 
 const SEED_EMAILS = {
   newsletterOnly: "newsletter-only@ccvaa-seed.test",
@@ -47,6 +47,28 @@ async function upsertMember(
   return inserted[0]!.id;
 }
 
+async function upsertCurrentMembership(
+  memberId: string,
+  values: Omit<typeof memberships.$inferInsert, "memberId" | "id">,
+) {
+  const db = getMembersDb();
+  const existing = await db
+    .select({ id: memberships.id })
+    .from(memberships)
+    .where(eq(memberships.memberId, memberId))
+    .limit(1);
+
+  if (existing[0]) {
+    await db
+      .update(memberships)
+      .set({ ...values, updatedAt: new Date() })
+      .where(eq(memberships.id, existing[0].id));
+    return;
+  }
+
+  await db.insert(memberships).values({ memberId, ...values });
+}
+
 async function main() {
   if (!canRunMembersSeeds()) {
     console.error(
@@ -59,66 +81,63 @@ async function main() {
 
   const newsletterOnlyId = await upsertMember(SEED_EMAILS.newsletterOnly, {
     newsletterStatus: "on",
-    newsletterConfirmedAt: new Date("2025-01-01T12:00:00.000Z"),
-    membershipPlan: "none",
-    membershipStatus: "none",
-    membershipAnniversary: null,
-    nextRenewalAt: null,
+    unsubToken: "seed-unsub-newsletter-only",
   });
 
-  await upsertMember(SEED_EMAILS.founding, {
+  const foundingId = await upsertMember(SEED_EMAILS.founding, {
     newsletterStatus: "off",
-    membershipPlan: "founding",
-    membershipStatus: "active",
-    membershipAnniversary: null,
-    nextRenewalAt: null,
+  });
+  await upsertCurrentMembership(foundingId, {
+    plan: "founding",
+    status: "active",
+    stripeSubscriptionId: null,
+    currentPeriodEnd: null,
+    cancelAtPeriodEnd: false,
   });
 
-  await upsertMember(SEED_EMAILS.lifetime, {
+  const lifetimeId = await upsertMember(SEED_EMAILS.lifetime, {
     newsletterStatus: "on",
-    newsletterConfirmedAt: new Date("2025-02-01T12:00:00.000Z"),
-    membershipPlan: "lifetime",
-    membershipStatus: "active",
-    membershipAnniversary: null,
-    nextRenewalAt: null,
+    unsubToken: generateUnsubToken(),
+  });
+  await upsertCurrentMembership(lifetimeId, {
+    plan: "lifetime",
+    status: "active",
+    stripeSubscriptionId: null,
+    currentPeriodEnd: null,
+    cancelAtPeriodEnd: false,
   });
 
   const annualId = await upsertMember(SEED_EMAILS.annual, {
     newsletterStatus: "on",
-    newsletterConfirmedAt: new Date("2025-03-01T12:00:00.000Z"),
-    membershipPlan: "annual",
-    membershipStatus: "active",
-    membershipAnniversary: SEED_ANNUAL_ANNIVERSARY,
-    nextRenewalAt: new Date(SEED_ANNUAL_NEXT_RENEWAL),
+    unsubToken: "seed-unsub-annual-member",
     stripeCustomerId: "cus_seed_annual_test",
   });
+  await upsertCurrentMembership(annualId, {
+    plan: "annual",
+    status: "active",
+    stripeSubscriptionId: "sub_seed_annual_test",
+    currentPeriodEnd: new Date(SEED_ANNUAL_PERIOD_END),
+    cancelAtPeriodEnd: false,
+  });
+
   const db = getMembersDb();
 
   await db.insert(otpChallenges).values({
     email: SEED_EMAILS.annual,
-    purpose: "login",
     codeHash: hashOtpCode("123456"),
     expiresAt: new Date(Date.now() + 15 * 60 * 1000),
   });
 
-  for (const row of [
-    { memberId: newsletterOnlyId, token: "seed-unsub-newsletter-only" },
-    { memberId: annualId, token: "seed-unsub-annual-member" },
-  ]) {
-    await db
-      .insert(unsubTokens)
-      .values(row)
-      .onConflictDoNothing({ target: unsubTokens.token });
-  }
+  void newsletterOnlyId;
 
   console.log("Seed complete:");
   console.log(`  Newsletter-only: ${SEED_EMAILS.newsletterOnly}`);
   console.log(`  Founding:        ${SEED_EMAILS.founding}`);
   console.log(`  Lifetime:        ${SEED_EMAILS.lifetime}`);
   console.log(
-    `  Annual:          ${SEED_EMAILS.annual} (anniversary ${SEED_ANNUAL_ANNIVERSARY}, next renewal ${SEED_ANNUAL_NEXT_RENEWAL})`,
+    `  Annual:          ${SEED_EMAILS.annual} (period end ${SEED_ANNUAL_PERIOD_END})`,
   );
-  console.log("  OTP sample for annual login: 123456 (dev seed only)");
+  console.log("  OTP sample for annual email: 123456 (dev seed only)");
 }
 
 main().catch((error) => {

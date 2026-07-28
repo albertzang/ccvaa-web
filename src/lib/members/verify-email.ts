@@ -9,6 +9,10 @@ import {
 import { requireDatabaseUrl } from "@/lib/members/env";
 import { MembersDbError, withMembersDbError } from "@/lib/members/errors";
 import {
+  getCurrentMembership,
+  sessionPlanFromMembership,
+} from "@/lib/members/memberships";
+import {
   getMemberProfileForSession,
   toPublicMemberProfile,
 } from "@/lib/members/profile";
@@ -50,8 +54,7 @@ export async function startEmailVerification(
 
 /**
  * Verifies OTP, upserts `members` (UUID PK; email unique), and mints a verified
- * session bound to Member ID. New rows default newsletter **off**. Existing
- * newsletter / paid plan columns are preserved.
+ * session bound to Member ID. New rows default newsletter **off**.
  */
 export async function confirmEmailVerification(
   input: VerifyEmailConfirmInput | unknown,
@@ -71,7 +74,6 @@ export async function confirmEmailVerification(
 
   await verifyDeliveredOtp({
     email,
-    purpose: "email_verify",
     code: parsed.code,
   });
 
@@ -80,7 +82,7 @@ export async function confirmEmailVerification(
   const { token, expiresAt, payload } = createMemberSessionToken({
     memberId: member.id,
     email: member.email,
-    plan: member.membershipPlan,
+    plan: member.plan,
   });
 
   const profile = await getMemberProfileForSession(payload);
@@ -98,7 +100,7 @@ export async function confirmEmailVerification(
 async function upsertVerifiedMember(input: { email: string }): Promise<{
   id: string;
   email: string;
-  membershipPlan: MembershipPlan;
+  plan: MembershipPlan;
 }> {
   return withMembersDbError(async () => {
     const db = getMembersDb();
@@ -106,7 +108,6 @@ async function upsertVerifiedMember(input: { email: string }): Promise<{
       .select({
         id: members.id,
         email: members.email,
-        membershipPlan: members.membershipPlan,
       })
       .from(members)
       .where(eq(members.email, input.email))
@@ -120,10 +121,11 @@ async function upsertVerifiedMember(input: { email: string }): Promise<{
         .update(members)
         .set({ updatedAt: now })
         .where(eq(members.id, row.id));
+      const current = await getCurrentMembership(row.id);
       return {
         id: row.id,
         email: row.email,
-        membershipPlan: row.membershipPlan,
+        plan: sessionPlanFromMembership(current),
       };
     }
 
@@ -132,19 +134,20 @@ async function upsertVerifiedMember(input: { email: string }): Promise<{
       .values({
         email: input.email,
         newsletterStatus: "off",
-        membershipPlan: "none",
-        membershipStatus: "none",
       })
       .returning({
         id: members.id,
         email: members.email,
-        membershipPlan: members.membershipPlan,
       });
 
     const created = inserted[0];
     if (!created) {
       throw new MembersDbError("Failed to create member after email verify.");
     }
-    return created;
+    return {
+      id: created.id,
+      email: created.email,
+      plan: "none",
+    };
   }, "Failed to upsert member after email verification.");
 }
