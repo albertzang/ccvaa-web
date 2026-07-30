@@ -5,11 +5,11 @@
 **Backlog work ID:** `members-0024`  
 **Ship path that led here:** `feature-branch`  
 **Filled by:** Developer  
-**Iteration:** `3` (retest after Iteration 3 Customer invariant)
+**Iteration:** `4` (focused retest — Manage billing opens portal in new tab)
 
 **Branch name:** `feat/members-0024-memberships-portal`  
 **PR link:** https://github.com/albertzang/ccvaa-web/pull/11  
-**Commit:** `7ea2353`  
+**Commit:** `c44d3b4`  
 **Preview URL:** https://ccvaa-web-git-feat-members-0024-membershi-c691b4-azang-projects.vercel.app  
 **Preview protection:** QA reads `VERCEL_AUTOMATION_BYPASS_SECRET` from `.env.local` (do **not** paste the secret here). Browser Pass 1: both bypass query **and** `x-vercel-set-bypass-cookie=true`. See `docs/protocols/PREVIEW_PROTECTION.md`.  
 **Production URL:** https://ccvaa-web.vercel.app/ (Pass **2**)  
@@ -24,31 +24,21 @@
 
 ## What changed
 
-**Iteration 3:** Enforce invariant — every `memberships` row requires that member’s `members.stripe_customer_id` to be a durable Stripe Customer (`cus_*`). Reject null / Guest (`gcus_*`).
+**Iteration 4:** **Manage billing** opens the Stripe Customer Portal URL in a **new tab** (`window.open(..., "_blank", "noopener,noreferrer")`). The CCVAA `#membership` page stays in the current tab. Fail-closed in-app errors (no customer, Stripe down) unchanged.
 
-- App write path: before membership upsert/insert (and Founding activation), require + persist `cus_*` on `members`
-- Checkout: still payment-mode `customer_creation: 'always'` when no Customer; reuse `customer` only when already `cus_*`
-- Migration **`0004`** (do not re-run/edit `0003`): partial unique index on `members(stripe_customer_id)` where not null; `BEFORE INSERT OR UPDATE` trigger on `memberships` that raises if member Customer is null / not `cus_%`
-- Paid seeds use `cus_seed_*` so migrate/seed pass
-
-**CEO / Preview Neon:** If Preview Integration uses a Neon branch that already has `0003` but not `0004`, run `npm run db:migrate` (applies `0004`) against that Preview `DATABASE_URL`. Fresh Preview DBs need full migrate through `0004`. Seeds may need re-run after migrate so paid seed rows have `cus_…`.
-
-Prior Iteration 2: payment-mode `customer_creation: 'always'`. Iteration 1: `memberships` + portal + prune.
+Prior iterations (already on this PR): memberships + portal + prune; payment-mode `customer_creation: 'always'`; Customer invariant (`cus_*`) + migration `0004`.
 
 ## Focus checklist
 
-- [ ] Join Founding → pay → profile `stripeCustomerId` is `cus_…`; **Manage billing** works
-- [ ] Lifetime smoke (same payment-mode path) → Customer + Manage billing
-- [ ] Annual still OK; Customer reused when already set
-- [ ] Newsletter-only still has no Manage billing (no `stripe_customer_id`)
-- [ ] Confirm Preview deploy tip ≥ `7ea2353` and migration `0004` applied (membership APIs must not 503 on missing schema)
+- [ ] Sign in as a paid member with **Manage billing** visible
+- [ ] Click **Manage billing** → Stripe portal opens in a **new tab**; current tab remains on the site (`#membership` / members area)
+- [ ] Fail-closed still works when portal cannot open (e.g. newsletter-only / no customer — no Manage billing, or in-app error if forced)
 
 ## Known risks / flaky areas
 
-- **Migration `0004` must be applied on Preview Neon** before membership writes succeed under the new trigger — CEO may need `npm run db:migrate` if Integration did not auto-migrate
-- Old Preview rows with memberships but null/`gcus_*` Customer are out of scope for backfill; new Joins should create `cus_*`
+- Popup blockers may block `window.open` if the click→async gap is long; if portal does not open, note whether an error appeared in-app
 - Stripe Customer portal must be enabled in Stripe **test** Dashboard
-- Wait for Vercel Preview deploy of `7ea2353` before retesting
+- Wait for Vercel Preview deploy tip ≥ `c44d3b4` before retesting
 
 ## Preview env notes (Pass 1)
 
