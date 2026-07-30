@@ -86,6 +86,7 @@ async function main() {
 
   const foundingId = await upsertMember(SEED_EMAILS.founding, {
     newsletterStatus: "off",
+    stripeCustomerId: "cus_seed_founding_test",
   });
   await upsertCurrentMembership(foundingId, {
     plan: "founding",
@@ -98,6 +99,7 @@ async function main() {
   const lifetimeId = await upsertMember(SEED_EMAILS.lifetime, {
     newsletterStatus: "on",
     unsubToken: generateUnsubToken(),
+    stripeCustomerId: "cus_seed_lifetime_test",
   });
   await upsertCurrentMembership(lifetimeId, {
     plan: "lifetime",

@@ -11,11 +11,13 @@ import {
 import { MembersDbError } from "@/lib/members/errors";
 import { requireDatabaseUrl } from "@/lib/members/env";
 import {
+  assertMemberHasStripeCustomer,
   canJoinMembership,
   countActiveFoundingMemberships,
   countActivePaidMemberships,
   findMembershipBySubscriptionId,
   getCurrentMembership,
+  isDurableStripeCustomerId,
   sessionPlanFromMembership,
   upsertCurrentMembership,
 } from "@/lib/members/memberships";
@@ -242,7 +244,8 @@ function checkoutCustomerFields(
 ):
   | { customer: string }
   | { customer_email: string; customer_creation?: "always" } {
-  if (stripeCustomerId) {
+  // Reuse only durable Customers (`cus_*`). Reject Guest (`gcus_*`) / null.
+  if (isDurableStripeCustomerId(stripeCustomerId)) {
     return { customer: stripeCustomerId };
   }
   // Payment-mode Checkout defaults to customer_creation: if_required and often
@@ -589,11 +592,24 @@ async function ensureMemberRow(params: {
   const now = new Date();
   const existing = await resolveMemberForActivation(params);
 
+  const durableCustomerId = isDurableStripeCustomerId(params.stripeCustomerId)
+    ? params.stripeCustomerId
+    : isDurableStripeCustomerId(existing?.stripeCustomerId)
+      ? existing.stripeCustomerId
+      : null;
+
+  // Persist Customer on members before any memberships write.
+  if (!durableCustomerId) {
+    throw new MembersDbError(
+      "Join activation requires a Stripe Customer (cus_*). Guest or missing customer cannot create a membership.",
+    );
+  }
+
   if (existing) {
     await db
       .update(members)
       .set({
-        stripeCustomerId: params.stripeCustomerId ?? existing.stripeCustomerId,
+        stripeCustomerId: durableCustomerId,
         updatedAt: now,
       })
       .where(eq(members.id, existing.id));
@@ -605,7 +621,7 @@ async function ensureMemberRow(params: {
     .values({
       email: params.email,
       newsletterStatus: "off",
-      stripeCustomerId: params.stripeCustomerId,
+      stripeCustomerId: durableCustomerId,
     })
     .returning({ id: members.id, email: members.email });
 
@@ -627,6 +643,8 @@ async function activateFoundingMembership(params: {
     email: params.email,
     stripeCustomerId: params.stripeCustomerId,
   });
+  // Customer must be on members before memberships insert (app + DB trigger).
+  await assertMemberHasStripeCustomer(member.id);
 
   const current = await getCurrentMembership(member.id);
   if (current?.plan === "founding" && current.status === "active") {

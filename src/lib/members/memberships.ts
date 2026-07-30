@@ -1,13 +1,44 @@
 import { and, eq, inArray, sql } from "drizzle-orm";
 
 import { getMembersDb } from "@/db/client";
-import { memberships, type Membership } from "@/db/schema";
-import { withMembersDbError } from "@/lib/members/errors";
+import { members, memberships, type Membership } from "@/db/schema";
+import { MembersDbError, withMembersDbError } from "@/lib/members/errors";
 import type {
   MembershipPlan,
   MembershipStatus,
   PaidMembershipPlan,
 } from "@/lib/members/zod/membership";
+
+/**
+ * Durable Stripe Customer ID (`cus_…`). Rejects null and Guest IDs (`gcus_…`).
+ */
+export function isDurableStripeCustomerId(
+  id: string | null | undefined,
+): id is string {
+  return typeof id === "string" && id.startsWith("cus_");
+}
+
+/**
+ * Invariant: every memberships write requires the member to already have
+ * `members.stripe_customer_id` as a durable `cus_*` Customer.
+ */
+export async function assertMemberHasStripeCustomer(
+  memberId: string,
+): Promise<string> {
+  const db = getMembersDb();
+  const rows = await db
+    .select({ stripeCustomerId: members.stripeCustomerId })
+    .from(members)
+    .where(eq(members.id, memberId))
+    .limit(1);
+  const stripeCustomerId = rows[0]?.stripeCustomerId;
+  if (!isDurableStripeCustomerId(stripeCustomerId)) {
+    throw new MembersDbError(
+      "Membership requires a Stripe Customer (cus_*) on the member before write.",
+    );
+  }
+  return stripeCustomerId;
+}
 
 /** Current = active or past_due (≤1 per member via partial unique index). */
 export async function getCurrentMembership(
@@ -122,6 +153,7 @@ export async function upsertCurrentMembership(
   input: UpsertCurrentMembershipInput,
 ): Promise<Membership> {
   return withMembersDbError(async () => {
+    await assertMemberHasStripeCustomer(input.memberId);
     const db = getMembersDb();
     const now = new Date();
     const status = input.status ?? "active";

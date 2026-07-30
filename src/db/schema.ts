@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   boolean,
   index,
@@ -48,7 +49,13 @@ export const members = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => [index("members_newsletter_status_idx").on(table.newsletterStatus)],
+  (table) => [
+    index("members_newsletter_status_idx").on(table.newsletterStatus),
+    /** Durable Stripe Customer only — null allowed for newsletter-only. */
+    uniqueIndex("members_stripe_customer_id_uidx")
+      .on(table.stripeCustomerId)
+      .where(sql`${table.stripeCustomerId} is not null`),
+  ],
 );
 
 /**

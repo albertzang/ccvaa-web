@@ -8,8 +8,10 @@ Neon + Drizzle schema for the Members platform. Newsletter and paid membership a
 |-------|------|
 | `members.id` (UUID) | Primary key |
 | `email` | **Login identity** — unique; OTP verify / session; the only public identity (no name column — `members-0025`) |
-| `stripe_customer_id` | **Billing identity** — Stripe Customer ID; Join Checkout reuses it when set; Customer portal when set (`members-0024` / `members-0026`) |
+| `stripe_customer_id` | **Billing identity** — durable Stripe Customer (`cus_…`); Join Checkout reuses it when set; Customer portal when set (`members-0024` / `members-0026`). Nullable for newsletter-only. |
 | `unsub_token` | Lifelong newsletter unsubscribe token (`/?unsub=<token>#membership`) |
+
+**Invariant (`members-0024` Iteration 3):** every `memberships` row ⇒ that member’s `stripe_customer_id` is a durable Stripe Customer (`cus_%`). Guest IDs (`gcus_*`) and null are rejected. Customer stays on `members` (not copied onto `memberships`); `memberships.member_id` FK is unchanged. App write path persists/checks Customer before membership insert/upsert; DB enforces via trigger (migration `0004`).
 
 When a paid member changes login email (profile OTP verify), Neon updates only after `stripe.customers.update` succeeds for the bound Customer (fail closed). Email is not the Stripe billing key.
 
@@ -38,11 +40,18 @@ UI and perks use the **current** row only (`status` ∈ `active` \| `past_due`).
 
 **Product rules:** `active` → perks on; `past_due` → perks off, no Join, fix via Stripe Customer portal; no current row → Join.
 
-Seed Annual member:
+**DB guards (migration `0004`):**
 
-- Email: `annual@ccvaa-seed.test`
-- `current_period_end`: `2026-03-15T00:00:00.000Z`
-- `stripe_customer_id`: `cus_seed_annual_test`
+| Object | Role |
+|--------|------|
+| Partial unique index `members_stripe_customer_id_uidx` | `members(stripe_customer_id) WHERE stripe_customer_id IS NOT NULL` |
+| Trigger `memberships_require_stripe_customer_trg` | `BEFORE INSERT OR UPDATE` on `memberships` — raises if that member’s `stripe_customer_id` is null or not `cus_%` |
+
+Seed paid members (all have `cus_…` so migrate/seed pass the trigger):
+
+- Founding: `founding@ccvaa-seed.test` / `cus_seed_founding_test`
+- Lifetime: `lifetime@ccvaa-seed.test` / `cus_seed_lifetime_test`
+- Annual: `annual@ccvaa-seed.test` / `cus_seed_annual_test` / `current_period_end`: `2026-03-15T00:00:00.000Z`
 
 ## Scripts
 
@@ -63,7 +72,7 @@ See `.env.example` — `DATABASE_URL` (Neon), `RESEND_API_KEY` + `RESEND_FROM_EM
 - Dedupe: insert into `stripe_webhook_events` on `event.id` before side effects
 - Activates / updates `memberships`; Founding seat claim is race-safe (cap check in SQL)
 - Member resolution: `stripe_customer_id` first when Checkout `customer` is present; metadata / `customer_email` fallback
-- Checkout create: pass Stripe `customer` when the Neon row already has `stripe_customer_id`; otherwise `customer_email`
+- Checkout create: pass Stripe `customer` when Neon already has durable `cus_*`; payment-mode uses `customer_creation: 'always'` when unset; activation persists Customer on `members` before writing `memberships`
 - Portal session: `POST /api/members/billing/portal` → Stripe `billingPortal.sessions.create` → return `/#membership`
 - **CEO Stripe Dashboard (test now; live at go-live):** enable Customer portal; allow payment method update + invoice history; for Annual allow cancel/renew at period end; subscribe webhook endpoint to subscription updated/deleted
 

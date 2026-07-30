@@ -29,6 +29,13 @@
       "when": 1753660800000,
       "tag": "0003_memberships_portal",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1753833600000,
+      "tag": "0004_memberships_require_stripe_customer",
+      "breakpoints": true
     }
   ]
 }
