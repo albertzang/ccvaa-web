@@ -371,13 +371,14 @@ export function MembershipPanel({
         "/api/members/billing/portal",
         {},
       );
-      window.location.assign(result.url);
+      window.open(result.url, "_blank", "noopener,noreferrer");
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
           : "Could not open billing portal.",
       );
+    } finally {
       setBillingBusy(false);
     }
   };
