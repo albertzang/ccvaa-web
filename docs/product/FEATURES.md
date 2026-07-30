@@ -1,7 +1,7 @@
 # CCVAA Web — Feature Inventory
 
 > **Owner:** Product Manager agent  
-> **Updated:** 2026-07-25  
+> **Updated:** 2026-07-29  
 > Keep this document current whenever features ship or change. Work-to-do: [`BACKLOG.md`](BACKLOG.md).
 
 ## Product summary
@@ -35,7 +35,7 @@
 
 ### Membership (`#membership`)
 - **Only after email OTP verify** (section + nav hidden when logged out)
-- Verified strip: Email (+ change with re-OTP); newsletter toggle (default **off**; on/off without OTP while session active); non-members → Stripe Checkout; current membership → plan copy (**Annual until** / **Lifetime** / **Founding**) + **Manage billing** when Stripe Customer linked; `active` → perks placeholder; `past_due` → perks off, no Join. Identity is **email-only** (no member name)
+- Verified strip: Email (+ change with re-OTP); newsletter toggle (default **off**; on/off without OTP while session active); non-members → Stripe Checkout; current membership → plan copy (**Annual until** / **Lifetime** / **Founding**) + **Manage billing** when Stripe Customer linked (opens Stripe Customer portal in a **new tab**); `active` → perks placeholder; `past_due` → perks off, no Join. Identity is **email-only** (no member name)
 - Plans: **Founding** (capped one-time) while seats remain → then **Lifetime**; **Annual** always offered (short plan copy; seats remaining on Founding card)
 - Checkout return carries `session_id`; client activates membership (webhook backstop); strips `joined`/`session_id` from URL after success; cookie + plan are truth
 - Top banners: info (cream) / error (coral-dark); dismissible; form `noValidate` → banner field errors
@@ -121,7 +121,7 @@
 
 **Newsletter (members-0003 / portal `members-0022`, prune `members-0024`):** Preference lives on `#membership` after email verify. First verify defaults newsletter **off** (CASL). Session toggle on/off requires no OTP. Token unsub `/?unsub=<token>#membership` via `members.unsub_token` (idempotent; newsletter off + verified session; membership unchanged). ESP sync stub in `src/lib/members/esp.ts` — footer URL: [`docs/members/esp.md`](../members/esp.md). APIs: `POST /api/members/newsletter/preference` (session), email/token unsub. Legacy subscribe/confirm OTP routes removed.
 
-**Join / Stripe (members-0004 + portal `members-0022` + `members-0024`/`0026`):** Verified session → plan picker → `POST /api/members/join/checkout` → Stripe Checkout (test keys on Dev/Preview). Success return includes Stripe `session_id`; `POST /api/members/join/session` mints httpOnly member cookie (**members-0014**). Pre-cap Founding+Annual; post-cap Lifetime+Annual. Env: `STRIPE_*`, `MEMBERSHIP_FOUNDING_CAP`, fee cents (Lifetime > Founding enforced). Webhook: `POST /api/members/webhooks/stripe` (`checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`) writes `memberships`. Billing binds to **Stripe Customer ID**; Customer portal via `POST /api/members/billing/portal` when `stripe_customer_id` set (invoices/history; Annual cancel/renew in portal — no in-app cancel). `past_due`: perks off, no Join, portal is the fix path. Live keys: `members-0009`.
+**Join / Stripe (members-0004 + portal `members-0022` + `members-0024`/`0026`):** Verified session → plan picker → `POST /api/members/join/checkout` → Stripe Checkout (test keys on Dev/Preview). Success return includes Stripe `session_id`; `POST /api/members/join/session` mints httpOnly member cookie (**members-0014**). Pre-cap Founding+Annual; post-cap Lifetime+Annual. Env: `STRIPE_*`, `MEMBERSHIP_FOUNDING_CAP`, fee cents (Lifetime > Founding enforced). Webhook: `POST /api/members/webhooks/stripe` (`checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`) writes `memberships`. Billing binds to **Stripe Customer ID** (`cus_*` required for any `memberships` row). Customer portal via `POST /api/members/billing/portal` when `stripe_customer_id` set — UI opens portal in a **new tab** (invoices/history; Annual cancel/renew in portal — no in-app cancel). `past_due`: perks off, no Join, portal is the fix path. Live keys: `members-0009`.
 
 **Member auth (members-0005 / portal `members-0022`, prune `members-0024`):** Email verify OTP upserts `members` and mints httpOnly `ccvaa_member_session` bound to Member ID UUID (plan may be `none`). 7-day TTL. Logout clears cookie only (does not touch Hover admin). APIs: `POST /api/members/verify/{start,verify}`, `POST /api/members/login/logout`, `GET /api/members/login/session`. Login start/verify removed. **Never grants `/admin`.**
 
@@ -164,6 +164,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-29 | **members-0024:** shipped on `main` (PR #11) — `memberships` + Customer portal (Manage billing **new tab**); `cus_*` invariant (write path + `0004` trigger); newsletter/OTP prune; Pass 2 ship confirmed (Members flag Off OK) |
 | 2026-07-27 | **members-0024:** `memberships` table + Stripe Customer portal + newsletter/OTP prune — current plan copy; Manage billing; subscription webhooks; past_due rules (Preview) |
 | 2026-07-26 | **members-0026:** Stripe Customer ID billing live on `main` (PR #10) — Checkout reuses `customer`; activation by customer id; profile email→Stripe sync (fail closed); Pass 2 ship confirmed |
 | 2026-07-26 | **members-0027:** OTP verify soft-reload gap — no Sub/Join flash; gate slot stays invisible so brand copy does not jump |

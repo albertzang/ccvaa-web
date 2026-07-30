@@ -38,7 +38,7 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 5. Then `next`: `0010` links → `0009` go-live (CEO); `later`: `0011`–`0013`
 6. Portal redesign — `0022` (CEO kickoff when ready)
 
-**Ship lane:** First Members milestone **merged to `main`** 2026-07-18 (PR #8) via epic branch `feat/members` (historical). Pass 2 **ship confirmed**. **`members-0025`** Name removal (PR #9) and **`members-0026`** Stripe Customer ID binding (PR #10) shipped 2026-07-26. Remaining: `members-0009` (CEO go-live / Production flag), `0010` if still open, `0011`–`0013` later; **`members-0024`** memberships table + Stripe Customer portal + newsletter/OTP prune (not started). **Future work:** main-safe increments per [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#main-safe-increments-required).
+**Ship lane:** First Members milestone **merged to `main`** 2026-07-18 (PR #8) via epic branch `feat/members` (historical). Pass 2 **ship confirmed**. **`members-0025`** Name removal (PR #9) and **`members-0026`** Stripe Customer ID binding (PR #10) shipped 2026-07-26. **`members-0024`** (PR #11) shipped 2026-07-29 (`9ca43ce`); Pass 2 **ship confirmed**. Remaining: `members-0009` (CEO go-live / Production flag), `0010` if still open, `0011`–`0013` later. **Future work:** main-safe increments per [`GIT_DEPLOY.md`](../../protocols/GIT_DEPLOY.md#main-safe-increments-required).
 
 ---
 
@@ -150,7 +150,7 @@ CEO sets fees, Founding cap, Lifetime fee (> Founding), Stripe Price IDs, ESP na
 |-------|--------|
 | **Type** | `task` |
 | **Priority** | `now` |
-| **Status** | `in-progress` |
+| **Status** | `completed` |
 | **Verifier** | `agent` |
 | **Verify passes** | `pass1+pass2` |
 | **Ship path** | `feature-branch` |
@@ -258,12 +258,17 @@ Join activation / subscription webhooks → write `memberships`. Profile, Join C
 
 In-app Annual cancel/resume; member-facing membership history UI; Member since; in-app invoice browser (portal covers receipts); refunds; admin cancels; ESP go-live (`0009`); consent/email-change audit logs.
 
+### Overall
+
+- Shipped 2026-07-29: PR #11 merged (`9ca43ce`); Pass 2 **ship confirmed** on Production (Members flag Off — flag-off path OK; on-path portal covered in Pass 1).
+- Iterations: Founding `cus_*` (Iter 2); write-path + `0004` trigger invariant (Iter 3); Manage billing **new tab** (Iter 4).
+
 ### Links
 
-- Source: CEO (2026-07-25…27; Customer portal–first Annual)
+- Source: CEO (2026-07-25…29; Customer portal–first Annual)
 - Related: `members-0004`, `members-0012`, `members-0026`, newsletter `0003`/`0015`
-- Dev handoff: `docs/handoffs/HANDOFF-DEV.md`
-- Overall: Kicked off 2026-07-27 — feature branch + Pass 1/2
+- PR: https://github.com/albertzang/ccvaa-web/pull/11
+- Merge: `9ca43ce`
 
 ---
 

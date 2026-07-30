@@ -12,6 +12,7 @@
 | Public Homepage | `public-homepage` | [`backlogs/public-homepage-BACKLOG.md`](backlogs/public-homepage-BACKLOG.md) |
 | Admin Console | `admin-console` | [`backlogs/admin-console-BACKLOG.md`](backlogs/admin-console-BACKLOG.md) |
 | Members | `members` | [`backlogs/members-BACKLOG.md`](backlogs/members-BACKLOG.md) |
+| Platform | `platform` | [`backlogs/platform-BACKLOG.md`](backlogs/platform-BACKLOG.md) |
 | Agent OS | `agent-os` | [`backlogs/agent-os-BACKLOG.md`](backlogs/agent-os-BACKLOG.md) |
 
 ## Item schema (required)
