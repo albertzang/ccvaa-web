@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+/** Session / UI plan including `none` when there is no current membership row. */
 export const membershipPlanSchema = z.enum([
   "none",
   "founding",
@@ -9,32 +10,29 @@ export const membershipPlanSchema = z.enum([
 
 export type MembershipPlan = z.infer<typeof membershipPlanSchema>;
 
+/** Plans stored on `memberships.plan` (no `none`). */
+export const paidMembershipPlanSchema = z.enum([
+  "founding",
+  "lifetime",
+  "annual",
+]);
+
+export type PaidMembershipPlan = z.infer<typeof paidMembershipPlanSchema>;
+
 export const membershipStatusSchema = z.enum([
-  "none",
   "active",
-  "cancelled",
   "past_due",
+  "cancelled",
 ]);
 
 export type MembershipStatus = z.infer<typeof membershipStatusSchema>;
 
-/**
- * Annual renewal fields — populated from Stripe for `annual` plan only.
- * Founding and Lifetime must keep both null.
- */
-export const annualRenewalFieldsSchema = z.object({
-  membershipAnniversary: z.coerce.date().nullable(),
-  nextRenewalAt: z.coerce.date().nullable(),
-});
-
-export type AnnualRenewalFields = z.infer<typeof annualRenewalFieldsSchema>;
-
 export const membershipRecordSchema = z.object({
-  plan: membershipPlanSchema,
+  plan: paidMembershipPlanSchema,
   status: membershipStatusSchema,
-  membershipAnniversary: z.coerce.date().nullable(),
-  nextRenewalAt: z.coerce.date().nullable(),
-  stripeCustomerId: z.string().nullable(),
+  stripeSubscriptionId: z.string().nullable(),
+  currentPeriodEnd: z.coerce.date().nullable(),
+  cancelAtPeriodEnd: z.boolean(),
 });
 
 export type MembershipRecord = z.infer<typeof membershipRecordSchema>;
@@ -51,7 +49,7 @@ export const joinMembershipInputSchema = z.object({
 
 export type JoinMembershipInput = z.infer<typeof joinMembershipInputSchema>;
 
-/** Join verify — same identity fields plus email_verify OTP code. */
+/** Join verify — same identity fields plus email OTP code. */
 export const joinMembershipVerifyInputSchema = joinMembershipInputSchema.extend(
   {
     code: z
@@ -73,18 +71,3 @@ export const joinCheckoutFromSessionSchema = z.object({
 export type JoinCheckoutFromSessionInput = z.infer<
   typeof joinCheckoutFromSessionSchema
 >;
-
-/** Validates that non-annual plans do not carry renewal dates. */
-export function assertAnnualRenewalConsistency(
-  plan: MembershipPlan,
-  fields: AnnualRenewalFields,
-): void {
-  if (plan === "annual") {
-    return;
-  }
-  if (fields.membershipAnniversary !== null || fields.nextRenewalAt !== null) {
-    throw new Error(
-      `membershipAnniversary and nextRenewalAt must be null for plan "${plan}"`,
-    );
-  }
-}

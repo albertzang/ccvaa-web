@@ -35,7 +35,7 @@
 
 ### Membership (`#membership`)
 - **Only after email OTP verify** (section + nav hidden when logged out)
-- Verified strip: Email (+ change with re-OTP); newsletter toggle (default **off**; on/off without OTP while session active); non-members → Stripe Checkout; paid → perks placeholder. Identity is **email-only** (no member name)
+- Verified strip: Email (+ change with re-OTP); newsletter toggle (default **off**; on/off without OTP while session active); non-members → Stripe Checkout; current membership → plan copy (**Annual until** / **Lifetime** / **Founding**) + **Manage billing** when Stripe Customer linked; `active` → perks placeholder; `past_due` → perks off, no Join. Identity is **email-only** (no member name)
 - Plans: **Founding** (capped one-time) while seats remain → then **Lifetime**; **Annual** always offered (short plan copy; seats remaining on Founding card)
 - Checkout return carries `session_id`; client activates membership (webhook backstop); strips `joined`/`session_id` from URL after success; cookie + plan are truth
 - Top banners: info (cream) / error (coral-dark); dismissible; form `noValidate` → banner field errors
@@ -88,7 +88,7 @@
 ### Members roster
 - Mail-session gated roster at **Members** (same Hover login as Webmail)
 - List / search by email; **plan** and **newsletter** filters are separate axes
-- Table shows email, plan, membership status, newsletter flag; **Annual** rows show anniversary date and next renewal (no name column)
+- Table shows email, current plan, membership status, newsletter flag; **Annual** rows show period end (no name column)
 - Edit (modal + confirm) and delete (confirm dialog); mutations validated with Zod; API routes under `/api/admin/members`
 - Fail closed when `DATABASE_URL` is missing or Neon schema is unmigrated (503) — UI shows error state
 
@@ -107,8 +107,8 @@
 | | Newsletter | Membership |
 |--|------------|------------|
 | **Meaning** | Mailing-list opt-in | Paid association (Stripe) |
-| **UI** | `#membership` toggle after verify; ESP unsub → `#membership` + verified session | `#membership` Join Checkout or perks placeholder after verify |
-| **Count** | Anyone with newsletter on | Active paid plans |
+| **UI** | `#membership` toggle after verify; ESP unsub → `#membership` + verified session | `#membership` Join Checkout or current plan copy + Manage billing / perks after verify |
+| **Count** | Anyone with newsletter on | Active paid memberships (`memberships.status = active`) |
 
 **Hero / membership:** Logged-out OTP + Sub/Join in Hero; `#membership` only after verify.  
 **Stack:** Neon + Drizzle + Zod · Stripe · Resend · ESP · Mailosaur. Admin roster (`0008`); Resend/ESP new-tab links (`0010`); later: in-admin blast, member perks, impersonation.  
@@ -117,15 +117,15 @@
 
 **Public feature switch (members-0023, epic `feat/members`):** One shared Edge Config store has three top-level JSON-object items: `production = { "members": false }`, `preview = { "members": false }`, and `development = { "members": false }`. Future flags are sibling booleans in each object. The app reads the item matching `VERCEL_ENV` (`development` when local/unset) via `@vercel/edge-config`; missing/unknown environment, bucket, key, invalid value, read failure, or unset `EDGE_CONFIG` fails closed to Off. **Staging** (`staging` branch) is a Vercel Preview deploy, so it reads the **`preview`** bucket — flip `preview` to demo Staging without changing Production. Flags are managed in the Vercel dashboard or by an external API — there is no Admin Console toggle or in-app write path, and the app needs only `EDGE_CONFIG`. **Production values are CEO/Admin-only; agents never flip Production.** CEO/Admin and agents may flip Preview/Development for testing and should restore Off afterward.
 
-**Platform (members-0001, epic `feat/members`):** Drizzle schema on Neon — orthogonal `newsletter_status` vs `membership_plan`; OTP challenges; unsub tokens; `stripe_webhook_events` for Join idempotency. Annual plans use `membership_anniversary` + `next_renewal_at` (null for Founding/Lifetime). Member identity is email-only (`members-0025` — no `name` column). Shared Zod in `src/lib/members/zod/`. `GET /api/members/health` fails closed (503) without `DATABASE_URL` (Stripe/Resend status informational). Migrate/seed: `npm run db:migrate`, `npm run db:seed` (seeds non-Production only). Schema notes: [`docs/members/schema.md`](../members/schema.md).
+**Platform (members-0001 + `members-0024`):** Drizzle schema on Neon — `members` (email, newsletter on/off, lifelong `unsub_token`, `stripe_customer_id`) + `memberships` history (plan/status/period; current = active|past_due). **Invariant:** every `memberships` row requires that member’s `stripe_customer_id` to be a durable Stripe Customer (`cus_*`); enforced in app write path + DB trigger (`0004`). OTP challenges have no purpose column. `stripe_webhook_events` for Join/subscription idempotency. Member identity is email-only (`members-0025`). Shared Zod in `src/lib/members/zod/`. `GET /api/members/health` fails closed (503) without `DATABASE_URL`. Migrate/seed: `npm run db:migrate`, `npm run db:seed` (seeds non-Production only). Schema notes: [`docs/members/schema.md`](../members/schema.md).
 
-**Newsletter (members-0003 / portal `members-0022`, epic `feat/members`):** Preference lives on `#membership` after email verify. First verify defaults newsletter **off** (CASL). Session toggle on/off requires no OTP. Token unsub `/?unsub=<token>#membership` (idempotent; newsletter off + verified session + toggle UI off; membership unchanged). ESP sync stub in `src/lib/members/esp.ts` — footer URL: [`docs/members/esp.md`](../members/esp.md). APIs: `POST /api/members/newsletter/preference` (session), legacy subscribe/confirm/unsub routes retained for tooling.
+**Newsletter (members-0003 / portal `members-0022`, prune `members-0024`):** Preference lives on `#membership` after email verify. First verify defaults newsletter **off** (CASL). Session toggle on/off requires no OTP. Token unsub `/?unsub=<token>#membership` via `members.unsub_token` (idempotent; newsletter off + verified session; membership unchanged). ESP sync stub in `src/lib/members/esp.ts` — footer URL: [`docs/members/esp.md`](../members/esp.md). APIs: `POST /api/members/newsletter/preference` (session), email/token unsub. Legacy subscribe/confirm OTP routes removed.
 
-**Join / Stripe (members-0004 + portal `members-0022`, epic `feat/members`):** Verified session → plan picker → `POST /api/members/join/checkout` → Stripe Checkout (test keys on Dev/Preview). Success return includes Stripe `session_id`; `POST /api/members/join/session` mints httpOnly member cookie (**members-0014**). Pre-cap Founding+Annual; post-cap Lifetime+Annual. Env: `STRIPE_*`, `MEMBERSHIP_FOUNDING_CAP`, fee cents (Lifetime > Founding enforced). Webhook: `POST /api/members/webhooks/stripe`. Billing binds to **Stripe Customer ID** (`stripe_customer_id`); Neon `email` is login only — Checkout reuses `customer` when set; activation/webhook resolve customer id first (`members-0026`). Live keys: `members-0009`.
+**Join / Stripe (members-0004 + portal `members-0022` + `members-0024`/`0026`):** Verified session → plan picker → `POST /api/members/join/checkout` → Stripe Checkout (test keys on Dev/Preview). Success return includes Stripe `session_id`; `POST /api/members/join/session` mints httpOnly member cookie (**members-0014**). Pre-cap Founding+Annual; post-cap Lifetime+Annual. Env: `STRIPE_*`, `MEMBERSHIP_FOUNDING_CAP`, fee cents (Lifetime > Founding enforced). Webhook: `POST /api/members/webhooks/stripe` (`checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`) writes `memberships`. Billing binds to **Stripe Customer ID**; Customer portal via `POST /api/members/billing/portal` when `stripe_customer_id` set (invoices/history; Annual cancel/renew in portal — no in-app cancel). `past_due`: perks off, no Join, portal is the fix path. Live keys: `members-0009`.
 
-**Member auth (members-0005 / portal `members-0022`, epic `feat/members`):** Email verify OTP (`purpose=email_verify`) upserts `members` and mints httpOnly `ccvaa_member_session` bound to Member ID UUID (plan may be `none`). 7-day TTL. Logout clears cookie only (does not touch Hover admin). APIs: `POST /api/members/verify/{start,verify}`, `POST /api/members/login/logout`. **Never grants `/admin`.**
+**Member auth (members-0005 / portal `members-0022`, prune `members-0024`):** Email verify OTP upserts `members` and mints httpOnly `ccvaa_member_session` bound to Member ID UUID (plan may be `none`). 7-day TTL. Logout clears cookie only (does not touch Hover admin). APIs: `POST /api/members/verify/{start,verify}`, `POST /api/members/login/logout`, `GET /api/members/login/session`. Login start/verify removed. **Never grants `/admin`.**
 
-**Member profile (members-0006 / portal `members-0022`, epic `feat/members`; name removed `members-0025`):** Verified strip — email change requires `email_verify` OTP on the new address; when `stripe_customer_id` is set, Stripe Customer email syncs first (fail closed — `members-0026`); Annual shows read-only anniversary / next renewal; paid members see perks placeholder (`members-0012`). APIs: `GET /api/members/profile`, `POST /api/members/profile/email/{start,verify}`.
+**Member profile (members-0006 / portal `members-0022`; name removed `members-0025`; memberships `members-0024`):** Verified strip — email change requires OTP on the new address; when `stripe_customer_id` is set, Stripe Customer email syncs first (fail closed — `members-0026`). Plan copy: **Annual until {date}** / **Lifetime** / **Founding** (+ won’t-renew / past_due); **Manage billing** when Customer linked; paid `active` sees perks placeholder (`members-0012`). No Member since / history UI. APIs: `GET /api/members/profile`, `POST /api/members/profile/email/{start,verify}`, `POST /api/members/billing/portal`.
 
 ---
 
@@ -164,6 +164,7 @@ Work-to-do lives in **[`BACKLOG.md`](BACKLOG.md)** (feature files under `backlog
 
 | When | What |
 |------|------|
+| 2026-07-27 | **members-0024:** `memberships` table + Stripe Customer portal + newsletter/OTP prune — current plan copy; Manage billing; subscription webhooks; past_due rules (Preview) |
 | 2026-07-26 | **members-0026:** Stripe Customer ID billing live on `main` (PR #10) — Checkout reuses `customer`; activation by customer id; profile email→Stripe sync (fail closed); Pass 2 ship confirmed |
 | 2026-07-26 | **members-0027:** OTP verify soft-reload gap — no Sub/Join flash; gate slot stays invisible so brand copy does not jump |
 | 2026-07-26 | **members-0025:** email-only identity live on `main` (PR #9) — drop Name; membership UX polish (MessageBanner, soft-reload recovery, verified glass portal); Pass 2 ship confirmed |

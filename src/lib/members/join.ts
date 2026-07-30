@@ -1,18 +1,26 @@
-import { and, eq, ne, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import type Stripe from "stripe";
 import { z } from "zod";
 
 import { getMembersDb } from "@/db/client";
-import { members, stripeWebhookEvents } from "@/db/schema";
+import { members, memberships, stripeWebhookEvents } from "@/db/schema";
 import {
   sendEmailVerifyOtp,
   verifyDeliveredOtp,
 } from "@/lib/members/confirm";
-import {
-  MembersDbError,
-  withMembersDbError,
-} from "@/lib/members/errors";
+import { MembersDbError } from "@/lib/members/errors";
 import { requireDatabaseUrl } from "@/lib/members/env";
+import {
+  assertMemberHasStripeCustomer,
+  canJoinMembership,
+  countActiveFoundingMemberships,
+  countActivePaidMemberships,
+  findMembershipBySubscriptionId,
+  getCurrentMembership,
+  isDurableStripeCustomerId,
+  sessionPlanFromMembership,
+  upsertCurrentMembership,
+} from "@/lib/members/memberships";
 import { activateNewsletterFromVerifiedEmail } from "@/lib/members/newsletter";
 import {
   createMemberSessionToken,
@@ -35,6 +43,7 @@ import {
   joinMembershipVerifyInputSchema,
   type JoinMembershipInput,
   type JoinPlanId,
+  type MembershipStatus,
 } from "@/lib/members/zod/membership";
 
 export type JoinPlanOffer = {
@@ -107,6 +116,11 @@ export function isMembersJoinError(error: unknown): error is MembersJoinError {
   return error instanceof MembersJoinError;
 }
 
+export {
+  countActiveFoundingMemberships as countActiveFoundingMembers,
+  countActivePaidMemberships as countActivePaidMembers,
+};
+
 function formatFeeCad(cents: number): string {
   return new Intl.NumberFormat("en-CA", {
     style: "currency",
@@ -128,33 +142,6 @@ function getAppOrigin(requestUrl?: string): string {
     return `https://${vercel}`;
   }
   return "http://localhost:3000";
-}
-
-export async function countActiveFoundingMembers(): Promise<number> {
-  return withMembersDbError(async () => {
-    const db = getMembersDb();
-    const rows = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(members)
-      .where(
-        and(
-          eq(members.membershipPlan, "founding"),
-          eq(members.membershipStatus, "active"),
-        ),
-      );
-    return rows[0]?.count ?? 0;
-  }, "Failed to count founding members.");
-}
-
-export async function countActivePaidMembers(): Promise<number> {
-  return withMembersDbError(async () => {
-    const db = getMembersDb();
-    const rows = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(members)
-      .where(eq(members.membershipStatus, "active"));
-    return rows[0]?.count ?? 0;
-  }, "Failed to count paid members.");
 }
 
 function buildPlanOffers(
@@ -211,7 +198,7 @@ function buildPlanOffers(
 export async function getJoinPlans(): Promise<JoinPlansResult> {
   requireDatabaseUrl();
   const config = requireStripeJoinConfig();
-  const taken = await countActiveFoundingMembers();
+  const taken = await countActiveFoundingMemberships();
   return buildPlanOffers(config, taken);
 }
 
@@ -235,9 +222,6 @@ async function findMemberByStripeCustomerId(stripeCustomerId: string) {
   return rows[0] ?? null;
 }
 
-/**
- * Prefer Stripe Customer ID for billing-linked resolution; email is login + fallback.
- */
 async function resolveMemberForActivation(params: {
   email: string;
   stripeCustomerId: string | null;
@@ -253,13 +237,22 @@ async function resolveMemberForActivation(params: {
   return findMemberByEmail(params.email);
 }
 
-/** Reuse existing Stripe Customer when bound; otherwise let Checkout create via email. */
 function checkoutCustomerFields(
   email: string,
   stripeCustomerId: string | null | undefined,
-): { customer: string } | { customer_email: string } {
-  if (stripeCustomerId) {
+  mode: "payment" | "subscription",
+):
+  | { customer: string }
+  | { customer_email: string; customer_creation?: "always" } {
+  // Reuse only durable Customers (`cus_*`). Reject Guest (`gcus_*`) / null.
+  if (isDurableStripeCustomerId(stripeCustomerId)) {
     return { customer: stripeCustomerId };
+  }
+  // Payment-mode Checkout defaults to customer_creation: if_required and often
+  // leaves session.customer null — then stripe_customer_id never persists and
+  // Manage billing fails. Force a Customer for Founding/Lifetime one-time pays.
+  if (mode === "payment") {
+    return { customer_email: email, customer_creation: "always" };
   }
   return { customer_email: email };
 }
@@ -292,7 +285,22 @@ function priceIdForPlan(config: StripeJoinConfig, plan: JoinPlanId): string {
   return config.priceAnnual;
 }
 
-/** Starts Join: Zod-validate → plan/seat checks → email_verify OTP. */
+async function assertCanJoin(email: string): Promise<void> {
+  const existing = await findMemberByEmail(email);
+  if (!existing) {
+    return;
+  }
+  const current = await getCurrentMembership(existing.id);
+  if (!canJoinMembership(current)) {
+    throw new MembersJoinError(
+      "MEMBERS_ALREADY_MEMBER",
+      current?.status === "past_due"
+        ? "Your membership payment is past due. Use Manage billing to update your payment method."
+        : "This email already has an active membership. Sign in from Membership instead.",
+    );
+  }
+}
+
 export async function startJoin(
   input: JoinMembershipInput,
 ): Promise<JoinStartResult> {
@@ -303,18 +311,7 @@ export async function startJoin(
   const email = parsed.email.trim().toLowerCase();
   const offers = await getJoinPlans();
   assertPlanOffered(parsed.plan, offers);
-
-  const existing = await findMemberByEmail(email);
-  if (
-    existing &&
-    existing.membershipStatus === "active" &&
-    existing.membershipPlan !== "none"
-  ) {
-    throw new MembersJoinError(
-      "MEMBERS_ALREADY_MEMBER",
-      "This email already has an active membership. Sign in from Membership instead.",
-    );
-  }
+  await assertCanJoin(email);
 
   const delivery = await sendEmailVerifyOtp(email);
 
@@ -327,7 +324,6 @@ export async function startJoin(
   };
 }
 
-/** Verifies OTP and creates a Stripe Checkout Session. Returns Stripe URL. */
 export async function verifyJoinAndCreateCheckout(
   input: unknown,
   options?: { requestOrigin?: string },
@@ -339,25 +335,14 @@ export async function verifyJoinAndCreateCheckout(
   const email = parsed.email.trim().toLowerCase();
   const offers = await getJoinPlans();
   assertPlanOffered(parsed.plan, offers);
-
-  const existing = await findMemberByEmail(email);
-  if (
-    existing &&
-    existing.membershipStatus === "active" &&
-    existing.membershipPlan !== "none"
-  ) {
-    throw new MembersJoinError(
-      "MEMBERS_ALREADY_MEMBER",
-      "This email already has an active membership. Sign in from Membership instead.",
-    );
-  }
+  await assertCanJoin(email);
 
   await verifyDeliveredOtp({
     email,
-    purpose: "email_verify",
     code: parsed.code,
   });
 
+  const existing = await findMemberByEmail(email);
   const origin = getAppOrigin(options?.requestOrigin);
   const stripe = getStripeClient();
   const priceId = priceIdForPlan(config, parsed.plan);
@@ -366,7 +351,7 @@ export async function verifyJoinAndCreateCheckout(
   const session = await stripe.checkout.sessions.create({
     mode,
     line_items: [{ price: priceId, quantity: 1 }],
-    ...checkoutCustomerFields(email, existing?.stripeCustomerId),
+    ...checkoutCustomerFields(email, existing?.stripeCustomerId, mode),
     success_url: `${origin}/?joined=1&session_id={CHECKOUT_SESSION_ID}#membership`,
     cancel_url: `${origin}/#membership`,
     metadata: {
@@ -400,10 +385,6 @@ export async function verifyJoinAndCreateCheckout(
   };
 }
 
-/**
- * Creates Stripe Checkout for a verified session member (no second OTP).
- * Newsletter stays on its own toggle — checkout metadata does not opt-in.
- */
 export async function createJoinCheckoutForSession(
   session: MemberSessionPayload,
   input: unknown,
@@ -416,25 +397,17 @@ export async function createJoinCheckoutForSession(
   const offers = await getJoinPlans();
   assertPlanOffered(parsed.plan, offers);
 
-  if (session.plan !== "none") {
+  const current = await getCurrentMembership(session.memberId);
+  if (!canJoinMembership(current)) {
     throw new MembersJoinError(
       "MEMBERS_ALREADY_MEMBER",
-      "You already have an active membership.",
+      current?.status === "past_due"
+        ? "Your membership payment is past due. Use Manage billing to update your payment method."
+        : "You already have an active membership.",
     );
   }
 
   const existing = await findMemberByEmail(session.email);
-  if (
-    existing &&
-    existing.membershipStatus === "active" &&
-    existing.membershipPlan !== "none"
-  ) {
-    throw new MembersJoinError(
-      "MEMBERS_ALREADY_MEMBER",
-      "You already have an active membership.",
-    );
-  }
-
   const email = session.email;
   const origin = getAppOrigin(options?.requestOrigin);
   const stripe = getStripeClient();
@@ -444,7 +417,7 @@ export async function createJoinCheckoutForSession(
   const checkout = await stripe.checkout.sessions.create({
     mode,
     line_items: [{ price: priceId, quantity: 1 }],
-    ...checkoutCustomerFields(email, existing?.stripeCustomerId),
+    ...checkoutCustomerFields(email, existing?.stripeCustomerId, mode),
     success_url: `${origin}/?joined=1&session_id={CHECKOUT_SESSION_ID}#membership`,
     cancel_url: `${origin}/#membership`,
     metadata: {
@@ -487,10 +460,6 @@ const joinCheckoutSessionInputSchema = z.object({
     .regex(/^cs_[A-Za-z0-9_]+$/, "Invalid Checkout session id."),
 });
 
-/**
- * After Stripe success return: verify paid Checkout session and mint member
- * session cookie payload. Returns pending when webhook has not activated yet.
- */
 export async function establishMemberSessionFromCheckout(
   input: unknown,
 ): Promise<JoinCheckoutSessionResult> {
@@ -533,60 +502,31 @@ export async function establishMemberSessionFromCheckout(
     );
   }
 
-  const db = getMembersDb();
-
   const loadActivePaidMember = async () => {
-    if (stripeCustomerId) {
-      const byCustomer = await db
-        .select({
-          id: members.id,
-          email: members.email,
-          membershipPlan: members.membershipPlan,
-          membershipStatus: members.membershipStatus,
-        })
-        .from(members)
-        .where(
-          and(
-            eq(members.stripeCustomerId, stripeCustomerId),
-            eq(members.membershipStatus, "active"),
-            ne(members.membershipPlan, "none"),
-          ),
-        )
-        .limit(1);
-      if (byCustomer[0]) {
-        return byCustomer[0];
-      }
-    }
+    const memberRow =
+      (stripeCustomerId
+        ? await findMemberByStripeCustomerId(stripeCustomerId)
+        : null) ?? (email ? await findMemberByEmail(email) : null);
 
-    if (!email) {
+    if (!memberRow) {
       return null;
     }
 
-    const rows = await db
-      .select({
-        id: members.id,
-        email: members.email,
-        membershipPlan: members.membershipPlan,
-        membershipStatus: members.membershipStatus,
-      })
-      .from(members)
-      .where(
-        and(
-          eq(members.email, email),
-          eq(members.membershipStatus, "active"),
-          ne(members.membershipPlan, "none"),
-        ),
-      )
-      .limit(1);
-    return rows[0] ?? null;
+    const current = await getCurrentMembership(memberRow.id);
+    if (!current || current.status !== "active") {
+      return null;
+    }
+
+    return {
+      id: memberRow.id,
+      email: memberRow.email,
+      plan: current.plan,
+    };
   };
 
   let member = await loadActivePaidMember();
 
-  if (!member || member.membershipPlan === "none") {
-    // Webhooks are often delayed or unavailable on local Dev. Fulfill from the
-    // paid Checkout session (same path as checkout.session.completed); webhook
-    // retries stay idempotent via the activate* helpers.
+  if (!member) {
     try {
       await handleCheckoutSessionCompleted(checkout);
     } catch (error) {
@@ -604,8 +544,7 @@ export async function establishMemberSessionFromCheckout(
     member = await loadActivePaidMember();
   }
 
-  if (!member || member.membershipPlan === "none") {
-    // Founding cap race refunds in the activator and leaves plan unset.
+  if (!member) {
     throw new MembersJoinError(
       "MEMBERS_JOIN_ACTIVATION_FAILED",
       "Payment was received but membership could not be activated. If you were charged for a Founding seat that just filled, a refund may be in progress — contact us or try Annual/Lifetime.",
@@ -615,7 +554,7 @@ export async function establishMemberSessionFromCheckout(
   const { token, expiresAt, payload } = createMemberSessionToken({
     memberId: member.id,
     email: member.email,
-    plan: member.membershipPlan,
+    plan: member.plan,
   });
 
   const memberProfile = await getMemberProfileForSession(payload);
@@ -628,14 +567,6 @@ export async function establishMemberSessionFromCheckout(
     profile: toPublicMemberProfile(memberProfile, payload.exp),
     message: "Welcome — you are signed in to your membership.",
   };
-}
-
-function anniversaryDateString(fromUnix: number): string {
-  const d = new Date(fromUnix * 1000);
-  const yyyy = d.getUTCFullYear();
-  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const dd = String(d.getUTCDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
 }
 
 function rowsFromExecute(result: unknown): unknown[] {
@@ -653,10 +584,54 @@ function rowsFromExecute(result: unknown): unknown[] {
   return [];
 }
 
-/**
- * Race-safe Founding activation: single-statement claim that only writes when
- * active founding count is still under the cap (works on Neon HTTP).
- */
+async function ensureMemberRow(params: {
+  email: string;
+  stripeCustomerId: string | null;
+}): Promise<{ id: string; email: string }> {
+  const db = getMembersDb();
+  const now = new Date();
+  const existing = await resolveMemberForActivation(params);
+
+  const durableCustomerId = isDurableStripeCustomerId(params.stripeCustomerId)
+    ? params.stripeCustomerId
+    : isDurableStripeCustomerId(existing?.stripeCustomerId)
+      ? existing.stripeCustomerId
+      : null;
+
+  // Persist Customer on members before any memberships write.
+  if (!durableCustomerId) {
+    throw new MembersDbError(
+      "Join activation requires a Stripe Customer (cus_*). Guest or missing customer cannot create a membership.",
+    );
+  }
+
+  if (existing) {
+    await db
+      .update(members)
+      .set({
+        stripeCustomerId: durableCustomerId,
+        updatedAt: now,
+      })
+      .where(eq(members.id, existing.id));
+    return { id: existing.id, email: existing.email };
+  }
+
+  const inserted = await db
+    .insert(members)
+    .values({
+      email: params.email,
+      newsletterStatus: "off",
+      stripeCustomerId: durableCustomerId,
+    })
+    .returning({ id: members.id, email: members.email });
+
+  const row = inserted[0];
+  if (!row) {
+    throw new MembersDbError("Failed to create member during Join activation.");
+  }
+  return row;
+}
+
 async function activateFoundingMembership(params: {
   email: string;
   stripeCustomerId: string | null;
@@ -664,67 +639,56 @@ async function activateFoundingMembership(params: {
 }): Promise<"activated" | "cap_full"> {
   const db = getMembersDb();
   const now = new Date();
-  const existing = await resolveMemberForActivation({
+  const member = await ensureMemberRow({
     email: params.email,
     stripeCustomerId: params.stripeCustomerId,
   });
+  // Customer must be on members before memberships insert (app + DB trigger).
+  await assertMemberHasStripeCustomer(member.id);
 
-  if (existing) {
-    const claimed = await db.execute(sql`
-      WITH caps AS (
-        SELECT count(*)::int AS founding_count
-        FROM members
-        WHERE membership_plan = 'founding'
-          AND membership_status = 'active'
-      )
-      UPDATE members AS m
-      SET
-        membership_plan = 'founding',
-        membership_status = 'active',
-        membership_anniversary = NULL,
-        next_renewal_at = NULL,
-        stripe_customer_id = ${params.stripeCustomerId},
-        updated_at = ${now}
-      FROM caps
-      WHERE m.id = ${existing.id}::uuid
-        AND caps.founding_count < ${params.foundingCap}
-      RETURNING m.id
-    `);
-    return rowsFromExecute(claimed).length > 0 ? "activated" : "cap_full";
+  const current = await getCurrentMembership(member.id);
+  if (current?.plan === "founding" && current.status === "active") {
+    return "activated";
+  }
+
+  if (current) {
+    await db
+      .update(memberships)
+      .set({ status: "cancelled", updatedAt: now })
+      .where(eq(memberships.id, current.id));
   }
 
   const inserted = await db.execute(sql`
     WITH caps AS (
       SELECT count(*)::int AS founding_count
-      FROM members
-      WHERE membership_plan = 'founding'
-        AND membership_status = 'active'
+      FROM memberships
+      WHERE plan = 'founding'
+        AND status = 'active'
     )
-    INSERT INTO members (
-      email,
-      membership_plan,
-      membership_status,
-      membership_anniversary,
-      next_renewal_at,
-      stripe_customer_id,
-      newsletter_status,
+    INSERT INTO memberships (
+      member_id,
+      plan,
+      status,
+      stripe_subscription_id,
+      current_period_end,
+      cancel_at_period_end,
       created_at,
       updated_at
     )
     SELECT
-      ${params.email},
+      ${member.id}::uuid,
       'founding',
       'active',
       NULL,
       NULL,
-      ${params.stripeCustomerId},
-      'off',
+      false,
       ${now},
       ${now}
     FROM caps
     WHERE caps.founding_count < ${params.foundingCap}
     RETURNING id
   `);
+
   return rowsFromExecute(inserted).length > 0 ? "activated" : "cap_full";
 }
 
@@ -732,45 +696,26 @@ async function activateNonFoundingMembership(params: {
   email: string;
   plan: "lifetime" | "annual";
   stripeCustomerId: string | null;
-  membershipAnniversary: string | null;
-  nextRenewalAt: Date | null;
+  stripeSubscriptionId: string | null;
+  currentPeriodEnd: Date | null;
+  cancelAtPeriodEnd?: boolean;
 }): Promise<void> {
-  const db = getMembersDb();
-  const now = new Date();
-  const existing = await resolveMemberForActivation({
+  const member = await ensureMemberRow({
     email: params.email,
     stripeCustomerId: params.stripeCustomerId,
   });
 
-  if (existing) {
-    await db
-      .update(members)
-      .set({
-        membershipPlan: params.plan,
-        membershipStatus: "active",
-        membershipAnniversary: params.membershipAnniversary,
-        nextRenewalAt: params.nextRenewalAt,
-        stripeCustomerId: params.stripeCustomerId,
-        updatedAt: now,
-      })
-      .where(eq(members.id, existing.id));
-    return;
-  }
-
-  await db.insert(members).values({
-    email: params.email,
-    membershipPlan: params.plan,
-    membershipStatus: "active",
-    membershipAnniversary: params.membershipAnniversary,
-    nextRenewalAt: params.nextRenewalAt,
-    stripeCustomerId: params.stripeCustomerId,
-    newsletterStatus: "off",
+  await upsertCurrentMembership({
+    memberId: member.id,
+    plan: params.plan,
+    status: "active",
+    stripeSubscriptionId: params.stripeSubscriptionId,
+    currentPeriodEnd: params.currentPeriodEnd,
+    cancelAtPeriodEnd: params.cancelAtPeriodEnd ?? false,
   });
 }
 
 async function applyNewsletterOptIn(email: string): Promise<void> {
-  // Join already verified email via email_verify OTP — activate immediately
-  // (no second newsletter confirm mail). Contact-only subscribe stays double opt-in.
   await activateNewsletterFromVerifiedEmail(email);
 }
 
@@ -797,6 +742,44 @@ async function refundCheckoutSession(
   }
 }
 
+function subscriptionPeriodEnd(subscription: Stripe.Subscription): Date | null {
+  const firstItem = subscription.items?.data?.[0];
+  let periodEnd: number | null = null;
+  if (
+    firstItem &&
+    "current_period_end" in firstItem &&
+    typeof firstItem.current_period_end === "number"
+  ) {
+    periodEnd = firstItem.current_period_end;
+  } else {
+    const raw = (subscription as unknown as { current_period_end?: unknown })
+      .current_period_end;
+    if (typeof raw === "number") {
+      periodEnd = raw;
+    }
+  }
+  return periodEnd ? new Date(periodEnd * 1000) : null;
+}
+
+function mapStripeSubscriptionStatus(
+  status: Stripe.Subscription.Status,
+): MembershipStatus | null {
+  if (status === "active" || status === "trialing") {
+    return "active";
+  }
+  if (status === "past_due" || status === "unpaid") {
+    return "past_due";
+  }
+  if (
+    status === "canceled" ||
+    status === "incomplete_expired" ||
+    status === "incomplete"
+  ) {
+    return "cancelled";
+  }
+  return null;
+}
+
 async function handleCheckoutSessionCompleted(
   session: Stripe.Checkout.Session,
 ): Promise<void> {
@@ -811,7 +794,6 @@ async function handleCheckoutSessionCompleted(
   const plan = session.metadata?.plan as JoinPlanId | undefined;
   const newsletterOptIn = session.metadata?.newsletterOptIn === "true";
 
-  // Prefer customer-id resolution later; email still required for insert / newsletter.
   if (!email || !plan || !["founding", "lifetime", "annual"].includes(plan)) {
     throw new MembersDbError(
       "Stripe checkout session missing email/plan metadata.",
@@ -841,13 +823,12 @@ async function handleCheckoutSessionCompleted(
       email,
       plan: "lifetime",
       stripeCustomerId,
-      membershipAnniversary: null,
-      nextRenewalAt: null,
+      stripeSubscriptionId: null,
+      currentPeriodEnd: null,
     });
   } else {
-    let membershipAnniversary: string | null = null;
-    let nextRenewalAt: Date | null = null;
-
+    let currentPeriodEnd: Date | null = null;
+    let cancelAtPeriodEnd = false;
     const subscriptionId =
       typeof session.subscription === "string"
         ? session.subscription
@@ -858,32 +839,17 @@ async function handleCheckoutSessionCompleted(
       const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
         expand: ["items.data"],
       });
-      const firstItem = subscription.items?.data?.[0];
-      const periodEnd =
-        firstItem &&
-        "current_period_end" in firstItem &&
-        typeof firstItem.current_period_end === "number"
-          ? firstItem.current_period_end
-          : null;
-      const anchor =
-        typeof subscription.billing_cycle_anchor === "number"
-          ? subscription.billing_cycle_anchor
-          : periodEnd;
-
-      if (periodEnd) {
-        nextRenewalAt = new Date(periodEnd * 1000);
-      }
-      if (anchor) {
-        membershipAnniversary = anniversaryDateString(anchor);
-      }
+      currentPeriodEnd = subscriptionPeriodEnd(subscription);
+      cancelAtPeriodEnd = Boolean(subscription.cancel_at_period_end);
     }
 
     await activateNonFoundingMembership({
       email,
       plan: "annual",
       stripeCustomerId,
-      membershipAnniversary,
-      nextRenewalAt,
+      stripeSubscriptionId: subscriptionId ?? null,
+      currentPeriodEnd,
+      cancelAtPeriodEnd,
     });
   }
 
@@ -896,10 +862,73 @@ async function handleCheckoutSessionCompleted(
   }
 }
 
-/**
- * Idempotent Stripe webhook processor.
- * Claims `event.id` first; duplicates return without re-running side effects.
- */
+async function handleSubscriptionUpdated(
+  subscription: Stripe.Subscription,
+): Promise<void> {
+  const existing = await findMembershipBySubscriptionId(subscription.id);
+  const mapped = mapStripeSubscriptionStatus(subscription.status);
+  if (!mapped) {
+    return;
+  }
+
+  const periodEnd = subscriptionPeriodEnd(subscription);
+  const cancelAtPeriodEnd = Boolean(subscription.cancel_at_period_end);
+  const now = new Date();
+
+  if (existing) {
+    const db = getMembersDb();
+    await db
+      .update(memberships)
+      .set({
+        status: mapped,
+        currentPeriodEnd: periodEnd,
+        cancelAtPeriodEnd,
+        updatedAt: now,
+      })
+      .where(eq(memberships.id, existing.id));
+    return;
+  }
+
+  const customerId =
+    typeof subscription.customer === "string"
+      ? subscription.customer
+      : subscription.customer?.id;
+  if (!customerId) {
+    return;
+  }
+  const member = await findMemberByStripeCustomerId(customerId);
+  if (!member) {
+    return;
+  }
+
+  await upsertCurrentMembership({
+    memberId: member.id,
+    plan: "annual",
+    status: mapped === "cancelled" ? "cancelled" : mapped,
+    stripeSubscriptionId: subscription.id,
+    currentPeriodEnd: periodEnd,
+    cancelAtPeriodEnd,
+  });
+}
+
+async function handleSubscriptionDeleted(
+  subscription: Stripe.Subscription,
+): Promise<void> {
+  const existing = await findMembershipBySubscriptionId(subscription.id);
+  if (!existing) {
+    return;
+  }
+  const db = getMembersDb();
+  await db
+    .update(memberships)
+    .set({
+      status: "cancelled",
+      cancelAtPeriodEnd: false,
+      updatedAt: new Date(),
+    })
+    .where(eq(memberships.id, existing.id));
+}
+
 export async function processStripeWebhookEvent(
   event: Stripe.Event,
 ): Promise<{ duplicate: boolean; handled: boolean }> {
@@ -927,5 +956,25 @@ export async function processStripeWebhookEvent(
     return { duplicate: false, handled: true };
   }
 
+  if (event.type === "customer.subscription.updated") {
+    await handleSubscriptionUpdated(
+      event.data.object as Stripe.Subscription,
+    );
+    return { duplicate: false, handled: true };
+  }
+
+  if (event.type === "customer.subscription.deleted") {
+    await handleSubscriptionDeleted(
+      event.data.object as Stripe.Subscription,
+    );
+    return { duplicate: false, handled: true };
+  }
+
   return { duplicate: false, handled: false };
+}
+
+export async function getSessionPlanForMember(
+  memberId: string,
+): Promise<ReturnType<typeof sessionPlanFromMembership>> {
+  return sessionPlanFromMembership(await getCurrentMembership(memberId));
 }

@@ -39,7 +39,6 @@ const NEWSLETTER_OPTIONS = [
   { value: "all", label: "All newsletter" },
   { value: "on", label: "Newsletter on" },
   { value: "off", label: "Newsletter off" },
-  { value: "pending", label: "Newsletter pending" },
 ] as const;
 
 const MEMBERSHIP_PLANS: MembershipPlan[] = [
@@ -49,28 +48,17 @@ const MEMBERSHIP_PLANS: MembershipPlan[] = [
   "annual",
 ];
 
-const MEMBERSHIP_STATUSES: MembershipStatus[] = [
+const MEMBERSHIP_STATUSES: Array<MembershipStatus | "none"> = [
   "none",
   "active",
   "cancelled",
   "past_due",
 ];
 
-const NEWSLETTER_STATUSES: NewsletterStatus[] = ["off", "pending", "on"];
+const NEWSLETTER_STATUSES: NewsletterStatus[] = ["off", "on"];
 
 function formatLabel(value: string): string {
   return value.replace(/_/g, " ");
-}
-
-function formatDate(value: string | null): string {
-  if (!value) return "—";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
 }
 
 function formatDateTime(value: string | null): string {
@@ -87,9 +75,9 @@ function formatDateTime(value: string | null): string {
 type EditDraft = {
   newsletterStatus: NewsletterStatus;
   membershipPlan: MembershipPlan;
-  membershipStatus: MembershipStatus;
-  membershipAnniversary: string;
-  nextRenewalAt: string;
+  membershipStatus: MembershipStatus | "none";
+  currentPeriodEnd: string;
+  cancelAtPeriodEnd: boolean;
 };
 
 function memberToDraft(member: AdminRosterMember): EditDraft {
@@ -97,10 +85,10 @@ function memberToDraft(member: AdminRosterMember): EditDraft {
     newsletterStatus: member.newsletterStatus,
     membershipPlan: member.membershipPlan,
     membershipStatus: member.membershipStatus,
-    membershipAnniversary: member.membershipAnniversary ?? "",
-    nextRenewalAt: member.nextRenewalAt
-      ? member.nextRenewalAt.slice(0, 16)
+    currentPeriodEnd: member.currentPeriodEnd
+      ? member.currentPeriodEnd.slice(0, 16)
       : "",
+    cancelAtPeriodEnd: member.cancelAtPeriodEnd,
   };
 }
 
@@ -195,14 +183,12 @@ export function MembersSection({ hidden = false }: MembersSectionProps) {
       newsletterStatus: editDraft.newsletterStatus,
       membershipPlan: editDraft.membershipPlan,
       membershipStatus: editDraft.membershipStatus,
+      cancelAtPeriodEnd: editDraft.cancelAtPeriodEnd,
     };
 
     if (editDraft.membershipPlan === "annual") {
-      payload.membershipAnniversary = editDraft.membershipAnniversary.trim()
-        ? editDraft.membershipAnniversary.trim()
-        : null;
-      payload.nextRenewalAt = editDraft.nextRenewalAt.trim()
-        ? new Date(editDraft.nextRenewalAt).toISOString()
+      payload.currentPeriodEnd = editDraft.currentPeriodEnd.trim()
+        ? new Date(editDraft.currentPeriodEnd).toISOString()
         : null;
     }
 
@@ -353,8 +339,7 @@ export function MembersSection({ hidden = false }: MembersSectionProps) {
               <th className="px-3 py-2.5 font-medium">Plan</th>
               <th className="px-3 py-2.5 font-medium">Status</th>
               <th className="px-3 py-2.5 font-medium">Newsletter</th>
-              <th className="px-3 py-2.5 font-medium">Anniversary</th>
-              <th className="px-3 py-2.5 font-medium">Next renewal</th>
+              <th className="px-3 py-2.5 font-medium">Period end</th>
               <th className="px-3 py-2.5 font-medium">
                 <span className="sr-only">Actions</span>
               </th>
@@ -364,7 +349,7 @@ export function MembersSection({ hidden = false }: MembersSectionProps) {
             {!loading && members.length === 0 && (
               <tr>
                 <td
-                  colSpan={7}
+                  colSpan={6}
                   className="px-3 py-8 text-center text-ocean-500"
                 >
                   {error ? "Roster unavailable." : "No members match these filters."}
@@ -387,12 +372,7 @@ export function MembersSection({ hidden = false }: MembersSectionProps) {
                 </td>
                 <td className="px-3 py-2.5">
                   {member.membershipPlan === "annual"
-                    ? formatDate(member.membershipAnniversary)
-                    : "—"}
-                </td>
-                <td className="px-3 py-2.5">
-                  {member.membershipPlan === "annual"
-                    ? formatDateTime(member.nextRenewalAt)
+                    ? formatDateTime(member.currentPeriodEnd)
                     : "—"}
                 </td>
                 <td className="px-3 py-2.5">
@@ -505,35 +485,32 @@ export function MembersSection({ hidden = false }: MembersSectionProps) {
                 <>
                   <label className="grid gap-1 text-sm">
                     <span className="font-medium text-ocean-700">
-                      Anniversary (YYYY-MM-DD)
+                      Period end
                     </span>
                     <input
-                      type="date"
-                      value={editDraft.membershipAnniversary}
+                      type="datetime-local"
+                      value={editDraft.currentPeriodEnd}
                       onChange={(event) =>
                         setEditDraft({
                           ...editDraft,
-                          membershipAnniversary: event.target.value,
+                          currentPeriodEnd: event.target.value,
                         })
                       }
                       className="rounded-lg border border-ocean-200 px-3 py-2 text-ocean-900 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-200"
                     />
                   </label>
-                  <label className="grid gap-1 text-sm">
-                    <span className="font-medium text-ocean-700">
-                      Next renewal
-                    </span>
+                  <label className="flex items-center gap-2 text-sm text-ocean-800">
                     <input
-                      type="datetime-local"
-                      value={editDraft.nextRenewalAt}
+                      type="checkbox"
+                      checked={editDraft.cancelAtPeriodEnd}
                       onChange={(event) =>
                         setEditDraft({
                           ...editDraft,
-                          nextRenewalAt: event.target.value,
+                          cancelAtPeriodEnd: event.target.checked,
                         })
                       }
-                      className="rounded-lg border border-ocean-200 px-3 py-2 text-ocean-900 focus:border-ocean-400 focus:outline-none focus:ring-2 focus:ring-ocean-200"
                     />
+                    Cancel at period end
                   </label>
                 </>
               )}

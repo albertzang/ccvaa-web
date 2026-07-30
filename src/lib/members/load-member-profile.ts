@@ -27,9 +27,13 @@ export async function loadInitialMemberProfile(): Promise<{
     return {
       profile: {
         ...toPublicMemberSession(payload),
+        membershipStatus: "none",
         newsletterStatus: "off",
-        membershipAnniversary: null,
-        nextRenewalAt: null,
+        currentPeriodEnd: null,
+        cancelAtPeriodEnd: false,
+        stripeCustomerId: null,
+        perksActive: false,
+        canJoin: true,
       },
       profileError:
         error instanceof Error

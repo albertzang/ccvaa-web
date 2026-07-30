@@ -129,18 +129,11 @@ export async function sendTransactionalEmail(
   }
 }
 
-const OTP_SUBJECT_BY_PURPOSE = {
-  login: "Your CCVAA login code",
-  email_verify: "Verify your CCVAA email",
-  newsletter_confirm: "Confirm your CCVAA newsletter subscription",
-} as const;
-
 /**
- * Sends a 6-digit OTP email for the given purpose. Used by login and confirm flows.
+ * Sends a 6-digit OTP email (gate / Join / profile email-change).
  */
 export async function sendOtpEmail(input: {
   to: string;
-  purpose: keyof typeof OTP_SUBJECT_BY_PURPOSE;
   code: string;
   expiresAt: Date;
 }): Promise<SendTransactionalEmailResult> {
@@ -149,7 +142,7 @@ export async function sendOtpEmail(input: {
     Math.round((input.expiresAt.getTime() - Date.now()) / 60_000),
   );
 
-  const subject = OTP_SUBJECT_BY_PURPOSE[input.purpose];
+  const subject = "Verify your CCVAA email";
   const text = [
     `Your CCVAA verification code is: ${input.code}`,
     "",

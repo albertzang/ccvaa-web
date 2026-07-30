@@ -3,9 +3,9 @@
  *
  * Distinct from Hover/Roundcube admin cookies — never grants `/admin`.
  *
- * OTP rate limits / expiry (shared with newsletter + Join verify):
+ * OTP rate limits / expiry (gate + email-change + Join verify):
  * - TTL: 15 minutes (`OTP_TTL_MS`)
- * - Max challenges: 3 per email + purpose per hour
+ * - Max challenges: 3 per email per hour
  * - Max verify attempts: 5 per challenge
  * See `src/lib/members/otp-config.ts` and `docs/members/schema.md`.
  */

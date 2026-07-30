@@ -16,7 +16,6 @@ import {
 import {
   otpChallengeCreateSchema,
   otpVerifyInputSchema,
-  type OtpPurpose,
   type OtpVerifyInput,
 } from "@/lib/members/zod/otp";
 
@@ -60,13 +59,9 @@ export type CreateOtpChallengeResult = {
 export type VerifyOtpChallengeResult = {
   challengeId: string;
   email: string;
-  purpose: OtpPurpose;
 };
 
-async function countRecentChallenges(
-  email: string,
-  purpose: OtpPurpose,
-): Promise<number> {
+async function countRecentChallenges(email: string): Promise<number> {
   return withMembersDbError(async () => {
     const db = getMembersDb();
     const windowStart = new Date(Date.now() - OTP_RATE_LIMIT_WINDOW_MS);
@@ -77,7 +72,6 @@ async function countRecentChallenges(
       .where(
         and(
           eq(otpChallenges.email, email),
-          eq(otpChallenges.purpose, purpose),
           gt(otpChallenges.createdAt, windowStart),
         ),
       );
@@ -92,12 +86,10 @@ async function countRecentChallenges(
  */
 export async function createOtpChallenge(input: {
   email: string;
-  purpose: OtpPurpose;
 }): Promise<CreateOtpChallengeResult> {
   const email = input.email.trim().toLowerCase();
-  const purpose = input.purpose;
 
-  const recentCount = await countRecentChallenges(email, purpose);
+  const recentCount = await countRecentChallenges(email);
   if (recentCount >= OTP_MAX_CHALLENGES_PER_WINDOW) {
     throw new MembersRateLimitError(
       `Too many OTP requests for ${email}. Try again later.`,
@@ -109,7 +101,6 @@ export async function createOtpChallenge(input: {
 
   const parsed = otpChallengeCreateSchema.parse({
     email,
-    purpose,
     codeHash: hashOtpCode(code),
     expiresAt,
   });
@@ -120,7 +111,6 @@ export async function createOtpChallenge(input: {
       .insert(otpChallenges)
       .values({
         email: parsed.email,
-        purpose: parsed.purpose,
         codeHash: parsed.codeHash,
         expiresAt: parsed.expiresAt,
       })
@@ -143,7 +133,7 @@ export async function createOtpChallenge(input: {
 }
 
 /**
- * Verifies a submitted OTP against the latest active challenge for email + purpose.
+ * Verifies a submitted OTP against the latest active challenge for the email.
  * Increments attempt count on failure; marks challenge consumed on success.
  */
 export async function verifyOtpChallenge(
@@ -161,7 +151,6 @@ export async function verifyOtpChallenge(
       .where(
         and(
           eq(otpChallenges.email, email),
-          eq(otpChallenges.purpose, parsed.purpose),
           isNull(otpChallenges.consumedAt),
           gt(otpChallenges.expiresAt, now),
         ),
@@ -212,6 +201,5 @@ export async function verifyOtpChallenge(
   return {
     challengeId: challenge.id,
     email,
-    purpose: parsed.purpose,
   };
 }

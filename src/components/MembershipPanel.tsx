@@ -28,9 +28,13 @@ export type MemberProfileSummary = {
   memberId: string;
   email: string;
   plan: "none" | "founding" | "lifetime" | "annual";
-  newsletterStatus: "off" | "pending" | "on";
-  membershipAnniversary: string | null;
-  nextRenewalAt: string | null;
+  membershipStatus: "none" | "active" | "past_due" | "cancelled";
+  newsletterStatus: "off" | "on";
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+  stripeCustomerId: string | null;
+  perksActive: boolean;
+  canJoin: boolean;
   expiresAt: string;
   grantsAdmin: false;
 };
@@ -117,26 +121,26 @@ async function fetchMemberProfile() {
   return (data as { ok: true; profile: MemberProfileSummary }).profile;
 }
 
-function formatAnniversary(isoDate: string): string {
-  const [year, month, day] = isoDate.split("-").map(Number);
-  if (!year || !month || !day) {
-    return isoDate;
-  }
-  return new Intl.DateTimeFormat("en-CA", {
-    dateStyle: "long",
-    timeZone: "UTC",
-  }).format(new Date(Date.UTC(year, month - 1, day)));
-}
-
-function formatRenewal(isoDateTime: string): string {
+function formatPeriodEnd(isoDateTime: string): string {
   const date = new Date(isoDateTime);
   if (Number.isNaN(date.getTime())) {
     return isoDateTime;
   }
   return new Intl.DateTimeFormat("en-CA", {
     dateStyle: "long",
-    timeStyle: "short",
   }).format(date);
+}
+
+function planDisplayLabel(
+  plan: Exclude<MemberProfileSummary["plan"], "none">,
+  currentPeriodEnd: string | null,
+): string {
+  if (plan === "annual") {
+    return currentPeriodEnd
+      ? `Annual until ${formatPeriodEnd(currentPeriodEnd)}`
+      : "Annual";
+  }
+  return PLAN_LABELS[plan];
 }
 
 /** Logged-in: looks read-only until focused / clicked for in-place edit. Width from content. */
@@ -196,6 +200,7 @@ export function MembershipPanel({
   const [loading, setLoading] = useState(false);
   const [newsletterBusy, setNewsletterBusy] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [billingBusy, setBillingBusy] = useState(false);
 
   const verified = Boolean(profile?.authenticated);
   const savedEmail = profile?.email ?? "";
@@ -358,6 +363,26 @@ export function MembershipPanel({
     }
   };
 
+  const handleManageBilling = async () => {
+    setBillingBusy(true);
+    setError(null);
+    try {
+      const result = await postMembersJson<{ url: string }>(
+        "/api/members/billing/portal",
+        {},
+      );
+      window.open(result.url, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Could not open billing portal.",
+      );
+    } finally {
+      setBillingBusy(false);
+    }
+  };
+
   const handleLogout = async () => {
     setLoggingOut(true);
     try {
@@ -386,9 +411,13 @@ export function MembershipPanel({
   };
 
   const newsletterOn = profile?.newsletterStatus === "on";
-  const isPaidMember =
+  const hasCurrentMembership =
     profile?.authenticated &&
-    profile.plan !== "none";
+    profile.plan !== "none" &&
+    (profile.membershipStatus === "active" ||
+      profile.membershipStatus === "past_due");
+  const showJoin = Boolean(profile?.canJoin);
+  const showBilling = Boolean(profile?.stripeCustomerId);
 
   useEffect(() => {
     if (!error) {
@@ -569,37 +598,76 @@ export function MembershipPanel({
           </div>
         </div>
 
-        {isPaidMember && profile ? (
+        {hasCurrentMembership && profile ? (
           <div>
-            <p className={quietLabelClass}>
-              {membershipContent.profilePlanLabel}
-            </p>
-            <p className="font-display text-lg font-semibold text-cream">
-              {PLAN_LABELS[profile.plan as Exclude<MemberProfileSummary["plan"], "none">]}
-            </p>
-            {profile.plan === "annual" && profile.membershipAnniversary ? (
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div className="min-w-0">
+                <p className={quietLabelClass}>
+                  {membershipContent.profilePlanLabel}
+                </p>
+                <p className="font-display text-lg font-semibold text-cream">
+                  {planDisplayLabel(
+                    profile.plan as Exclude<
+                      MemberProfileSummary["plan"],
+                      "none"
+                    >,
+                    profile.currentPeriodEnd,
+                  )}
+                </p>
+              </div>
+              {showBilling ? (
+                <button
+                  type="button"
+                  disabled={billingBusy}
+                  onClick={() => void handleManageBilling()}
+                  className={glassSecondaryBtnClass}
+                >
+                  {billingBusy
+                    ? "Opening…"
+                    : membershipContent.manageBillingLabel}
+                </button>
+              ) : null}
+            </div>
+            {profile.membershipStatus === "past_due" ? (
+              <p className="mt-2 text-sm text-coral">
+                {membershipContent.pastDueMessage}
+              </p>
+            ) : null}
+            {profile.plan === "annual" && profile.cancelAtPeriodEnd ? (
               <p className="mt-2 text-xs text-cream/70">
-                {membershipContent.profileAnniversaryLabel}:{" "}
-                {formatAnniversary(profile.membershipAnniversary)}
+                {membershipContent.wontRenewMessage}
               </p>
             ) : null}
-            {profile.plan === "annual" && profile.nextRenewalAt ? (
-              <p className="mt-0.5 text-xs text-cream/70">
-                {membershipContent.profileNextRenewalLabel}:{" "}
-                {formatRenewal(profile.nextRenewalAt)}
+            {profile.perksActive ? (
+              <p className="mt-4 text-sm text-cream/85">
+                {membershipContent.perksComingSoon}
               </p>
             ) : null}
-            <p className="mt-4 text-sm text-cream/85">
-              {membershipContent.perksComingSoon}
-            </p>
           </div>
-        ) : (
+        ) : null}
+
+        {showJoin ? (
           <JoinForm
             mode="session"
             initialPlans={initialPlans}
             initialPlansError={initialPlansError}
           />
-        )}
+        ) : null}
+
+        {!hasCurrentMembership && showBilling && profile ? (
+          <div className="flex justify-end">
+            <button
+              type="button"
+              disabled={billingBusy}
+              onClick={() => void handleManageBilling()}
+              className={glassSecondaryBtnClass}
+            >
+              {billingBusy
+                ? "Opening…"
+                : membershipContent.manageBillingLabel}
+            </button>
+          </div>
+        ) : null}
       </div>
 
       {/* Bottom-right text link — mirrors social proof at top-right. */}
